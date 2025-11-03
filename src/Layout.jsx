@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Building2, FileCheck, Shield, LogOut } from "lucide-react";
+import { LayoutDashboard, Building2, Shield, ClipboardCheck, FileCheck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +16,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { base44 } from "@/api/base44Client";
 
 const navigationItems = [
   {
@@ -32,41 +31,37 @@ const navigationItems = [
   {
     title: "Frameworks",
     url: createPageUrl("Frameworks"),
-    icon: FileCheck,
+    icon: Shield,
   },
   {
     title: "Assessments",
     url: createPageUrl("Assessments"),
-    icon: Shield,
+    icon: ClipboardCheck,
   },
 ];
 
-export default function Layout({ children, currentPageName }) {
+export default function Layout({ children }) {
   const location = useLocation();
-
-  const handleLogout = () => {
-    base44.auth.logout();
-  };
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-slate-100">
         <Sidebar className="border-r border-slate-200">
-          <SidebarHeader className="border-b border-slate-200 p-6">
+          <SidebarHeader className="border-b border-slate-200 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Shield className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+                <FileCheck className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h2 className="font-bold text-slate-900 text-lg">RiskGuard</h2>
-                <p className="text-xs text-slate-500">Risk Management System</p>
+                <p className="text-xs text-slate-500">Risk Management Platform</p>
               </div>
             </div>
           </SidebarHeader>
           
-          <SidebarContent className="p-3">
+          <SidebarContent className="p-2">
             <SidebarGroup>
-              <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
+              <SidebarGroupLabel className="text-xs font-medium text-slate-500 uppercase tracking-wider px-2 py-2">
                 Navigation
               </SidebarGroupLabel>
               <SidebarGroupContent>
@@ -76,11 +71,11 @@ export default function Layout({ children, currentPageName }) {
                       <SidebarMenuButton 
                         asChild 
                         className={`hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-lg mb-1 ${
-                          location.pathname === item.url ? 'bg-blue-50 text-blue-700 font-medium shadow-sm' : ''
+                          location.pathname === item.url ? 'bg-blue-50 text-blue-700 font-medium' : ''
                         }`}
                       >
                         <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
-                          <item.icon className="w-5 h-5" />
+                          <item.icon className="w-4 h-4" />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -92,13 +87,15 @@ export default function Layout({ children, currentPageName }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-slate-200 p-4">
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-3 py-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="text-sm font-medium">Logout</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center">
+                <span className="text-slate-700 font-semibold text-sm">U</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-slate-900 text-sm truncate">Risk Manager</p>
+                <p className="text-xs text-slate-500 truncate">Compliance Team</p>
+              </div>
+            </div>
           </SidebarFooter>
         </Sidebar>
 

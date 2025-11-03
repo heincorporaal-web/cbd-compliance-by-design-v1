@@ -1,22 +1,35 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Shield, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import AssessmentForm from "../components/assessments/AssessmentForm";
-import AssessmentCard from "../components/assessments/AssessmentCard";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ClipboardCheck, Plus, ArrowRight, Calendar, Building2, Shield } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { format } from "date-fns";
 
 export default function Assessments() {
-  const [showForm, setShowForm] = useState(false);
-  const [editingAssessment, setEditingAssessment] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: assessments = [], isLoading } = useQuery({
+  const [formData, setFormData] = useState({
+    company_id: "",
+    framework_id: "",
+    name: "",
+    assessment_date: new Date().toISOString().split('T')[0],
+    due_date: "",
+    assessor: "",
+    notes: "",
+    status: "not_started"
+  });
+
+  const { data: assessments = [] } = useQuery({
     queryKey: ['assessments'],
     queryFn: () => base44.entities.Assessment.list('-created_date'),
   });
@@ -34,144 +47,237 @@ export default function Assessments() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Assessment.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessments'] });
-      setShowForm(false);
-      setEditingAssessment(null);
+      queryClient.invalidateQueries(['assessments']);
+      setIsDialogOpen(false);
+      resetForm();
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Assessment.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessments'] });
-      setShowForm(false);
-      setEditingAssessment(null);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Assessment.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assessments'] });
-    },
-  });
-
-  const handleSubmit = (data) => {
-    if (editingAssessment) {
-      updateMutation.mutate({ id: editingAssessment.id, data });
-    } else {
-      createMutation.mutate(data);
-    }
+  const resetForm = () => {
+    setFormData({
+      company_id: "",
+      framework_id: "",
+      name: "",
+      assessment_date: new Date().toISOString().split('T')[0],
+      due_date: "",
+      assessor: "",
+      notes: "",
+      status: "not_started"
+    });
   };
 
-  const handleEdit = (assessment) => {
-    setEditingAssessment(assessment);
-    setShowForm(true);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    createMutation.mutate(formData);
   };
 
-  const handleDelete = (id) => {
-    if (confirm('Are you sure you want to delete this assessment?')) {
-      deleteMutation.mutate(id);
-    }
+  const getStatusColor = (status) => {
+    const colors = {
+      not_started: 'bg-slate-100 text-slate-700 border-slate-200',
+      in_progress: 'bg-blue-100 text-blue-700 border-blue-200',
+      completed: 'bg-green-100 text-green-700 border-green-200',
+      archived: 'bg-slate-100 text-slate-500 border-slate-200'
+    };
+    return colors[status] || 'bg-slate-100 text-slate-700';
   };
-
-  const filteredAssessments = assessments.filter(assessment => {
-    const matchesSearch = 
-      assessment.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assessment.framework_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assessment.assessor?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || assessment.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
 
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="p-6 lg:p-8 space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Risk Assessments</h1>
-          <p className="text-slate-500 mt-1">Evaluate companies against risk frameworks</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Assessments</h1>
+          <p className="text-slate-600">Create and manage compliance assessments</p>
         </div>
-        <Button
-          onClick={() => {
-            setEditingAssessment(null);
-            setShowForm(!showForm);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 shadow-lg"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          New Assessment
-        </Button>
-      </div>
-
-      {showForm && (
-        <AssessmentForm
-          assessment={editingAssessment}
-          companies={companies}
-          frameworks={frameworks}
-          onSubmit={handleSubmit}
-          onCancel={() => {
-            setShowForm(false);
-            setEditingAssessment(null);
-          }}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-        />
-      )}
-
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <Input
-            placeholder="Search assessments..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="draft">Draft</TabsTrigger>
-            <TabsTrigger value="in_progress">In Progress</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-            <TabsTrigger value="reviewed">Reviewed</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-80 bg-slate-100 rounded-lg animate-pulse" />
-          ))}
-        </div>
-      ) : filteredAssessments.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-lg shadow-lg border border-slate-200">
-          <Shield className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <p className="text-slate-500 text-lg">
-            {searchTerm || statusFilter !== 'all' ? 'No assessments found' : 'No assessments yet'}
-          </p>
-          {!searchTerm && statusFilter === 'all' && (
-            <Button
-              onClick={() => setShowForm(true)}
-              className="mt-4 bg-blue-600 hover:bg-blue-700"
-            >
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
-              Create Your First Assessment
+              New Assessment
             </Button>
-          )}
-        </div>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Assessment</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="company_id">Company *</Label>
+                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {companies.map(company => (
+                        <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="framework_id">Framework *</Label>
+                  <Select value={formData.framework_id} onValueChange={(value) => setFormData({...formData, framework_id: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select framework" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {frameworks.map(framework => (
+                        <SelectItem key={framework.id} value={framework.id}>{framework.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="name">Assessment Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="e.g., Q4 2024 ISO 27001 Assessment"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="assessment_date">Start Date</Label>
+                  <Input
+                    id="assessment_date"
+                    type="date"
+                    value={formData.assessment_date}
+                    onChange={(e) => setFormData({...formData, assessment_date: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="due_date">Due Date</Label>
+                  <Input
+                    id="due_date"
+                    type="date"
+                    value={formData.due_date}
+                    onChange={(e) => setFormData({...formData, due_date: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="assessor">Assessor</Label>
+                  <Input
+                    id="assessor"
+                    value={formData.assessor}
+                    onChange={(e) => setFormData({...formData, assessor: e.target.value})}
+                    placeholder="Person responsible for assessment"
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                  Create Assessment
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {companies.length === 0 || frameworks.length === 0 ? (
+        <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
+          <CardContent className="p-12 text-center">
+            <ClipboardCheck className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Setup Required</h3>
+            <p className="text-slate-600 mb-6">
+              {companies.length === 0 && "Add companies "}
+              {companies.length === 0 && frameworks.length === 0 && "and "}
+              {frameworks.length === 0 && "load frameworks "}
+              before creating assessments
+            </p>
+            <div className="flex gap-3 justify-center">
+              {companies.length === 0 && (
+                <Link to={createPageUrl("Companies")}>
+                  <Button>Add Companies</Button>
+                </Link>
+              )}
+              {frameworks.length === 0 && (
+                <Link to={createPageUrl("Frameworks")}>
+                  <Button variant="outline">Load Frameworks</Button>
+                </Link>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ) : assessments.length === 0 ? (
+        <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
+          <CardContent className="p-12 text-center">
+            <ClipboardCheck className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No Assessments Yet</h3>
+            <p className="text-slate-600 mb-6">
+              Create your first assessment to start evaluating compliance
+            </p>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Assessment
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAssessments.map((assessment) => (
-            <AssessmentCard
-              key={assessment.id}
-              assessment={assessment}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {assessments.map((assessment) => {
+            const company = companies.find(c => c.id === assessment.company_id);
+            const framework = frameworks.find(f => f.id === assessment.framework_id);
+            
+            return (
+              <Card key={assessment.id} className="border-none shadow-lg hover:shadow-xl transition-all">
+                <CardHeader className="border-b border-slate-100">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg mb-2">{assessment.name}</CardTitle>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                          <Building2 className="w-4 h-4" />
+                          {company?.name || 'Unknown Company'}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                          <Shield className="w-4 h-4" />
+                          {framework?.name || 'Unknown Framework'}
+                        </div>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className={`${getStatusColor(assessment.status)} border`}>
+                      {assessment.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="space-y-3 mb-4">
+                    {assessment.assessor && (
+                      <p className="text-sm text-slate-600">
+                        <span className="font-medium">Assessor:</span> {assessment.assessor}
+                      </p>
+                    )}
+                    {assessment.due_date && (
+                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <Calendar className="w-4 h-4" />
+                        Due: {format(new Date(assessment.due_date), 'MMM d, yyyy')}
+                      </div>
+                    )}
+                  </div>
+                  <Link to={createPageUrl(`AssessmentDetail?id=${assessment.id}`)}>
+                    <Button className="w-full" variant="outline">
+                      View Details
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
