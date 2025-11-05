@@ -3,13 +3,21 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Plus, Download, CheckCircle2 } from "lucide-react";
+import { Shield, Plus, Download, CheckCircle2, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export default function Frameworks() {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const [expandedFramework, setExpandedFramework] = useState(null);
 
   const { data: frameworks = [] } = useQuery({
     queryKey: ['frameworks'],
@@ -24,7 +32,6 @@ export default function Frameworks() {
   const loadSampleFrameworks = async () => {
     setLoading(true);
     try {
-      // Create ISO 27001 Framework
       const iso27001 = await base44.entities.Framework.create({
         name: "ISO 27001",
         version: "2022",
@@ -33,7 +40,6 @@ export default function Frameworks() {
         status: "active"
       });
 
-      // Create NIST CSF
       const nistCsf = await base44.entities.Framework.create({
         name: "NIST Cybersecurity Framework",
         version: "2.0",
@@ -42,7 +48,6 @@ export default function Frameworks() {
         status: "active"
       });
 
-      // Create SOC 2
       const soc2 = await base44.entities.Framework.create({
         name: "SOC 2",
         version: "2017",
@@ -51,7 +56,6 @@ export default function Frameworks() {
         status: "active"
       });
 
-      // Create sample controls for ISO 27001
       const isoControls = [
         { control_id: "A.5.1", title: "Policies for information security", category: "Organizational controls", priority: "high" },
         { control_id: "A.5.2", title: "Information security roles and responsibilities", category: "Organizational controls", priority: "high" },
@@ -71,7 +75,6 @@ export default function Frameworks() {
         });
       }
 
-      // Create sample controls for NIST CSF
       const nistControls = [
         { control_id: "ID.AM-1", title: "Physical devices and systems inventoried", category: "Identify", priority: "high" },
         { control_id: "ID.AM-2", title: "Software platforms and applications inventoried", category: "Identify", priority: "high" },
@@ -90,7 +93,6 @@ export default function Frameworks() {
         });
       }
 
-      // Create sample controls for SOC 2
       const soc2Controls = [
         { control_id: "CC1.1", title: "COSO Principle 1", category: "Common Criteria", priority: "high" },
         { control_id: "CC2.1", title: "COSO Principle 13", category: "Common Criteria", priority: "high" },
@@ -130,6 +132,16 @@ export default function Frameworks() {
     return colors[category] || colors.other;
   };
 
+  const getPriorityColor = (priority) => {
+    const colors = {
+      critical: 'bg-red-100 text-red-700 border-red-200',
+      high: 'bg-orange-100 text-orange-700 border-orange-200',
+      medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      low: 'bg-green-100 text-green-700 border-green-200'
+    };
+    return colors[priority] || 'bg-slate-100 text-slate-700 border-slate-200';
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -164,34 +176,91 @@ export default function Frameworks() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="space-y-6">
           {frameworks.map((framework) => {
             const frameworkControls = controls.filter(c => c.framework_id === framework.id);
+            const isExpanded = expandedFramework === framework.id;
+            
             return (
-              <Card key={framework.id} className="border-none shadow-lg hover:shadow-xl transition-shadow">
+              <Card key={framework.id} className="border-none shadow-lg">
                 <CardHeader className="border-b border-slate-100">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
                       <Shield className="w-6 h-6 text-indigo-600" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-slate-900 text-lg mb-1">{framework.name}</h3>
-                      <p className="text-sm text-slate-500">Version {framework.version}</p>
+                      <p className="text-sm text-slate-500 mb-2">Version {framework.version}</p>
+                      <p className="text-sm text-slate-600 mb-3">{framework.description}</p>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className={`${getCategoryColor(framework.category)} border`}>
+                          {framework.category.replace(/_/g, ' ')}
+                        </Badge>
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                          <CheckCircle2 className="w-4 h-4 text-green-600" />
+                          {frameworkControls.length} controls
+                        </div>
+                      </div>
                     </div>
+                    <Collapsible open={isExpanded} onOpenChange={() => setExpandedFramework(isExpanded ? null : framework.id)}>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          {isExpanded ? 'Hide' : 'View'} Controls
+                          <ChevronRight className={`w-4 h-4 ml-2 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                        </Button>
+                      </CollapsibleTrigger>
+                    </Collapsible>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-4">
-                  <p className="text-sm text-slate-600 mb-4">{framework.description}</p>
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className={`${getCategoryColor(framework.category)} border`}>
-                      {framework.category.replace(/_/g, ' ')}
-                    </Badge>
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      {frameworkControls.length} controls
-                    </div>
-                  </div>
-                </CardContent>
+                
+                <Collapsible open={isExpanded}>
+                  <CollapsibleContent>
+                    <CardContent className="pt-0">
+                      {frameworkControls.length === 0 ? (
+                        <div className="p-8 text-center text-slate-500">
+                          No controls defined for this framework
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-slate-100">
+                          {frameworkControls.map((control) => (
+                            <Link
+                              key={control.id}
+                              to={createPageUrl(`ControlDetail?id=${control.id}`)}
+                              className="block p-4 hover:bg-slate-50 transition-colors group"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-3 flex-1">
+                                  <Badge variant="outline" className="mt-0.5 shrink-0">
+                                    {control.control_id}
+                                  </Badge>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors mb-1">
+                                      {control.title}
+                                    </h4>
+                                    {control.description && (
+                                      <p className="text-sm text-slate-600 line-clamp-2">{control.description}</p>
+                                    )}
+                                    {control.category && (
+                                      <p className="text-xs text-slate-500 mt-1">{control.category}</p>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 ml-4">
+                                  {control.priority && (
+                                    <Badge variant="outline" className={`${getPriorityColor(control.priority)} border`}>
+                                      {control.priority}
+                                    </Badge>
+                                  )}
+                                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </CollapsibleContent>
+                </Collapsible>
               </Card>
             );
           })}

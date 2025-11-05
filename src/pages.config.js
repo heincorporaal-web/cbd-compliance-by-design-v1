@@ -3,6 +3,7 @@ import Companies from './pages/Companies';
 import Frameworks from './pages/Frameworks';
 import Assessments from './pages/Assessments';
 import AssessmentDetail from './pages/AssessmentDetail';
+import ControlDetail from './pages/ControlDetail';
 import Layout from './Layout.jsx';
 
 
@@ -12,6 +13,7 @@ export const PAGES = {
     "Frameworks": Frameworks,
     "Assessments": Assessments,
     "AssessmentDetail": AssessmentDetail,
+    "ControlDetail": ControlDetail,
 }
 
 export const pagesConfig = {
