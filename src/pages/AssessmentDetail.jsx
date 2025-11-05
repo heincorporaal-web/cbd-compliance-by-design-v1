@@ -68,7 +68,7 @@ export default function AssessmentDetail() {
   });
 
   useEffect(() => {
-    if (controls.length > 0 && controlAssessments.length === 0) {
+    if (controls.length > 0 && controlAssessments.length === 0 && assessmentId) {
       controls.forEach(control => {
         createControlAssessmentMutation.mutate({
           assessment_id: assessmentId,
@@ -77,20 +77,24 @@ export default function AssessmentDetail() {
         });
       });
     }
-  }, [controls, controlAssessments]);
+  }, [controls.length, controlAssessments.length, assessmentId]);
 
   const handleStatusChange = (controlAssessmentId, newStatus) => {
-    updateControlAssessmentMutation.mutate({
-      id: controlAssessmentId,
-      data: { status: newStatus }
-    });
+    if (controlAssessmentId) {
+      updateControlAssessmentMutation.mutate({
+        id: controlAssessmentId,
+        data: { status: newStatus }
+      });
+    }
   };
 
   const handleNotesChange = (controlAssessmentId, notes) => {
-    updateControlAssessmentMutation.mutate({
-      id: controlAssessmentId,
-      data: { notes }
-    });
+    if (controlAssessmentId) {
+      updateControlAssessmentMutation.mutate({
+        id: controlAssessmentId,
+        data: { notes }
+      });
+    }
   };
 
   const compliantCount = controlAssessments.filter(ca => ca.status === 'compliant').length;
@@ -192,63 +196,73 @@ export default function AssessmentDetail() {
           <CardTitle>Control Assessments</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="divide-y divide-slate-100">
-            {controls.map(control => {
-              const controlAssessment = controlAssessments.find(ca => ca.control_id === control.id);
-              const StatusIcon = getStatusIcon(controlAssessment?.status);
-              
-              return (
-                <div key={control.id} className="p-4 hover:bg-slate-50">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-start gap-3 mb-2">
-                        <Badge variant="outline" className="mt-0.5">{control.control_id}</Badge>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-slate-900">{control.title}</h3>
-                          {control.description && (
-                            <p className="text-sm text-slate-600 mt-1">{control.description}</p>
-                          )}
-                          {control.category && (
-                            <p className="text-xs text-slate-500 mt-1">{control.category}</p>
-                          )}
+          {controls.length === 0 ? (
+            <div className="p-12 text-center text-slate-500">
+              No controls found for this framework
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {controls.map(control => {
+                const controlAssessment = controlAssessments.find(ca => ca.control_id === control.id);
+                const StatusIcon = getStatusIcon(controlAssessment?.status);
+                
+                return (
+                  <div key={control.id} className="p-4 hover:bg-slate-50">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-start gap-3 mb-2">
+                          <Badge variant="outline" className="mt-0.5">{control.control_id}</Badge>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-slate-900">{control.title}</h3>
+                            {control.description && (
+                              <p className="text-sm text-slate-600 mt-1">{control.description}</p>
+                            )}
+                            {control.category && (
+                              <p className="text-xs text-slate-500 mt-1">{control.category}</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="flex gap-3 mt-3">
-                        <Select
-                          value={controlAssessment?.status || 'not_assessed'}
-                          onValueChange={(value) => handleStatusChange(controlAssessment.id, value)}
-                        >
-                          <SelectTrigger className="w-48">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="not_assessed">Not Assessed</SelectItem>
-                            <SelectItem value="compliant">Compliant</SelectItem>
-                            <SelectItem value="partial">Partially Compliant</SelectItem>
-                            <SelectItem value="non_compliant">Non-Compliant</SelectItem>
-                            <SelectItem value="not_applicable">Not Applicable</SelectItem>
-                          </SelectContent>
-                        </Select>
                         
-                        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${getStatusColor(controlAssessment?.status)}`}>
-                          <StatusIcon className="w-4 h-4" />
-                        </div>
-                      </div>
+                        {controlAssessment && (
+                          <>
+                            <div className="flex gap-3 mt-3">
+                              <Select
+                                value={controlAssessment.status || 'not_assessed'}
+                                onValueChange={(value) => handleStatusChange(controlAssessment.id, value)}
+                              >
+                                <SelectTrigger className="w-48">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="not_assessed">Not Assessed</SelectItem>
+                                  <SelectItem value="compliant">Compliant</SelectItem>
+                                  <SelectItem value="partial">Partially Compliant</SelectItem>
+                                  <SelectItem value="non_compliant">Non-Compliant</SelectItem>
+                                  <SelectItem value="not_applicable">Not Applicable</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              
+                              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${getStatusColor(controlAssessment.status)}`}>
+                                <StatusIcon className="w-4 h-4" />
+                              </div>
+                            </div>
 
-                      <Textarea
-                        placeholder="Add notes or evidence..."
-                        value={controlAssessment?.notes || ''}
-                        onChange={(e) => handleNotesChange(controlAssessment.id, e.target.value)}
-                        className="mt-3"
-                        rows={2}
-                      />
+                            <Textarea
+                              placeholder="Add notes or evidence..."
+                              value={controlAssessment.notes || ''}
+                              onChange={(e) => handleNotesChange(controlAssessment.id, e.target.value)}
+                              className="mt-3"
+                              rows={2}
+                            />
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
