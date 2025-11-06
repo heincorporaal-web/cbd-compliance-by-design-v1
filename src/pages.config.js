@@ -4,6 +4,7 @@ import Frameworks from './pages/Frameworks';
 import Assessments from './pages/Assessments';
 import AssessmentDetail from './pages/AssessmentDetail';
 import ControlDetail from './pages/ControlDetail';
+import ICTSystems from './pages/ICTSystems';
 import Layout from './Layout.jsx';
 
 
@@ -14,6 +15,7 @@ export const PAGES = {
     "Assessments": Assessments,
     "AssessmentDetail": AssessmentDetail,
     "ControlDetail": ControlDetail,
+    "ICTSystems": ICTSystems,
 }
 
 export const pagesConfig = {
