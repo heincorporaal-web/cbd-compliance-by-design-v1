@@ -6,6 +6,7 @@ import AssessmentDetail from './pages/AssessmentDetail';
 import ControlDetail from './pages/ControlDetail';
 import ICTSystems from './pages/ICTSystems';
 import Incidents from './pages/Incidents';
+import ThirdParties from './pages/ThirdParties';
 import Layout from './Layout.jsx';
 
 
@@ -18,6 +19,7 @@ export const PAGES = {
     "ControlDetail": ControlDetail,
     "ICTSystems": ICTSystems,
     "Incidents": Incidents,
+    "ThirdParties": ThirdParties,
 }
 
 export const pagesConfig = {
