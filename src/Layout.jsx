@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Building2, Shield, ClipboardCheck, FileCheck } from "lucide-react";
+import { LayoutDashboard, Building2, Shield, ClipboardCheck, Server, AlertTriangle, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -29,6 +29,21 @@ const navigationItems = [
     icon: Building2,
   },
   {
+    title: "ICT Systems",
+    url: createPageUrl("ICTSystems"),
+    icon: Server,
+  },
+  {
+    title: "Third Parties",
+    url: createPageUrl("ThirdParties"),
+    icon: Users,
+  },
+  {
+    title: "Incidents",
+    url: createPageUrl("Incidents"),
+    icon: AlertTriangle,
+  },
+  {
     title: "Frameworks",
     url: createPageUrl("Frameworks"),
     icon: Shield,
@@ -50,11 +65,11 @@ export default function Layout({ children }) {
           <SidebarHeader className="border-b border-slate-200 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-                <FileCheck className="w-6 h-6 text-white" />
+                <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="font-bold text-slate-900 text-lg">RiskGuard</h2>
-                <p className="text-xs text-slate-500">Risk Management Platform</p>
+                <h2 className="font-bold text-slate-900 text-lg">CBD</h2>
+                <p className="text-xs text-slate-500">Compliance by Design</p>
               </div>
             </div>
           </SidebarHeader>
@@ -103,7 +118,7 @@ export default function Layout({ children }) {
           <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 px-6 py-4 lg:hidden sticky top-0 z-10">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200" />
-              <h1 className="text-xl font-bold text-slate-900">RiskGuard</h1>
+              <h1 className="text-xl font-bold text-slate-900">CBD</h1>
             </div>
           </header>
 
