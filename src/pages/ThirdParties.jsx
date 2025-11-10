@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Users, Plus, Search, Edit2, Trash2, Calendar, Shield } from "lucide-react";
+import { Users, Plus, Search, Edit2, Trash2, Calendar, Shield, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 export default function ThirdParties() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -390,6 +392,11 @@ export default function ThirdParties() {
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        <Link to={createPageUrl(`ThirdPartyDetail?id=${provider.id}`)}>
+                          <Button variant="ghost" size="icon">
+                            <ArrowRight className="w-4 h-4" />
+                          </Button>
+                        </Link>
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(provider)}>
                           <Edit2 className="w-4 h-4" />
                         </Button>

@@ -7,6 +7,7 @@ import ControlDetail from './pages/ControlDetail';
 import ICTSystems from './pages/ICTSystems';
 import Incidents from './pages/Incidents';
 import ThirdParties from './pages/ThirdParties';
+import ThirdPartyDetail from './pages/ThirdPartyDetail';
 import Layout from './Layout.jsx';
 
 
@@ -20,6 +21,7 @@ export const PAGES = {
     "ICTSystems": ICTSystems,
     "Incidents": Incidents,
     "ThirdParties": ThirdParties,
+    "ThirdPartyDetail": ThirdPartyDetail,
 }
 
 export const pagesConfig = {
