@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ClipboardCheck, Plus, ArrowRight, Calendar, Building2, Shield } from "lucide-react";
+import { ClipboardCheck, Plus, ArrowRight, Calendar, Building2, Shield, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -16,6 +16,8 @@ import { format } from "date-fns";
 
 export default function Assessments() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isIssueDialogOpen, setIsIssueDialogOpen] = useState(false);
+  const [selectedAssessment, setSelectedAssessment] = useState(null);
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
@@ -27,6 +29,19 @@ export default function Assessments() {
     assessor: "",
     notes: "",
     status: "not_started"
+  });
+
+  const [issueFormData, setIssueFormData] = useState({
+    title: "",
+    description: "",
+    issue_type: "action_item",
+    status: "open",
+    priority: "medium",
+    linked_entity_type: "Assessment",
+    linked_entity_id: "",
+    linked_entity_name: "",
+    assigned_to: "",
+    due_date: ""
   });
 
   const { data: assessments = [] } = useQuery({
@@ -53,6 +68,15 @@ export default function Assessments() {
     },
   });
 
+  const createIssueMutation = useMutation({
+    mutationFn: (data) => base44.entities.Issue.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['issues']);
+      setIsIssueDialogOpen(false);
+      resetIssueForm();
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       company_id: "",
@@ -66,9 +90,43 @@ export default function Assessments() {
     });
   };
 
+  const resetIssueForm = () => {
+    setIssueFormData({
+      title: "",
+      description: "",
+      issue_type: "action_item",
+      status: "open",
+      priority: "medium",
+      linked_entity_type: "Assessment",
+      linked_entity_id: "",
+      linked_entity_name: "",
+      assigned_to: "",
+      due_date: ""
+    });
+    setSelectedAssessment(null);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     createMutation.mutate(formData);
+  };
+
+  const handleIssueSubmit = (e) => {
+    e.preventDefault();
+    createIssueMutation.mutate(issueFormData);
+  };
+
+  const handleCreateIssue = (assessment) => {
+    const company = companies.find(c => c.id === assessment.company_id);
+    const framework = frameworks.find(f => f.id === assessment.framework_id);
+    setSelectedAssessment(assessment);
+    setIssueFormData({
+      ...issueFormData,
+      linked_entity_type: "Assessment",
+      linked_entity_id: assessment.id,
+      linked_entity_name: `${assessment.name} (${company?.name || ''} - ${framework?.name || ''})`
+    });
+    setIsIssueDialogOpen(true);
   };
 
   const getStatusColor = (status) => {
@@ -187,6 +245,97 @@ export default function Assessments() {
         </Dialog>
       </div>
 
+      <Dialog open={isIssueDialogOpen} onOpenChange={(open) => {
+        setIsIssueDialogOpen(open);
+        if (!open) resetIssueForm();
+      }}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Issue</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleIssueSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="issue_title">Title *</Label>
+                <Input
+                  id="issue_title"
+                  value={issueFormData.title}
+                  onChange={(e) => setIssueFormData({...issueFormData, title: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="issue_type">Type *</Label>
+                <Select value={issueFormData.issue_type} onValueChange={(value) => setIssueFormData({...issueFormData, issue_type: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="action_item">Action Item</SelectItem>
+                    <SelectItem value="fyi">FYI</SelectItem>
+                    <SelectItem value="risk">Risk</SelectItem>
+                    <SelectItem value="finding">Finding</SelectItem>
+                    <SelectItem value="recommendation">Recommendation</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="issue_priority">Priority</Label>
+                <Select value={issueFormData.priority} onValueChange={(value) => setIssueFormData({...issueFormData, priority: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="issue_assigned">Assigned To</Label>
+                <Input
+                  id="issue_assigned"
+                  value={issueFormData.assigned_to}
+                  onChange={(e) => setIssueFormData({...issueFormData, assigned_to: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="issue_due_date">Due Date</Label>
+                <Input
+                  id="issue_due_date"
+                  type="date"
+                  value={issueFormData.due_date}
+                  onChange={(e) => setIssueFormData({...issueFormData, due_date: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="issue_description">Description</Label>
+                <Textarea
+                  id="issue_description"
+                  value={issueFormData.description}
+                  onChange={(e) => setIssueFormData({...issueFormData, description: e.target.value})}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label>Linked To</Label>
+                <Input value={issueFormData.linked_entity_name} disabled className="bg-slate-50" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsIssueDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                Create Issue
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {companies.length === 0 || frameworks.length === 0 ? (
         <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
           <CardContent className="p-12 text-center">
@@ -268,12 +417,22 @@ export default function Assessments() {
                       </div>
                     )}
                   </div>
-                  <Link to={createPageUrl(`AssessmentDetail?id=${assessment.id}`)}>
-                    <Button className="w-full" variant="outline">
-                      View Details
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                  <div className="flex gap-2">
+                    <Link to={createPageUrl(`AssessmentDetail?id=${assessment.id}`)} className="flex-1">
+                      <Button className="w-full" variant="outline">
+                        View Details
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => handleCreateIssue(assessment)}
+                      title="Create Issue"
+                    >
+                      <AlertCircle className="w-4 h-4" />
                     </Button>
-                  </Link>
+                  </div>
                 </CardContent>
               </Card>
             );

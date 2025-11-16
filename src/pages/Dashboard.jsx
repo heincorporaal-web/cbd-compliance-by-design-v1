@@ -2,11 +2,10 @@ import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users } from "lucide-react";
+import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
@@ -45,6 +44,11 @@ export default function Dashboard() {
     queryFn: () => base44.entities.ThirdPartyProvider.list(),
   });
 
+  const { data: issues = [] } = useQuery({
+    queryKey: ['issues'],
+    queryFn: () => base44.entities.Issue.list('-created_date'),
+  });
+
   const activeCompanies = companies.filter(c => c.status === 'active').length;
   const activeFrameworks = frameworks.filter(f => f.status === 'active').length;
   const inProgressAssessments = assessments.filter(a => a.status === 'in_progress').length;
@@ -59,6 +63,9 @@ export default function Dashboard() {
   const openIncidents = incidents.filter(i => i.status === 'open' || i.status === 'investigating').length;
   const criticalIncidents = incidents.filter(i => i.severity === 'critical' && (i.status === 'open' || i.status === 'investigating')).length;
   const highRiskProviders = thirdParties.filter(tp => tp.risk_rating === 'high' || tp.risk_rating === 'critical').length;
+
+  const openIssues = issues.filter(i => i.status === 'open' || i.status === 'in_progress').length;
+  const closedIssues = issues.filter(i => i.status === 'resolved' || i.status === 'closed').length;
 
   const recentIncidents = incidents.slice(0, 5);
 
@@ -147,8 +154,8 @@ export default function Dashboard() {
       </div>
 
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">DORA Resilience</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">DORA Resilience & Issue Tracking</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <Card className="border-none shadow-lg">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -188,16 +195,29 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-lg">
+          <Card className="border-none shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">Total Incidents</CardTitle>
-                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <CardTitle className="text-sm font-medium text-slate-600">Open Issues</CardTitle>
+                <AlertCircle className="w-5 h-5 text-red-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{incidents.length}</div>
-              <p className="text-xs text-slate-500 mt-1">Last 90 days</p>
+              <div className="text-3xl font-bold text-slate-900">{openIssues}</div>
+              <p className="text-xs text-slate-500 mt-1">Action items & findings</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-slate-600">Closed Issues</CardTitle>
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-slate-900">{closedIssues}</div>
+              <p className="text-xs text-slate-500 mt-1">Resolved items</p>
             </CardContent>
           </Card>
         </div>
@@ -252,6 +272,12 @@ export default function Dashboard() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="p-4 space-y-3">
+            <Link to={createPageUrl("Issues")}>
+              <Button className="w-full justify-start" variant="outline">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Manage Issues
+              </Button>
+            </Link>
             <Link to={createPageUrl("ICTSystems")}>
               <Button className="w-full justify-start" variant="outline">
                 <Server className="w-4 h-4 mr-2" />
