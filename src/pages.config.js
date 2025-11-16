@@ -8,7 +8,8 @@ import ICTSystems from './pages/ICTSystems';
 import Incidents from './pages/Incidents';
 import ThirdParties from './pages/ThirdParties';
 import ThirdPartyDetail from './pages/ThirdPartyDetail';
-import Layout from './Layout.jsx';
+import Issues from './pages/Issues';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -22,10 +23,11 @@ export const PAGES = {
     "Incidents": Incidents,
     "ThirdParties": ThirdParties,
     "ThirdPartyDetail": ThirdPartyDetail,
+    "Issues": Issues,
 }
 
 export const pagesConfig = {
     mainPage: "Dashboard",
     Pages: PAGES,
-    Layout: Layout,
+    Layout: __Layout,
 };
