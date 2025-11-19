@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, Plus, Search, Edit2, Calendar, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { AlertCircle, Plus, Search, Edit2, Calendar, CheckCircle2, Clock, AlertTriangle, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import FileUpload from "../components/FileUpload";
 
 export default function Issues() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,6 +32,7 @@ export default function Issues() {
     linked_entity_name: "",
     assigned_to: "",
     due_date: "",
+    attachments: [],
     resolution_notes: "",
     resolved_date: ""
   });
@@ -70,10 +72,25 @@ export default function Issues() {
       linked_entity_name: "",
       assigned_to: "",
       due_date: "",
+      attachments: [],
       resolution_notes: "",
       resolved_date: ""
     });
     setEditingIssue(null);
+  };
+
+  const handleFileUploaded = (fileUrl, fileName) => {
+    setFormData({
+      ...formData,
+      attachments: [...(formData.attachments || []), { url: fileUrl, name: fileName }]
+    });
+  };
+
+  const handleFileRemoved = (fileIndex) => {
+    setFormData({
+      ...formData,
+      attachments: formData.attachments.filter((_, idx) => idx !== fileIndex)
+    });
   };
 
   const handleSubmit = (e) => {
@@ -269,6 +286,14 @@ export default function Issues() {
                   rows={3}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Supporting Documents</Label>
+                <FileUpload
+                  onFileUploaded={handleFileUploaded}
+                  existingFiles={formData.attachments || []}
+                  onFileRemoved={handleFileRemoved}
+                />
+              </div>
               {(formData.status === 'resolved' || formData.status === 'closed') && (
                 <>
                   <div className="space-y-2">
@@ -422,6 +447,22 @@ export default function Issues() {
                         <p className="text-sm text-green-700 bg-green-50 p-2 rounded mt-2">
                           <span className="font-medium">Resolution:</span> {issue.resolution_notes}
                         </p>
+                      )}
+                      {issue.attachments && issue.attachments.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {issue.attachments.map((file, idx) => (
+                            <a
+                              key={idx}
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 hover:underline flex items-center gap-1 bg-blue-50 px-2 py-1 rounded border border-blue-200"
+                            >
+                              <FileText className="w-3 h-3" />
+                              {file.name || 'Attachment'}
+                            </a>
+                          ))}
+                        </div>
                       )}
                     </div>
                     <Button variant="ghost" size="icon" onClick={() => handleEdit(issue)}>

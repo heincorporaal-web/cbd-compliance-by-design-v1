@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, CheckCircle2, XCircle, AlertCircle, Clock, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { Label } from "@/components/ui/label";
+import FileUpload from "../components/FileUpload";
 
 export default function AssessmentDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -93,6 +95,28 @@ export default function AssessmentDetail() {
       updateControlAssessmentMutation.mutate({
         id: controlAssessmentId,
         data: { notes }
+      });
+    }
+  };
+
+  const handleFileUploaded = (controlAssessmentId, fileUrl, fileName) => {
+    const controlAssessment = controlAssessments.find(ca => ca.id === controlAssessmentId);
+    if (controlAssessment) {
+      const newAttachments = [...(controlAssessment.attachments || []), { url: fileUrl, name: fileName }];
+      updateControlAssessmentMutation.mutate({
+        id: controlAssessmentId,
+        data: { attachments: newAttachments }
+      });
+    }
+  };
+
+  const handleFileRemoved = (controlAssessmentId, fileIndex) => {
+    const controlAssessment = controlAssessments.find(ca => ca.id === controlAssessmentId);
+    if (controlAssessment) {
+      const newAttachments = controlAssessment.attachments.filter((_, idx) => idx !== fileIndex);
+      updateControlAssessmentMutation.mutate({
+        id: controlAssessmentId,
+        data: { attachments: newAttachments }
       });
     }
   };
@@ -254,6 +278,15 @@ export default function AssessmentDetail() {
                               className="mt-3"
                               rows={2}
                             />
+
+                            <div className="mt-3">
+                              <Label className="text-sm text-slate-600 mb-2 block">Evidence Documents</Label>
+                              <FileUpload
+                                onFileUploaded={(url, name) => handleFileUploaded(controlAssessment.id, url, name)}
+                                existingFiles={controlAssessment.attachments || []}
+                                onFileRemoved={(idx) => handleFileRemoved(controlAssessment.id, idx)}
+                              />
+                            </div>
                           </>
                         )}
                       </div>

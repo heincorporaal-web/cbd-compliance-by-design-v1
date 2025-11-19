@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
+import FileUpload from "../components/FileUpload";
 
 export default function ThirdPartyDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -35,6 +36,7 @@ export default function ThirdPartyDetail() {
     compliance_status: "compliant",
     next_assessment_date: "",
     documents_reviewed: "",
+    attachments: [],
     status: "completed"
   });
 
@@ -88,9 +90,24 @@ export default function ThirdPartyDetail() {
       compliance_status: "compliant",
       next_assessment_date: "",
       documents_reviewed: "",
+      attachments: [],
       status: "completed"
     });
     setEditingAssessment(null);
+  };
+
+  const handleFileUploaded = (fileUrl, fileName) => {
+    setAssessmentFormData({
+      ...assessmentFormData,
+      attachments: [...(assessmentFormData.attachments || []), { url: fileUrl, name: fileName }]
+    });
+  };
+
+  const handleFileRemoved = (fileIndex) => {
+    setAssessmentFormData({
+      ...assessmentFormData,
+      attachments: assessmentFormData.attachments.filter((_, idx) => idx !== fileIndex)
+    });
   };
 
   const handleAssessmentSubmit = (e) => {
@@ -446,6 +463,14 @@ export default function ThirdPartyDetail() {
                       rows={2}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label>Audit Documents & Reports</Label>
+                    <FileUpload
+                      onFileUploaded={handleFileUploaded}
+                      existingFiles={assessmentFormData.attachments || []}
+                      onFileRemoved={handleFileRemoved}
+                    />
+                  </div>
                   <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={() => setIsAssessmentDialogOpen(false)}>
                       Cancel
@@ -551,6 +576,25 @@ export default function ThirdPartyDetail() {
                         <div>
                           <h4 className="text-sm font-semibold text-slate-700 mb-2">Documents Reviewed</h4>
                           <p className="text-sm text-slate-600">{assessment.documents_reviewed}</p>
+                        </div>
+                      )}
+                      {assessment.attachments && assessment.attachments.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-slate-700 mb-2">Audit Documents</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {assessment.attachments.map((file, idx) => (
+                              <a
+                                key={idx}
+                                href={file.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:underline flex items-center gap-1 bg-blue-50 px-3 py-2 rounded border border-blue-200"
+                              >
+                                <FileText className="w-4 h-4" />
+                                {file.name || 'Document'}
+                              </a>
+                            ))}
+                          </div>
                         </div>
                       )}
                       {assessment.next_assessment_date && (
