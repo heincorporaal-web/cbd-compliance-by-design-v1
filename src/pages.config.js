@@ -9,6 +9,9 @@ import Incidents from './pages/Incidents';
 import ThirdParties from './pages/ThirdParties';
 import ThirdPartyDetail from './pages/ThirdPartyDetail';
 import Issues from './pages/Issues';
+import Surveys from './pages/Surveys';
+import SurveyBuilder from './pages/SurveyBuilder';
+import SurveyDetail from './pages/SurveyDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -24,6 +27,9 @@ export const PAGES = {
     "ThirdParties": ThirdParties,
     "ThirdPartyDetail": ThirdPartyDetail,
     "Issues": Issues,
+    "Surveys": Surveys,
+    "SurveyBuilder": SurveyBuilder,
+    "SurveyDetail": SurveyDetail,
 }
 
 export const pagesConfig = {
