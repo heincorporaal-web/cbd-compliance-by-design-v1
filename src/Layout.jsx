@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Building2, Shield, ClipboardCheck, Server, AlertTriangle, Users, AlertCircle, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Building2, Shield, ClipboardCheck, Server, AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -62,6 +62,11 @@ const navigationItems = [
     title: "Surveys",
     url: createPageUrl("Surveys"),
     icon: ClipboardList,
+  },
+  {
+    title: "Risk Register",
+    url: createPageUrl("RiskRegister"),
+    icon: TriangleAlert,
   },
 ];
 

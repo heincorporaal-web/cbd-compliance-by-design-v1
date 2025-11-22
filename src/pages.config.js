@@ -12,6 +12,8 @@ import Issues from './pages/Issues';
 import Surveys from './pages/Surveys';
 import SurveyBuilder from './pages/SurveyBuilder';
 import SurveyDetail from './pages/SurveyDetail';
+import RiskRegister from './pages/RiskRegister';
+import RiskDetail from './pages/RiskDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +32,8 @@ export const PAGES = {
     "Surveys": Surveys,
     "SurveyBuilder": SurveyBuilder,
     "SurveyDetail": SurveyDetail,
+    "RiskRegister": RiskRegister,
+    "RiskDetail": RiskDetail,
 }
 
 export const pagesConfig = {
