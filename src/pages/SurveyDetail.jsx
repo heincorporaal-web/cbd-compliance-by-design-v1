@@ -14,6 +14,8 @@ import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import SurveyDistribution from "../components/surveys/SurveyDistribution";
+import AIAnalysis from "../components/surveys/AIAnalysis";
 
 export default function SurveyDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -45,12 +47,28 @@ export default function SurveyDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries(['surveyResponses', surveyId]);
       setSubmitted(true);
+      
+      // Update recipient completion status
+      if (survey.recipients) {
+        const updatedRecipients = survey.recipients.map(r => 
+          r.email === formData.respondent_email ? { ...r, completed: true } : r
+        );
+        base44.entities.Survey.update(surveyId, { recipients: updatedRecipients });
+      }
+      
       setFormData({
         respondent_name: "",
         respondent_email: "",
         responses: [],
         notes: ""
       });
+    },
+  });
+
+  const updateSurveyMutation = useMutation({
+    mutationFn: (data) => base44.entities.Survey.update(surveyId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['survey', surveyId]);
     },
   });
 
@@ -212,6 +230,8 @@ export default function SurveyDetail() {
               <Badge variant="secondary" className="ml-2">{responses.length}</Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="distribution">Distribution</TabsTrigger>
+          <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
         </TabsList>
 
         <TabsContent value="take">
@@ -342,6 +362,21 @@ export default function SurveyDetail() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="distribution">
+          <SurveyDistribution 
+            survey={survey} 
+            onUpdate={(data) => updateSurveyMutation.mutate(data)} 
+          />
+        </TabsContent>
+
+        <TabsContent value="analysis">
+          <AIAnalysis 
+            survey={survey} 
+            responses={responses}
+            onAnalysisComplete={(analysis) => updateSurveyMutation.mutate({ ai_analysis: analysis })}
+          />
         </TabsContent>
       </Tabs>
     </div>

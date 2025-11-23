@@ -11,6 +11,7 @@ import { ArrowLeft, Plus, Trash2, GripVertical } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import AIQuestionGenerator from "../components/surveys/AIQuestionGenerator";
 
 export default function SurveyBuilder() {
   const navigate = useNavigate();
@@ -37,6 +38,16 @@ export default function SurveyBuilder() {
   const { data: frameworks = [] } = useQuery({
     queryKey: ['frameworks'],
     queryFn: () => base44.entities.Framework.list(),
+  });
+
+  const { data: linkedEntity } = useQuery({
+    queryKey: ['linkedEntity', formData.linked_entity_type, formData.linked_entity_id],
+    queryFn: async () => {
+      if (!formData.linked_entity_id) return null;
+      const entities = getEntityOptions();
+      return entities.find(e => e.id === formData.linked_entity_id);
+    },
+    enabled: !!formData.linked_entity_id,
   });
 
   const [formData, setFormData] = useState({
@@ -95,6 +106,13 @@ export default function SurveyBuilder() {
           required: false
         }
       ]
+    });
+  };
+
+  const handleAIGenerate = (generatedQuestions) => {
+    setFormData({
+      ...formData,
+      questions: [...formData.questions, ...generatedQuestions]
     });
   };
 
@@ -238,10 +256,19 @@ export default function SurveyBuilder() {
           <CardHeader className="border-b border-slate-100">
             <div className="flex items-center justify-between">
               <CardTitle>Questions</CardTitle>
-              <Button type="button" onClick={addQuestion} variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Question
-              </Button>
+              <div className="flex gap-2">
+                {linkedEntity && (
+                  <AIQuestionGenerator
+                    entityType={formData.linked_entity_type}
+                    entityData={linkedEntity}
+                    onQuestionsGenerated={handleAIGenerate}
+                  />
+                )}
+                <Button type="button" onClick={addQuestion} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Question
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
