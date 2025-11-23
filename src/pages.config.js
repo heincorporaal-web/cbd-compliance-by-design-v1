@@ -14,6 +14,7 @@ import SurveyBuilder from './pages/SurveyBuilder';
 import SurveyDetail from './pages/SurveyDetail';
 import RiskRegister from './pages/RiskRegister';
 import RiskDetail from './pages/RiskDetail';
+import Controls from './pages/Controls';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "SurveyDetail": SurveyDetail,
     "RiskRegister": RiskRegister,
     "RiskDetail": RiskDetail,
+    "Controls": Controls,
 }
 
 export const pagesConfig = {

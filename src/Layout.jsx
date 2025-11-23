@@ -29,6 +29,26 @@ const navigationItems = [
     icon: Building2,
   },
   {
+    title: "Frameworks",
+    url: createPageUrl("Frameworks"),
+    icon: Shield,
+  },
+  {
+    title: "Controls",
+    url: createPageUrl("Controls"),
+    icon: Shield,
+  },
+  {
+    title: "Assessments",
+    url: createPageUrl("Assessments"),
+    icon: ClipboardCheck,
+  },
+  {
+    title: "Risk Register",
+    url: createPageUrl("RiskRegister"),
+    icon: TriangleAlert,
+  },
+  {
     title: "ICT Systems",
     url: createPageUrl("ICTSystems"),
     icon: Server,
@@ -44,16 +64,6 @@ const navigationItems = [
     icon: AlertTriangle,
   },
   {
-    title: "Frameworks",
-    url: createPageUrl("Frameworks"),
-    icon: Shield,
-  },
-  {
-    title: "Assessments",
-    url: createPageUrl("Assessments"),
-    icon: ClipboardCheck,
-  },
-  {
     title: "Issues",
     url: createPageUrl("Issues"),
     icon: AlertCircle,
@@ -62,11 +72,6 @@ const navigationItems = [
     title: "Surveys",
     url: createPageUrl("Surveys"),
     icon: ClipboardList,
-  },
-  {
-    title: "Risk Register",
-    url: createPageUrl("RiskRegister"),
-    icon: TriangleAlert,
   },
 ];
 
