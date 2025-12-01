@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -168,7 +167,7 @@ export default function ICTSystems() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company_id">Company *</Label>
-                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})}>
+                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select company" />
                     </SelectTrigger>

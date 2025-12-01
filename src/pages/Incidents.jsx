@@ -163,7 +163,7 @@ export default function Incidents() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company_id">Company *</Label>
-                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})}>
+                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value, ict_system_id: ""})} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select company" />
                     </SelectTrigger>
@@ -181,9 +181,11 @@ export default function Incidents() {
                       <SelectValue placeholder="Select system" />
                     </SelectTrigger>
                     <SelectContent>
-                      {ictSystems.map(system => (
-                        <SelectItem key={system.id} value={system.id}>{system.name}</SelectItem>
-                      ))}
+                      {ictSystems
+                        .filter(system => !formData.company_id || system.company_id === formData.company_id)
+                        .map(system => (
+                          <SelectItem key={system.id} value={system.id}>{system.name}</SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>

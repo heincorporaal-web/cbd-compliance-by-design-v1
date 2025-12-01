@@ -198,7 +198,7 @@ export default function RiskDetail() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="company_id">Company *</Label>
-                <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})}>
+                <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required>
                   <SelectTrigger>
                     <SelectValue placeholder="Select company" />
                   </SelectTrigger>

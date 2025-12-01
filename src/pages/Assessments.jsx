@@ -160,18 +160,18 @@ export default function Assessments() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="company_id">Company *</Label>
-                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {companies.map(company => (
-                        <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <Label htmlFor="company_id">Company *</Label>
+                    <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select company" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companies.map(company => (
+                          <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 <div className="space-y-2">
                   <Label htmlFor="framework_id">Framework *</Label>
                   <Select value={formData.framework_id} onValueChange={(value) => setFormData({...formData, framework_id: value})}>
