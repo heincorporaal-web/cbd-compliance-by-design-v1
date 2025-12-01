@@ -17,6 +17,8 @@ import RiskDetail from './pages/RiskDetail';
 import Controls from './pages/Controls';
 import GRCGoals from './pages/GRCGoals';
 import GRCGoalDetail from './pages/GRCGoalDetail';
+import SignOffs from './pages/SignOffs';
+import SignOffDetail from './pages/SignOffDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +42,8 @@ export const PAGES = {
     "Controls": Controls,
     "GRCGoals": GRCGoals,
     "GRCGoalDetail": GRCGoalDetail,
+    "SignOffs": SignOffs,
+    "SignOffDetail": SignOffDetail,
 }
 
 export const pagesConfig = {
