@@ -231,14 +231,18 @@ export default function SignOffDetail() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="company_id">Company *</Label>
-                    <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})}>
+                    <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select company" />
                       </SelectTrigger>
                       <SelectContent>
-                        {companies.map(c => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
+                        {companies.length === 0 ? (
+                          <SelectItem value={null} disabled>No companies available</SelectItem>
+                        ) : (
+                          companies.map(c => (
+                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
