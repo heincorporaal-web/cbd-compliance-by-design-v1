@@ -15,6 +15,8 @@ import SurveyDetail from './pages/SurveyDetail';
 import RiskRegister from './pages/RiskRegister';
 import RiskDetail from './pages/RiskDetail';
 import Controls from './pages/Controls';
+import GRCGoals from './pages/GRCGoals';
+import GRCGoalDetail from './pages/GRCGoalDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +38,8 @@ export const PAGES = {
     "RiskRegister": RiskRegister,
     "RiskDetail": RiskDetail,
     "Controls": Controls,
+    "GRCGoals": GRCGoals,
+    "GRCGoalDetail": GRCGoalDetail,
 }
 
 export const pagesConfig = {
