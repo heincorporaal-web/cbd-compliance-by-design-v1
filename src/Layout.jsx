@@ -59,6 +59,11 @@ const navigationItems = [
     icon: FileCheck,
   },
   {
+    title: "iHPOM",
+    url: createPageUrl("iHPOM"),
+    icon: LayoutDashboard,
+  },
+  {
     title: "ICT Systems",
     url: createPageUrl("ICTSystems"),
     icon: Server,

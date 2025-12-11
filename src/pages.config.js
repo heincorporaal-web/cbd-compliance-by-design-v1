@@ -19,6 +19,8 @@ import GRCGoals from './pages/GRCGoals';
 import GRCGoalDetail from './pages/GRCGoalDetail';
 import SignOffs from './pages/SignOffs';
 import SignOffDetail from './pages/SignOffDetail';
+import iHPOM from './pages/iHPOM';
+import ProcessDetail from './pages/ProcessDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +46,8 @@ export const PAGES = {
     "GRCGoalDetail": GRCGoalDetail,
     "SignOffs": SignOffs,
     "SignOffDetail": SignOffDetail,
+    "iHPOM": iHPOM,
+    "ProcessDetail": ProcessDetail,
 }
 
 export const pagesConfig = {
