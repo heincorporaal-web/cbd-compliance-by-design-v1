@@ -5,18 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, ChevronDown, Plus, Search, Network } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Network, Plus, Search, ChevronRight, ChevronDown, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 export default function iHPOM() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [companyFilter, setCompanyFilter] = useState("all");
   const [expandedNodes, setExpandedNodes] = useState(new Set());
-  const [selectedCompany, setSelectedCompany] = useState("");
 
-  const { data: processes = [] } = useQuery({
+  const { data: processes = [], isLoading } = useQuery({
     queryKey: ['businessProcesses'],
-    queryFn: () => base44.entities.BusinessProcess.list(),
+    queryFn: () => base44.entities.BusinessProcess.list('process_code'),
   });
 
   const { data: companies = [] } = useQuery({
@@ -24,80 +26,89 @@ export default function iHPOM() {
     queryFn: () => base44.entities.Company.list(),
   });
 
-  const getLevelName = (level) => {
-    const names = {
-      0: "Value Chain",
-      1: "Level 1 - Process",
-      2: "Level 2 - Sub-Process",
-      3: "Level 3 - Procedure",
-      4: "Level 4 - Task",
-      5: "Level 5 - Step",
-      6: "Level 6 - Activity/Keystroke"
-    };
-    return names[level] || `Level ${level}`;
+  const levelLabels = {
+    0: "Value Chain",
+    1: "Process Group",
+    2: "Process",
+    3: "Sub-Process",
+    4: "Procedure",
+    5: "Task",
+    6: "Activity/Keystroke"
   };
 
   const getLevelColor = (level) => {
     const colors = {
-      0: "bg-purple-100 text-purple-700 border-purple-200",
-      1: "bg-blue-100 text-blue-700 border-blue-200",
-      2: "bg-cyan-100 text-cyan-700 border-cyan-200",
-      3: "bg-green-100 text-green-700 border-green-200",
-      4: "bg-yellow-100 text-yellow-700 border-yellow-200",
-      5: "bg-orange-100 text-orange-700 border-orange-200",
-      6: "bg-red-100 text-red-700 border-red-200"
+      0: "bg-purple-500 text-white",
+      1: "bg-blue-500 text-white",
+      2: "bg-indigo-500 text-white",
+      3: "bg-cyan-500 text-white",
+      4: "bg-teal-500 text-white",
+      5: "bg-green-500 text-white",
+      6: "bg-emerald-500 text-white"
     };
-    return colors[level] || "bg-slate-100 text-slate-700";
+    return colors[level] || "bg-slate-500 text-white";
   };
 
-  const getStatusColor = (status) => {
+  const getCriticalityColor = (criticality) => {
     const colors = {
-      draft: "bg-slate-100 text-slate-700 border-slate-200",
-      active: "bg-green-100 text-green-700 border-green-200",
-      under_review: "bg-amber-100 text-amber-700 border-amber-200",
-      archived: "bg-slate-100 text-slate-500 border-slate-200"
+      critical: "bg-red-100 text-red-700 border-red-200",
+      high: "bg-orange-100 text-orange-700 border-orange-200",
+      medium: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      low: "bg-blue-100 text-blue-700 border-blue-200"
     };
-    return colors[status] || "bg-slate-100 text-slate-700";
+    return colors[criticality] || "bg-slate-100 text-slate-700 border-slate-200";
   };
 
-  const toggleNode = (id) => {
+  const toggleNode = (processId) => {
     const newExpanded = new Set(expandedNodes);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
+    if (newExpanded.has(processId)) {
+      newExpanded.delete(processId);
     } else {
-      newExpanded.add(id);
+      newExpanded.add(processId);
     }
     setExpandedNodes(newExpanded);
   };
 
   const filteredProcesses = processes.filter(p => {
-    const matchesSearch = !searchTerm || 
-      p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.process_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCompany = !selectedCompany || p.company_id === selectedCompany;
-    return matchesSearch && matchesCompany;
+    const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         p.process_code?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLevel = levelFilter === "all" || p.level === parseInt(levelFilter);
+    const matchesCompany = companyFilter === "all" || p.company_id === companyFilter;
+    return matchesSearch && matchesLevel && matchesCompany;
   });
 
-  const getChildProcesses = (parentId) => {
-    return filteredProcesses.filter(p => p.parent_process_id === parentId);
+  const buildHierarchy = (procs) => {
+    const map = {};
+    const roots = [];
+
+    procs.forEach(p => {
+      map[p.id] = { ...p, children: [] };
+    });
+
+    procs.forEach(p => {
+      if (p.parent_id && map[p.parent_id]) {
+        map[p.parent_id].children.push(map[p.id]);
+      } else if (!p.parent_id) {
+        roots.push(map[p.id]);
+      }
+    });
+
+    return roots;
   };
 
-  const rootProcesses = filteredProcesses.filter(p => !p.parent_process_id || p.level === 0);
-
-  const renderProcessTree = (process, depth = 0) => {
-    const children = getChildProcesses(process.id);
+  const renderProcess = (process, depth = 0) => {
+    const hasChildren = process.children && process.children.length > 0;
     const isExpanded = expandedNodes.has(process.id);
-    const hasChildren = children.length > 0;
+    const company = companies.find(c => c.id === process.company_id);
 
     return (
-      <div key={process.id} className={depth > 0 ? "ml-6 border-l-2 border-slate-200 pl-4" : ""}>
-        <div className="py-2">
-          <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200 hover:shadow-md transition-all">
-            {hasChildren && (
-              <button 
+      <div key={process.id} style={{ marginLeft: `${depth * 24}px` }}>
+        <div className="group hover:bg-slate-50 rounded-lg transition-colors">
+          <div className="flex items-center gap-3 py-3 px-4">
+            {hasChildren ? (
+              <button
                 onClick={() => toggleNode(process.id)}
-                className="mt-1 hover:bg-slate-100 rounded p-1"
+                className="hover:bg-slate-200 rounded p-1 transition-colors"
               >
                 {isExpanded ? (
                   <ChevronDown className="w-4 h-4 text-slate-600" />
@@ -105,112 +116,124 @@ export default function iHPOM() {
                   <ChevronRight className="w-4 h-4 text-slate-600" />
                 )}
               </button>
+            ) : (
+              <div className="w-6" />
             )}
-            {!hasChildren && <div className="w-6" />}
             
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap mb-2">
-                <Badge variant="outline" className={`${getLevelColor(process.level)} border font-mono text-xs`}>
-                  {process.process_number}
-                </Badge>
-                <Badge variant="outline" className={`${getLevelColor(process.level)} border text-xs`}>
-                  {getLevelName(process.level)}
-                </Badge>
-                <Badge variant="outline" className={`${getStatusColor(process.status)} border text-xs`}>
-                  {process.status}
-                </Badge>
+            <Badge className={`${getLevelColor(process.level)} shrink-0`}>
+              L{process.level}
+            </Badge>
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-mono text-sm text-slate-600">{process.process_code}</span>
+                <Link to={createPageUrl(`ProcessDetail?id=${process.id}`)}>
+                  <span className="font-medium text-slate-900 hover:text-blue-600 transition-colors">
+                    {process.name}
+                  </span>
+                </Link>
+                {process.criticality && (
+                  <Badge variant="outline" className={`${getCriticalityColor(process.criticality)} border text-xs`}>
+                    {process.criticality}
+                  </Badge>
+                )}
               </div>
-              
-              <Link to={createPageUrl(`ProcessDetail?id=${process.id}`)}>
-                <h3 className="font-semibold text-slate-900 hover:text-blue-600 mb-1">
-                  {process.name}
-                </h3>
-              </Link>
-              
-              {process.description && (
-                <p className="text-sm text-slate-600 mb-2">{process.description}</p>
+              <div className="text-xs text-slate-500 space-x-3">
+                <span>{company?.name || 'Unknown Company'}</span>
+                {process.process_owner && <span>• Owner: {process.process_owner}</span>}
+                {process.workstream && <span>• Workstream: {process.workstream}</span>}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              {(process.linked_risk_ids?.length || 0) > 0 && (
+                <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                  {process.linked_risk_ids.length} risks
+                </Badge>
               )}
-              
-              <div className="flex items-center gap-4 text-xs text-slate-500">
-                {process.process_owner && <span>Owner: {process.process_owner}</span>}
-                {process.global_control_owner && <span>GCO: {process.global_control_owner}</span>}
-                {process.value_chain && <span>Chain: {process.value_chain}</span>}
-              </div>
-
-              {(process.linked_risk_ids?.length > 0 || 
-                process.linked_control_ids?.length > 0 || 
-                process.linked_issue_ids?.length > 0 ||
-                process.linked_goal_ids?.length > 0 ||
-                process.linked_workstream_ids?.length > 0 ||
-                process.linked_assessment_ids?.length > 0) && (
-                <div className="flex gap-2 mt-2 flex-wrap">
-                  {process.linked_risk_ids?.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {process.linked_risk_ids.length} Risk{process.linked_risk_ids.length !== 1 ? 's' : ''}
-                    </Badge>
-                  )}
-                  {process.linked_control_ids?.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {process.linked_control_ids.length} Control{process.linked_control_ids.length !== 1 ? 's' : ''}
-                    </Badge>
-                  )}
-                  {process.linked_issue_ids?.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {process.linked_issue_ids.length} Issue{process.linked_issue_ids.length !== 1 ? 's' : ''}
-                    </Badge>
-                  )}
-                  {process.linked_goal_ids?.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {process.linked_goal_ids.length} Goal{process.linked_goal_ids.length !== 1 ? 's' : ''}
-                    </Badge>
-                  )}
-                  {process.linked_workstream_ids?.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {process.linked_workstream_ids.length} Workstream{process.linked_workstream_ids.length !== 1 ? 's' : ''}
-                    </Badge>
-                  )}
-                  {process.linked_assessment_ids?.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {process.linked_assessment_ids.length} Assessment{process.linked_assessment_ids.length !== 1 ? 's' : ''}
-                    </Badge>
-                  )}
-                </div>
+              {(process.linked_control_ids?.length || 0) > 0 && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  {process.linked_control_ids.length} controls
+                </Badge>
               )}
             </div>
           </div>
         </div>
-
-        {isExpanded && children.length > 0 && (
-          <div className="mt-2">
-            {children.map(child => renderProcessTree(child, depth + 1))}
+        
+        {hasChildren && isExpanded && (
+          <div>
+            {process.children.map(child => renderProcess(child, depth + 1))}
           </div>
         )}
       </div>
     );
   };
 
+  const hierarchy = buildHierarchy(filteredProcesses);
+
+  const stats = {
+    total: processes.length,
+    byLevel: processes.reduce((acc, p) => {
+      acc[p.level] = (acc[p.level] || 0) + 1;
+      return acc;
+    }, {}),
+    critical: processes.filter(p => p.criticality === 'critical').length
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            iHPOM - Integrated High Performance Organisational Model
-          </h1>
-          <p className="text-slate-600">
-            Manage business process hierarchy from value chains (L0) to activities (L6)
-          </p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+              <Network className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">iHPOM</h1>
+              <p className="text-slate-600">Integrated High Performance Organisational Model</p>
+            </div>
+          </div>
         </div>
         <Link to={createPageUrl("ProcessDetail?new=true")}>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button className="bg-purple-600 hover:bg-purple-700">
             <Plus className="w-4 h-4 mr-2" />
             Add Process
           </Button>
         </Link>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="border-none shadow-lg">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Total Processes</p>
+                <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
+              </div>
+              <Layers className="w-8 h-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {[0, 1, 2].map(level => (
+          <Card key={level} className="border-none shadow-lg">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">Level {level}</p>
+                  <p className="text-3xl font-bold text-slate-900">{stats.byLevel[level] || 0}</p>
+                  <p className="text-xs text-slate-500 mt-1">{levelLabels[level]}</p>
+                </div>
+                <Badge className={getLevelColor(level)}>L{level}</Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       <Card className="border-none shadow-lg">
         <CardHeader className="border-b border-slate-100">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
               <Input
@@ -220,36 +243,44 @@ export default function iHPOM() {
                 className="pl-10"
               />
             </div>
-            <select
-              value={selectedCompany}
-              onChange={(e) => setSelectedCompany(e.target.value)}
-              className="px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Companies</option>
-              {companies.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            <Select value={levelFilter} onValueChange={setLevelFilter}>
+              <SelectTrigger className="w-full lg:w-48">
+                <SelectValue placeholder="Filter by level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Levels</SelectItem>
+                {Object.entries(levelLabels).map(([level, label]) => (
+                  <SelectItem key={level} value={level}>Level {level}: {label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={companyFilter} onValueChange={setCompanyFilter}>
+              <SelectTrigger className="w-full lg:w-48">
+                <SelectValue placeholder="Filter by company" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {companies.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
-          {rootProcesses.length === 0 ? (
-            <div className="text-center py-12">
-              <Network className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">No Processes Found</h3>
-              <p className="text-slate-600 mb-6">
-                Start building your organisational model by creating a value chain (Level 0)
-              </p>
-              <Link to={createPageUrl("ProcessDetail?new=true")}>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create First Process
-                </Button>
-              </Link>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-12 text-center text-slate-500">Loading processes...</div>
+          ) : hierarchy.length > 0 ? (
+            <div className="divide-y divide-slate-100">
+              {hierarchy.map(process => renderProcess(process))}
             </div>
           ) : (
-            <div className="space-y-4">
-              {rootProcesses.map(process => renderProcessTree(process))}
+            <div className="p-12 text-center">
+              <Network className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <p className="text-slate-500 mb-4">No processes found</p>
+              <Link to={createPageUrl("ProcessDetail?new=true")}>
+                <Button>Create Your First Process</Button>
+              </Link>
             </div>
           )}
         </CardContent>

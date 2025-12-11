@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Building2, Shield, ClipboardCheck, Server, AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert, Target, FileCheck } from "lucide-react";
+import { LayoutDashboard, Building2, Shield, ClipboardCheck, Server, AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert, Target, FileCheck, Network } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -61,7 +61,7 @@ const navigationItems = [
   {
     title: "iHPOM",
     url: createPageUrl("iHPOM"),
-    icon: LayoutDashboard,
+    icon: Network,
   },
   {
     title: "ICT Systems",
