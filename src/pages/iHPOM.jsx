@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Network, Plus, Search, ChevronRight, ChevronDown, Layers } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Network, Plus, Search, ChevronRight, ChevronDown, Layers, List, GitBranch } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import ProcessTreeView from "@/components/ihpom/ProcessTreeView";
 
 export default function iHPOM() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -270,10 +272,35 @@ export default function iHPOM() {
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-12 text-center text-slate-500">Loading processes...</div>
-          ) : hierarchy.length > 0 ? (
-            <div className="divide-y divide-slate-100">
-              {hierarchy.map(process => renderProcess(process))}
-            </div>
+          ) : filteredProcesses.length > 0 ? (
+            <Tabs defaultValue="tree" className="w-full">
+              <div className="border-b px-4">
+                <TabsList>
+                  <TabsTrigger value="tree" className="gap-2">
+                    <GitBranch className="w-4 h-4" />
+                    Tree View
+                  </TabsTrigger>
+                  <TabsTrigger value="list" className="gap-2">
+                    <List className="w-4 h-4" />
+                    List View
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="tree" className="p-4 m-0">
+                <ProcessTreeView
+                  processes={filteredProcesses}
+                  companies={companies}
+                  searchTerm={searchTerm}
+                />
+              </TabsContent>
+
+              <TabsContent value="list" className="m-0">
+                <div className="divide-y divide-slate-100">
+                  {hierarchy.map(process => renderProcess(process))}
+                </div>
+              </TabsContent>
+            </Tabs>
           ) : (
             <div className="p-12 text-center">
               <Network className="w-12 h-12 text-slate-300 mx-auto mb-3" />
