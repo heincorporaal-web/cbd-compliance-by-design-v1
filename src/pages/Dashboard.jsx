@@ -1,14 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle } from "lucide-react";
+import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Eye, EyeOff, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export default function Dashboard() {
+  const [visibleWidgets, setVisibleWidgets] = useState({
+    compliance: true,
+    resilience: true,
+    processHealth: true,
+    goals: true,
+    riskPosture: true,
+    recentIncidents: true,
+    quickActions: true
+  });
+
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
     queryFn: () => base44.entities.Company.list(),
@@ -49,6 +62,26 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Issue.list('-created_date'),
   });
 
+  const { data: processes = [] } = useQuery({
+    queryKey: ['businessProcesses'],
+    queryFn: () => base44.entities.BusinessProcess.list(),
+  });
+
+  const { data: processAssessments = [] } = useQuery({
+    queryKey: ['processAssessments'],
+    queryFn: () => base44.entities.ProcessAssessment.list('-assessment_date'),
+  });
+
+  const { data: goals = [] } = useQuery({
+    queryKey: ['grcGoals'],
+    queryFn: () => base44.entities.GRCGoal.list(),
+  });
+
+  const { data: risks = [] } = useQuery({
+    queryKey: ['risks'],
+    queryFn: () => base44.entities.Risk.list(),
+  });
+
   const activeCompanies = companies.filter(c => c.status === 'active').length;
   const activeFrameworks = frameworks.filter(f => f.status === 'active').length;
   const inProgressAssessments = assessments.filter(a => a.status === 'in_progress').length;
@@ -67,7 +100,34 @@ export default function Dashboard() {
   const openIssues = issues.filter(i => i.status === 'open' || i.status === 'in_progress').length;
   const closedIssues = issues.filter(i => i.status === 'resolved' || i.status === 'closed').length;
 
+  // Process Health Metrics
+  const activeProcesses = processes.filter(p => p.status === 'active').length;
+  const criticalProcesses = processes.filter(p => p.criticality === 'critical').length;
+  const recentProcessAssessments = processAssessments.slice(0, 5);
+  const needsImprovementCount = processAssessments.filter(pa => 
+    pa.overall_rating === 'needs_improvement' || pa.overall_rating === 'unsatisfactory'
+  ).length;
+  const excellentProcesses = processAssessments.filter(pa => pa.overall_rating === 'excellent').length;
+
+  // Goal Achievement Metrics
+  const achievedGoals = goals.filter(g => g.status === 'achieved').length;
+  const onTrackGoals = goals.filter(g => g.status === 'on_track').length;
+  const atRiskGoals = goals.filter(g => g.status === 'at_risk').length;
+  const goalAchievementRate = goals.length > 0 ? Math.round(((achievedGoals + onTrackGoals) / goals.length) * 100) : 0;
+
+  // Risk Posture
+  const highRisks = risks.filter(r => 
+    (r.likelihood === 'high' || r.likelihood === 'very_high') && 
+    (r.impact === 'high' || r.impact === 'very_high')
+  ).length;
+  const openRisks = risks.filter(r => r.status === 'identified' || r.status === 'assessed').length;
+  const mitigatedRisks = risks.filter(r => r.status === 'mitigated').length;
+
   const recentIncidents = incidents.slice(0, 5);
+
+  const toggleWidget = (widget) => {
+    setVisibleWidgets(prev => ({ ...prev, [widget]: !prev[widget] }));
+  };
 
   const getSeverityColor = (severity) => {
     const colors = {
@@ -91,14 +151,44 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Compliance Dashboard</h1>
-        <p className="text-slate-600">Monitor compliance, resilience, and operational risk across your organization</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Executive Dashboard</h1>
+          <p className="text-slate-600">Real-time overview of risk, compliance, and operational performance</p>
+        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">
+              <Settings className="w-4 h-4 mr-2" />
+              Customize Widgets
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Dashboard Widgets</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {Object.entries(visibleWidgets).map(([key, value]) => (
+                <div key={key} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={key}
+                    checked={value}
+                    onCheckedChange={() => toggleWidget(key)}
+                  />
+                  <Label htmlFor={key} className="capitalize cursor-pointer">
+                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">Compliance Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {visibleWidgets.compliance && (
+        <div>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">Compliance Overview</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="border-none shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -151,10 +241,193 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+      )}
 
-      <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">DORA Resilience & Issue Tracking</h2>
+      {visibleWidgets.processHealth && (
+        <div>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">Process Health (iHPOM)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="border-none shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">Active Processes</CardTitle>
+                  <Network className="w-5 h-5 text-purple-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{activeProcesses}</div>
+                <p className="text-xs text-slate-500 mt-1">{criticalProcesses} critical processes</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">Process Assessments</CardTitle>
+                  <ClipboardCheck className="w-5 h-5 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{processAssessments.length}</div>
+                <p className="text-xs text-green-600 mt-1">{excellentProcesses} rated excellent</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg bg-gradient-to-br from-amber-50 to-orange-50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">Needs Attention</CardTitle>
+                  <AlertTriangle className="w-5 h-5 text-orange-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{needsImprovementCount}</div>
+                <p className="text-xs text-slate-500 mt-1">Requires improvement</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">Open Actions</CardTitle>
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">
+                  {processAssessments.reduce((sum, pa) => 
+                    sum + (pa.actions?.filter(a => a.status === 'open' || a.status === 'in_progress').length || 0), 0
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 mt-1">From process assessments</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {visibleWidgets.goals && (
+        <div>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">Goal Achievement</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="border-none shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium opacity-90">Achievement Rate</CardTitle>
+                  <Target className="w-5 h-5 opacity-75" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{goalAchievementRate}%</div>
+                <p className="text-xs opacity-75 mt-1">{achievedGoals + onTrackGoals} of {goals.length} goals</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">Achieved</CardTitle>
+                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{achievedGoals}</div>
+                <p className="text-xs text-slate-500 mt-1">Goals completed</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">On Track</CardTitle>
+                  <TrendingUp className="w-5 h-5 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{onTrackGoals}</div>
+                <p className="text-xs text-slate-500 mt-1">Progressing well</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">At Risk</CardTitle>
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{atRiskGoals}</div>
+                <p className="text-xs text-slate-500 mt-1">Needs intervention</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {visibleWidgets.riskPosture && (
+        <div>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">Risk & Control Posture</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="border-none shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">Total Risks</CardTitle>
+                  <AlertTriangle className="w-5 h-5 text-slate-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{risks.length}</div>
+                <p className="text-xs text-red-600 mt-1">{highRisks} high/critical risks</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">Open Risks</CardTitle>
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{openRisks}</div>
+                <p className="text-xs text-slate-500 mt-1">Require mitigation</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-slate-600">Mitigated Risks</CardTitle>
+                  <Shield className="w-5 h-5 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{mitigatedRisks}</div>
+                <p className="text-xs text-slate-500 mt-1">Controls in place</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg bg-gradient-to-br from-green-500 to-green-600 text-white">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium opacity-90">Control Compliance</CardTitle>
+                  <Shield className="w-5 h-5 opacity-75" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{complianceRate}%</div>
+                <p className="text-xs opacity-75 mt-1">{compliantControls}/{totalAssessedControls} compliant</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {visibleWidgets.resilience && (
+        <div>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">DORA Resilience & Issue Tracking</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <Card className="border-none shadow-lg">
             <CardHeader className="pb-3">
@@ -221,10 +494,12 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border-none shadow-lg">
+        {visibleWidgets.recentIncidents && (
+          <Card className="lg:col-span-2 border-none shadow-lg">
           <CardHeader className="border-b border-slate-100">
             <div className="flex items-center justify-between">
               <CardTitle>Recent Incidents</CardTitle>
@@ -266,8 +541,10 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+        )}
 
-        <Card className="border-none shadow-lg">
+        {visibleWidgets.quickActions && (
+          <Card className="border-none shadow-lg">
           <CardHeader className="border-b border-slate-100">
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
@@ -302,8 +579,21 @@ export default function Dashboard() {
                 New Assessment
               </Button>
             </Link>
+            <Link to={createPageUrl("iHPOM")}>
+              <Button className="w-full justify-start" variant="outline">
+                <Network className="w-4 h-4 mr-2" />
+                Process Management
+              </Button>
+            </Link>
+            <Link to={createPageUrl("GRCGoals")}>
+              <Button className="w-full justify-start" variant="outline">
+                <Target className="w-4 h-4 mr-2" />
+                GRC Goals
+              </Button>
+            </Link>
           </CardContent>
         </Card>
+        )}
       </div>
     </div>
   );
