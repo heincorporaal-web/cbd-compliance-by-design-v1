@@ -1,53 +1,59 @@
-import Dashboard from './pages/Dashboard';
-import Companies from './pages/Companies';
-import Frameworks from './pages/Frameworks';
-import Assessments from './pages/Assessments';
 import AssessmentDetail from './pages/AssessmentDetail';
+import Assessments from './pages/Assessments';
+import Companies from './pages/Companies';
 import ControlDetail from './pages/ControlDetail';
+import Controls from './pages/Controls';
+import Dashboard from './pages/Dashboard';
+import Frameworks from './pages/Frameworks';
+import GRCGoalDetail from './pages/GRCGoalDetail';
+import GRCGoals from './pages/GRCGoals';
+import Home from './pages/Home';
 import ICTSystems from './pages/ICTSystems';
 import Incidents from './pages/Incidents';
-import ThirdParties from './pages/ThirdParties';
-import ThirdPartyDetail from './pages/ThirdPartyDetail';
 import Issues from './pages/Issues';
-import Surveys from './pages/Surveys';
+import ProcessDetail from './pages/ProcessDetail';
+import RiskDetail from './pages/RiskDetail';
+import RiskRegister from './pages/RiskRegister';
+import SignOffDetail from './pages/SignOffDetail';
+import SignOffs from './pages/SignOffs';
 import SurveyBuilder from './pages/SurveyBuilder';
 import SurveyDetail from './pages/SurveyDetail';
-import RiskRegister from './pages/RiskRegister';
-import RiskDetail from './pages/RiskDetail';
-import Controls from './pages/Controls';
-import GRCGoals from './pages/GRCGoals';
-import GRCGoalDetail from './pages/GRCGoalDetail';
-import SignOffs from './pages/SignOffs';
-import SignOffDetail from './pages/SignOffDetail';
+import Surveys from './pages/Surveys';
+import ThirdParties from './pages/ThirdParties';
+import ThirdPartyDetail from './pages/ThirdPartyDetail';
 import iHPOM from './pages/iHPOM';
-import ProcessDetail from './pages/ProcessDetail';
+import ProcessAssessments from './pages/ProcessAssessments';
+import ProcessAssessmentDetail from './pages/ProcessAssessmentDetail';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Dashboard": Dashboard,
-    "Companies": Companies,
-    "Frameworks": Frameworks,
-    "Assessments": Assessments,
     "AssessmentDetail": AssessmentDetail,
+    "Assessments": Assessments,
+    "Companies": Companies,
     "ControlDetail": ControlDetail,
+    "Controls": Controls,
+    "Dashboard": Dashboard,
+    "Frameworks": Frameworks,
+    "GRCGoalDetail": GRCGoalDetail,
+    "GRCGoals": GRCGoals,
+    "Home": Home,
     "ICTSystems": ICTSystems,
     "Incidents": Incidents,
-    "ThirdParties": ThirdParties,
-    "ThirdPartyDetail": ThirdPartyDetail,
     "Issues": Issues,
-    "Surveys": Surveys,
+    "ProcessDetail": ProcessDetail,
+    "RiskDetail": RiskDetail,
+    "RiskRegister": RiskRegister,
+    "SignOffDetail": SignOffDetail,
+    "SignOffs": SignOffs,
     "SurveyBuilder": SurveyBuilder,
     "SurveyDetail": SurveyDetail,
-    "RiskRegister": RiskRegister,
-    "RiskDetail": RiskDetail,
-    "Controls": Controls,
-    "GRCGoals": GRCGoals,
-    "GRCGoalDetail": GRCGoalDetail,
-    "SignOffs": SignOffs,
-    "SignOffDetail": SignOffDetail,
+    "Surveys": Surveys,
+    "ThirdParties": ThirdParties,
+    "ThirdPartyDetail": ThirdPartyDetail,
     "iHPOM": iHPOM,
-    "ProcessDetail": ProcessDetail,
+    "ProcessAssessments": ProcessAssessments,
+    "ProcessAssessmentDetail": ProcessAssessmentDetail,
 }
 
 export const pagesConfig = {

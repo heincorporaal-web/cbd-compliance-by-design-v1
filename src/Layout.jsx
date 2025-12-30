@@ -64,6 +64,11 @@ const navigationItems = [
     icon: Network,
   },
   {
+    title: "Process Assessments",
+    url: createPageUrl("ProcessAssessments"),
+    icon: ClipboardCheck,
+  },
+  {
     title: "ICT Systems",
     url: createPageUrl("ICTSystems"),
     icon: Server,
