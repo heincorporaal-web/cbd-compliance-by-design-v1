@@ -11,6 +11,8 @@ import Home from './pages/Home';
 import ICTSystems from './pages/ICTSystems';
 import Incidents from './pages/Incidents';
 import Issues from './pages/Issues';
+import ProcessAssessmentDetail from './pages/ProcessAssessmentDetail';
+import ProcessAssessments from './pages/ProcessAssessments';
 import ProcessDetail from './pages/ProcessDetail';
 import RiskDetail from './pages/RiskDetail';
 import RiskRegister from './pages/RiskRegister';
@@ -22,8 +24,8 @@ import Surveys from './pages/Surveys';
 import ThirdParties from './pages/ThirdParties';
 import ThirdPartyDetail from './pages/ThirdPartyDetail';
 import iHPOM from './pages/iHPOM';
-import ProcessAssessments from './pages/ProcessAssessments';
-import ProcessAssessmentDetail from './pages/ProcessAssessmentDetail';
+import Workflows from './pages/Workflows';
+import WorkflowApproval from './pages/WorkflowApproval';
 import __Layout from './Layout.jsx';
 
 
@@ -41,6 +43,8 @@ export const PAGES = {
     "ICTSystems": ICTSystems,
     "Incidents": Incidents,
     "Issues": Issues,
+    "ProcessAssessmentDetail": ProcessAssessmentDetail,
+    "ProcessAssessments": ProcessAssessments,
     "ProcessDetail": ProcessDetail,
     "RiskDetail": RiskDetail,
     "RiskRegister": RiskRegister,
@@ -52,8 +56,8 @@ export const PAGES = {
     "ThirdParties": ThirdParties,
     "ThirdPartyDetail": ThirdPartyDetail,
     "iHPOM": iHPOM,
-    "ProcessAssessments": ProcessAssessments,
-    "ProcessAssessmentDetail": ProcessAssessmentDetail,
+    "Workflows": Workflows,
+    "WorkflowApproval": WorkflowApproval,
 }
 
 export const pagesConfig = {
