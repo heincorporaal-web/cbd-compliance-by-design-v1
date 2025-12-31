@@ -1,332 +1,328 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Shield, CheckCircle2, XCircle, AlertCircle, Clock, FileText, ExternalLink, Building2, Calendar } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Save, Shield, CheckCircle, AlertTriangle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { format } from "date-fns";
 
 export default function ControlDetail() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   const controlId = urlParams.get('id');
+  const isNew = urlParams.get('new') === 'true';
 
-  const { data: control, isLoading: controlLoading } = useQuery({
-    queryKey: ['control', controlId],
-    queryFn: () => base44.entities.Control.filter({ id: controlId }).then(res => res[0]),
-    enabled: !!controlId,
+  const [formData, setFormData] = useState({
+    framework_id: "",
+    control_id: "",
+    title: "",
+    description: "",
+    category: "",
+    priority: "medium"
   });
 
-  const { data: framework } = useQuery({
-    queryKey: ['framework', control?.framework_id],
-    queryFn: () => base44.entities.Framework.filter({ id: control.framework_id }).then(res => res[0]),
-    enabled: !!control?.framework_id,
+  const { data: existingControl } = useQuery({
+    queryKey: ['control', controlId],
+    queryFn: () => base44.entities.Control.filter({ id: controlId }),
+    enabled: !!controlId && !isNew,
+  });
+
+  const { data: frameworks = [] } = useQuery({
+    queryKey: ['frameworks'],
+    queryFn: () => base44.entities.Framework.list(),
   });
 
   const { data: controlAssessments = [] } = useQuery({
     queryKey: ['controlAssessments', controlId],
     queryFn: () => base44.entities.ControlAssessment.filter({ control_id: controlId }),
-    enabled: !!controlId,
+    enabled: !!controlId && !isNew,
   });
 
-  const { data: allAssessments = [] } = useQuery({
+  const { data: assessments = [] } = useQuery({
     queryKey: ['assessments'],
     queryFn: () => base44.entities.Assessment.list(),
   });
 
-  const { data: allCompanies = [] } = useQuery({
-    queryKey: ['companies'],
-    queryFn: () => base44.entities.Company.list(),
+  useEffect(() => {
+    if (existingControl?.[0]) {
+      setFormData(existingControl[0]);
+    }
+  }, [existingControl]);
+
+  const createMutation = useMutation({
+    mutationFn: (data) => base44.entities.Control.create(data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(['controls']);
+      navigate(createPageUrl(`ControlDetail?id=${data.id}`));
+    },
   });
+
+  const updateMutation = useMutation({
+    mutationFn: (data) => base44.entities.Control.update(controlId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['controls']);
+      queryClient.invalidateQueries(['control', controlId]);
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (isNew || !controlId) {
+      createMutation.mutate(formData);
+    } else {
+      updateMutation.mutate(formData);
+    }
+  };
 
   const getPriorityColor = (priority) => {
     const colors = {
-      critical: 'bg-red-500 text-white',
-      high: 'bg-orange-500 text-white',
-      medium: 'bg-yellow-500 text-white',
-      low: 'bg-green-500 text-white'
+      critical: 'bg-red-100 text-red-700 border-red-200',
+      high: 'bg-orange-100 text-orange-700 border-orange-200',
+      medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      low: 'bg-blue-100 text-blue-700 border-blue-200'
     };
-    return colors[priority] || 'bg-slate-500 text-white';
-  };
-
-  const getStatusIcon = (status) => {
-    const icons = {
-      compliant: CheckCircle2,
-      partial: AlertCircle,
-      non_compliant: XCircle,
-      not_applicable: FileText,
-      not_assessed: Clock
-    };
-    return icons[status] || Clock;
+    return colors[priority] || 'bg-slate-100 text-slate-700 border-slate-200';
   };
 
   const getStatusColor = (status) => {
     const colors = {
-      compliant: 'bg-green-100 text-green-700 border-green-200',
-      partial: 'bg-amber-100 text-amber-700 border-amber-200',
-      non_compliant: 'bg-red-100 text-red-700 border-red-200',
-      not_applicable: 'bg-slate-100 text-slate-700 border-slate-200',
-      not_assessed: 'bg-slate-50 text-slate-500 border-slate-200'
+      compliant: 'bg-green-100 text-green-700',
+      partial: 'bg-yellow-100 text-yellow-700',
+      non_compliant: 'bg-red-100 text-red-700',
+      not_applicable: 'bg-slate-100 text-slate-700',
+      not_assessed: 'bg-blue-100 text-blue-700'
     };
-    return colors[status] || colors.not_assessed;
+    return colors[status] || 'bg-slate-100 text-slate-700';
   };
 
-  const getRiskLevelColor = (riskLevel) => {
-    const colors = {
-      critical: 'bg-red-500 text-white border-red-600',
-      high: 'bg-orange-500 text-white border-orange-600',
-      medium: 'bg-yellow-500 text-white border-yellow-600',
-      low: 'bg-green-500 text-white border-green-600',
-      none: 'bg-slate-100 text-slate-600 border-slate-200'
-    };
-    return colors[riskLevel] || colors.none;
-  };
+  const framework = frameworks.find(f => f.id === formData.framework_id);
 
-  // Calculate statistics
-  const assessedCount = controlAssessments.filter(ca => ca.status !== 'not_assessed').length;
-  const compliantCount = controlAssessments.filter(ca => ca.status === 'compliant').length;
-  const nonCompliantCount = controlAssessments.filter(ca => ca.status === 'non_compliant').length;
-  const partialCount = controlAssessments.filter(ca => ca.status === 'partial').length;
-  const complianceRate = assessedCount > 0 ? Math.round((compliantCount / assessedCount) * 100) : 0;
-
-  if (controlLoading) {
-    return <div className="p-8 text-center">Loading control details...</div>;
-  }
-
-  if (!control) {
-    return (
-      <div className="p-8 text-center">
-        <p className="text-slate-500 mb-4">Control not found</p>
-        <Link to={createPageUrl("Frameworks")}>
-          <Button>Back to Frameworks</Button>
-        </Link>
-      </div>
-    );
-  }
+  const complianceRate = controlAssessments.length > 0
+    ? Math.round((controlAssessments.filter(ca => ca.status === 'compliant').length / controlAssessments.length) * 100)
+    : 0;
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center gap-4">
-        <Link to={createPageUrl("Frameworks")}>
+        <Link to={createPageUrl("Controls")}>
           <Button variant="ghost" size="icon">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <Badge variant="outline" className="text-base px-3 py-1">{control.control_id}</Badge>
-            {control.priority && (
-              <Badge className={getPriorityColor(control.priority)}>
-                {control.priority} priority
-              </Badge>
-            )}
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900">{control.title}</h1>
-          {framework && (
-            <div className="flex items-center gap-2 mt-2 text-slate-600">
-              <Shield className="w-4 h-4" />
-              <span>{framework.name}</span>
-              {control.category && (
-                <>
-                  <span>•</span>
-                  <span>{control.category}</span>
-                </>
-              )}
-            </div>
-          )}
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">
+            {isNew ? 'New Control' : formData.title || 'Control Details'}
+          </h1>
+          <p className="text-slate-600">
+            {framework ? `${framework.name} • ` : ''}Control Management
+          </p>
         </div>
       </div>
 
-      <Card className="border-none shadow-lg">
-        <CardHeader className="border-b border-slate-100">
-          <CardTitle>Control Details</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            {control.description && (
-              <div>
-                <h3 className="text-sm font-semibold text-slate-700 mb-2">Description</h3>
-                <p className="text-slate-600">{control.description}</p>
-              </div>
+      <form onSubmit={handleSubmit}>
+        <Tabs defaultValue="details" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="details">Details</TabsTrigger>
+            {!isNew && controlId && (
+              <TabsTrigger value="assessments">
+                Assessments
+                {controlAssessments.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">
+                    {controlAssessments.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
             )}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
-              <div>
-                <p className="text-xs text-slate-500 mb-1">Framework</p>
-                <p className="font-semibold text-slate-900">{framework?.name || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 mb-1">Category</p>
-                <p className="font-semibold text-slate-900">{control.category || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 mb-1">Priority</p>
-                <Badge className={getPriorityColor(control.priority)}>
-                  {control.priority || 'N/A'}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 mb-1">Control ID</p>
-                <p className="font-semibold text-slate-900">{control.control_id}</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </TabsList>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-none shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium opacity-90">Total Assessments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{controlAssessments.length}</div>
-            <p className="text-xs opacity-75 mt-1">{assessedCount} assessed</p>
-          </CardContent>
-        </Card>
+          <TabsContent value="details" className="space-y-6">
+            <Card className="border-none shadow-lg">
+              <CardHeader className="border-b border-slate-100">
+                <CardTitle>Control Information</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="framework_id">Framework *</Label>
+                    <Select value={formData.framework_id} onValueChange={(value) => setFormData({...formData, framework_id: value})} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select framework" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {frameworks.map(f => (
+                          <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-        <Card className="border-none shadow-lg bg-gradient-to-br from-green-500 to-green-600 text-white">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium opacity-90">Compliant</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{compliantCount}</div>
-            <p className="text-xs opacity-75 mt-1">{complianceRate}% compliance rate</p>
-          </CardContent>
-        </Card>
+                  <div className="space-y-2">
+                    <Label htmlFor="control_id">Control ID *</Label>
+                    <Input
+                      id="control_id"
+                      value={formData.control_id}
+                      onChange={(e) => setFormData({...formData, control_id: e.target.value})}
+                      placeholder="e.g., A.5.1"
+                      required
+                    />
+                  </div>
 
-        <Card className="border-none shadow-lg bg-gradient-to-br from-amber-500 to-amber-600 text-white">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium opacity-90">Partial</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{partialCount}</div>
-            <p className="text-xs opacity-75 mt-1">Partially compliant</p>
-          </CardContent>
-        </Card>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="title">Control Title *</Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      required
+                    />
+                  </div>
 
-        <Card className="border-none shadow-lg bg-gradient-to-br from-red-500 to-red-600 text-white">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium opacity-90">Non-Compliant</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{nonCompliantCount}</div>
-            <p className="text-xs opacity-75 mt-1">Needs attention</p>
-          </CardContent>
-        </Card>
-      </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <Input
+                      id="category"
+                      value={formData.category}
+                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                      placeholder="e.g., Access Control, Cryptography"
+                    />
+                  </div>
 
-      <Card className="border-none shadow-lg">
-        <CardHeader className="border-b border-slate-100">
-          <CardTitle>Assessment History</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {controlAssessments.length === 0 ? (
-            <div className="p-12 text-center">
-              <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500">No assessments for this control yet</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {controlAssessments.map((ca) => {
-                const assessment = allAssessments.find(a => a.id === ca.assessment_id);
-                const company = allCompanies.find(c => c.id === assessment?.company_id);
-                const StatusIcon = getStatusIcon(ca.status);
+                  <div className="space-y-2">
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select value={formData.priority} onValueChange={(value) => setFormData({...formData, priority: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="critical">Critical</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                return (
-                  <div key={ca.id} className="p-6 hover:bg-slate-50 transition-colors">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Link 
-                            to={createPageUrl(`AssessmentDetail?id=${assessment?.id}`)}
-                            className="font-semibold text-slate-900 hover:text-blue-600 transition-colors"
-                          >
-                            {assessment?.name || 'Unknown Assessment'}
-                          </Link>
-                          <Badge variant="outline" className={`${getStatusColor(ca.status)} border`}>
-                            <StatusIcon className="w-3 h-3 mr-1" />
-                            {ca.status.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex items-center gap-4 text-sm text-slate-600">
-                          {company && (
-                            <div className="flex items-center gap-1">
-                              <Building2 className="w-4 h-4" />
-                              {company.name}
-                            </div>
-                          )}
-                          {assessment?.assessment_date && (
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {format(new Date(assessment.assessment_date), 'MMM d, yyyy')}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {ca.risk_level && ca.risk_level !== 'none' && (
-                        <Badge className={`${getRiskLevelColor(ca.risk_level)} border`}>
-                          {ca.risk_level} risk
-                        </Badge>
-                      )}
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {!isNew && controlAssessments.length > 0 && (
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle>Compliance Overview</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
+                      <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                      <div className="text-3xl font-bold text-slate-900">{complianceRate}%</div>
+                      <p className="text-sm text-slate-600 mt-1">Compliance Rate</p>
                     </div>
-
-                    {ca.notes && (
-                      <div className="mb-3">
-                        <h4 className="text-sm font-semibold text-slate-700 mb-1">Notes</h4>
-                        <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200">
-                          {ca.notes}
-                        </p>
+                    <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
+                      <Shield className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                      <div className="text-3xl font-bold text-slate-900">{controlAssessments.length}</div>
+                      <p className="text-sm text-slate-600 mt-1">Total Assessments</p>
+                    </div>
+                    <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl">
+                      <AlertTriangle className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+                      <div className="text-3xl font-bold text-slate-900">
+                        {controlAssessments.filter(ca => ca.status === 'non_compliant').length}
                       </div>
-                    )}
-
-                    {ca.evidence_url && (
-                      <div className="mb-3">
-                        <h4 className="text-sm font-semibold text-slate-700 mb-1">Evidence</h4>
-                        <a
-                          href={ca.evidence_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 hover:underline"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          View Evidence Document
-                        </a>
-                      </div>
-                    )}
-
-                    {ca.remediation_plan && (
-                      <div className="mb-3">
-                        <h4 className="text-sm font-semibold text-slate-700 mb-1">Remediation Plan</h4>
-                        <p className="text-sm text-slate-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
-                          {ca.remediation_plan}
-                        </p>
-                        {ca.remediation_date && (
-                          <p className="text-xs text-slate-500 mt-2">
-                            Target Date: {format(new Date(ca.remediation_date), 'MMM d, yyyy')}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="flex justify-end pt-3 border-t border-slate-200">
-                      <Link to={createPageUrl(`AssessmentDetail?id=${assessment?.id}`)}>
-                        <Button variant="outline" size="sm">
-                          View Full Assessment
-                          <ArrowLeft className="w-3 h-3 ml-2 rotate-180" />
-                        </Button>
-                      </Link>
+                      <p className="text-sm text-slate-600 mt-1">Non-Compliant</p>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {!isNew && controlId && (
+            <TabsContent value="assessments" className="space-y-6">
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle>Assessment History</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {controlAssessments.length > 0 ? (
+                    <div className="divide-y divide-slate-100">
+                      {controlAssessments.map((ca) => {
+                        const assessment = assessments.find(a => a.id === ca.assessment_id);
+                        return (
+                          <div key={ca.id} className="p-4 hover:bg-slate-50 transition-colors">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-slate-900">
+                                  {assessment?.name || 'Assessment'}
+                                </h4>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge className={getStatusColor(ca.status)}>
+                                    {ca.status?.replace('_', ' ')}
+                                  </Badge>
+                                  {ca.risk_level && ca.risk_level !== 'none' && (
+                                    <Badge variant="outline" className={getPriorityColor(ca.risk_level)}>
+                                      {ca.risk_level} risk
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            {ca.notes && (
+                              <p className="text-sm text-slate-600 mt-2">{ca.notes}</p>
+                            )}
+                            {ca.remediation_plan && (
+                              <div className="mt-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                                <p className="text-sm font-medium text-amber-900">Remediation Plan:</p>
+                                <p className="text-sm text-amber-700 mt-1">{ca.remediation_plan}</p>
+                                {ca.remediation_date && (
+                                  <p className="text-xs text-amber-600 mt-1">
+                                    Target: {new Date(ca.remediation_date).toLocaleDateString()}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-12 text-center text-slate-500">
+                      <Shield className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                      <p>No assessments for this control yet</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
           )}
-        </CardContent>
-      </Card>
+        </Tabs>
+
+        <div className="flex justify-end gap-3 mt-6">
+          <Link to={createPageUrl("Controls")}>
+            <Button type="button" variant="outline">Cancel</Button>
+          </Link>
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <Save className="w-4 h-4 mr-2" />
+            {isNew || !controlId ? 'Create Control' : 'Save Changes'}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
