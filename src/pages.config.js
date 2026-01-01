@@ -23,9 +23,9 @@ import SurveyDetail from './pages/SurveyDetail';
 import Surveys from './pages/Surveys';
 import ThirdParties from './pages/ThirdParties';
 import ThirdPartyDetail from './pages/ThirdPartyDetail';
-import iHPOM from './pages/iHPOM';
-import Workflows from './pages/Workflows';
 import WorkflowApproval from './pages/WorkflowApproval';
+import Workflows from './pages/Workflows';
+import iHPOM from './pages/iHPOM';
 import __Layout from './Layout.jsx';
 
 
@@ -55,9 +55,9 @@ export const PAGES = {
     "Surveys": Surveys,
     "ThirdParties": ThirdParties,
     "ThirdPartyDetail": ThirdPartyDetail,
-    "iHPOM": iHPOM,
-    "Workflows": Workflows,
     "WorkflowApproval": WorkflowApproval,
+    "Workflows": Workflows,
+    "iHPOM": iHPOM,
 }
 
 export const pagesConfig = {

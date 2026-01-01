@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Search, ArrowRight } from "lucide-react";
+import { Shield, Search, ArrowRight, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -49,6 +49,12 @@ export default function Controls() {
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Controls</h1>
           <p className="text-slate-600">Browse and manage security controls across frameworks</p>
         </div>
+        <Link to={createPageUrl("ControlDetail?new=true")}>
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Control
+          </Button>
+        </Link>
       </div>
 
       <Card className="border-none shadow-lg">

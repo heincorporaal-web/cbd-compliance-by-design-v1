@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Shield, CheckCircle, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Save, Shield, CheckCircle, AlertTriangle, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function ControlDetail() {
   const navigate = useNavigate();
@@ -26,8 +27,11 @@ export default function ControlDetail() {
     title: "",
     description: "",
     category: "",
-    priority: "medium"
+    priority: "medium",
+    compensating_control_ids: []
   });
+
+  const [isAddingCompensating, setIsAddingCompensating] = useState(false);
 
   const { data: existingControl } = useQuery({
     queryKey: ['control', controlId],
@@ -49,6 +53,11 @@ export default function ControlDetail() {
   const { data: assessments = [] } = useQuery({
     queryKey: ['assessments'],
     queryFn: () => base44.entities.Assessment.list(),
+  });
+
+  const { data: allControls = [] } = useQuery({
+    queryKey: ['allControls'],
+    queryFn: () => base44.entities.Control.list(),
   });
 
   useEffect(() => {
@@ -108,6 +117,29 @@ export default function ControlDetail() {
   const complianceRate = controlAssessments.length > 0
     ? Math.round((controlAssessments.filter(ca => ca.status === 'compliant').length / controlAssessments.length) * 100)
     : 0;
+
+  const addCompensatingControl = (compensatingControlId) => {
+    if (!formData.compensating_control_ids?.includes(compensatingControlId)) {
+      const updated = [...(formData.compensating_control_ids || []), compensatingControlId];
+      const newData = { ...formData, compensating_control_ids: updated };
+      setFormData(newData);
+      if (controlId) updateMutation.mutate(newData);
+    }
+    setIsAddingCompensating(false);
+  };
+
+  const removeCompensatingControl = (compensatingControlId) => {
+    const updated = formData.compensating_control_ids?.filter(id => id !== compensatingControlId) || [];
+    const newData = { ...formData, compensating_control_ids: updated };
+    setFormData(newData);
+    if (controlId) updateMutation.mutate(newData);
+  };
+
+  const compensatingControls = allControls.filter(c => formData.compensating_control_ids?.includes(c.id));
+  const availableControls = allControls.filter(c => 
+    c.id !== controlId && 
+    !formData.compensating_control_ids?.includes(c.id)
+  );
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -222,6 +254,79 @@ export default function ControlDetail() {
                 </div>
               </CardContent>
             </Card>
+
+            {!isNew && (
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Compensating Controls</CardTitle>
+                    <Dialog open={isAddingCompensating} onOpenChange={setIsAddingCompensating}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Compensating Control
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Add Compensating Control</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {availableControls.map(control => {
+                            const fw = frameworks.find(f => f.id === control.framework_id);
+                            return (
+                              <div
+                                key={control.id}
+                                className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                                onClick={() => addCompensatingControl(control.id)}
+                              >
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium text-slate-900">{control.control_id}</span>
+                                  <Badge variant="outline">{fw?.name}</Badge>
+                                </div>
+                                <p className="text-sm text-slate-600">{control.title}</p>
+                              </div>
+                            );
+                          })}
+                          {availableControls.length === 0 && (
+                            <p className="text-center text-slate-500 py-8">No available controls to add</p>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {compensatingControls.length > 0 ? (
+                    <div className="space-y-2">
+                      {compensatingControls.map(control => {
+                        const fw = frameworks.find(f => f.id === control.framework_id);
+                        return (
+                          <div key={control.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-slate-900">{control.control_id}</span>
+                                <Badge variant="outline">{fw?.name}</Badge>
+                              </div>
+                              <p className="text-sm text-slate-600">{control.title}</p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeCompensatingControl(control.id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500 text-center py-4">No compensating controls defined</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {!isNew && controlAssessments.length > 0 && (
               <Card className="border-none shadow-lg">
