@@ -158,16 +158,26 @@ export default function RiskDetail() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Link to={createPageUrl("RiskRegister")}>
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="w-5 h-5" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to={createPageUrl("RiskRegister")}>
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              {isNew ? 'Add New Risk' : risk?.title || 'Risk Details'}
+            </h1>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Link to={createPageUrl("RiskRegister")}>
+            <Button type="button" variant="outline">Cancel</Button>
+          </Link>
+          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
+            {isNew ? 'Create Risk' : 'Update Risk'}
           </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">
-            {isNew ? 'Add New Risk' : risk?.title || 'Risk Details'}
-          </h1>
         </div>
       </div>
 
@@ -450,14 +460,6 @@ export default function RiskDetail() {
           </Card>
         </div>
 
-        <div className="flex justify-end gap-3">
-          <Link to={createPageUrl("RiskRegister")}>
-            <Button type="button" variant="outline">Cancel</Button>
-          </Link>
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-            {isNew ? 'Create Risk' : 'Update Risk'}
-          </Button>
-        </div>
       </form>
     </div>
   );

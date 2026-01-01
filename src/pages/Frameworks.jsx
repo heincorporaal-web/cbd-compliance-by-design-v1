@@ -3,8 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Plus, Download, CheckCircle2, ChevronRight } from "lucide-react";
+import { Shield, Plus, Download, CheckCircle2, ChevronRight, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -18,6 +19,7 @@ export default function Frameworks() {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [expandedFramework, setExpandedFramework] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: frameworks = [] } = useQuery({
     queryKey: ['frameworks'],
@@ -161,6 +163,22 @@ export default function Frameworks() {
         )}
       </div>
 
+      {frameworks.length > 0 && (
+        <Card className="border-none shadow-lg">
+          <CardContent className="p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Input
+                placeholder="Search frameworks and controls..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {frameworks.length === 0 ? (
         <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
           <CardContent className="p-12 text-center">
@@ -177,7 +195,15 @@ export default function Frameworks() {
         </Card>
       ) : (
         <div className="space-y-6">
-          {frameworks.map((framework) => {
+          {frameworks.filter(f => 
+            f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            f.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            controls.some(c => 
+              c.framework_id === f.id && 
+              (c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+               c.control_id?.toLowerCase().includes(searchTerm.toLowerCase()))
+            )
+          ).map((framework) => {
             const frameworkControls = controls.filter(c => c.framework_id === framework.id);
             const isExpanded = expandedFramework === framework.id;
             

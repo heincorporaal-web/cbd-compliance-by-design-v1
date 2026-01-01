@@ -166,17 +166,28 @@ export default function ProcessDetail() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Link to={createPageUrl("iHPOM")}>
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="w-5 h-5" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to={createPageUrl("iHPOM")}>
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              {isNew ? 'New Business Process' : formData.name || 'Process Details'}
+            </h1>
+            <p className="text-slate-600">iHPOM Process Management</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Link to={createPageUrl("iHPOM")}>
+            <Button type="button" variant="outline">Cancel</Button>
+          </Link>
+          <Button onClick={handleSubmit} className="bg-purple-600 hover:bg-purple-700">
+            <Save className="w-4 h-4 mr-2" />
+            {isNew || !processId ? 'Create Process' : 'Save Changes'}
           </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">
-            {isNew ? 'New Business Process' : formData.name || 'Process Details'}
-          </h1>
-          <p className="text-slate-600">iHPOM Process Management</p>
         </div>
       </div>
 
@@ -724,16 +735,7 @@ export default function ProcessDetail() {
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end gap-3 mt-6">
-          <Link to={createPageUrl("iHPOM")}>
-            <Button type="button" variant="outline">Cancel</Button>
-          </Link>
-          <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-            <Save className="w-4 h-4 mr-2" />
-            {isNew || !processId ? 'Create Process' : 'Save Changes'}
-          </Button>
-        </div>
-      </form>
+        </form>
     </div>
   );
 }

@@ -160,17 +160,28 @@ export default function GRCGoalDetail() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Link to={createPageUrl("GRCGoals")}>
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="w-5 h-5" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to={createPageUrl("GRCGoals")}>
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              {goalId ? 'Edit GRC Goal' : 'New GRC Goal'}
+            </h1>
+            <p className="text-slate-600">Define goals with maturity assessments</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Link to={createPageUrl("GRCGoals")}>
+            <Button type="button" variant="outline">Cancel</Button>
+          </Link>
+          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
+            <Save className="w-4 h-4 mr-2" />
+            {goalId ? 'Save Changes' : 'Create Goal'}
           </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">
-            {goalId ? 'Edit GRC Goal' : 'New GRC Goal'}
-          </h1>
-          <p className="text-slate-600">Define goals with maturity assessments</p>
         </div>
       </div>
 
@@ -487,10 +498,6 @@ export default function GRCGoalDetail() {
               </CardContent>
             </Card>
 
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-              <Save className="w-4 h-4 mr-2" />
-              {goalId ? 'Save Changes' : 'Create Goal'}
-            </Button>
           </div>
         </div>
       </form>

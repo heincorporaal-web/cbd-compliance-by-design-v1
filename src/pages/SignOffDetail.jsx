@@ -186,12 +186,21 @@ export default function SignOffDetail() {
             <p className="text-slate-600">Review controls, narratives, and open issues</p>
           </div>
         </div>
-        {signOffId && formData.status !== 'approved' && (
-          <Button onClick={handleApprove} className="bg-green-600 hover:bg-green-700">
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            Approve Sign-Off
+        <div className="flex gap-2">
+          {signOffId && formData.status !== 'approved' && (
+            <Button onClick={handleApprove} className="bg-green-600 hover:bg-green-700">
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Approve Sign-Off
+            </Button>
+          )}
+          <Link to={createPageUrl("SignOffs")}>
+            <Button type="button" variant="outline">Cancel</Button>
+          </Link>
+          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
+            <Save className="w-4 h-4 mr-2" />
+            {signOffId ? 'Save Changes' : 'Create Sign-Off'}
           </Button>
-        )}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -477,16 +486,16 @@ export default function SignOffDetail() {
             </Card>
           </TabsContent>
 
-          <div className="flex justify-end gap-2">
-            <Link to={createPageUrl("SignOffs")}>
-              <Button type="button" variant="outline">Cancel</Button>
-            </Link>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              <Save className="w-4 h-4 mr-2" />
-              {signOffId ? 'Save Changes' : 'Create Sign-Off'}
-            </Button>
-          </div>
         </Tabs>
+        <div className="flex justify-end gap-2">
+          <Link to={createPageUrl("SignOffs")}>
+            <Button type="button" variant="outline">Cancel</Button>
+          </Link>
+          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
+            <Save className="w-4 h-4 mr-2" />
+            {signOffId ? 'Save Changes' : 'Create Sign-Off'}
+          </Button>
+        </div>
       </form>
     </div>
   );

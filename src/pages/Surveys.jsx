@@ -4,12 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardList, Plus, ArrowRight } from "lucide-react";
+import { ClipboardList, Plus, ArrowRight, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
 
 export default function Surveys() {
+  const [searchTerm, setSearchTerm] = useState("");
+  
   const { data: surveys = [] } = useQuery({
     queryKey: ['surveys'],
     queryFn: () => base44.entities.Survey.list('-created_date'),
@@ -53,6 +56,22 @@ export default function Surveys() {
         </Link>
       </div>
 
+      {surveys.length > 0 && (
+        <Card className="border-none shadow-lg">
+          <CardContent className="p-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Input
+                placeholder="Search surveys by title, entity, or status..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {surveys.length === 0 ? (
         <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
           <CardContent className="p-12 text-center">
@@ -71,7 +90,13 @@ export default function Surveys() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {surveys.map((survey) => {
+          {surveys.filter(s => 
+            s.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.linked_entity_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.linked_entity_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.status?.toLowerCase().includes(searchTerm.toLowerCase())
+          ).map((survey) => {
             const responseCount = responses.filter(r => r.survey_id === survey.id).length;
             
             return (
