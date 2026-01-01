@@ -334,6 +334,14 @@ export default function RiskDetail() {
                     <DialogHeader>
                       <DialogTitle>Add Control</DialogTitle>
                     </DialogHeader>
+                    <div className="mb-4">
+                      <Link to={createPageUrl("ControlDetail?new=true")} target="_blank">
+                        <Button type="button" variant="outline" size="sm" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create New Control
+                        </Button>
+                      </Link>
+                    </div>
                     <div className="space-y-2 max-h-96 overflow-y-auto">
                       {controls.map(control => (
                         <div
