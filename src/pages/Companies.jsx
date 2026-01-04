@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, Plus, Search, Edit2, Trash2 } from "lucide-react";
+import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Companies() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,7 +24,9 @@ export default function Companies() {
     contact_name: "",
     contact_email: "",
     status: "active",
-    description: ""
+    description: "",
+    objectives: [],
+    principle_risks: []
   });
 
   const { data: companies = [], isLoading } = useQuery({
@@ -63,9 +66,43 @@ export default function Companies() {
       contact_name: "",
       contact_email: "",
       status: "active",
-      description: ""
+      description: "",
+      objectives: [],
+      principle_risks: []
     });
     setEditingCompany(null);
+  };
+
+  const addObjective = () => {
+    const newObjective = { id: Date.now().toString(), title: "", description: "" };
+    setFormData({ ...formData, objectives: [...(formData.objectives || []), newObjective] });
+  };
+
+  const updateObjective = (id, field, value) => {
+    setFormData({
+      ...formData,
+      objectives: formData.objectives.map(obj => obj.id === id ? { ...obj, [field]: value } : obj)
+    });
+  };
+
+  const removeObjective = (id) => {
+    setFormData({ ...formData, objectives: formData.objectives.filter(obj => obj.id !== id) });
+  };
+
+  const addPrincipleRisk = () => {
+    const newRisk = { id: Date.now().toString(), title: "", description: "" };
+    setFormData({ ...formData, principle_risks: [...(formData.principle_risks || []), newRisk] });
+  };
+
+  const updatePrincipleRisk = (id, field, value) => {
+    setFormData({
+      ...formData,
+      principle_risks: formData.principle_risks.map(risk => risk.id === id ? { ...risk, [field]: value } : risk)
+    });
+  };
+
+  const removePrincipleRisk = (id) => {
+    setFormData({ ...formData, principle_risks: formData.principle_risks.filter(risk => risk.id !== id) });
   };
 
   const handleSubmit = (e) => {
@@ -120,11 +157,29 @@ export default function Companies() {
               Add Company
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingCompany ? 'Edit Company' : 'Add New Company'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <Tabs defaultValue="details">
+                <TabsList>
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="objectives">
+                    Objectives
+                    {formData.objectives?.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">{formData.objectives.length}</Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="risks">
+                    Principle Risks
+                    {formData.principle_risks?.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">{formData.principle_risks.length}</Badge>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="details" className="space-y-4 mt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Company Name *</Label>
@@ -183,7 +238,112 @@ export default function Companies() {
                   rows={3}
                 />
               </div>
-              <div className="flex justify-end gap-2">
+                </TabsContent>
+
+                <TabsContent value="objectives" className="space-y-4 mt-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-slate-600">Define strategic objectives for this company</p>
+                    <Button type="button" onClick={addObjective} variant="outline" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Objective
+                    </Button>
+                  </div>
+                  {formData.objectives?.length > 0 ? (
+                    <div className="space-y-3">
+                      {formData.objectives.map((obj, idx) => (
+                        <Card key={obj.id} className="p-4 border">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <Target className="w-4 h-4 text-blue-600" />
+                              <span className="font-medium text-sm">Objective #{idx + 1}</span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => removeObjective(obj.id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                          <div className="space-y-3">
+                            <Input
+                              placeholder="Objective title"
+                              value={obj.title}
+                              onChange={(e) => updateObjective(obj.id, 'title', e.target.value)}
+                            />
+                            <Textarea
+                              placeholder="Objective description"
+                              value={obj.description}
+                              onChange={(e) => updateObjective(obj.id, 'description', e.target.value)}
+                              rows={2}
+                            />
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                      <Target className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                      <p className="text-sm text-slate-500">No objectives defined yet</p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="risks" className="space-y-4 mt-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-slate-600">Define principle risks for this company</p>
+                    <Button type="button" onClick={addPrincipleRisk} variant="outline" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Principle Risk
+                    </Button>
+                  </div>
+                  {formData.principle_risks?.length > 0 ? (
+                    <div className="space-y-3">
+                      {formData.principle_risks.map((risk, idx) => (
+                        <Card key={risk.id} className="p-4 border">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4 text-orange-600" />
+                              <span className="font-medium text-sm">Principle Risk #{idx + 1}</span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => removePrincipleRisk(risk.id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
+                          <div className="space-y-3">
+                            <Input
+                              placeholder="Principle risk title"
+                              value={risk.title}
+                              onChange={(e) => updatePrincipleRisk(risk.id, 'title', e.target.value)}
+                            />
+                            <Textarea
+                              placeholder="Principle risk description"
+                              value={risk.description}
+                              onChange={(e) => updatePrincipleRisk(risk.id, 'description', e.target.value)}
+                              rows={2}
+                            />
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                      <AlertTriangle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                      <p className="text-sm text-slate-500">No principle risks defined yet</p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+
+              <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
