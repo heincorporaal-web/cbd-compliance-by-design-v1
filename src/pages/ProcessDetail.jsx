@@ -96,11 +96,6 @@ export default function ProcessDetail() {
     queryFn: () => base44.entities.Assessment.list(),
   });
 
-  const { data: companies = [] } = useQuery({
-    queryKey: ['companies'],
-    queryFn: () => base44.entities.Company.list(),
-  });
-
   useEffect(() => {
     if (existingProcess?.[0]) {
       setFormData(existingProcess[0]);
