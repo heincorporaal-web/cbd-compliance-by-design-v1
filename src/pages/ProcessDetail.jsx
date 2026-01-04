@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Plus, Trash2, Network, Shield, AlertTriangle, AlertCircle, Target, ClipboardCheck, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Network, Shield, AlertTriangle, AlertCircle, Target, ClipboardCheck, Link as LinkIcon, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -52,6 +52,8 @@ export default function ProcessDetail() {
   });
 
   const [activeDialog, setActiveDialog] = useState(null);
+  const [isObjectiveDialogOpen, setIsObjectiveDialogOpen] = useState(false);
+  const [isPrincipleRiskDialogOpen, setIsPrincipleRiskDialogOpen] = useState(false);
 
   const { data: existingProcess } = useQuery({
     queryKey: ['businessProcess', processId],
@@ -147,6 +149,36 @@ export default function ProcessDetail() {
     const newData = { ...formData, [field]: updated };
     setFormData(newData);
     if (processId) updateMutation.mutate(newData);
+  };
+
+  const addObjective = (objectiveId) => {
+    if (!formData.linked_objective_ids?.includes(objectiveId)) {
+      const updated = [...(formData.linked_objective_ids || []), objectiveId];
+      setFormData({ ...formData, linked_objective_ids: updated });
+      if (processId) updateMutation.mutate({ ...formData, linked_objective_ids: updated });
+    }
+    setIsObjectiveDialogOpen(false);
+  };
+
+  const removeObjective = (objectiveId) => {
+    const updated = formData.linked_objective_ids.filter(id => id !== objectiveId);
+    setFormData({ ...formData, linked_objective_ids: updated });
+    if (processId) updateMutation.mutate({ ...formData, linked_objective_ids: updated });
+  };
+
+  const addPrincipleRisk = (riskId) => {
+    if (!formData.linked_principle_risk_ids?.includes(riskId)) {
+      const updated = [...(formData.linked_principle_risk_ids || []), riskId];
+      setFormData({ ...formData, linked_principle_risk_ids: updated });
+      if (processId) updateMutation.mutate({ ...formData, linked_principle_risk_ids: updated });
+    }
+    setIsPrincipleRiskDialogOpen(false);
+  };
+
+  const removePrincipleRisk = (riskId) => {
+    const updated = formData.linked_principle_risk_ids.filter(id => id !== riskId);
+    setFormData({ ...formData, linked_principle_risk_ids: updated });
+    if (processId) updateMutation.mutate({ ...formData, linked_principle_risk_ids: updated });
   };
 
   const levelLabels = {
@@ -596,6 +628,124 @@ export default function ProcessDetail() {
                     </div>
                   ) : (
                     <p className="text-sm text-slate-500 text-center py-4">No goals linked</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Objectives */}
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="w-5 h-5 text-blue-600" />
+                      Company Objectives
+                    </CardTitle>
+                    <Dialog open={isObjectiveDialogOpen} onOpenChange={setIsObjectiveDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="outline" size="sm" disabled={!formData.company_id}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Link
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Link Company Objective</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {availableObjectives.filter(obj => !formData.linked_objective_ids?.includes(obj.id)).map(obj => (
+                            <div
+                              key={obj.id}
+                              className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
+                              onClick={() => addObjective(obj.id)}
+                            >
+                              <p className="font-medium text-sm">{obj.title}</p>
+                              {obj.description && <p className="text-xs text-slate-600 mt-1">{obj.description}</p>}
+                            </div>
+                          ))}
+                          {availableObjectives.filter(obj => !formData.linked_objective_ids?.includes(obj.id)).length === 0 && (
+                            <p className="text-sm text-slate-500 text-center py-4">No objectives available. Define them in the company settings.</p>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {linkedObjectives.length > 0 ? (
+                    <div className="space-y-2">
+                      {linkedObjectives.map(obj => (
+                        <div key={obj.id} className="flex items-start justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm text-slate-900">{obj.title}</p>
+                            {obj.description && <p className="text-xs text-slate-600 mt-1">{obj.description}</p>}
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeObjective(obj.id)}>
+                            <X className="w-3 h-3 text-slate-500" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500 text-center py-4">No objectives linked</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Principle Risks */}
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-orange-600" />
+                      Principle Risks
+                    </CardTitle>
+                    <Dialog open={isPrincipleRiskDialogOpen} onOpenChange={setIsPrincipleRiskDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="outline" size="sm" disabled={!formData.company_id}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Link
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Link Principle Risk</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {availablePrincipleRisks.filter(risk => !formData.linked_principle_risk_ids?.includes(risk.id)).map(risk => (
+                            <div
+                              key={risk.id}
+                              className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
+                              onClick={() => addPrincipleRisk(risk.id)}
+                            >
+                              <p className="font-medium text-sm">{risk.title}</p>
+                              {risk.description && <p className="text-xs text-slate-600 mt-1">{risk.description}</p>}
+                            </div>
+                          ))}
+                          {availablePrincipleRisks.filter(risk => !formData.linked_principle_risk_ids?.includes(risk.id)).length === 0 && (
+                            <p className="text-sm text-slate-500 text-center py-4">No principle risks available. Define them in the company settings.</p>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {linkedPrincipleRisks.length > 0 ? (
+                    <div className="space-y-2">
+                      {linkedPrincipleRisks.map(risk => (
+                        <div key={risk.id} className="flex items-start justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm text-slate-900">{risk.title}</p>
+                            {risk.description && <p className="text-xs text-slate-600 mt-1">{risk.description}</p>}
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removePrincipleRisk(risk.id)}>
+                            <X className="w-3 h-3 text-slate-500" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500 text-center py-4">No principle risks linked</p>
                   )}
                 </CardContent>
               </Card>
