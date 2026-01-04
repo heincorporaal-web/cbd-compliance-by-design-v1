@@ -26,6 +26,7 @@ import ThirdPartyDetail from './pages/ThirdPartyDetail';
 import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
+import FrameworkDetail from './pages/FrameworkDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -58,6 +59,7 @@ export const PAGES = {
     "WorkflowApproval": WorkflowApproval,
     "Workflows": Workflows,
     "iHPOM": iHPOM,
+    "FrameworkDetail": FrameworkDetail,
 }
 
 export const pagesConfig = {

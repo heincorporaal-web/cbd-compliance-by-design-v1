@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Plus, Download, CheckCircle2, ChevronRight, Search } from "lucide-react";
+import { Shield, Plus, Download, CheckCircle2, ChevronRight, Search, Edit2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -228,14 +228,22 @@ export default function Frameworks() {
                         </div>
                       </div>
                     </div>
-                    <Collapsible open={isExpanded} onOpenChange={() => setExpandedFramework(isExpanded ? null : framework.id)}>
-                      <CollapsibleTrigger asChild>
+                    <div className="flex gap-2">
+                      <Link to={createPageUrl(`FrameworkDetail?id=${framework.id}`)}>
                         <Button variant="outline" size="sm">
-                          {isExpanded ? 'Hide' : 'View'} Controls
-                          <ChevronRight className={`w-4 h-4 ml-2 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          <Edit2 className="w-4 h-4 mr-2" />
+                          Edit
                         </Button>
-                      </CollapsibleTrigger>
-                    </Collapsible>
+                      </Link>
+                      <Collapsible open={isExpanded} onOpenChange={() => setExpandedFramework(isExpanded ? null : framework.id)}>
+                        <CollapsibleTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            {isExpanded ? 'Hide' : 'View'} Controls
+                            <ChevronRight className={`w-4 h-4 ml-2 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          </Button>
+                        </CollapsibleTrigger>
+                      </Collapsible>
+                    </div>
                   </div>
                 </CardHeader>
                 
