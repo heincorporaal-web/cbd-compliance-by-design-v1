@@ -4,6 +4,7 @@ import Companies from './pages/Companies';
 import ControlDetail from './pages/ControlDetail';
 import Controls from './pages/Controls';
 import Dashboard from './pages/Dashboard';
+import FrameworkDetail from './pages/FrameworkDetail';
 import Frameworks from './pages/Frameworks';
 import GRCGoalDetail from './pages/GRCGoalDetail';
 import GRCGoals from './pages/GRCGoals';
@@ -26,7 +27,7 @@ import ThirdPartyDetail from './pages/ThirdPartyDetail';
 import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
-import FrameworkDetail from './pages/FrameworkDetail';
+import RiskControlEngine from './pages/RiskControlEngine';
 import __Layout from './Layout.jsx';
 
 
@@ -37,6 +38,7 @@ export const PAGES = {
     "ControlDetail": ControlDetail,
     "Controls": Controls,
     "Dashboard": Dashboard,
+    "FrameworkDetail": FrameworkDetail,
     "Frameworks": Frameworks,
     "GRCGoalDetail": GRCGoalDetail,
     "GRCGoals": GRCGoals,
@@ -59,7 +61,7 @@ export const PAGES = {
     "WorkflowApproval": WorkflowApproval,
     "Workflows": Workflows,
     "iHPOM": iHPOM,
-    "FrameworkDetail": FrameworkDetail,
+    "RiskControlEngine": RiskControlEngine,
 }
 
 export const pagesConfig = {
