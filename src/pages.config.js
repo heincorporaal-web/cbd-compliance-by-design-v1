@@ -15,6 +15,7 @@ import Issues from './pages/Issues';
 import ProcessAssessmentDetail from './pages/ProcessAssessmentDetail';
 import ProcessAssessments from './pages/ProcessAssessments';
 import ProcessDetail from './pages/ProcessDetail';
+import RiskControlEngine from './pages/RiskControlEngine';
 import RiskDetail from './pages/RiskDetail';
 import RiskRegister from './pages/RiskRegister';
 import SignOffDetail from './pages/SignOffDetail';
@@ -27,7 +28,8 @@ import ThirdPartyDetail from './pages/ThirdPartyDetail';
 import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
-import RiskControlEngine from './pages/RiskControlEngine';
+import Users from './pages/Users';
+import Roles from './pages/Roles';
 import __Layout from './Layout.jsx';
 
 
@@ -49,6 +51,7 @@ export const PAGES = {
     "ProcessAssessmentDetail": ProcessAssessmentDetail,
     "ProcessAssessments": ProcessAssessments,
     "ProcessDetail": ProcessDetail,
+    "RiskControlEngine": RiskControlEngine,
     "RiskDetail": RiskDetail,
     "RiskRegister": RiskRegister,
     "SignOffDetail": SignOffDetail,
@@ -61,7 +64,8 @@ export const PAGES = {
     "WorkflowApproval": WorkflowApproval,
     "Workflows": Workflows,
     "iHPOM": iHPOM,
-    "RiskControlEngine": RiskControlEngine,
+    "Users": Users,
+    "Roles": Roles,
 }
 
 export const pagesConfig = {

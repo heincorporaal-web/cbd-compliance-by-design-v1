@@ -85,6 +85,16 @@ const navigationItems = [
     icon: Server,
   },
   {
+    title: "Users",
+    url: createPageUrl("Users"),
+    icon: Users,
+  },
+  {
+    title: "Roles",
+    url: createPageUrl("Roles"),
+    icon: Shield,
+  },
+  {
     title: "Third Parties",
     url: createPageUrl("ThirdParties"),
     icon: Users,
