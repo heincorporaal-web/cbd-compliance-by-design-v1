@@ -30,6 +30,7 @@ import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
 import Users from './pages/Users';
 import Roles from './pages/Roles';
+import AuditLogs from './pages/AuditLogs';
 import __Layout from './Layout.jsx';
 
 
@@ -66,6 +67,7 @@ export const PAGES = {
     "iHPOM": iHPOM,
     "Users": Users,
     "Roles": Roles,
+    "AuditLogs": AuditLogs,
 }
 
 export const pagesConfig = {

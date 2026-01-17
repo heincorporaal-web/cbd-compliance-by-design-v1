@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Building2, Shield, ClipboardCheck, Server, AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert, Target, FileCheck, Network, GitBranch, Cog } from "lucide-react";
+import { LayoutDashboard, Building2, Shield, ClipboardCheck, Server, AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert, Target, FileCheck, Network, GitBranch, Cog, FileText } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import {
   Sidebar,
@@ -93,6 +93,11 @@ const navigationItems = [
     title: "Roles",
     url: createPageUrl("Roles"),
     icon: Shield,
+  },
+  {
+    title: "Audit Logs",
+    url: createPageUrl("AuditLogs"),
+    icon: FileText,
   },
   {
     title: "Third Parties",
