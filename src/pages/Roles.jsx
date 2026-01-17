@@ -72,8 +72,11 @@ export default function Roles() {
     },
   });
 
+  const [hasInitialized, setHasInitialized] = useState(false);
+
   useEffect(() => {
-    if (roles.length === 0 && !createRoleMutation.isPending) {
+    if (roles.length === 0 && !hasInitialized && !createRoleMutation.isPending) {
+      setHasInitialized(true);
       createRoleMutation.mutate({
         name: "Admin",
         description: "Full system access",
@@ -91,7 +94,7 @@ export default function Roles() {
         status: "active"
       });
     }
-  }, [roles.length, createRoleMutation.isPending]);
+  }, [roles.length]);
 
   const resetForm = () => {
     setRoleFormData({
