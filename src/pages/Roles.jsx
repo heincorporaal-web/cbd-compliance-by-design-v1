@@ -73,7 +73,7 @@ export default function Roles() {
   });
 
   useEffect(() => {
-    if (roles.length === 0) {
+    if (roles.length === 0 && !createRoleMutation.isPending) {
       createRoleMutation.mutate({
         name: "Admin",
         description: "Full system access",
@@ -91,7 +91,7 @@ export default function Roles() {
         status: "active"
       });
     }
-  }, [roles.length]);
+  }, [roles.length, createRoleMutation.isPending]);
 
   const resetForm = () => {
     setRoleFormData({
