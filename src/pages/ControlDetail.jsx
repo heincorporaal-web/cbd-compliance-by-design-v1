@@ -9,10 +9,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Shield, CheckCircle, AlertTriangle, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Shield, CheckCircle, AlertTriangle, Plus, Trash2, History } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import LifecycleActions from "@/components/lifecycle/LifecycleActions";
+import LifecycleHistory from "@/components/lifecycle/LifecycleHistory";
+import LifecycleNotifications from "@/components/lifecycle/LifecycleNotifications";
 
 export default function ControlDetail() {
   const navigate = useNavigate();
@@ -79,8 +83,48 @@ export default function ControlDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries(['controls']);
       queryClient.invalidateQueries(['control', controlId]);
+      toast.success('Control updated successfully');
     },
   });
+
+  const addLifecycleEvent = (status, comments = "") => {
+    const event = {
+      status,
+      actor: "Current User",
+      timestamp: new Date().toISOString(),
+      comments
+    };
+    const history = [...(existingControl?.[0]?.lifecycle_history || []), event];
+    return history;
+  };
+
+  const submitForReview = async () => {
+    await updateMutation.mutateAsync({
+      status: "pending_review",
+      lifecycle_history: addLifecycleEvent("pending_review", "Submitted for review")
+    });
+    toast.success("Control submitted for review");
+  };
+
+  const returnControl = async (comments) => {
+    await updateMutation.mutateAsync({
+      status: "returned",
+      return_comments: comments,
+      lifecycle_history: addLifecycleEvent("returned", comments)
+    });
+    toast.success("Control returned");
+  };
+
+  const approveControl = async () => {
+    const user = await base44.auth.me();
+    await updateMutation.mutateAsync({
+      status: "approved",
+      approver: user.full_name,
+      approval_date: new Date().toISOString(),
+      lifecycle_history: addLifecycleEvent("approved", "Control approved")
+    });
+    toast.success("Control approved");
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -158,8 +202,16 @@ export default function ControlDetail() {
               {framework ? `${framework.name} • ` : ''}Control Management
             </p>
           </div>
-        </div>
-        <div className="flex gap-2">
+          </div>
+          <div className="flex gap-2">
+          {!isNew && existingControl?.[0] && (
+            <LifecycleActions
+              entity={existingControl[0]}
+              onSubmitForReview={submitForReview}
+              onReturn={returnControl}
+              onApprove={approveControl}
+            />
+          )}
           <Link to={createPageUrl("Controls")}>
             <Button type="button" variant="outline">Cancel</Button>
           </Link>
@@ -167,7 +219,7 @@ export default function ControlDetail() {
             <Save className="w-4 h-4 mr-2" />
             {isNew || !controlId ? 'Create Control' : 'Save Changes'}
           </Button>
-        </div>
+          </div>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -184,9 +236,17 @@ export default function ControlDetail() {
                 )}
               </TabsTrigger>
             )}
+            {!isNew && controlId && (
+              <TabsTrigger value="history">
+                <History className="w-4 h-4 mr-2" />
+                Lifecycle
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="details" className="space-y-6">
+            {!isNew && existingControl?.[0] && <LifecycleNotifications entity={existingControl[0]} />}
+            
             <Card className="border-none shadow-lg">
               <CardHeader className="border-b border-slate-100">
                 <CardTitle>Control Information</CardTitle>
@@ -426,10 +486,15 @@ export default function ControlDetail() {
                 </CardContent>
               </Card>
             </TabsContent>
-          )}
-        </Tabs>
+            )}
+            {!isNew && controlId && existingControl?.[0] && (
+            <TabsContent value="history">
+              <LifecycleHistory history={existingControl[0]?.lifecycle_history} />
+            </TabsContent>
+            )}
+            </Tabs>
 
-      </form>
-    </div>
-  );
-}
+            </form>
+            </div>
+            );
+            }

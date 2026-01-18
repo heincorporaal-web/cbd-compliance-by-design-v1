@@ -278,7 +278,11 @@ export default function RiskDetail() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="identified">Identified</SelectItem>
+                    <SelectItem value="pending_review">Pending Review</SelectItem>
+                    <SelectItem value="returned">Returned</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="assessed">Assessed</SelectItem>
                     <SelectItem value="mitigated">Mitigated</SelectItem>
                     <SelectItem value="accepted">Accepted</SelectItem>

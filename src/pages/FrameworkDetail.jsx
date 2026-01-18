@@ -192,6 +192,10 @@ export default function FrameworkDetail() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="pending_review">Pending Review</SelectItem>
+                    <SelectItem value="returned">Returned</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
