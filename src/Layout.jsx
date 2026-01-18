@@ -30,6 +30,11 @@ const navigationItems = [
     icon: Building2,
   },
   {
+    title: "Knowledge",
+    url: createPageUrl("KnowledgeManagement"),
+    icon: FileText,
+  },
+  {
     title: "Frameworks",
     url: createPageUrl("Frameworks"),
     icon: Shield,

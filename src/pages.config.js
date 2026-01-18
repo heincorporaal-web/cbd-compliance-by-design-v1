@@ -31,6 +31,8 @@ import Users from './pages/Users';
 import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
+import KnowledgeManagement from './pages/KnowledgeManagement';
+import KnowledgeArticleDetail from './pages/KnowledgeArticleDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -68,6 +70,8 @@ export const PAGES = {
     "WorkflowApproval": WorkflowApproval,
     "Workflows": Workflows,
     "iHPOM": iHPOM,
+    "KnowledgeManagement": KnowledgeManagement,
+    "KnowledgeArticleDetail": KnowledgeArticleDetail,
 }
 
 export const pagesConfig = {
