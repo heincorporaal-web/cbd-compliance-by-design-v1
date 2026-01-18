@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, CheckCircle2, XCircle, AlertCircle, Clock, FileText, AlertTriangle, Plus, Save, PlayCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, AlertCircle, Clock, FileText, AlertTriangle, Plus, Save, PlayCircle, Send, RotateCcw, CheckCheck, History } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,8 @@ export default function AssessmentDetail() {
   const queryClient = useQueryClient();
   const [isRiskDialogOpen, setIsRiskDialogOpen] = useState(false);
   const [isWorkflowDialogOpen, setIsWorkflowDialogOpen] = useState(false);
+  const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false);
+  const [returnComments, setReturnComments] = useState("");
   const [newRiskData, setNewRiskData] = useState({
     title: "",
     description: "",
@@ -91,6 +93,58 @@ export default function AssessmentDetail() {
       queryClient.invalidateQueries(['assessment', assessmentId]);
     },
   });
+
+  const addLifecycleEvent = (status, comments = "") => {
+    const event = {
+      status,
+      actor: "Current User",
+      timestamp: new Date().toISOString(),
+      comments
+    };
+    const history = [...(assessment.lifecycle_history || []), event];
+    return history;
+  };
+
+  const submitForReview = async () => {
+    const user = await base44.auth.me();
+    await updateAssessmentMutation.mutateAsync({
+      id: assessmentId,
+      data: {
+        status: "pending_review",
+        lifecycle_history: addLifecycleEvent("pending_review", "Submitted for review")
+      }
+    });
+    toast.success("Assessment submitted for review");
+  };
+
+  const returnAssessment = async () => {
+    const user = await base44.auth.me();
+    await updateAssessmentMutation.mutateAsync({
+      id: assessmentId,
+      data: {
+        status: "returned",
+        return_comments: returnComments,
+        lifecycle_history: addLifecycleEvent("returned", returnComments)
+      }
+    });
+    setIsReturnDialogOpen(false);
+    setReturnComments("");
+    toast.success("Assessment returned to assessor");
+  };
+
+  const approveAssessment = async () => {
+    const user = await base44.auth.me();
+    await updateAssessmentMutation.mutateAsync({
+      id: assessmentId,
+      data: {
+        status: "approved",
+        approver: user.full_name,
+        approval_date: new Date().toISOString(),
+        lifecycle_history: addLifecycleEvent("approved", "Assessment approved")
+      }
+    });
+    toast.success("Assessment approved");
+  };
 
   const createRiskMutation = useMutation({
     mutationFn: async (riskData) => {
@@ -253,12 +307,19 @@ export default function AssessmentDetail() {
     const colors = {
       draft: 'bg-slate-100 text-slate-700',
       in_progress: 'bg-blue-100 text-blue-700',
+      pending_review: 'bg-amber-100 text-amber-700',
+      returned: 'bg-orange-100 text-orange-700',
+      approved: 'bg-green-100 text-green-700',
       completed: 'bg-green-100 text-green-700',
       overdue: 'bg-red-100 text-red-700',
       archived: 'bg-slate-100 text-slate-700'
     };
     return colors[status] || 'bg-slate-100 text-slate-700';
   };
+
+  const canSubmitForReview = assessment?.status === "in_progress" || assessment?.status === "draft" || assessment?.status === "returned";
+  const canReturn = assessment?.status === "pending_review";
+  const canApprove = assessment?.status === "pending_review";
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -282,49 +343,56 @@ export default function AssessmentDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          {workflows.length > 0 && !assessment.workflow_instance_id && (
-            <Dialog open={isWorkflowDialogOpen} onOpenChange={setIsWorkflowDialogOpen}>
+          {canSubmitForReview && (
+            <Button onClick={submitForReview} variant="outline">
+              <Send className="w-4 h-4 mr-2" />
+              Submit for Review
+            </Button>
+          )}
+          {canReturn && (
+            <Dialog open={isReturnDialogOpen} onOpenChange={setIsReturnDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">
-                  <PlayCircle className="w-4 h-4 mr-2" />
-                  Start Workflow
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Return
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Start Assessment Workflow</DialogTitle>
+                  <DialogTitle>Return Assessment</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-3">
-                  {workflows.map(workflow => (
-                    <div
-                      key={workflow.id}
-                      className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
-                      onClick={() => startWorkflowMutation.mutate(workflow.id)}
-                    >
-                      <p className="font-medium">{workflow.name}</p>
-                      {workflow.description && <p className="text-sm text-slate-600">{workflow.description}</p>}
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Comments</Label>
+                    <Textarea
+                      value={returnComments}
+                      onChange={(e) => setReturnComments(e.target.value)}
+                      placeholder="Explain why this assessment is being returned..."
+                      rows={4}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setIsReturnDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={returnAssessment} disabled={!returnComments}>
+                      Return Assessment
+                    </Button>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
           )}
-          <Button onClick={() => updateAssessmentMutation.mutate({ 
-            id: assessmentId, 
-            data: { 
-              status: 'completed',
-              completion_date: new Date().toISOString().split('T')[0]
-            } 
-          })}>
-            <Save className="w-4 h-4 mr-2" />
-            Mark Complete
-          </Button>
+          {canApprove && (
+            <Button onClick={approveAssessment} className="bg-green-600 hover:bg-green-700">
+              <CheckCheck className="w-4 h-4 mr-2" />
+              Approve
+            </Button>
+          )}
         </div>
       </div>
 
       <Card className="border-none shadow-lg">
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
               <Label className="text-sm text-slate-600">Assessor</Label>
               <Input
@@ -363,6 +431,32 @@ export default function AssessmentDetail() {
               />
             </div>
           </div>
+          
+          {assessment.return_comments && (
+            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5" />
+                <div>
+                  <p className="font-medium text-orange-900">Returned for Revision</p>
+                  <p className="text-sm text-orange-700 mt-1">{assessment.return_comments}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {assessment.approver && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <CheckCheck className="w-5 h-5 text-green-600 mt-0.5" />
+                <div>
+                  <p className="font-medium text-green-900">Approved by {assessment.approver}</p>
+                  <p className="text-sm text-green-700 mt-1">
+                    {new Date(assessment.approval_date).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -404,6 +498,9 @@ export default function AssessmentDetail() {
               <SelectContent>
                 <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="pending_review">Pending Review</SelectItem>
+                <SelectItem value="returned">Returned</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="overdue">Overdue</SelectItem>
                 <SelectItem value="archived">Archived</SelectItem>
@@ -421,6 +518,10 @@ export default function AssessmentDetail() {
             {linkedRisks.length > 0 && (
               <Badge variant="secondary" className="ml-2">{linkedRisks.length}</Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            <History className="w-4 h-4 mr-2" />
+            Lifecycle History
           </TabsTrigger>
         </TabsList>
 
@@ -637,6 +738,48 @@ export default function AssessmentDetail() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="history">
+          <Card className="border-none shadow-lg">
+            <CardHeader className="border-b border-slate-100">
+              <CardTitle>Lifecycle History</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {assessment.lifecycle_history && assessment.lifecycle_history.length > 0 ? (
+                <div className="divide-y divide-slate-100">
+                  {assessment.lifecycle_history.map((event, idx) => (
+                    <div key={idx} className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getStatusBadgeColor(event.status)}`}>
+                          <History className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-slate-900 capitalize">
+                              {event.status?.replace('_', ' ')}
+                            </span>
+                            <span className="text-sm text-slate-500">
+                              {new Date(event.timestamp).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600">By: {event.actor}</p>
+                          {event.comments && (
+                            <p className="text-sm text-slate-700 mt-2 p-2 bg-slate-50 rounded">{event.comments}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-12 text-center text-slate-500">
+                  <History className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p>No lifecycle history yet</p>
                 </div>
               )}
             </CardContent>

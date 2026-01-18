@@ -1,5 +1,6 @@
 import AssessmentDetail from './pages/AssessmentDetail';
 import Assessments from './pages/Assessments';
+import AuditLogs from './pages/AuditLogs';
 import Companies from './pages/Companies';
 import ControlDetail from './pages/ControlDetail';
 import Controls from './pages/Controls';
@@ -18,6 +19,7 @@ import ProcessDetail from './pages/ProcessDetail';
 import RiskControlEngine from './pages/RiskControlEngine';
 import RiskDetail from './pages/RiskDetail';
 import RiskRegister from './pages/RiskRegister';
+import Roles from './pages/Roles';
 import SignOffDetail from './pages/SignOffDetail';
 import SignOffs from './pages/SignOffs';
 import SurveyBuilder from './pages/SurveyBuilder';
@@ -25,18 +27,17 @@ import SurveyDetail from './pages/SurveyDetail';
 import Surveys from './pages/Surveys';
 import ThirdParties from './pages/ThirdParties';
 import ThirdPartyDetail from './pages/ThirdPartyDetail';
+import Users from './pages/Users';
 import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
-import Users from './pages/Users';
-import Roles from './pages/Roles';
-import AuditLogs from './pages/AuditLogs';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AssessmentDetail": AssessmentDetail,
     "Assessments": Assessments,
+    "AuditLogs": AuditLogs,
     "Companies": Companies,
     "ControlDetail": ControlDetail,
     "Controls": Controls,
@@ -55,6 +56,7 @@ export const PAGES = {
     "RiskControlEngine": RiskControlEngine,
     "RiskDetail": RiskDetail,
     "RiskRegister": RiskRegister,
+    "Roles": Roles,
     "SignOffDetail": SignOffDetail,
     "SignOffs": SignOffs,
     "SurveyBuilder": SurveyBuilder,
@@ -62,12 +64,10 @@ export const PAGES = {
     "Surveys": Surveys,
     "ThirdParties": ThirdParties,
     "ThirdPartyDetail": ThirdPartyDetail,
+    "Users": Users,
     "WorkflowApproval": WorkflowApproval,
     "Workflows": Workflows,
     "iHPOM": iHPOM,
-    "Users": Users,
-    "Roles": Roles,
-    "AuditLogs": AuditLogs,
 }
 
 export const pagesConfig = {
