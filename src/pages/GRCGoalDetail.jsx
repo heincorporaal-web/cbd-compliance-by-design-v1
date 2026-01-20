@@ -15,6 +15,7 @@ import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import MaturityScale from "../components/grc/MaturityScale";
 import MaturityBadge from "../components/grc/MaturityBadge";
+import ObjectiveSelector from "@/components/objectives/ObjectiveSelector";
 
 export default function GRCGoalDetail() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function GRCGoalDetail() {
     description: "",
     company_id: "",
     category: "governance",
+    linked_objective_ids: [],
     linked_risk_ids: [],
     linked_control_ids: [],
     current_maturity: null,
@@ -39,6 +41,7 @@ export default function GRCGoalDetail() {
     maturity_assessments: []
   });
 
+  const [isObjectiveDialogOpen, setIsObjectiveDialogOpen] = useState(false);
   const [isRiskDialogOpen, setIsRiskDialogOpen] = useState(false);
   const [isControlDialogOpen, setIsControlDialogOpen] = useState(false);
   const [isAssessmentDialogOpen, setIsAssessmentDialogOpen] = useState(false);
@@ -154,9 +157,22 @@ export default function GRCGoalDetail() {
     }
   };
 
+  const addObjective = (objectiveId) => {
+    const updated = [...(formData.linked_objective_ids || []), objectiveId];
+    setFormData({ ...formData, linked_objective_ids: updated });
+    if (goalId) updateMutation.mutate({ ...formData, linked_objective_ids: updated });
+  };
+
+  const removeObjective = (objectiveId) => {
+    const updated = formData.linked_objective_ids.filter(id => id !== objectiveId);
+    setFormData({ ...formData, linked_objective_ids: updated });
+    if (goalId) updateMutation.mutate({ ...formData, linked_objective_ids: updated });
+  };
+
   const linkedRisks = risks.filter(r => formData.linked_risk_ids?.includes(r.id));
   const linkedControls = controls.filter(c => formData.linked_control_ids?.includes(c.id));
   const company = companies.find(c => c.id === formData.company_id);
+  const linkedObjectives = company?.objectives?.filter(obj => formData.linked_objective_ids?.includes(obj.id)) || [];
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -278,6 +294,47 @@ export default function GRCGoalDetail() {
                     />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg">
+              <CardHeader className="border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-blue-600" />
+                    Strategic Objectives
+                  </CardTitle>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsObjectiveDialogOpen(true)}
+                    disabled={!formData.company_id}
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Link
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {linkedObjectives.length > 0 ? (
+                  <div className="space-y-2">
+                    {linkedObjectives.map(obj => (
+                      <div key={obj.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex-1">
+                          <p className="font-medium text-slate-900">{obj.title}</p>
+                          {obj.description && (
+                            <p className="text-sm text-slate-600">{obj.description}</p>
+                          )}
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeObjective(obj.id)}>
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 text-center py-4">No objectives linked yet</p>
+                )}
               </CardContent>
             </Card>
 
@@ -500,6 +557,15 @@ export default function GRCGoalDetail() {
 
           </div>
         </div>
+
+        <ObjectiveSelector
+          company={company}
+          linkedObjectiveIds={formData.linked_objective_ids}
+          onAdd={addObjective}
+          onRemove={removeObjective}
+          isOpen={isObjectiveDialogOpen}
+          onClose={() => setIsObjectiveDialogOpen(false)}
+        />
       </form>
     </div>
   );

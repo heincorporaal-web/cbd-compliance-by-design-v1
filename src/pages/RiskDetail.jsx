@@ -9,10 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, X, Shield } from "lucide-react";
+import { ArrowLeft, Plus, X, Shield, Target } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import ObjectiveSelector from "@/components/objectives/ObjectiveSelector";
 
 export default function RiskDetail() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function RiskDetail() {
 
   const [isControlDialogOpen, setIsControlDialogOpen] = useState(false);
   const [isFrameworkDialogOpen, setIsFrameworkDialogOpen] = useState(false);
+  const [isObjectiveDialogOpen, setIsObjectiveDialogOpen] = useState(false);
 
   const { data: risk } = useQuery({
     queryKey: ['risk', riskId],
@@ -56,6 +58,7 @@ export default function RiskDetail() {
     owner: "",
     control_ids: [],
     framework_ids: [],
+    linked_objective_ids: [],
     mitigation_plan: "",
     review_date: "",
     identified_date: new Date().toISOString().split('T')[0]
@@ -74,6 +77,7 @@ export default function RiskDetail() {
         owner: risk.owner || "",
         control_ids: risk.control_ids || [],
         framework_ids: risk.framework_ids || [],
+        linked_objective_ids: risk.linked_objective_ids || [],
         mitigation_plan: risk.mitigation_plan || "",
         review_date: risk.review_date || "",
         identified_date: risk.identified_date || new Date().toISOString().split('T')[0]
@@ -152,8 +156,26 @@ export default function RiskDetail() {
     }
   };
 
+  const addObjective = (objectiveId) => {
+    const updated = [...(formData.linked_objective_ids || []), objectiveId];
+    setFormData({ ...formData, linked_objective_ids: updated });
+    if (riskId) {
+      updateMutation.mutate({ id: riskId, data: { linked_objective_ids: updated } });
+    }
+  };
+
+  const removeObjective = (objectiveId) => {
+    const updated = formData.linked_objective_ids.filter(id => id !== objectiveId);
+    setFormData({ ...formData, linked_objective_ids: updated });
+    if (riskId) {
+      updateMutation.mutate({ id: riskId, data: { linked_objective_ids: updated } });
+    }
+  };
+
   const linkedControls = controls.filter(c => formData.control_ids?.includes(c.id));
   const linkedFrameworks = frameworks.filter(f => formData.framework_ids?.includes(f.id));
+  const company = companies.find(c => c.id === formData.company_id);
+  const linkedObjectives = company?.objectives?.filter(obj => formData.linked_objective_ids?.includes(obj.id)) || [];
   const riskScore = getRiskLevel(formData.likelihood, formData.impact);
 
   return (
@@ -329,6 +351,56 @@ export default function RiskDetail() {
           </CardContent>
         </Card>
 
+        <Card className="border-none shadow-lg">
+          <CardHeader className="border-b border-slate-100">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-blue-600" />
+                Strategic Objectives
+              </CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsObjectiveDialogOpen(true)}
+                disabled={!formData.company_id}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Link
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4">
+            {linkedObjectives.length > 0 ? (
+              <div className="space-y-2">
+                {linkedObjectives.map(obj => (
+                  <div key={obj.id} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{obj.title}</p>
+                        {obj.description && (
+                          <p className="text-xs text-slate-600 mt-1">{obj.description}</p>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => removeObjective(obj.id)}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500 text-center py-4">No objectives linked</p>
+            )}
+          </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="border-none shadow-lg">
             <CardHeader className="border-b border-slate-100">
@@ -464,6 +536,14 @@ export default function RiskDetail() {
           </Card>
         </div>
 
+        <ObjectiveSelector
+          company={company}
+          linkedObjectiveIds={formData.linked_objective_ids}
+          onAdd={addObjective}
+          onRemove={removeObjective}
+          isOpen={isObjectiveDialogOpen}
+          onClose={() => setIsObjectiveDialogOpen(false)}
+        />
       </form>
     </div>
   );

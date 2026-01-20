@@ -13,6 +13,8 @@ import Home from './pages/Home';
 import ICTSystems from './pages/ICTSystems';
 import Incidents from './pages/Incidents';
 import Issues from './pages/Issues';
+import KnowledgeArticleDetail from './pages/KnowledgeArticleDetail';
+import KnowledgeManagement from './pages/KnowledgeManagement';
 import ProcessAssessmentDetail from './pages/ProcessAssessmentDetail';
 import ProcessAssessments from './pages/ProcessAssessments';
 import ProcessDetail from './pages/ProcessDetail';
@@ -31,8 +33,6 @@ import Users from './pages/Users';
 import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
-import KnowledgeManagement from './pages/KnowledgeManagement';
-import KnowledgeArticleDetail from './pages/KnowledgeArticleDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -52,6 +52,8 @@ export const PAGES = {
     "ICTSystems": ICTSystems,
     "Incidents": Incidents,
     "Issues": Issues,
+    "KnowledgeArticleDetail": KnowledgeArticleDetail,
+    "KnowledgeManagement": KnowledgeManagement,
     "ProcessAssessmentDetail": ProcessAssessmentDetail,
     "ProcessAssessments": ProcessAssessments,
     "ProcessDetail": ProcessDetail,
@@ -70,8 +72,6 @@ export const PAGES = {
     "WorkflowApproval": WorkflowApproval,
     "Workflows": Workflows,
     "iHPOM": iHPOM,
-    "KnowledgeManagement": KnowledgeManagement,
-    "KnowledgeArticleDetail": KnowledgeArticleDetail,
 }
 
 export const pagesConfig = {
