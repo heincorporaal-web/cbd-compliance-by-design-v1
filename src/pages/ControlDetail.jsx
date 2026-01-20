@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Shield, CheckCircle, AlertTriangle, Plus, Trash2, History } from "lucide-react";
+import { ArrowLeft, Save, Shield, CheckCircle, AlertTriangle, Plus, Trash2, History, Target } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -32,7 +32,8 @@ export default function ControlDetail() {
     description: "",
     category: "",
     priority: "medium",
-    compensating_control_ids: []
+    compensating_control_ids: [],
+    linked_objective_ids: []
   });
 
   const [isAddingCompensating, setIsAddingCompensating] = useState(false);
@@ -62,6 +63,11 @@ export default function ControlDetail() {
   const { data: allControls = [] } = useQuery({
     queryKey: ['allControls'],
     queryFn: () => base44.entities.Control.list(),
+  });
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list(),
   });
 
   useEffect(() => {
@@ -185,6 +191,26 @@ export default function ControlDetail() {
     !formData.compensating_control_ids?.includes(c.id)
   );
 
+  const allObjectives = companies.flatMap(company => 
+    (company.objectives || []).map(obj => ({ ...obj, companyName: company.name, companyId: company.id }))
+  );
+  const linkedObjectives = allObjectives.filter(obj => formData.linked_objective_ids?.includes(obj.id));
+  const availableObjectives = allObjectives.filter(obj => !formData.linked_objective_ids?.includes(obj.id));
+
+  const addObjective = (objectiveId) => {
+    const updated = [...(formData.linked_objective_ids || []), objectiveId];
+    const newData = { ...formData, linked_objective_ids: updated };
+    setFormData(newData);
+    if (controlId) updateMutation.mutate(newData);
+  };
+
+  const removeObjective = (objectiveId) => {
+    const updated = formData.linked_objective_ids?.filter(id => id !== objectiveId) || [];
+    const newData = { ...formData, linked_objective_ids: updated };
+    setFormData(newData);
+    if (controlId) updateMutation.mutate(newData);
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -236,6 +262,12 @@ export default function ControlDetail() {
                 )}
               </TabsTrigger>
             )}
+            <TabsTrigger value="objectives">
+              Strategic Objectives
+              {linkedObjectives.length > 0 && (
+                <Badge variant="secondary" className="ml-2">{linkedObjectives.length}</Badge>
+              )}
+            </TabsTrigger>
             {!isNew && controlId && (
               <TabsTrigger value="history">
                 <History className="w-4 h-4 mr-2" />
@@ -487,6 +519,67 @@ export default function ControlDetail() {
               </Card>
             </TabsContent>
             )}
+
+            <TabsContent value="objectives">
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle>Linked Strategic Objectives</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  {linkedObjectives.length > 0 && (
+                    <div className="space-y-2">
+                      {linkedObjectives.map(obj => (
+                        <div key={obj.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                          <div className="flex items-center gap-3 flex-1">
+                            <Target className="w-4 h-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium text-slate-900">{obj.title}</p>
+                              <p className="text-xs text-slate-500">{obj.companyName}</p>
+                              {obj.description && (
+                                <p className="text-sm text-slate-600 mt-1">{obj.description}</p>
+                              )}
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeObjective(obj.id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {availableObjectives.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Add Strategic Objective</Label>
+                      <Select onValueChange={addObjective}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select objective to add" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableObjectives.map(obj => (
+                            <SelectItem key={obj.id} value={obj.id}>
+                              {obj.companyName} - {obj.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  
+                  {linkedObjectives.length === 0 && availableObjectives.length === 0 && (
+                    <p className="text-sm text-slate-500 text-center py-4">
+                      No objectives available. Add objectives in company settings.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             {!isNew && controlId && existingControl?.[0] && (
             <TabsContent value="history">
               <LifecycleHistory history={existingControl[0]?.lifecycle_history} />
