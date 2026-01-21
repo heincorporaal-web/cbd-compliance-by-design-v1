@@ -65,6 +65,11 @@ const navigationItems = [
     icon: FileCheck,
   },
   {
+    title: "Reports",
+    url: createPageUrl("Reports"),
+    icon: FileText,
+  },
+  {
     title: "iHPOM",
     url: createPageUrl("iHPOM"),
     icon: Network,
