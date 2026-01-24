@@ -14,6 +14,14 @@ export default function Reports() {
       icon: Building2,
       color: "from-blue-500 to-indigo-600",
       url: createPageUrl("CompanyOverviewReport")
+    },
+    {
+      id: "ihpom-tree",
+      title: "iHPOM Tree View Report",
+      description: "Hierarchical tree view of business processes from Level 0 (Value Chain) to Level 5 (Tasks) with drill-down capabilities",
+      icon: BarChart3,
+      color: "from-purple-500 to-pink-600",
+      url: createPageUrl("iHPOMTreeReport")
     }
   ];
 

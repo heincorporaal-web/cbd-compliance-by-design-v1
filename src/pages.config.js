@@ -35,6 +35,7 @@ import Users from './pages/Users';
 import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
+import iHPOMTreeReport from './pages/iHPOMTreeReport';
 import __Layout from './Layout.jsx';
 
 
@@ -76,6 +77,7 @@ export const PAGES = {
     "WorkflowApproval": WorkflowApproval,
     "Workflows": Workflows,
     "iHPOM": iHPOM,
+    "iHPOMTreeReport": iHPOMTreeReport,
 }
 
 export const pagesConfig = {
