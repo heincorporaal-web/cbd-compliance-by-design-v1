@@ -204,12 +204,12 @@ export default function iHPOM() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card className="border-none shadow-lg">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 mb-1">Total Processes</p>
+                <p className="text-sm text-slate-600 mb-1">Total</p>
                 <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
               </div>
               <Layers className="w-8 h-8 text-purple-600" />
@@ -217,16 +217,16 @@ export default function iHPOM() {
           </CardContent>
         </Card>
 
-        {[0, 1, 2].map(level => (
+        {[0, 1, 2, 3, 4].map(level => (
           <Card key={level} className="border-none shadow-lg">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 mb-1">Level {level}</p>
-                  <p className="text-3xl font-bold text-slate-900">{stats.byLevel[level] || 0}</p>
-                  <p className="text-xs text-slate-500 mt-1">{levelLabels[level]}</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-slate-600">Level {level}</p>
+                  <Badge className={getLevelColor(level)}>L{level}</Badge>
                 </div>
-                <Badge className={getLevelColor(level)}>L{level}</Badge>
+                <p className="text-2xl font-bold text-slate-900">{stats.byLevel[level] || 0}</p>
+                <p className="text-xs text-slate-500">{levelLabels[level]}</p>
               </div>
             </CardContent>
           </Card>

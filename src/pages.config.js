@@ -2,6 +2,7 @@ import AssessmentDetail from './pages/AssessmentDetail';
 import Assessments from './pages/Assessments';
 import AuditLogs from './pages/AuditLogs';
 import Companies from './pages/Companies';
+import CompanyOverviewReport from './pages/CompanyOverviewReport';
 import ControlDetail from './pages/ControlDetail';
 import Controls from './pages/Controls';
 import Dashboard from './pages/Dashboard';
@@ -18,6 +19,7 @@ import KnowledgeManagement from './pages/KnowledgeManagement';
 import ProcessAssessmentDetail from './pages/ProcessAssessmentDetail';
 import ProcessAssessments from './pages/ProcessAssessments';
 import ProcessDetail from './pages/ProcessDetail';
+import Reports from './pages/Reports';
 import RiskControlEngine from './pages/RiskControlEngine';
 import RiskDetail from './pages/RiskDetail';
 import RiskRegister from './pages/RiskRegister';
@@ -33,8 +35,6 @@ import Users from './pages/Users';
 import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
-import Reports from './pages/Reports';
-import CompanyOverviewReport from './pages/CompanyOverviewReport';
 import __Layout from './Layout.jsx';
 
 
@@ -43,6 +43,7 @@ export const PAGES = {
     "Assessments": Assessments,
     "AuditLogs": AuditLogs,
     "Companies": Companies,
+    "CompanyOverviewReport": CompanyOverviewReport,
     "ControlDetail": ControlDetail,
     "Controls": Controls,
     "Dashboard": Dashboard,
@@ -59,6 +60,7 @@ export const PAGES = {
     "ProcessAssessmentDetail": ProcessAssessmentDetail,
     "ProcessAssessments": ProcessAssessments,
     "ProcessDetail": ProcessDetail,
+    "Reports": Reports,
     "RiskControlEngine": RiskControlEngine,
     "RiskDetail": RiskDetail,
     "RiskRegister": RiskRegister,
@@ -74,8 +76,6 @@ export const PAGES = {
     "WorkflowApproval": WorkflowApproval,
     "Workflows": Workflows,
     "iHPOM": iHPOM,
-    "Reports": Reports,
-    "CompanyOverviewReport": CompanyOverviewReport,
 }
 
 export const pagesConfig = {
