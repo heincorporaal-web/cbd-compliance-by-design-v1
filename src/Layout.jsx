@@ -70,7 +70,7 @@ const navigationItems = [
     icon: FileText,
   },
   {
-    title: "iHPOM",
+    title: "Process Management",
     url: createPageUrl("iHPOM"),
     icon: Network,
   },
