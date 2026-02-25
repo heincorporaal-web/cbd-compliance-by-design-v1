@@ -71,7 +71,7 @@ const navigationItems = [
   },
   {
     title: "Process Management",
-    url: createPageUrl("iHPOM"),
+    url: createPageUrl("ProcessManagement"),
     icon: Network,
   },
   {
