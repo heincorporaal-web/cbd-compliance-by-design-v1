@@ -86,6 +86,7 @@ import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
 import iHPOMTreeReport from './pages/iHPOMTreeReport';
 import ProcessManagement from './pages/ProcessManagement';
+import ProcessManagementDetail from './pages/ProcessManagementDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -129,6 +130,7 @@ export const PAGES = {
     "iHPOM": iHPOM,
     "iHPOMTreeReport": iHPOMTreeReport,
     "ProcessManagement": ProcessManagement,
+    "ProcessManagementDetail": ProcessManagementDetail,
 }
 
 export const pagesConfig = {
