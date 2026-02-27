@@ -1,139 +1,41 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Building2, Shield, ClipboardCheck, Server, AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert, Target, FileCheck, Network, GitBranch, Cog, FileText } from "lucide-react";
+import { Shield } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
+import NavTree from "@/components/layout/NavTree";
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { base44 } from "@/api/base44Client";
 
-const navigationItems = [
-  {
-    title: "Dashboard",
-    url: createPageUrl("Dashboard"),
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Companies",
-    url: createPageUrl("Companies"),
-    icon: Building2,
-  },
-  {
-    title: "Knowledge",
-    url: createPageUrl("KnowledgeManagement"),
-    icon: FileText,
-  },
-  {
-    title: "Frameworks",
-    url: createPageUrl("Frameworks"),
-    icon: Shield,
-  },
-  {
-    title: "Controls",
-    url: createPageUrl("Controls"),
-    icon: Shield,
-  },
-  {
-    title: "Assessments",
-    url: createPageUrl("Assessments"),
-    icon: ClipboardCheck,
-  },
-  {
-    title: "Risk Register",
-    url: createPageUrl("RiskRegister"),
-    icon: TriangleAlert,
-  },
-  {
-    title: "GRC Goals",
-    url: createPageUrl("GRCGoals"),
-    icon: Target,
-  },
-  {
-    title: "Sign-Offs",
-    url: createPageUrl("SignOffs"),
-    icon: FileCheck,
-  },
-  {
-    title: "Reports",
-    url: createPageUrl("Reports"),
-    icon: FileText,
-  },
-  {
-    title: "Process Management",
-    url: createPageUrl("ProcessManagement"),
-    icon: Network,
-  },
-  {
-    title: "Process Assessments",
-    url: createPageUrl("ProcessAssessments"),
-    icon: ClipboardCheck,
-  },
-  {
-    title: "Workflows",
-    url: createPageUrl("Workflows"),
-    icon: GitBranch,
-  },
-  {
-    title: "Risk Engine",
-    url: createPageUrl("RiskControlEngine"),
-    icon: Cog,
-  },
-  {
-    title: "ICT Systems",
-    url: createPageUrl("ICTSystems"),
-    icon: Server,
-  },
-  {
-    title: "Users",
-    url: createPageUrl("Users"),
-    icon: Users,
-  },
-  {
-    title: "Roles",
-    url: createPageUrl("Roles"),
-    icon: Shield,
-  },
-  {
-    title: "Audit Logs",
-    url: createPageUrl("AuditLogs"),
-    icon: FileText,
-  },
-  {
-    title: "Third Parties",
-    url: createPageUrl("ThirdParties"),
-    icon: Users,
-  },
-  {
-    title: "Incidents",
-    url: createPageUrl("Incidents"),
-    icon: AlertTriangle,
-  },
-  {
-    title: "Issues",
-    url: createPageUrl("Issues"),
-    icon: AlertCircle,
-  },
-  {
-    title: "Surveys",
-    url: createPageUrl("Surveys"),
-    icon: ClipboardList,
-  },
-];
+function UserFooter() {
+  const [user, setUser] = React.useState(null);
+  React.useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
+
+  const initials = user?.full_name
+    ? user.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    : "U";
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+        <span className="text-white font-semibold text-sm">{initials}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-slate-900 text-sm truncate">{user?.full_name || "User"}</p>
+        <p className="text-xs text-slate-500 truncate">{user?.email || ""}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function Layout({ children }) {
-  const location = useLocation();
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-slate-100">
@@ -149,44 +51,13 @@ export default function Layout({ children }) {
               </div>
             </div>
           </SidebarHeader>
-          
-          <SidebarContent className="p-2">
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-xs font-medium text-slate-500 uppercase tracking-wider px-2 py-2">
-                Navigation
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {navigationItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        asChild 
-                        className={`hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-lg mb-1 ${
-                          location.pathname === item.url ? 'bg-blue-50 text-blue-700 font-medium' : ''
-                        }`}
-                      >
-                        <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
-                          <item.icon className="w-4 h-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+
+          <SidebarContent className="px-2 overflow-y-auto">
+            <NavTree />
           </SidebarContent>
 
           <SidebarFooter className="border-t border-slate-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center">
-                <span className="text-slate-700 font-semibold text-sm">U</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-slate-900 text-sm truncate">Risk Manager</p>
-                <p className="text-xs text-slate-500 truncate">Compliance Team</p>
-              </div>
-            </div>
+            <UserFooter />
           </SidebarFooter>
         </Sidebar>
 

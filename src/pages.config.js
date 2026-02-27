@@ -68,6 +68,8 @@ import KnowledgeManagement from './pages/KnowledgeManagement';
 import ProcessAssessmentDetail from './pages/ProcessAssessmentDetail';
 import ProcessAssessments from './pages/ProcessAssessments';
 import ProcessDetail from './pages/ProcessDetail';
+import ProcessManagement from './pages/ProcessManagement';
+import ProcessManagementDetail from './pages/ProcessManagementDetail';
 import Reports from './pages/Reports';
 import RiskControlEngine from './pages/RiskControlEngine';
 import RiskDetail from './pages/RiskDetail';
@@ -85,8 +87,6 @@ import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
 import iHPOMTreeReport from './pages/iHPOMTreeReport';
-import ProcessManagement from './pages/ProcessManagement';
-import ProcessManagementDetail from './pages/ProcessManagementDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -112,6 +112,8 @@ export const PAGES = {
     "ProcessAssessmentDetail": ProcessAssessmentDetail,
     "ProcessAssessments": ProcessAssessments,
     "ProcessDetail": ProcessDetail,
+    "ProcessManagement": ProcessManagement,
+    "ProcessManagementDetail": ProcessManagementDetail,
     "Reports": Reports,
     "RiskControlEngine": RiskControlEngine,
     "RiskDetail": RiskDetail,
@@ -129,8 +131,6 @@ export const PAGES = {
     "Workflows": Workflows,
     "iHPOM": iHPOM,
     "iHPOMTreeReport": iHPOMTreeReport,
-    "ProcessManagement": ProcessManagement,
-    "ProcessManagementDetail": ProcessManagementDetail,
 }
 
 export const pagesConfig = {
