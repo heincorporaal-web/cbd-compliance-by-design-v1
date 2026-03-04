@@ -176,6 +176,8 @@ export default function Stakeholders() {
         </TabsContent>
       </Tabs>
 
+      <HRImportDialog open={hrImportOpen} onOpenChange={setHrImportOpen} />
+
       <StakeholderDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
