@@ -81,9 +81,14 @@ export default function Stakeholders() {
           <h1 className="text-3xl font-bold text-slate-900">Stakeholder Management</h1>
           <p className="text-slate-500 mt-1">Manage stakeholders, groups and matrix assignments</p>
         </div>
-        <Button onClick={handleNew} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" /> Add Stakeholder
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setHrImportOpen(true)}>
+            <Upload className="w-4 h-4 mr-2" /> Import HR Data
+          </Button>
+          <Button onClick={handleNew} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-2" /> Add Stakeholder
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
