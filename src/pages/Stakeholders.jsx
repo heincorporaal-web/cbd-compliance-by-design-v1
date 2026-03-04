@@ -10,12 +10,15 @@ import StakeholderGroupsPanel from "@/components/stakeholders/StakeholderGroupsP
 import StakeholderListPanel from "@/components/stakeholders/StakeholderListPanel";
 import StakeholderMatrixPanel from "@/components/stakeholders/StakeholderMatrixPanel";
 import StakeholderDialog from "@/components/stakeholders/StakeholderDialog";
+import HRImportDialog from "@/components/stakeholders/HRImportDialog";
+import { Upload } from "lucide-react";
 
 export default function Stakeholders() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [filterGroupId, setFilterGroupId] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [hrImportOpen, setHrImportOpen] = useState(false);
   const [editingStakeholder, setEditingStakeholder] = useState(null);
 
   const { data: stakeholders = [] } = useQuery({

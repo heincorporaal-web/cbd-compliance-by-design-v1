@@ -77,6 +77,7 @@ import RiskRegister from './pages/RiskRegister';
 import Roles from './pages/Roles';
 import SignOffDetail from './pages/SignOffDetail';
 import SignOffs from './pages/SignOffs';
+import Stakeholders from './pages/Stakeholders';
 import SurveyBuilder from './pages/SurveyBuilder';
 import SurveyDetail from './pages/SurveyDetail';
 import Surveys from './pages/Surveys';
@@ -87,7 +88,6 @@ import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
 import iHPOM from './pages/iHPOM';
 import iHPOMTreeReport from './pages/iHPOMTreeReport';
-import Stakeholders from './pages/Stakeholders';
 import __Layout from './Layout.jsx';
 
 
@@ -122,6 +122,7 @@ export const PAGES = {
     "Roles": Roles,
     "SignOffDetail": SignOffDetail,
     "SignOffs": SignOffs,
+    "Stakeholders": Stakeholders,
     "SurveyBuilder": SurveyBuilder,
     "SurveyDetail": SurveyDetail,
     "Surveys": Surveys,
@@ -132,7 +133,6 @@ export const PAGES = {
     "Workflows": Workflows,
     "iHPOM": iHPOM,
     "iHPOMTreeReport": iHPOMTreeReport,
-    "Stakeholders": Stakeholders,
 }
 
 export const pagesConfig = {
