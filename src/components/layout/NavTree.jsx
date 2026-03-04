@@ -67,6 +67,14 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    id: "stakeholders",
+    label: "Stakeholders",
+    icon: Users,
+    items: [
+      { id: "stakeholders", title: "Stakeholder Management", url: createPageUrl("Stakeholders"), icon: Users },
+    ],
+  },
+  {
     id: "admin",
     label: "Administration",
     icon: Settings,
