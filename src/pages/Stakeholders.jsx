@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Users, Grid3X3 } from "lucide-react";
+import { Plus, Search, Users, Grid3X3, Building2 } from "lucide-react";
 import StakeholderGroupsPanel from "@/components/stakeholders/StakeholderGroupsPanel";
 import StakeholderListPanel from "@/components/stakeholders/StakeholderListPanel";
 import StakeholderMatrixPanel from "@/components/stakeholders/StakeholderMatrixPanel";
