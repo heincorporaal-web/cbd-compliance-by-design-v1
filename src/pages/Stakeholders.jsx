@@ -229,6 +229,7 @@ export default function Stakeholders() {
             groups={groups}
             onEdit={handleEdit}
             onDelete={(id) => deleteMutation.mutate(id)}
+            onViewHistory={(s) => setHistoryStakeholder(s)}
           />
         </TabsContent>
 
