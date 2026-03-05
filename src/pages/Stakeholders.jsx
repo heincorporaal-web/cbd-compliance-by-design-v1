@@ -73,10 +73,55 @@ export default function Stakeholders() {
 
   const handleEdit = (s) => { setEditingStakeholder(s); setDialogOpen(true); };
   const handleNew = () => { setEditingStakeholder(null); setDialogOpen(true); };
-  const handleSave = (data) => {
-    editingStakeholder
-      ? updateMutation.mutate({ id: editingStakeholder.id, data })
-      : createMutation.mutate(data);
+
+  const recordHistory = async (stakeholderId, stakeholderName, empNumber, companyId, changeType, fieldChanged, fromValue, toValue) => {
+    const today = new Date().toISOString().split("T")[0];
+    await base44.entities.StakeholderHistory.create({
+      stakeholder_id: stakeholderId,
+      stakeholder_name: stakeholderName,
+      employee_number: empNumber || "",
+      company_id: companyId || "",
+      change_type: changeType,
+      field_changed: fieldChanged,
+      from_value: fromValue || "",
+      to_value: toValue || "",
+      to_date: fromValue ? today : undefined,
+    });
+  };
+
+  const handleSave = async (data) => {
+    if (editingStakeholder) {
+      const prev = editingStakeholder;
+      // Detect changes and record history
+      const fieldsToTrack = [
+        { key: "job_title", label: "job_title", changeType: "job_change" },
+        { key: "department", label: "department", changeType: "job_change" },
+        { key: "status", label: "status", changeType: data.status === "inactive" ? "termination" : "reactivation" },
+      ];
+      for (const f of fieldsToTrack) {
+        if (prev[f.key] !== data[f.key]) {
+          await recordHistory(prev.id, data.full_name, data.employee_number, data.company_id,
+            f.changeType, f.label, prev[f.key] || "", data[f.key] || "");
+        }
+      }
+      // Group changes
+      const prevGroups = (prev.group_ids || []).join(",");
+      const newGroups = (data.group_ids || []).join(",");
+      if (prevGroups !== newGroups) {
+        const groupMap = Object.fromEntries(groups.map(g => [g.id, g.name]));
+        const fromNames = (prev.group_ids || []).map(id => groupMap[id] || id).join(", ");
+        const toNames = (data.group_ids || []).map(id => groupMap[id] || id).join(", ");
+        await recordHistory(prev.id, data.full_name, data.employee_number, data.company_id,
+          "group_change", "group_ids", fromNames, toNames);
+      }
+      updateMutation.mutate({ id: editingStakeholder.id, data });
+    } else {
+      const created = await base44.entities.Stakeholder.create(data);
+      await recordHistory(created.id, data.full_name, data.employee_number, data.company_id,
+        "new_hire", "status", "", "active");
+      queryClient.invalidateQueries(["stakeholders"]);
+      setDialogOpen(false);
+    }
   };
 
   return (
