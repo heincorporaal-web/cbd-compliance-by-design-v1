@@ -11,6 +11,7 @@ import StakeholderListPanel from "@/components/stakeholders/StakeholderListPanel
 import StakeholderMatrixPanel from "@/components/stakeholders/StakeholderMatrixPanel";
 import StakeholderDialog from "@/components/stakeholders/StakeholderDialog";
 import HRImportDialog from "@/components/stakeholders/HRImportDialog";
+import StakeholderHistoryDialog from "@/components/stakeholders/StakeholderHistoryDialog";
 import { Upload } from "lucide-react";
 
 export default function Stakeholders() {
