@@ -124,12 +124,26 @@ export default function Stakeholders() {
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search stakeholders..."
+            placeholder="Search by name, email, employee number..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-9"
           />
         </div>
+        {companies.length > 1 && (
+          <div className="flex gap-2 flex-wrap items-center">
+            <Building2 className="w-4 h-4 text-slate-400" />
+            <Button variant={filterCompanyId === "all" ? "default" : "outline"} size="sm" onClick={() => setFilterCompanyId("all")}>All Companies</Button>
+            {companies.map(c => (
+              <Button key={c.id} variant={filterCompanyId === c.id ? "default" : "outline"} size="sm" onClick={() => setFilterCompanyId(c.id)}>
+                {c.name}
+                <Badge variant="secondary" className="ml-1 text-xs">
+                  {stakeholders.filter(s => s.company_id === c.id && s.status !== "inactive").length}
+                </Badge>
+              </Button>
+            ))}
+          </div>
+        )}
         <div className="flex gap-2 flex-wrap">
           <Button
             variant={filterGroupId === "all" ? "default" : "outline"}
