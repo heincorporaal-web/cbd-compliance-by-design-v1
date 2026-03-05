@@ -244,6 +244,12 @@ export default function Stakeholders() {
 
       <HRImportDialog open={hrImportOpen} onOpenChange={setHrImportOpen} />
 
+      <StakeholderHistoryDialog
+        open={!!historyStakeholder}
+        onOpenChange={(v) => { if (!v) setHistoryStakeholder(null); }}
+        stakeholder={historyStakeholder}
+      />
+
       <StakeholderDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
