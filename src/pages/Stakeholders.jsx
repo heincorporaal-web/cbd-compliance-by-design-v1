@@ -203,6 +203,7 @@ export default function Stakeholders() {
         groups={groups}
         companies={companies}
         users={users}
+        allStakeholders={stakeholders}
         onSave={handleSave}
       />
     </div>
