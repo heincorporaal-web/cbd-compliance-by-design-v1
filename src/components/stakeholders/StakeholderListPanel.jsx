@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Pencil, Trash2, Mail, Phone, Building2 } from "lucide-react";
+import { Pencil, Trash2, Mail, Phone, Building2, History } from "lucide-react";
 
 const GROUP_COLORS = [
   "bg-blue-100 text-blue-800", "bg-purple-100 text-purple-800",
