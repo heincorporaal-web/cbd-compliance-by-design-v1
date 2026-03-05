@@ -66,10 +66,10 @@ const ACTION_STYLE = {
   termination: { label: "Termination", class: "bg-red-100 text-red-700" },
 };
 
-const SAMPLE_CSV = `full_name,email,job_title,department,phone,action
-Jane Smith,jane.smith@example.com,Risk Manager,Risk & Compliance,+44 7700 900001,new_hire
-John Doe,john.doe@example.com,Process Owner,Operations,+44 7700 900002,job_change
-Alice Brown,alice.brown@example.com,Control Owner,Finance,+44 7700 900003,termination`;
+const SAMPLE_CSV = `full_name,email,employee_number,job_title,department,phone,action
+Jane Smith,jane.smith@example.com,EMP001,Risk Manager,Risk & Compliance,+44 7700 900001,new_hire
+John Doe,john.doe@example.com,EMP002,Process Owner,Operations,+44 7700 900002,job_change
+Alice Brown,alice.brown@example.com,EMP003,Control Owner,Finance,+44 7700 900003,termination`;
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function HRImportDialog({ open, onOpenChange }) {
