@@ -56,13 +56,17 @@ export default function Stakeholders() {
     onSuccess: () => queryClient.invalidateQueries(["stakeholders"]),
   });
 
+  const [filterCompanyId, setFilterCompanyId] = useState("all");
+
   const filteredStakeholders = stakeholders.filter(s => {
     const matchesSearch = !search ||
       s.full_name?.toLowerCase().includes(search.toLowerCase()) ||
       s.email?.toLowerCase().includes(search.toLowerCase()) ||
-      s.department?.toLowerCase().includes(search.toLowerCase());
+      s.department?.toLowerCase().includes(search.toLowerCase()) ||
+      s.employee_number?.toLowerCase().includes(search.toLowerCase());
     const matchesGroup = filterGroupId === "all" || s.group_ids?.includes(filterGroupId);
-    return matchesSearch && matchesGroup && s.status !== "inactive";
+    const matchesCompany = filterCompanyId === "all" || s.company_id === filterCompanyId;
+    return matchesSearch && matchesGroup && matchesCompany && s.status !== "inactive";
   });
 
   const handleEdit = (s) => { setEditingStakeholder(s); setDialogOpen(true); };
