@@ -30,6 +30,7 @@ function normalizeRow(row) {
   return {
     full_name: row.full_name || row.name || row.employee_name || "",
     email: row.email || row.email_address || row.work_email || "",
+    employee_number: row.employee_number || row.emp_number || row.emp_no || row.employee_id || "",
     job_title: row.job_title || row.title || row.position || row.role || "",
     department: row.department || row.dept || row.business_unit || "",
     phone: row.phone || row.phone_number || row.mobile || "",
