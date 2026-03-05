@@ -6,29 +6,47 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Check } from "lucide-react";
+import { X, Check, AlertCircle } from "lucide-react";
 
 const empty = {
-  full_name: "", email: "", job_title: "", department: "",
+  employee_number: "", full_name: "", email: "", job_title: "", department: "",
   phone: "", company_id: "", user_id: "", group_ids: [], status: "active", notes: ""
 };
 
-export default function StakeholderDialog({ open, onOpenChange, stakeholder, groups, companies, users, onSave }) {
+export default function StakeholderDialog({ open, onOpenChange, stakeholder, groups, companies, users, allStakeholders = [], onSave }) {
   const [form, setForm] = useState(empty);
+  const [empNumError, setEmpNumError] = useState("");
 
   useEffect(() => {
     setForm(stakeholder ? { ...empty, ...stakeholder } : empty);
+    setEmpNumError("");
   }, [stakeholder, open]);
 
   const toggleGroup = (id) => {
     const current = form.group_ids || [];
-    setForm({
-      ...form,
-      group_ids: current.includes(id) ? current.filter(g => g !== id) : [...current, id]
-    });
+    setForm({ ...form, group_ids: current.includes(id) ? current.filter(g => g !== id) : [...current, id] });
+  };
+
+  const validateEmpNumber = (val) => {
+    if (!val) { setEmpNumError(""); return; }
+    const duplicate = allStakeholders.find(
+      s => s.employee_number && s.employee_number === val && s.id !== stakeholder?.id
+    );
+    setEmpNumError(duplicate ? `Employee number already used by ${duplicate.full_name}` : "");
+  };
+
+  const handleEmpNumChange = (val) => {
+    setForm({ ...form, employee_number: val });
+    validateEmpNumber(val);
   };
 
   const activeGroups = groups.filter(g => g.status !== "inactive");
+  const canSave = form.full_name && form.email && form.company_id && !empNumError;
+
+  // Filter groups to company if company is selected
+  const relevantGroups = form.company_id
+    ? activeGroups.filter(g => !g.company_id || g.company_id === form.company_id)
+    : activeGroups;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -38,7 +56,41 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
+          {/* Company - required, shown first */}
+          <div className="space-y-1.5">
+            <Label>Company *</Label>
+            <Select value={form.company_id || ""} onValueChange={v => setForm({ ...form, company_id: v, group_ids: [] })}>
+              <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
+              <SelectContent>
+                {companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Employee Number</Label>
+              <Input
+                value={form.employee_number}
+                onChange={e => handleEmpNumChange(e.target.value)}
+                placeholder="e.g. EMP-00123"
+              />
+              {empNumError && (
+                <div className="flex items-center gap-1 text-xs text-red-600 mt-1">
+                  <AlertCircle className="w-3 h-3" /> {empNumError}
+                </div>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Status</Label>
+              <Select value={form.status} onValueChange={v => setForm({ ...form, status: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1.5 col-span-2">
               <Label>Full Name *</Label>
               <Input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} />
@@ -59,30 +111,7 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
               <Label>Phone</Label>
               <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
             </div>
-            <div className="space-y-1.5">
-              <Label>Status</Label>
-              <Select value={form.status} onValueChange={v => setForm({ ...form, status: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
-
-          {companies.length > 0 && (
-            <div className="space-y-1.5">
-              <Label>Company</Label>
-              <Select value={form.company_id || ""} onValueChange={v => setForm({ ...form, company_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={null}>None</SelectItem>
-                  {companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
 
           {users.length > 0 && (
             <div className="space-y-1.5">
@@ -99,14 +128,16 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
             </div>
           )}
 
-          {/* Group assignment */}
+          {/* Group assignment - scoped to company */}
           <div className="space-y-2">
             <Label>Group Membership</Label>
-            {activeGroups.length === 0 ? (
-              <p className="text-xs text-slate-500">No groups created yet. Go to "Manage Groups" first.</p>
+            {!form.company_id ? (
+              <p className="text-xs text-slate-500">Select a company first to assign groups.</p>
+            ) : relevantGroups.length === 0 ? (
+              <p className="text-xs text-slate-500">No groups available for this company.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
-                {activeGroups.map(g => {
+                {relevantGroups.map(g => {
                   const selected = form.group_ids?.includes(g.id);
                   return (
                     <button
@@ -139,7 +170,7 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
             <Button
               onClick={() => onSave(form)}
               className="bg-blue-600 hover:bg-blue-700"
-              disabled={!form.full_name || !form.email}
+              disabled={!canSave}
             >
               {stakeholder ? "Save Changes" : "Add Stakeholder"}
             </Button>
