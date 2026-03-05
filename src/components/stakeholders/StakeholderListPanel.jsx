@@ -36,6 +36,9 @@ export default function StakeholderListPanel({ stakeholders, groups, onEdit, onD
               </div>
             </div>
             <div className="flex gap-1 shrink-0">
+              <Button variant="ghost" size="icon" className="h-7 w-7" title="View history" onClick={() => onViewHistory(s)}>
+                <History className="w-3.5 h-3.5 text-slate-400" />
+              </Button>
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(s)}>
                 <Pencil className="w-3.5 h-3.5 text-slate-500" />
               </Button>
