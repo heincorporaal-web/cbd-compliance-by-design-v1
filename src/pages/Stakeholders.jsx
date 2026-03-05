@@ -21,6 +21,7 @@ export default function Stakeholders() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [hrImportOpen, setHrImportOpen] = useState(false);
   const [editingStakeholder, setEditingStakeholder] = useState(null);
+  const [historyStakeholder, setHistoryStakeholder] = useState(null);
 
   const { data: stakeholders = [] } = useQuery({
     queryKey: ["stakeholders"],
