@@ -11,7 +11,7 @@ const GROUP_COLORS = [
   "bg-indigo-100 text-indigo-800", "bg-amber-100 text-amber-800",
 ];
 
-export default function StakeholderListPanel({ stakeholders, groups, onEdit, onDelete }) {
+export default function StakeholderListPanel({ stakeholders, groups, onEdit, onDelete, onViewHistory }) {
   const groupMap = Object.fromEntries(groups.map(g => [g.id, g]));
 
   if (!stakeholders.length) return (
