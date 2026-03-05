@@ -165,7 +165,7 @@ export default function HRImportDialog({ open, onOpenChange }) {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800 flex gap-2">
             <Info className="w-4 h-4 shrink-0 mt-0.5" />
             <div>
-              Upload a CSV with columns: <strong>full_name, email, job_title, department, phone, action</strong>.
+              Upload a CSV with columns: <strong>full_name, email, employee_number, job_title, department, phone, action</strong>.
               The <strong>action</strong> column should be: <code>new_hire</code>, <code>job_change</code>, or <code>termination</code>.
               If omitted, action is inferred from the <strong>status</strong> column or email match.
             </div>
