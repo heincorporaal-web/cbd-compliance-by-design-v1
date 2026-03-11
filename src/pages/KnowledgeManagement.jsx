@@ -118,98 +118,12 @@ export default function KnowledgeManagement() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredArticles.map(article => {
-            const framework = frameworks.find(f => f.id === article.framework_id);
-            
-            return (
-              <Card key={article.id} className="border-none shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader className="border-b border-slate-100">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-slate-900 mb-1">{article.title}</h3>
-                      {article.chapter && (
-                        <p className="text-sm text-slate-600">{article.chapter}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {article.category && (
-                      <Badge className={getCategoryColor(article.category)}>
-                        {article.category.replace(/_/g, ' ')}
-                      </Badge>
-                    )}
-                    <Badge className={getStatusColor(article.status)}>
-                      {article.status}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  {framework && (
-                    <div className="mb-3 text-sm">
-                      <span className="text-slate-600">Framework: </span>
-                      <span className="font-medium text-slate-900">{framework.name}</span>
-                    </div>
-                  )}
-                  {article.description && (
-                    <p className="text-sm text-slate-600 line-clamp-2 mb-3">{article.description}</p>
-                  )}
-                  {article.key_steps && article.key_steps.length > 0 && (
-                    <div className="text-xs text-slate-500 mb-3">
-                      {article.key_steps.length} key steps
-                    </div>
-                  )}
-                  {article.tags && article.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {article.tags.slice(0, 3).map((tag, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {article.tags.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{article.tags.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleView(article)}
-                      className="flex-1"
-                    >
-                      <Eye className="w-3 h-3 mr-2" />
-                      View
-                    </Button>
-                    {article.pdf_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(article.pdf_url, '_blank')}
-                      >
-                        <Download className="w-3 h-3" />
-                      </Button>
-                    )}
-                    <Link to={createPageUrl(`KnowledgeArticleDetail?id=${article.id}`)}>
-                      <Button variant="outline" size="sm">
-                        <Edit2 className="w-3 h-3" />
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => deleteMutation.mutate(article.id)}
-                    >
-                      <Trash2 className="w-3 h-3 text-red-500" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <KnowledgeTreeView
+          articles={filteredArticles}
+          frameworks={frameworks}
+          onView={handleView}
+          onDelete={(id) => deleteMutation.mutate(id)}
+        />
       )}
 
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
