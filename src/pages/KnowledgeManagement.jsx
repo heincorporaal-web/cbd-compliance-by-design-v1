@@ -10,6 +10,7 @@ import { BookOpen, Plus, Search, FileText, Download, Eye, Edit2, Trash2 } from "
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
+import KnowledgeTreeView from "@/components/knowledge/KnowledgeTreeView";
 
 export default function KnowledgeManagement() {
   const queryClient = useQueryClient();
