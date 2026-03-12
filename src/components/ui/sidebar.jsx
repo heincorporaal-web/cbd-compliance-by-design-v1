@@ -308,6 +308,7 @@ const SidebarMenuButton = React.forwardRef(function SidebarMenuButtonInner(
   { asChild = false, isActive = false, variant = "default", size = "default", tooltip, className, ...props },
   ref
 ) {
+  // fixed: no id after rest
   const Comp = asChild ? Slot : "button"
   const { isMobile, state } = useSidebar()
 
