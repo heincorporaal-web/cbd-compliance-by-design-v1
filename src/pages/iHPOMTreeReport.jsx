@@ -9,7 +9,7 @@ import { ArrowLeft, Download, ChevronRight, ChevronDown, Network, Layers } from 
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
-export default function iHPOMTreeReport() {
+export default function IHPOMTreeReport() {
   const [selectedCompanyId, setSelectedCompanyId] = useState("all");
   const [expandedNodes, setExpandedNodes] = useState(new Set());
   const [expandLevel, setExpandLevel] = useState(null);

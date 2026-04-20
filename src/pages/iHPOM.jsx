@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ProcessTreeView from "@/components/ihpom/ProcessTreeView";
 
-export default function iHPOM() {
+export default function IHPOM() {
   const [searchTerm, setSearchTerm] = useState("");
   const [levelFilter, setLevelFilter] = useState("all");
   const [companyFilter, setCompanyFilter] = useState("all");
