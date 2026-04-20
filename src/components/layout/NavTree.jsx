@@ -6,7 +6,7 @@ import {
   AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert,
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
-  Activity, X, PlusCircle
+  Activity, X, PlusCircle, Sparkles
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -30,6 +30,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "frameworks", title: "Frameworks", url: createPageUrl("Frameworks"), icon: Shield },
       { id: "controls", title: "Controls", url: createPageUrl("Controls"), icon: Shield },
+      { id: "framework_mapper", title: "Framework Mapper (AI)", url: createPageUrl("FrameworkControlMapper"), icon: Sparkles },
       { id: "grc_goals", title: "GRC Goals", url: createPageUrl("GRCGoals"), icon: Target },
       { id: "sign_offs", title: "Sign-Offs", url: createPageUrl("SignOffs"), icon: FileCheck },
       { id: "workflows", title: "Workflows", url: createPageUrl("Workflows"), icon: GitBranch },

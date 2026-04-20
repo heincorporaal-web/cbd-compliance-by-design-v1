@@ -86,6 +86,7 @@ import ThirdPartyDetail from './pages/ThirdPartyDetail';
 import Users from './pages/Users';
 import WorkflowApproval from './pages/WorkflowApproval';
 import Workflows from './pages/Workflows';
+import FrameworkControlMapper from './pages/FrameworkControlMapper';
 import iHPOM from './pages/iHPOM';
 import iHPOMTreeReport from './pages/iHPOMTreeReport';
 import __Layout from './Layout.jsx';
@@ -131,6 +132,7 @@ export const PAGES = {
     "Users": Users,
     "WorkflowApproval": WorkflowApproval,
     "Workflows": Workflows,
+    "FrameworkControlMapper": FrameworkControlMapper,
     "iHPOM": iHPOM,
     "iHPOMTreeReport": iHPOMTreeReport,
 }
