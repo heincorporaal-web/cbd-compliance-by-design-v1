@@ -40,16 +40,7 @@ export default function SurveyBuilder() {
     queryFn: () => base44.entities.Framework.list(),
   });
 
-  const { data: linkedEntity } = useQuery({
-    queryKey: ['linkedEntity', formData.linked_entity_type, formData.linked_entity_id],
-    queryFn: async () => {
-      if (!formData.linked_entity_id) return null;
-      const entities = getEntityOptions();
-      return entities.find(e => e.id === formData.linked_entity_id);
-    },
-    enabled: !!formData.linked_entity_id,
-  });
-
+  // useState BEFORE any hook that references formData
   const [formData, setFormData] = useState({
     title: existingSurvey?.title || "",
     description: existingSurvey?.description || "",
@@ -76,6 +67,26 @@ export default function SurveyBuilder() {
     }
   }, [existingSurvey]);
 
+  const getEntityOptions = () => {
+    switch (formData.linked_entity_type) {
+      case 'ICTSystem': return ictSystems;
+      case 'ThirdPartyProvider': return suppliers;
+      case 'Framework': return frameworks;
+      default: return [];
+    }
+  };
+
+  // Now safe to use formData here
+  const { data: linkedEntity } = useQuery({
+    queryKey: ['linkedEntity', formData.linked_entity_type, formData.linked_entity_id],
+    queryFn: async () => {
+      if (!formData.linked_entity_id) return null;
+      const entities = getEntityOptions();
+      return entities.find(e => e.id === formData.linked_entity_id) || null;
+    },
+    enabled: !!formData.linked_entity_id,
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Survey.create(data),
     onSuccess: (data) => {
@@ -98,22 +109,13 @@ export default function SurveyBuilder() {
       ...formData,
       questions: [
         ...formData.questions,
-        {
-          id: Date.now().toString(),
-          question: "",
-          type: "text",
-          options: [],
-          required: false
-        }
+        { id: Date.now().toString(), question: "", type: "text", options: [], required: false }
       ]
     });
   };
 
   const handleAIGenerate = (generatedQuestions) => {
-    setFormData({
-      ...formData,
-      questions: [...formData.questions, ...generatedQuestions]
-    });
+    setFormData({ ...formData, questions: [...formData.questions, ...generatedQuestions] });
   };
 
   const updateQuestion = (index, field, value) => {
@@ -123,8 +125,7 @@ export default function SurveyBuilder() {
   };
 
   const removeQuestion = (index) => {
-    const newQuestions = formData.questions.filter((_, i) => i !== index);
-    setFormData({ ...formData, questions: newQuestions });
+    setFormData({ ...formData, questions: formData.questions.filter((_, i) => i !== index) });
   };
 
   const handleSubmit = (e) => {
@@ -136,27 +137,9 @@ export default function SurveyBuilder() {
     }
   };
 
-  const getEntityOptions = () => {
-    switch (formData.linked_entity_type) {
-      case 'ICTSystem':
-        return ictSystems;
-      case 'ThirdPartyProvider':
-        return suppliers;
-      case 'Framework':
-        return frameworks;
-      default:
-        return [];
-    }
-  };
-
   const handleEntityChange = (entityId) => {
-    const entities = getEntityOptions();
-    const entity = entities.find(e => e.id === entityId);
-    setFormData({
-      ...formData,
-      linked_entity_id: entityId,
-      linked_entity_name: entity?.name || ""
-    });
+    const entity = getEntityOptions().find(e => e.id === entityId);
+    setFormData({ ...formData, linked_entity_id: entityId, linked_entity_name: entity?.name || "" });
   };
 
   return (
@@ -326,18 +309,13 @@ export default function SurveyBuilder() {
                             <Textarea
                               value={question.options?.join('\n') || ''}
                               onChange={(e) => updateQuestion(index, 'options', e.target.value.split('\n').filter(o => o.trim()))}
-                              placeholder="Option 1&#10;Option 2&#10;Option 3"
+                              placeholder={"Option 1\nOption 2\nOption 3"}
                               rows={4}
                             />
                           </div>
                         )}
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeQuestion(index)}
-                      >
+                      <Button type="button" variant="ghost" size="icon" onClick={() => removeQuestion(index)}>
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
                     </div>
