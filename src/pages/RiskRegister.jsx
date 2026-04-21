@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Plus, Search, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function RiskRegister() {

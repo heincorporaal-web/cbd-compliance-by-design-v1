@@ -13,7 +13,6 @@ import { AlertCircle, Plus, Search, Edit2, Calendar, CheckCircle2, Clock, AlertT
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import FileUpload from "../components/FileUpload";
-import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function Issues() {

@@ -10,7 +10,6 @@ import { Target, Plus, Search, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import MaturityBadge from "../components/grc/MaturityBadge";
-import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function GRCGoals() {
