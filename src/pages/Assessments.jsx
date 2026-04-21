@@ -339,10 +339,6 @@ export default function Assessments() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex items-center gap-3">
-        <CompanyFilterBar />
-      </div>
-
       {companies.length === 0 || frameworks.length === 0 ? (
         <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
           <CardContent className="p-12 text-center">

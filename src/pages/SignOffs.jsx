@@ -107,7 +107,6 @@ export default function SignOffs() {
                 className="pl-10"
               />
             </div>
-            <CompanyFilterBar />
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="All Status" />

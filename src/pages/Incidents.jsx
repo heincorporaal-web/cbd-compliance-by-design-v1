@@ -350,7 +350,6 @@ export default function Incidents() {
                 className="pl-10"
               />
             </div>
-            <CompanyFilterBar />
           </div>
         </CardHeader>
         <CardContent className="p-0">

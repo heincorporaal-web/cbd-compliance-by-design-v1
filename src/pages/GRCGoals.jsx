@@ -121,7 +121,6 @@ export default function GRCGoals() {
                 className="pl-10"
               />
             </div>
-            <CompanyFilterBar />
             <Select value={filterCategory} onValueChange={setFilterCategory}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="All Categories" />

@@ -130,7 +130,6 @@ export default function RiskRegister() {
                 className="pl-10"
               />
             </div>
-            <CompanyFilterBar />
           </div>
         </CardHeader>
         <CardContent className="p-0">

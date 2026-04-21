@@ -10,8 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import CompanyFilterBar from "@/components/CompanyFilterBar";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function Dashboard() {
+  const [globalCompany] = useCompanyFilter();
   const [visibleWidgets, setVisibleWidgets] = useState({
     compliance: true,
     resilience: true,
@@ -82,48 +85,68 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Risk.list(),
   });
 
-  const activeCompanies = companies.filter(c => c.status === 'active').length;
+  // Apply company filter
+  const gc = globalCompany;
+  const filteredAssessments = gc === "all" ? assessments : assessments.filter(a => a.company_id === gc);
+  const filteredIctSystems = gc === "all" ? ictSystems : ictSystems.filter(s => s.company_id === gc);
+  const filteredIncidents = gc === "all" ? incidents : incidents.filter(i => i.company_id === gc);
+  const filteredThirdParties = gc === "all" ? thirdParties : thirdParties.filter(tp => tp.company_id === gc);
+  const filteredProcesses = gc === "all" ? processes : processes.filter(p => p.company_id === gc);
+  const filteredGoals = gc === "all" ? goals : goals.filter(g => g.company_id === gc);
+  const filteredRisks = gc === "all" ? risks : risks.filter(r => r.company_id === gc);
+  const filteredProcessAssessments = gc === "all" ? processAssessments : processAssessments.filter(pa => {
+    const proc = processes.find(p => p.id === pa.process_id);
+    return proc?.company_id === gc;
+  });
+  const filteredIssues = gc === "all" ? issues : issues.filter(i => {
+    if (i.linked_entity_type === "Company") return i.linked_entity_id === gc;
+    if (i.linked_entity_type === "Assessment") return filteredAssessments.some(a => a.id === i.linked_entity_id);
+    return true;
+  });
+
+  const activeCompanies = gc === "all" ? companies.filter(c => c.status === 'active').length : (companies.find(c => c.id === gc)?.status === 'active' ? 1 : 0);
   const activeFrameworks = frameworks.filter(f => f.status === 'active').length;
-  const inProgressAssessments = assessments.filter(a => a.status === 'in_progress').length;
-  
-  const compliantControls = controlAssessments.filter(ca => ca.status === 'compliant').length;
-  const totalAssessedControls = controlAssessments.filter(ca => ca.status !== 'not_assessed').length;
+  const inProgressAssessments = filteredAssessments.filter(a => a.status === 'in_progress').length;
+
+  const filteredAssessmentIds = new Set(filteredAssessments.map(a => a.id));
+  const filteredControlAssessments = controlAssessments.filter(ca => filteredAssessmentIds.has(ca.assessment_id));
+  const compliantControls = filteredControlAssessments.filter(ca => ca.status === 'compliant').length;
+  const totalAssessedControls = filteredControlAssessments.filter(ca => ca.status !== 'not_assessed').length;
   const complianceRate = totalAssessedControls > 0 
     ? Math.round((compliantControls / totalAssessedControls) * 100) 
     : 0;
 
-  const criticalSystems = ictSystems.filter(s => s.criticality === 'critical').length;
-  const openIncidents = incidents.filter(i => i.status === 'open' || i.status === 'investigating').length;
-  const criticalIncidents = incidents.filter(i => i.severity === 'critical' && (i.status === 'open' || i.status === 'investigating')).length;
-  const highRiskProviders = thirdParties.filter(tp => tp.risk_rating === 'high' || tp.risk_rating === 'critical').length;
+  const criticalSystems = filteredIctSystems.filter(s => s.criticality === 'critical').length;
+  const openIncidents = filteredIncidents.filter(i => i.status === 'open' || i.status === 'investigating').length;
+  const criticalIncidents = filteredIncidents.filter(i => i.severity === 'critical' && (i.status === 'open' || i.status === 'investigating')).length;
+  const highRiskProviders = filteredThirdParties.filter(tp => tp.risk_rating === 'high' || tp.risk_rating === 'critical').length;
 
-  const openIssues = issues.filter(i => i.status === 'open' || i.status === 'in_progress').length;
-  const closedIssues = issues.filter(i => i.status === 'resolved' || i.status === 'closed').length;
+  const openIssues = filteredIssues.filter(i => i.status === 'open' || i.status === 'in_progress').length;
+  const closedIssues = filteredIssues.filter(i => i.status === 'resolved' || i.status === 'closed').length;
 
   // Process Health Metrics
-  const activeProcesses = processes.filter(p => p.status === 'active').length;
-  const criticalProcesses = processes.filter(p => p.criticality === 'critical').length;
-  const recentProcessAssessments = processAssessments.slice(0, 5);
-  const needsImprovementCount = processAssessments.filter(pa => 
+  const activeProcesses = filteredProcesses.filter(p => p.status === 'active').length;
+  const criticalProcesses = filteredProcesses.filter(p => p.criticality === 'critical').length;
+  const needsImprovementCount = filteredProcessAssessments.filter(pa => 
     pa.overall_rating === 'needs_improvement' || pa.overall_rating === 'unsatisfactory'
   ).length;
-  const excellentProcesses = processAssessments.filter(pa => pa.overall_rating === 'excellent').length;
+  const excellentProcesses = filteredProcessAssessments.filter(pa => pa.overall_rating === 'excellent').length;
 
   // Goal Achievement Metrics
-  const achievedGoals = goals.filter(g => g.status === 'achieved').length;
-  const onTrackGoals = goals.filter(g => g.status === 'on_track').length;
-  const atRiskGoals = goals.filter(g => g.status === 'at_risk').length;
-  const goalAchievementRate = goals.length > 0 ? Math.round(((achievedGoals + onTrackGoals) / goals.length) * 100) : 0;
+  const achievedGoals = filteredGoals.filter(g => g.status === 'achieved').length;
+  const onTrackGoals = filteredGoals.filter(g => g.status === 'on_track').length;
+  const atRiskGoals = filteredGoals.filter(g => g.status === 'at_risk').length;
+  const goalAchievementRate = filteredGoals.length > 0 ? Math.round(((achievedGoals + onTrackGoals) / filteredGoals.length) * 100) : 0;
 
   // Risk Posture
-  const highRisks = risks.filter(r => 
+  const highRisks = filteredRisks.filter(r => 
     (r.likelihood === 'high' || r.likelihood === 'very_high') && 
     (r.impact === 'high' || r.impact === 'very_high')
   ).length;
-  const openRisks = risks.filter(r => r.status === 'identified' || r.status === 'assessed').length;
-  const mitigatedRisks = risks.filter(r => r.status === 'mitigated').length;
+  const openRisks = filteredRisks.filter(r => r.status === 'identified' || r.status === 'assessed').length;
+  const mitigatedRisks = filteredRisks.filter(r => r.status === 'mitigated').length;
 
-  const recentIncidents = incidents.slice(0, 5);
+  const recentIncidents = filteredIncidents.slice(0, 5);
 
   const toggleWidget = (widget) => {
     setVisibleWidgets(prev => ({ ...prev, [widget]: !prev[widget] }));
@@ -156,7 +179,9 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Executive Dashboard</h1>
           <p className="text-slate-600">Real-time overview of risk, compliance, and operational performance</p>
         </div>
-        <Dialog>
+        <div className="flex items-center gap-3">
+          <CompanyFilterBar />
+          <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline">
               <Settings className="w-4 h-4 mr-2" />
@@ -183,6 +208,7 @@ export default function Dashboard() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {visibleWidgets.compliance && (
@@ -269,7 +295,7 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{processAssessments.length}</div>
+                <div className="text-3xl font-bold text-slate-900">{filteredProcessAssessments.length}</div>
                 <p className="text-xs text-green-600 mt-1">{excellentProcesses} rated excellent</p>
               </CardContent>
             </Card>
@@ -320,7 +346,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">{goalAchievementRate}%</div>
-                <p className="text-xs opacity-75 mt-1">{achievedGoals + onTrackGoals} of {goals.length} goals</p>
+                <p className="text-xs opacity-75 mt-1">{achievedGoals + onTrackGoals} of {filteredGoals.length} goals</p>
               </CardContent>
             </Card>
 
@@ -378,7 +404,7 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{risks.length}</div>
+                <div className="text-3xl font-bold text-slate-900">{filteredRisks.length}</div>
                 <p className="text-xs text-red-600 mt-1">{highRisks} high/critical risks</p>
               </CardContent>
             </Card>
@@ -437,7 +463,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{ictSystems.length}</div>
+              <div className="text-3xl font-bold text-slate-900">{filteredIctSystems.length}</div>
               <p className="text-xs text-slate-500 mt-1">{criticalSystems} critical systems</p>
             </CardContent>
           </Card>
@@ -463,7 +489,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{thirdParties.length}</div>
+              <div className="text-3xl font-bold text-slate-900">{filteredThirdParties.length}</div>
               <p className="text-xs text-slate-500 mt-1">{highRiskProviders} high risk</p>
             </CardContent>
           </Card>

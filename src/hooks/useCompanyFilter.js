@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
-// Module-level store - persists across renders and page navigations
+// Module-level store so the selected company persists across page navigations
 let globalCompanyId = "all";
 const listeners = new Set();
 
@@ -10,17 +10,13 @@ function setGlobalCompanyId(id) {
 }
 
 export function useCompanyFilter() {
-  const [companyId, setLocalCompanyId] = useState(globalCompanyId);
+  const [companyId, setCompanyId] = useState(globalCompanyId);
 
   useEffect(() => {
-    const handler = (id) => setLocalCompanyId(id);
+    const handler = (id) => setCompanyId(id);
     listeners.add(handler);
     return () => listeners.delete(handler);
   }, []);
 
-  const setCompany = useCallback((id) => {
-    setGlobalCompanyId(id);
-  }, []);
-
-  return [companyId, setCompany];
+  return [companyId, setGlobalCompanyId];
 }

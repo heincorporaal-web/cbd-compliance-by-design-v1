@@ -2,6 +2,7 @@ import React from "react";
 import { Shield } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import NavTree from "@/components/layout/NavTree";
+import CompanyFilterBar from "@/components/CompanyFilterBar";
 import {
   Sidebar,
   SidebarContent,
@@ -68,7 +69,8 @@ export default function Layout({ children }) {
                 <SidebarTrigger className="lg:hidden hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200" />
                 <h1 className="text-xl font-bold text-slate-900 lg:hidden">CBD</h1>
               </div>
-              <div className="ml-auto">
+              <div className="ml-auto flex items-center gap-4">
+                <CompanyFilterBar />
                 <NotificationCenter />
               </div>
             </div>

@@ -344,7 +344,6 @@ export default function ThirdParties() {
                 className="pl-10"
               />
             </div>
-            <CompanyFilterBar />
           </div>
         </CardHeader>
         <CardContent className="p-0">

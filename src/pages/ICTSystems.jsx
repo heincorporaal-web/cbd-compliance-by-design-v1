@@ -326,7 +326,6 @@ export default function ICTSystems() {
                 className="pl-10"
               />
             </div>
-            <CompanyFilterBar />
           </div>
         </CardHeader>
         <CardContent className="p-0">

@@ -116,7 +116,6 @@ export default function Issues() {
                          issue.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || issue.status === filterStatus;
     return matchesSearch && matchesStatus;
-    // Issues don't have a direct company_id but are linked via linked_entity
   });
 
   const openIssues = issues.filter(i => i.status === "open" || i.status === "in_progress");
@@ -389,7 +388,6 @@ export default function Issues() {
                 className="pl-10"
               />
             </div>
-            <CompanyFilterBar />
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue />
