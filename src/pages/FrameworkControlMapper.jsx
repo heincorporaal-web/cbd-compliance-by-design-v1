@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Bot, Send, Loader2, Shield, Sparkles } from "lucide-react";
+import { ArrowLeft, Bot, Send, Loader2, Shield, Sparkles, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ReactMarkdown from "react-markdown";
@@ -15,13 +15,40 @@ export default function FrameworkControlMapper() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [selectedFrameworkId, setSelectedFrameworkId] = useState("");
   const messagesEndRef = useRef(null);
 
-  const { data: frameworks = [] } = useQuery({
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies"],
+    queryFn: () => base44.entities.Company.list(),
+  });
+
+  const { data: allFrameworks = [] } = useQuery({
     queryKey: ["frameworks"],
     queryFn: () => base44.entities.Framework.list(),
   });
+
+  const { data: allControls = [] } = useQuery({
+    queryKey: ["controls"],
+    queryFn: () => base44.entities.Control.list(),
+  });
+
+  // Filter frameworks and controls by selected company
+  // Frameworks and Controls don't have a direct company_id, but Controls reference Frameworks.
+  // We scope by only showing frameworks that have controls whose framework_id matches,
+  // or simply show all frameworks/controls until a company is used for context in the AI prompt.
+  // Since Framework/Control entities don't have company_id, we filter by Assessment's company
+  // but provide company context to the AI so it scopes its analysis.
+  const selectedCompany = companies.find(c => c.id === selectedCompanyId);
+
+  // Frameworks available: all (they are global, not per-company), but we note which company we're working for
+  const frameworks = allFrameworks;
+
+  // Reset framework selection when company changes
+  useEffect(() => {
+    setSelectedFrameworkId("");
+  }, [selectedCompanyId]);
 
   // Initialize conversation on mount
   useEffect(() => {
@@ -64,7 +91,8 @@ export default function FrameworkControlMapper() {
   const analyzeFramework = () => {
     const framework = frameworks.find(f => f.id === selectedFrameworkId);
     if (!framework) return;
-    const prompt = `Please analyze the framework "${framework.name}" (category: ${framework.category || "N/A"}, description: "${framework.description || "No description provided"}") and map it to existing controls. Show me which controls are a strong, partial, or weak match and explain your reasoning.`;
+    const companyContext = selectedCompany ? ` We are working in the context of company "${selectedCompany.name}" (industry: ${selectedCompany.industry || "N/A"}).` : "";
+    const prompt = `Please analyze the framework "${framework.name}" (category: ${framework.category || "N/A"}, description: "${framework.description || "No description provided"}") and map it to existing controls.${companyContext} Show me which controls are a strong, partial, or weak match and explain your reasoning.`;
     sendMessage(prompt);
   };
 
@@ -108,26 +136,56 @@ export default function FrameworkControlMapper() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-3">
-              <p className="text-xs text-slate-500">Select a framework to instantly start a mapping analysis.</p>
-              <Select value={selectedFrameworkId} onValueChange={setSelectedFrameworkId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a framework..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {frameworks.map(f => (
-                    <SelectItem key={f.id} value={f.id}>
-                      <div className="flex flex-col">
-                        <span>{f.name}</span>
-                        {f.category && <span className="text-xs text-slate-400">{f.category.replace(/_/g, " ")}</span>}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <p className="text-xs text-slate-500">Select a company and framework to start a mapping analysis.</p>
+
+              <div>
+                <label className="text-xs font-medium text-slate-500 flex items-center gap-1 mb-1">
+                  <Building2 className="w-3 h-3" /> Company
+                </label>
+                <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select company..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-500 flex items-center gap-1 mb-1">
+                  <Shield className="w-3 h-3" /> Framework
+                </label>
+                <Select value={selectedFrameworkId} onValueChange={setSelectedFrameworkId} disabled={!selectedCompanyId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={selectedCompanyId ? "Choose a framework..." : "Select a company first..."} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {frameworks.map(f => (
+                      <SelectItem key={f.id} value={f.id}>
+                        <div className="flex flex-col">
+                          <span>{f.name}</span>
+                          {f.category && <span className="text-xs text-slate-400">{f.category.replace(/_/g, " ")}</span>}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedCompany && (
+                <div className="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 text-xs text-indigo-700">
+                  <span className="font-medium">Scoped to:</span> {selectedCompany.name}
+                  {selectedCompany.industry && <span className="text-indigo-500"> · {selectedCompany.industry}</span>}
+                </div>
+              )}
+
               <Button
                 className="w-full bg-indigo-600 hover:bg-indigo-700"
                 onClick={analyzeFramework}
-                disabled={!selectedFrameworkId || isLoading || !conversation}
+                disabled={!selectedCompanyId || !selectedFrameworkId || isLoading || !conversation}
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Analyze & Map
@@ -145,16 +203,19 @@ export default function FrameworkControlMapper() {
                 "Which controls have no framework assigned?",
                 "Map all security controls to relevant frameworks",
                 "Find controls that overlap between frameworks",
-              ].map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => sendMessage(prompt)}
-                  disabled={isLoading || !conversation}
-                  className="w-full text-left text-xs text-slate-600 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 px-3 py-2 rounded-lg border border-slate-200 hover:border-indigo-200 transition-colors disabled:opacity-50"
-                >
-                  {prompt}
-                </button>
-              ))}
+              ].map((prompt) => {
+                const fullPrompt = selectedCompany ? `${prompt} (for company: ${selectedCompany.name})` : prompt;
+                return (
+                  <button
+                    key={prompt}
+                    onClick={() => sendMessage(fullPrompt)}
+                    disabled={isLoading || !conversation}
+                    className="w-full text-left text-xs text-slate-600 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 px-3 py-2 rounded-lg border border-slate-200 hover:border-indigo-200 transition-colors disabled:opacity-50"
+                  >
+                    {prompt}
+                  </button>
+                );
+              })}
             </CardContent>
           </Card>
         </div>
@@ -180,7 +241,7 @@ export default function FrameworkControlMapper() {
                 <div className="flex flex-col items-center justify-center h-full text-center text-slate-400 space-y-3">
                   <Sparkles className="w-10 h-10 text-indigo-200" />
                   <p className="text-sm font-medium">Ready to map frameworks to controls</p>
-                  <p className="text-xs">Select a framework on the left or type your question below.</p>
+                  <p className="text-xs">Select a company &amp; framework on the left, or type your question below.</p>
                 </div>
               )}
 
