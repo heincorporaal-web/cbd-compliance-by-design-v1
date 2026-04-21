@@ -10,8 +10,11 @@ import { FileCheck, Plus, Search, ArrowRight, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
+import CompanyFilterBar from "@/components/CompanyFilterBar";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function SignOffs() {
+  const [globalCompany] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -28,7 +31,8 @@ export default function SignOffs() {
   const filteredSignOffs = signOffs.filter(so => {
     const matchesSearch = so.title?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || so.status === filterStatus;
-    return matchesSearch && matchesStatus;
+    const matchesCompany = globalCompany === "all" || so.company_id === globalCompany;
+    return matchesSearch && matchesStatus && matchesCompany;
   });
 
   const getStatusColor = (status) => {
@@ -103,6 +107,7 @@ export default function SignOffs() {
                 className="pl-10"
               />
             </div>
+            <CompanyFilterBar />
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="All Status" />

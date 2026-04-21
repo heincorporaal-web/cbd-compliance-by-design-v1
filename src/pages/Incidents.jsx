@@ -12,8 +12,11 @@ import { AlertTriangle, Plus, Search, Edit2, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
+import CompanyFilterBar from "@/components/CompanyFilterBar";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function Incidents() {
+  const [globalCompany] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingIncident, setEditingIncident] = useState(null);
@@ -104,10 +107,12 @@ export default function Incidents() {
     setIsDialogOpen(true);
   };
 
-  const filteredIncidents = incidents.filter(incident =>
-    incident.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    incident.incident_type?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredIncidents = incidents.filter(incident => {
+    const matchesSearch = incident.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      incident.incident_type?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCompany = globalCompany === "all" || incident.company_id === globalCompany;
+    return matchesSearch && matchesCompany;
+  });
 
   const getSeverityColor = (severity) => {
     const colors = {
@@ -335,7 +340,7 @@ export default function Incidents() {
 
       <Card className="border-none shadow-lg">
         <CardHeader className="border-b border-slate-100">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
               <Input
@@ -345,6 +350,7 @@ export default function Incidents() {
                 className="pl-10"
               />
             </div>
+            <CompanyFilterBar />
           </div>
         </CardHeader>
         <CardContent className="p-0">

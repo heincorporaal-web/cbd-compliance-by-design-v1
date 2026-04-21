@@ -13,8 +13,11 @@ import { AlertCircle, Plus, Search, Edit2, Calendar, CheckCircle2, Clock, AlertT
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import FileUpload from "../components/FileUpload";
+import CompanyFilterBar from "@/components/CompanyFilterBar";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function Issues() {
+  const [globalCompany] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -113,6 +116,7 @@ export default function Issues() {
                          issue.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || issue.status === filterStatus;
     return matchesSearch && matchesStatus;
+    // Issues don't have a direct company_id but are linked via linked_entity
   });
 
   const openIssues = issues.filter(i => i.status === "open" || i.status === "in_progress");
@@ -385,6 +389,7 @@ export default function Issues() {
                 className="pl-10"
               />
             </div>
+            <CompanyFilterBar />
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue />

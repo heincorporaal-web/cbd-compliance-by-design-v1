@@ -13,8 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
+import CompanyFilterBar from "@/components/CompanyFilterBar";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function Assessments() {
+  const [globalCompany] = useCompanyFilter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isIssueDialogOpen, setIsIssueDialogOpen] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState(null);
@@ -336,6 +339,10 @@ export default function Assessments() {
         </DialogContent>
       </Dialog>
 
+      <div className="flex items-center gap-3">
+        <CompanyFilterBar />
+      </div>
+
       {companies.length === 0 || frameworks.length === 0 ? (
         <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
           <CardContent className="p-12 text-center">
@@ -377,7 +384,7 @@ export default function Assessments() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {assessments.map((assessment) => {
+          {assessments.filter(a => globalCompany === "all" || a.company_id === globalCompany).map((assessment) => {
             const company = companies.find(c => c.id === assessment.company_id);
             const framework = frameworks.find(f => f.id === assessment.framework_id);
             

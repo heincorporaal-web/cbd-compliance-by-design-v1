@@ -10,10 +10,12 @@ import { Target, Plus, Search, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import MaturityBadge from "../components/grc/MaturityBadge";
+import CompanyFilterBar from "@/components/CompanyFilterBar";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function GRCGoals() {
+  const [globalCompany] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterCompany, setFilterCompany] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
 
   const { data: goals = [] } = useQuery({
@@ -29,7 +31,7 @@ export default function GRCGoals() {
   const filteredGoals = goals.filter(goal => {
     const matchesSearch = goal.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          goal.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCompany = filterCompany === "all" || goal.company_id === filterCompany;
+    const matchesCompany = globalCompany === "all" || goal.company_id === globalCompany;
     const matchesCategory = filterCategory === "all" || goal.category === filterCategory;
     return matchesSearch && matchesCompany && matchesCategory;
   });
@@ -119,17 +121,7 @@ export default function GRCGoals() {
                 className="pl-10"
               />
             </div>
-            <Select value={filterCompany} onValueChange={setFilterCompany}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="All Companies" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
-                {companies.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CompanyFilterBar />
             <Select value={filterCategory} onValueChange={setFilterCategory}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="All Categories" />

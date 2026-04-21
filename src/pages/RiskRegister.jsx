@@ -8,8 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Plus, Search, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import CompanyFilterBar from "@/components/CompanyFilterBar";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function RiskRegister() {
+  const [globalCompany] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const queryClient = useQueryClient();
 
@@ -23,10 +26,12 @@ export default function RiskRegister() {
     queryFn: () => base44.entities.Company.list(),
   });
 
-  const filteredRisks = risks.filter(risk =>
-    risk.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    risk.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRisks = risks.filter(risk => {
+    const matchesSearch = risk.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      risk.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCompany = globalCompany === "all" || risk.company_id === globalCompany;
+    return matchesSearch && matchesCompany;
+  });
 
   const getRiskLevel = (likelihood, impact) => {
     const values = { very_low: 1, low: 2, medium: 3, high: 4, very_high: 5 };
@@ -115,7 +120,7 @@ export default function RiskRegister() {
 
       <Card className="border-none shadow-lg">
         <CardHeader className="border-b border-slate-100">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
               <Input
@@ -125,6 +130,7 @@ export default function RiskRegister() {
                 className="pl-10"
               />
             </div>
+            <CompanyFilterBar />
           </div>
         </CardHeader>
         <CardContent className="p-0">

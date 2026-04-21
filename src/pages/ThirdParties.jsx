@@ -13,8 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import CompanyFilterBar from "@/components/CompanyFilterBar";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function ThirdParties() {
+  const [globalCompany] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState(null);
@@ -113,10 +116,12 @@ export default function ThirdParties() {
     }
   };
 
-  const filteredProviders = providers.filter(provider =>
-    provider.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    provider.service_type?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProviders = providers.filter(provider => {
+    const matchesSearch = provider.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      provider.service_type?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCompany = globalCompany === "all" || provider.company_id === globalCompany;
+    return matchesSearch && matchesCompany;
+  });
 
   const getCriticalityColor = (criticality) => {
     const colors = {
@@ -329,7 +334,7 @@ export default function ThirdParties() {
 
       <Card className="border-none shadow-lg">
         <CardHeader className="border-b border-slate-100">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
               <Input
@@ -339,6 +344,7 @@ export default function ThirdParties() {
                 className="pl-10"
               />
             </div>
+            <CompanyFilterBar />
           </div>
         </CardHeader>
         <CardContent className="p-0">
