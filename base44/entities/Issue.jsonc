@@ -1,0 +1,111 @@
+{
+  "name": "Issue",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Issue title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the issue"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "issue_type": {
+      "type": "string",
+      "enum": [
+        "action_item",
+        "fyi",
+        "risk",
+        "finding",
+        "recommendation"
+      ],
+      "default": "action_item",
+      "description": "Type of issue"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "resolved",
+        "closed"
+      ],
+      "default": "open",
+      "description": "Current status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Priority level"
+    },
+    "linked_entity_type": {
+      "type": "string",
+      "enum": [
+        "Company",
+        "ThirdPartyProvider",
+        "Assessment",
+        "ICTSystem",
+        "Framework",
+        "Incident"
+      ],
+      "description": "Type of entity this issue is linked to"
+    },
+    "linked_entity_id": {
+      "type": "string",
+      "description": "ID of the linked entity"
+    },
+    "linked_entity_name": {
+      "type": "string",
+      "description": "Name of the linked entity for easy reference"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Person responsible for resolving the issue"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Target resolution date"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Supporting documentation files"
+    },
+    "resolution_notes": {
+      "type": "string",
+      "description": "Notes on how the issue was resolved"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when issue was resolved"
+    }
+  },
+  "required": [
+    "title",
+    "issue_type",
+    "linked_entity_type",
+    "linked_entity_id"
+  ]
+}

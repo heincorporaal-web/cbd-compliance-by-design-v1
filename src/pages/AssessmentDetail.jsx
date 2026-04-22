@@ -45,6 +45,11 @@ export default function AssessmentDetail() {
     enabled: !!assessment?.company_id,
   });
 
+  const { data: allCompanies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list(),
+  });
+
   const { data: framework } = useQuery({
     queryKey: ['framework', assessment?.framework_id],
     queryFn: () => base44.entities.Framework.filter({ id: assessment.framework_id }).then(res => res[0]),
@@ -392,7 +397,23 @@ export default function AssessmentDetail() {
 
       <Card className="border-none shadow-lg">
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+            <div>
+              <Label className="text-sm text-slate-600">Company</Label>
+              <Select
+                value={assessment.company_id || ''}
+                onValueChange={(value) => updateAssessmentMutation.mutate({ id: assessmentId, data: { company_id: value } })}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allCompanies.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label className="text-sm text-slate-600">Assessor</Label>
               <Input

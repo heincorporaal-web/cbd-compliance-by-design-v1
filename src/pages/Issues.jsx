@@ -26,6 +26,7 @@ export default function Issues() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    company_id: "",
     issue_type: "action_item",
     status: "open",
     priority: "medium",
@@ -42,6 +43,11 @@ export default function Issues() {
   const { data: issues = [] } = useQuery({
     queryKey: ['issues'],
     queryFn: () => base44.entities.Issue.list('-created_date'),
+  });
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list(),
   });
 
   const createMutation = useMutation({
@@ -66,6 +72,7 @@ export default function Issues() {
     setFormData({
       title: "",
       description: "",
+      company_id: "",
       issue_type: "action_item",
       status: "open",
       priority: "medium",
@@ -114,11 +121,14 @@ export default function Issues() {
     const matchesSearch = issue.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          issue.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || issue.status === filterStatus;
-    return matchesSearch && matchesStatus;
+    const matchesCompany = globalCompany === "all" || issue.company_id === globalCompany;
+    return matchesSearch && matchesStatus && matchesCompany;
   });
 
-  const openIssues = issues.filter(i => i.status === "open" || i.status === "in_progress");
-  const closedIssues = issues.filter(i => i.status === "resolved" || i.status === "closed");
+  const openIssues = filteredIssues.filter(i => i.status === "open" || i.status === "in_progress");
+  const closedIssues = filteredIssues.filter(i => i.status === "resolved" || i.status === "closed");
+
+
 
   const getPriorityColor = (priority) => {
     const colors = {
@@ -182,6 +192,19 @@ export default function Issues() {
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
                     required
                   />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="company_id">Company</Label>
+                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {companies.map(company => (
+                        <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="issue_type">Type *</Label>
@@ -338,6 +361,7 @@ export default function Issues() {
               <div>
                 <p className="text-sm text-slate-600 mb-1">Open Issues</p>
                 <p className="text-3xl font-bold text-slate-900">{openIssues.length}</p>
+
               </div>
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 text-red-600" />
@@ -352,6 +376,7 @@ export default function Issues() {
               <div>
                 <p className="text-sm text-slate-600 mb-1">Closed Issues</p>
                 <p className="text-3xl font-bold text-slate-900">{closedIssues.length}</p>
+
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-between">
                 <CheckCircle2 className="w-6 h-6 text-green-600" />
@@ -365,7 +390,7 @@ export default function Issues() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600 mb-1">Total Issues</p>
-                <p className="text-3xl font-bold text-slate-900">{issues.length}</p>
+                <p className="text-3xl font-bold text-slate-900">{filteredIssues.length}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6 text-blue-600" />
@@ -404,7 +429,9 @@ export default function Issues() {
         <CardContent className="p-0">
           {filteredIssues.length > 0 ? (
             <div className="divide-y divide-slate-100">
-              {filteredIssues.map((issue) => (
+              {filteredIssues.map((issue) => {
+                const issueCompany = companies.find(c => c.id === issue.company_id);
+                return (
                 <div key={issue.id} className="p-4 hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -424,6 +451,9 @@ export default function Issues() {
                         <p className="text-sm text-slate-600 mb-2">{issue.description}</p>
                       )}
                       <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                        {issueCompany && (
+                          <span className="font-medium text-slate-700">{issueCompany.name}</span>
+                        )}
                         {issue.linked_entity_name && (
                           <span className="flex items-center gap-1">
                             <span className="font-medium">{issue.linked_entity_type}:</span> {issue.linked_entity_name}
@@ -472,7 +502,8 @@ export default function Issues() {
                     </Button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="p-12 text-center">
