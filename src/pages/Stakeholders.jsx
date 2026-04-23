@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import { Upload } from "lucide-react";
 
 export default function Stakeholders() {
   const queryClient = useQueryClient();
+  const urlParams = new URLSearchParams(window.location.search);
+  const [activeTab, setActiveTab] = useState(urlParams.get("tab") || "list");
   const [search, setSearch] = useState("");
   const [filterGroupId, setFilterGroupId] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -216,7 +218,7 @@ export default function Stakeholders() {
       </div>
 
       {/* Main content */}
-      <Tabs defaultValue="list">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="list"><Users className="w-4 h-4 mr-1.5" />Stakeholders</TabsTrigger>
           <TabsTrigger value="matrix"><Grid3X3 className="w-4 h-4 mr-1.5" />Group Matrix</TabsTrigger>
