@@ -6,7 +6,7 @@ import {
   AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert,
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
-  Activity, X, PlusCircle, Sparkles
+  Activity, X, PlusCircle, Sparkles, Cpu
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -65,6 +65,7 @@ export const NAV_GROUPS = [
       { id: "process_mgmt", title: "Process Management", url: createPageUrl("ProcessManagement"), icon: Network },
       { id: "process_assessments", title: "Process Assessments", url: createPageUrl("ProcessAssessments"), icon: ClipboardCheck },
       { id: "ict_systems", title: "ICT Systems", url: createPageUrl("ICTSystems"), icon: Server },
+      { id: "it_capabilities", title: "IT Capabilities", url: createPageUrl("ITCapabilities"), icon: Cpu },
     ],
   },
   {

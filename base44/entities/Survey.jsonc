@@ -1,0 +1,149 @@
+{
+  "name": "Survey",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Survey title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Survey description and purpose"
+    },
+    "linked_entity_type": {
+      "type": "string",
+      "enum": [
+        "ICTSystem",
+        "ThirdPartyProvider",
+        "Framework",
+        "ITCapability"
+      ],
+      "description": "Type of entity this survey is linked to"
+    },
+    "linked_entity_id": {
+      "type": "string",
+      "description": "ID of the linked entity"
+    },
+    "linked_entity_name": {
+      "type": "string",
+      "description": "Name of the linked entity for easy reference"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "textarea",
+              "single_choice",
+              "multiple_choice",
+              "rating",
+              "yes_no"
+            ]
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Survey questions"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "closed"
+      ],
+      "default": "draft",
+      "description": "Survey status"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Survey completion due date"
+    },
+    "recipients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "completed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Survey recipients and completion status"
+    },
+    "reminder_schedule": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "frequency_days": {
+          "type": "number"
+        },
+        "last_sent": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Automated reminder settings"
+    },
+    "ai_analysis": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "key_findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sentiment": {
+          "type": "string"
+        },
+        "concerns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "last_analyzed": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "AI-generated analysis of responses"
+    }
+  },
+  "required": [
+    "title",
+    "linked_entity_type",
+    "linked_entity_id"
+  ]
+}

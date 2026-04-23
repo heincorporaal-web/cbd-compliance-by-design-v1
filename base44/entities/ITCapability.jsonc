@@ -1,0 +1,75 @@
+{
+  "name": "ITCapability",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Capability name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the IT capability"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "infrastructure",
+        "security",
+        "data_management",
+        "application_development",
+        "service_management",
+        "networking",
+        "cloud",
+        "analytics",
+        "integration",
+        "other"
+      ],
+      "default": "other",
+      "description": "Capability category"
+    },
+    "maturity_level": {
+      "type": "string",
+      "enum": [
+        "initial",
+        "developing",
+        "defined",
+        "managed",
+        "optimising"
+      ],
+      "default": "initial",
+      "description": "Current maturity level"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "planned",
+        "retired"
+      ],
+      "default": "active"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Capability owner name"
+    },
+    "stakeholder_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of assigned Stakeholders"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "name",
+    "company_id"
+  ]
+}

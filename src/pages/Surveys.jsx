@@ -36,7 +36,8 @@ export default function Surveys() {
     const colors = {
       ICTSystem: 'bg-blue-100 text-blue-700 border-blue-200',
       ThirdPartyProvider: 'bg-purple-100 text-purple-700 border-purple-200',
-      Framework: 'bg-indigo-100 text-indigo-700 border-indigo-200'
+      Framework: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+      ITCapability: 'bg-teal-100 text-teal-700 border-teal-200',
     };
     return colors[type] || 'bg-slate-100 text-slate-700';
   };

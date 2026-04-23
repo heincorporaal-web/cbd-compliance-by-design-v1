@@ -40,6 +40,11 @@ export default function SurveyBuilder() {
     queryFn: () => base44.entities.Framework.list(),
   });
 
+  const { data: itCapabilities = [] } = useQuery({
+    queryKey: ['itCapabilities'],
+    queryFn: () => base44.entities.ITCapability.list(),
+  });
+
   // useState BEFORE any hook that references formData
   const [formData, setFormData] = useState({
     title: existingSurvey?.title || "",
@@ -72,6 +77,7 @@ export default function SurveyBuilder() {
       case 'ICTSystem': return ictSystems;
       case 'ThirdPartyProvider': return suppliers;
       case 'Framework': return frameworks;
+      case 'ITCapability': return itCapabilities;
       default: return [];
     }
   };
@@ -193,6 +199,7 @@ export default function SurveyBuilder() {
                     <SelectItem value="ICTSystem">ICT System</SelectItem>
                     <SelectItem value="ThirdPartyProvider">Third Party Provider</SelectItem>
                     <SelectItem value="Framework">Framework</SelectItem>
+                    <SelectItem value="ITCapability">IT Capability</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
