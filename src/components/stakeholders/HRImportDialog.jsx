@@ -4,6 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Upload, FileText, AlertTriangle, CheckCircle2, XCircle, Info, Download } from "lucide-react";
 
 // ─── CSV parser ───────────────────────────────────────────────────────────────
@@ -80,6 +82,12 @@ export default function HRImportDialog({ open, onOpenChange }) {
   const [fileName, setFileName] = useState("");
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState("");
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies"],
+    queryFn: () => base44.entities.Company.list(),
+  });
 
   const { data: stakeholders = [] } = useQuery({
     queryKey: ["stakeholders"],
@@ -111,6 +119,7 @@ export default function HRImportDialog({ open, onOpenChange }) {
     for (const row of rows) {
       const { _existing, _classified, _action, ...data } = row;
       if (!data.email) { stats.errors++; continue; }
+      if (selectedCompanyId) data.company_id = selectedCompanyId;
       try {
         if (_classified === "new_hire" && !_existing) {
           await base44.entities.Stakeholder.create(data);
@@ -144,7 +153,7 @@ export default function HRImportDialog({ open, onOpenChange }) {
     a.href = url; a.download = "hr_import_sample.csv"; a.click();
   };
 
-  const reset = () => { setRows([]); setFileName(""); setResults(null); if (fileRef.current) fileRef.current.value = ""; };
+  const reset = () => { setRows([]); setFileName(""); setResults(null); setSelectedCompanyId(""); if (fileRef.current) fileRef.current.value = ""; };
 
   const counts = rows.reduce((acc, r) => {
     acc[r._classified] = (acc[r._classified] || 0) + 1;
@@ -169,6 +178,24 @@ export default function HRImportDialog({ open, onOpenChange }) {
               The <strong>action</strong> column should be: <code>new_hire</code>, <code>job_change</code>, or <code>termination</code>.
               If omitted, action is inferred from the <strong>status</strong> column or email match.
             </div>
+          </div>
+
+          {/* Company selector */}
+          <div className="space-y-1.5">
+            <Label htmlFor="import-company">Assign to Company <span className="text-slate-400 font-normal">(optional)</span></Label>
+            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+              <SelectTrigger id="import-company">
+                <SelectValue placeholder="Select a company…" />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedCompanyId && (
+              <p className="text-xs text-slate-500">All imported stakeholders will be assigned to this company.</p>
+            )}
           </div>
 
           {/* File picker */}
