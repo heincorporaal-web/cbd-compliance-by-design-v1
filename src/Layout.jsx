@@ -43,12 +43,12 @@ export default function Layout({ children }) {
         <Sidebar className="border-r border-slate-200">
           <SidebarHeader className="border-b border-slate-200 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-700 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg">
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h2 className="font-bold text-slate-900 text-lg">CBD</h2>
-                <p className="text-xs text-slate-500">Compliance by Design</p>
+                <p className="text-xs text-primary/70">Compliance by Design</p>
               </div>
             </div>
           </SidebarHeader>

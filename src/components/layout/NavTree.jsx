@@ -115,10 +115,10 @@ function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false })
       <Link
         to={item.url}
         className={`flex items-center gap-2.5 px-3 py-2 flex-1 min-w-0 text-sm ${
-          isActive ? "text-blue-700 font-semibold" : "text-slate-700"
+          isActive ? "text-primary font-semibold" : "text-slate-700"
         }`}
       >
-        <item.icon className={`w-4 h-4 shrink-0 ${isActive ? "text-blue-600" : "text-slate-500"}`} />
+        <item.icon className={`w-4 h-4 shrink-0 ${isActive ? "text-primary" : "text-slate-500"}`} />
         <span className="truncate">{item.title}</span>
       </Link>
       {showFavBtn && (
@@ -151,7 +151,7 @@ function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false
       <button
         onClick={() => setOpen(v => !v)}
         className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors ${
-          hasActive ? "text-blue-700 bg-blue-50" : "text-slate-500 hover:bg-slate-100"
+          hasActive ? "text-primary bg-primary/8" : "text-slate-500 hover:bg-slate-100"
         }`}
       >
         <group.icon className="w-3.5 h-3.5 shrink-0" />
@@ -210,7 +210,7 @@ export default function NavTree() {
       <div className="mb-2">
         <button
           onClick={() => setFavOpen(v => !v)}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-amber-600 hover:bg-amber-50 transition-colors"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-amber-500 hover:bg-amber-50 transition-colors"
         >
           <Star className="w-3.5 h-3.5 fill-amber-400" />
           <span className="flex-1 text-left">Favorites</span>
