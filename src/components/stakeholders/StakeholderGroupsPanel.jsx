@@ -12,8 +12,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Pencil, Trash2, Users } from "lucide-react";
 
 const PRESET_COLORS = [
-  "#3B82F6", "#8B5CF6", "#10B981", "#F59E0B",
-  "#EF4444", "#14B8A6", "#F97316", "#6366F1",
+  // Blues & Purples
+  "#3B82F6", "#2563EB", "#6366F1", "#8B5CF6", "#A855F7", "#7C3AED",
+  // Greens & Teals
+  "#10B981", "#059669", "#14B8A6", "#0D9488", "#22C55E", "#16A34A",
+  // Reds, Oranges & Yellows
+  "#EF4444", "#DC2626", "#F97316", "#EA580C", "#F59E0B", "#D97706",
+  // Pinks & Roses
+  "#EC4899", "#DB2777", "#F43F5E", "#E11D48",
+  // Slate & Neutral
+  "#64748B", "#475569", "#6B7280", "#374151",
 ];
 
 const emptyGroup = { name: "", description: "", color: "#3B82F6", company_id: "", status: "active" };
