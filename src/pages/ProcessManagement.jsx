@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cpu, Plus, Search, List, GitBranch, Layers, User, Server } from "lucide-react";
+import { Cpu, Plus, Search, List, GitBranch, Layers, User, Server, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import OrgProcessTreeView from "@/components/processmanagement/OrgProcessTreeView";
+import ProcessCSVImportDialog from "@/components/processmanagement/ProcessCSVImportDialog";
 
 const levelLabels = {
   0: "Value Chain", 1: "Process Group", 2: "Process",
@@ -36,6 +37,7 @@ const getCriticalityColor = (c) => ({
 
 export default function ProcessManagement() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
   const [levelFilter, setLevelFilter] = useState("all");
   const [companyFilter, setCompanyFilter] = useState("all");
   const [ownerFilter, setOwnerFilter] = useState("all");
@@ -144,13 +146,21 @@ export default function ProcessManagement() {
             <p className="text-slate-600">Manage process ownership and system allocations</p>
           </div>
         </div>
-        <Link to={createPageUrl("ProcessManagementDetail?new=true")}>
-          <Button className="bg-teal-600 hover:bg-teal-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Process
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            <Upload className="w-4 h-4 mr-2" />
+            Import CSV
           </Button>
-        </Link>
+          <Link to={createPageUrl("ProcessManagementDetail?new=true")}>
+            <Button className="bg-teal-600 hover:bg-teal-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Process
+            </Button>
+          </Link>
+        </div>
       </div>
+
+      <ProcessCSVImportDialog open={importOpen} onOpenChange={setImportOpen} companies={companies} />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
