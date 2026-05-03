@@ -12,8 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Save, Plus, Trash2, Shield, AlertTriangle, AlertCircle,
-  Target, ClipboardCheck, X, User, Server, Users
+  Target, ClipboardCheck, X, User, Server, Users, GitBranch
 } from "lucide-react";
+import ProcessFlowChart from "@/components/processmanagement/ProcessFlowChart";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -175,6 +176,12 @@ export default function ProcessManagementDetail() {
               )}
             </TabsTrigger>
             <TabsTrigger value="execution">Execution</TabsTrigger>
+            {!isNew && processId && (
+              <TabsTrigger value="flowchart">
+                <GitBranch className="w-3.5 h-3.5 mr-1" />
+                Flow Chart
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* DETAILS TAB */}
@@ -611,6 +618,27 @@ export default function ProcessManagementDetail() {
               </CardContent>
             </Card>
           </TabsContent>
+          {/* FLOW CHART TAB */}
+          {!isNew && processId && (
+            <TabsContent value="flowchart" className="space-y-4">
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle className="flex items-center gap-2">
+                    <GitBranch className="w-5 h-5 text-primary" />
+                    Process Flow Chart
+                  </CardTitle>
+                  <p className="text-sm text-slate-500">Interactive view of child processes and associated systems. Click a node to inspect details.</p>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <ProcessFlowChart
+                    rootProcess={existingProcess?.[0]}
+                    allProcesses={processes}
+                    systems={systems}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </form>
     </div>
