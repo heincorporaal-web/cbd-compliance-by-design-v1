@@ -89,7 +89,12 @@ export default function Layout({ children }) {
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="lg:hidden hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200" />
-                <h1 className="text-xl font-bold text-slate-900 lg:hidden">CBD</h1>
+                <div className="flex items-center gap-2 lg:hidden">
+                  <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shadow flex items-center justify-center">
+                    <CBDLogo />
+                  </div>
+                  <h1 className="text-xl font-bold text-slate-900">CBD</h1>
+                </div>
               </div>
               <div className="ml-auto flex items-center gap-4">
                 <CompanyFilterBar />
