@@ -1,0 +1,43 @@
+{
+  "name": "UserCompanyRole",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to User entity"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User email for easy reference"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name for easy reference"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "manager",
+        "analyst",
+        "viewer",
+        "auditor"
+      ],
+      "default": "viewer",
+      "description": "User role within this specific company"
+    },
+    "custom_role_id": {
+      "type": "string",
+      "description": "Optional custom UserRole ID"
+    }
+  },
+  "required": [
+    "user_id",
+    "company_id",
+    "role"
+  ]
+}

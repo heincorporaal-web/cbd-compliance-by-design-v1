@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Users as UsersIcon, Plus, Search, Shield, Mail, Phone, Briefcase, Edit2, Trash2 } from "lucide-react";
+import { Users as UsersIcon, Plus, Search, Shield, Mail, Phone, Briefcase, Edit2, Building2 } from "lucide-react";
 import { toast } from "sonner";
+import UserCompanyAssignments from "@/components/users/UserCompanyAssignments";
 
 export default function Users() {
   const queryClient = useQueryClient();
@@ -27,6 +29,16 @@ export default function Users() {
   const { data: userRoles = [] } = useQuery({
     queryKey: ['userRoles'],
     queryFn: () => base44.entities.UserRole.list(),
+  });
+
+  const { data: allUserCompanyRoles = [] } = useQuery({
+    queryKey: ['allUserCompanyRoles'],
+    queryFn: () => base44.entities.UserCompanyRole.list(),
+  });
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list(),
   });
 
   const updateUserMutation = useMutation({
@@ -191,6 +203,23 @@ export default function Users() {
                               </p>
                             </div>
                           )}
+                          {(() => {
+                            const userAssignments = allUserCompanyRoles.filter(r => r.user_id === user.id);
+                            if (userAssignments.length === 0) return null;
+                            return (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {userAssignments.map(a => {
+                                  const co = companies.find(c => c.id === a.company_id);
+                                  return (
+                                    <span key={a.id} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 rounded px-1.5 py-0.5">
+                                      <Building2 className="w-3 h-3" />
+                                      {co?.name || a.company_name} · {a.role}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                       <Dialog>
@@ -252,12 +281,15 @@ export default function Users() {
                                 </SelectContent>
                               </Select>
                             </div>
+                            <Separator />
+                            {editingUser && <UserCompanyAssignments user={editingUser} />}
+                            <Separator />
                             <div className="flex justify-end gap-2">
-                              <Button variant="outline" onClick={() => setEditingUser(null)}>Cancel</Button>
-                              <Button onClick={() => updateUserMutation.mutate({ id: editingUser.id, data: editingUser })}>
-                                Save Changes
-                              </Button>
-                            </div>
+                               <Button variant="outline" onClick={() => setEditingUser(null)}>Cancel</Button>
+                               <Button onClick={() => updateUserMutation.mutate({ id: editingUser.id, data: editingUser })}>
+                                 Save Changes
+                               </Button>
+                             </div>
                           </div>
                         </DialogContent>
                       </Dialog>
