@@ -90,6 +90,7 @@ import FrameworkControlMapper from './pages/FrameworkControlMapper';
 import iHPOM from './pages/iHPOM';
 import iHPOMTreeReport from './pages/iHPOMTreeReport';
 import ITCapabilities from './pages/ITCapabilities';
+import OrgObjectives from './pages/OrgObjectives';
 import __Layout from './Layout.jsx';
 
 
@@ -137,6 +138,7 @@ export const PAGES = {
     "iHPOM": iHPOM,
     "iHPOMTreeReport": iHPOMTreeReport,
     "ITCapabilities": ITCapabilities,
+    "OrgObjectives": OrgObjectives,
 }
 
 export const pagesConfig = {

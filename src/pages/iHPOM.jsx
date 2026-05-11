@@ -158,6 +158,11 @@ export default function IHPOM() {
                   {process.linked_control_ids.length} controls
                 </Badge>
               )}
+              {(process.linked_org_objective_ids?.length || 0) > 0 && (
+                <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                  {process.linked_org_objective_ids.length} objectives
+                </Badge>
+              )}
             </div>
           </div>
         </div>

@@ -1,0 +1,201 @@
+{
+  "name": "OrgProcess",
+  "type": "object",
+  "properties": {
+    "process_code": {
+      "type": "string",
+      "description": "Unique process identifier (e.g., P1.1.2.1)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Process name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed process description"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "level": {
+      "type": "number",
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "description": "Process hierarchy level: 0=Value Chain, 1=Process Group, 2=Process, 3=Sub-Process, 4=Procedure, 5=Task, 6=Activity/Keystroke"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent process ID for hierarchy"
+    },
+    "value_chain": {
+      "type": "string",
+      "description": "Associated value chain (for level 0 processes)"
+    },
+    "process_owner": {
+      "type": "string",
+      "description": "Process owner name (free text)"
+    },
+    "process_owner_id": {
+      "type": "string",
+      "description": "Reference to User entity (process owner)"
+    },
+    "deputy_owner": {
+      "type": "string",
+      "description": "Deputy process owner name"
+    },
+    "global_control_owner": {
+      "type": "string",
+      "description": "Global control owner responsible for this process"
+    },
+    "workstream": {
+      "type": "string",
+      "description": "Associated workstream"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "archived",
+        "under_review"
+      ],
+      "default": "active",
+      "description": "Process status"
+    },
+    "linked_system_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked ICT System IDs"
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked risk IDs"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked control IDs"
+    },
+    "linked_issue_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked issue IDs"
+    },
+    "linked_goal_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked GRC goal IDs"
+    },
+    "linked_assessment_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked assessment IDs"
+    },
+    "linked_objective_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of linked company objectives (from Company entity)"
+    },
+    "linked_principle_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of linked principle risks"
+    },
+    "linked_org_objective_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of linked OrgObjective records"
+    },
+    "documentation_url": {
+      "type": "string",
+      "description": "Link to process documentation"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "continuous",
+        "daily",
+        "weekly",
+        "monthly",
+        "quarterly",
+        "annually",
+        "ad_hoc"
+      ],
+      "description": "Process execution frequency"
+    },
+    "estimated_duration": {
+      "type": "string",
+      "description": "Estimated time to complete"
+    },
+    "automation_level": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "semi_automated",
+        "fully_automated"
+      ],
+      "default": "manual",
+      "description": "Level of automation"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "Business criticality"
+    },
+    "inputs": {
+      "type": "string",
+      "description": "Process inputs"
+    },
+    "outputs": {
+      "type": "string",
+      "description": "Process outputs"
+    },
+    "key_performance_indicators": {
+      "type": "string",
+      "description": "KPIs for this process"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "process_code",
+    "name",
+    "company_id",
+    "level"
+  ]
+}

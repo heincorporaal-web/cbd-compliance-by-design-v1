@@ -6,7 +6,7 @@ import {
   AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert,
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
-  Activity, X, PlusCircle, Sparkles, Cpu
+  Activity, X, PlusCircle, Sparkles, Cpu, Search
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -32,6 +32,7 @@ export const NAV_GROUPS = [
       { id: "controls", title: "Controls", url: createPageUrl("Controls"), icon: Shield },
       { id: "framework_mapper", title: "Framework Mapper (AI)", url: createPageUrl("FrameworkControlMapper"), icon: Sparkles },
       { id: "grc_goals", title: "GRC Goals", url: createPageUrl("GRCGoals"), icon: Target },
+      { id: "org_objectives", title: "Org. Objectives", url: createPageUrl("OrgObjectives"), icon: Target },
       { id: "sign_offs", title: "Sign-Offs", url: createPageUrl("SignOffs"), icon: FileCheck },
       { id: "workflows", title: "Workflows", url: createPageUrl("Workflows"), icon: GitBranch },
     ],
@@ -182,6 +183,7 @@ export default function NavTree() {
   const [userId, setUserId] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [favOpen, setFavOpen] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     base44.auth.me().then(user => {
@@ -204,8 +206,58 @@ export default function NavTree() {
 
   const favItems = ALL_NAV_ITEMS.filter(i => favorites.includes(i.id));
 
+  const searchResults = searchQuery.trim()
+    ? ALL_NAV_ITEMS.filter(i => i.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    : null;
+
   return (
     <div className="space-y-1 py-2">
+      {/* Search bar */}
+      <div className="px-2 pb-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search menu…"
+            className="w-full pl-8 pr-8 py-1.5 text-sm bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:bg-white transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Search results */}
+      {searchResults && (
+        <div className="mb-2">
+          <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            {searchResults.length} result{searchResults.length !== 1 ? "s" : ""}
+          </p>
+          <div className="ml-2 border-l-2 border-primary/30 pl-2 space-y-0.5">
+            {searchResults.length === 0 ? (
+              <p className="text-xs text-slate-400 px-3 py-2 italic">No matches found.</p>
+            ) : searchResults.map(item => (
+              <NavLink
+                key={item.id}
+                item={item}
+                isActive={location.pathname === item.url}
+                favorites={favorites}
+                onToggleFav={toggleFav}
+                showFavBtn
+              />
+            ))}
+          </div>
+          <div className="border-t border-slate-200 mt-2" />
+        </div>
+      )}
+
       {/* Favorites section */}
       <div className="mb-2">
         <button
@@ -238,8 +290,8 @@ export default function NavTree() {
 
       <div className="border-t border-slate-200 my-2" />
 
-      {/* Nav groups */}
-      {NAV_GROUPS.map((group, i) => (
+      {/* Nav groups — hide when searching */}
+      {!searchResults && NAV_GROUPS.map((group, i) => (
         <NavGroup
           key={group.id}
           group={group}

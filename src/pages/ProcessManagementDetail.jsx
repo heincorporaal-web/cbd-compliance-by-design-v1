@@ -37,7 +37,7 @@ export default function ProcessManagementDetail() {
     global_control_owner: "", workstream: "", status: "active",
     linked_system_ids: [], linked_risk_ids: [], linked_control_ids: [],
     linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
-    linked_objective_ids: [], linked_principle_risk_ids: [],
+    linked_objective_ids: [], linked_principle_risk_ids: [], linked_org_objective_ids: [],
     documentation_url: "", frequency: "ad_hoc", estimated_duration: "",
     automation_level: "manual", criticality: "medium",
     inputs: "", outputs: "", key_performance_indicators: "", notes: ""
@@ -60,6 +60,7 @@ export default function ProcessManagementDetail() {
   const { data: assessments = [] } = useQuery({ queryKey: ["assessments"], queryFn: () => base44.entities.Assessment.list() });
   const { data: systems = [] } = useQuery({ queryKey: ["ictSystems"], queryFn: () => base44.entities.ICTSystem.list() });
   const { data: users = [] } = useQuery({ queryKey: ["users"], queryFn: () => base44.entities.User.list() });
+  const { data: orgObjectives = [] } = useQuery({ queryKey: ["orgObjectives"], queryFn: () => base44.entities.OrgObjective.list() });
 
   useEffect(() => {
     if (existingProcess?.[0]) setFormData(existingProcess[0]);
@@ -119,6 +120,10 @@ export default function ProcessManagementDetail() {
   const linkedAssessments = assessments.filter(a => formData.linked_assessment_ids?.includes(a.id));
   const linkedObjectives = availableObjectives.filter(o => formData.linked_objective_ids?.includes(o.id));
   const linkedPrincipleRisks = availablePrincipleRisks.filter(r => formData.linked_principle_risk_ids?.includes(r.id));
+
+  const companyOrgObjectives = orgObjectives.filter(o => !formData.company_id || o.company_id === formData.company_id);
+  const linkedOrgObjectiveIds = formData.linked_org_objective_ids || [];
+  const linkedOrgObjectives = orgObjectives.filter(o => linkedOrgObjectiveIds.includes(o.id));
 
   const selectedOwnerUser = users.find(u => u.id === formData.process_owner_id);
 
@@ -527,6 +532,45 @@ export default function ProcessManagementDetail() {
                       <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeLink("linked_goal_ids", g.id)}><Trash2 className="w-3 h-3 text-red-500" /></Button>
                     </div>
                   )) : <p className="text-sm text-slate-500 text-center py-4">No goals linked</p>}
+                </CardContent>
+              </Card>
+
+              {/* Org Objectives */}
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2"><Target className="w-5 h-5 text-indigo-600" />Org. Objectives</CardTitle>
+                    <Dialog open={activeDialog === "org_obj"} onOpenChange={open => setActiveDialog(open ? "org_obj" : null)}>
+                      <DialogTrigger asChild><Button type="button" variant="outline" size="sm"><Plus className="w-4 h-4" /></Button></DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader><DialogTitle>Link Org. Objective</DialogTitle></DialogHeader>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {companyOrgObjectives.filter(o => !linkedOrgObjectiveIds.includes(o.id)).map(o => (
+                            <div key={o.id} className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer" onClick={() => addLink("linked_org_objective_ids", o.id)}>
+                              <p className="font-medium text-sm">{o.title}</p>
+                              <p className="text-xs text-slate-500 capitalize">{o.category} · {o.status}</p>
+                            </div>
+                          ))}
+                          {companyOrgObjectives.filter(o => !linkedOrgObjectiveIds.includes(o.id)).length === 0 && (
+                            <p className="text-sm text-slate-500 text-center py-4">No objectives available.</p>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {linkedOrgObjectives.length > 0 ? linkedOrgObjectives.map(o => (
+                    <div key={o.id} className="flex items-center justify-between p-2 bg-indigo-50 rounded border border-indigo-200 mb-2">
+                      <div>
+                        <p className="text-sm font-medium">{o.title}</p>
+                        <p className="text-xs text-slate-500 capitalize">{o.category}</p>
+                      </div>
+                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeLink("linked_org_objective_ids", o.id)}>
+                        <Trash2 className="w-3 h-3 text-red-500" />
+                      </Button>
+                    </div>
+                  )) : <p className="text-sm text-slate-500 text-center py-4">No org. objectives linked</p>}
                 </CardContent>
               </Card>
 

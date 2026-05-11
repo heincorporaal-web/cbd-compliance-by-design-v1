@@ -1,0 +1,127 @@
+{
+  "name": "OrgObjective",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Objective title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the objective"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "strategic",
+        "operational",
+        "financial",
+        "compliance",
+        "technology",
+        "people"
+      ],
+      "default": "strategic",
+      "description": "Objective category"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "achieved",
+        "on_hold",
+        "cancelled"
+      ],
+      "default": "active",
+      "description": "Current status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Objective owner name"
+    },
+    "target_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Target completion date"
+    },
+    "progress_pct": {
+      "type": "number",
+      "description": "Progress percentage (0-100)"
+    },
+    "linked_process_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of linked OrgProcess records"
+    },
+    "linked_ihpom_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of linked BusinessProcess (iHPOM) records"
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of linked risks"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of linked controls"
+    },
+    "key_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "current": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Key results / milestones for this objective"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "title",
+    "company_id",
+    "category"
+  ]
+}

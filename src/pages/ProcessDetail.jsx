@@ -198,11 +198,28 @@ export default function ProcessDetail() {
   const linkedGoals = goals.filter(g => formData.linked_goal_ids?.includes(g.id));
   const linkedAssessments = assessments.filter(a => formData.linked_assessment_ids?.includes(a.id));
 
+  const { data: orgObjectives = [] } = useQuery({
+    queryKey: ['orgObjectives'],
+    queryFn: () => base44.entities.OrgObjective.list(),
+  });
+
   const company = companies.find(c => c.id === formData.company_id);
   const availableObjectives = company?.objectives || [];
   const availablePrincipleRisks = company?.principle_risks || [];
   const linkedObjectives = availableObjectives.filter(obj => formData.linked_objective_ids?.includes(obj.id));
   const linkedPrincipleRisks = availablePrincipleRisks.filter(risk => formData.linked_principle_risk_ids?.includes(risk.id));
+
+  // OrgObjective entity linkage
+  const companyOrgObjectives = orgObjectives.filter(o => !formData.company_id || o.company_id === formData.company_id);
+  const linkedOrgObjectiveIds = formData.linked_org_objective_ids || [];
+  const linkedOrgObjectives = orgObjectives.filter(o => linkedOrgObjectiveIds.includes(o.id));
+
+  const toggleOrgObjective = (id, add) => {
+    const next = add ? [...linkedOrgObjectiveIds, id] : linkedOrgObjectiveIds.filter(x => x !== id);
+    const newData = { ...formData, linked_org_objective_ids: next };
+    setFormData(newData);
+    if (processId) updateMutation.mutate(newData);
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -792,6 +809,58 @@ export default function ProcessDetail() {
                     </div>
                   ) : (
                     <p className="text-sm text-slate-500 text-center py-4">No assessments linked</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Org Objectives (new entity) */}
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="w-5 h-5 text-indigo-600" />
+                      Org. Objectives
+                    </CardTitle>
+                    <Dialog open={activeDialog === 'org_obj'} onOpenChange={open => setActiveDialog(open ? 'org_obj' : null)}>
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="outline" size="sm">
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader><DialogTitle>Link Org. Objective</DialogTitle></DialogHeader>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {companyOrgObjectives.filter(o => !linkedOrgObjectiveIds.includes(o.id)).map(o => (
+                            <div key={o.id} className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer" onClick={() => { toggleOrgObjective(o.id, true); setActiveDialog(null); }}>
+                              <p className="font-medium text-sm">{o.title}</p>
+                              <p className="text-xs text-slate-500 capitalize">{o.category} · {o.status}</p>
+                            </div>
+                          ))}
+                          {companyOrgObjectives.filter(o => !linkedOrgObjectiveIds.includes(o.id)).length === 0 && (
+                            <p className="text-sm text-slate-500 text-center py-4">No objectives available for this company.</p>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {linkedOrgObjectives.length > 0 ? (
+                    <div className="space-y-2">
+                      {linkedOrgObjectives.map(o => (
+                        <div key={o.id} className="flex items-center justify-between p-2 bg-indigo-50 rounded border border-indigo-200">
+                          <div>
+                            <p className="text-sm font-medium">{o.title}</p>
+                            <p className="text-xs text-slate-500 capitalize">{o.category}</p>
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => toggleOrgObjective(o.id, false)}>
+                            <Trash2 className="w-3 h-3 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500 text-center py-4">No org. objectives linked</p>
                   )}
                 </CardContent>
               </Card>
