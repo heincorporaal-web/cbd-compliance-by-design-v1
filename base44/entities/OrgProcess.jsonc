@@ -190,6 +190,24 @@
     "notes": {
       "type": "string",
       "description": "Additional notes"
+    },
+    "minimum_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Minimum requirements for Sub-Process level (up to 10 items)"
     }
   },
   "required": [

@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Save, Plus, Trash2, Shield, AlertTriangle, AlertCircle,
-  Target, ClipboardCheck, X, User, Server, Users, GitBranch, Search, ChevronsUpDown
+  Target, ClipboardCheck, X, User, Server, Users, GitBranch, Search, ChevronsUpDown, ListChecks
 } from "lucide-react";
 import ProcessFlowChart from "@/components/processmanagement/ProcessFlowChart";
 import { Link, useNavigate } from "react-router-dom";
@@ -96,6 +96,20 @@ export default function ProcessManagementDetail() {
     },
   });
 
+  const blankForm = {
+    process_code: "", name: "", description: "", company_id: "",
+    level: 0, parent_id: "", value_chain: "",
+    process_owner: "", process_owner_id: "", deputy_owner: "",
+    global_control_owner: "", workstream: "", status: "active",
+    linked_system_ids: [], linked_risk_ids: [], linked_control_ids: [],
+    linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
+    linked_objective_ids: [], linked_principle_risk_ids: [], linked_org_objective_ids: [],
+    documentation_url: "", frequency: "ad_hoc", estimated_duration: "",
+    automation_level: "manual", criticality: "medium",
+    inputs: "", outputs: "", key_performance_indicators: "", notes: "",
+    minimum_requirements: []
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     isNew || !processId ? createMutation.mutate(formData) : updateMutation.mutate(formData);
@@ -103,27 +117,38 @@ export default function ProcessManagementDetail() {
 
   const handleSaveAndNew = (e) => {
     e.preventDefault();
-    const resetForm = () => {
-      setFormData({
-        process_code: "", name: "", description: "", company_id: formData.company_id,
-        level: formData.level, parent_id: "", value_chain: "",
-        process_owner: "", process_owner_id: "", deputy_owner: "",
-        global_control_owner: "", workstream: "", status: "active",
-        linked_system_ids: [], linked_risk_ids: [], linked_control_ids: [],
-        linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
-        linked_objective_ids: [], linked_principle_risk_ids: [], linked_org_objective_ids: [],
-        documentation_url: "", frequency: "ad_hoc", estimated_duration: "",
-        automation_level: "manual", criticality: "medium",
-        inputs: "", outputs: "", key_performance_indicators: "", notes: ""
-      });
+    const afterSave = () => {
+      queryClient.invalidateQueries(["orgProcesses"]);
+      setFormData({ ...blankForm });
       navigate(createPageUrl("ProcessManagementDetail?new=true"));
     };
     if (isNew || !processId) {
-      createMutation.mutate(formData, { onSuccess: resetForm });
+      createMutation.mutate(formData, { onSuccess: afterSave });
     } else {
-      updateMutation.mutate(formData, { onSuccess: resetForm });
+      updateMutation.mutate(formData, { onSuccess: afterSave });
     }
   };
+
+  const addRequirement = () => {
+    const reqs = formData.minimum_requirements || [];
+    if (reqs.length >= 10) return;
+    setFormData({ ...formData, minimum_requirements: [...reqs, { id: crypto.randomUUID(), requirement: "", description: "" }] });
+  };
+
+  const updateRequirement = (id, field, value) => {
+    setFormData({
+      ...formData,
+      minimum_requirements: (formData.minimum_requirements || []).map(r => r.id === id ? { ...r, [field]: value } : r)
+    });
+  };
+
+  const removeRequirement = (id) => {
+    setFormData({
+      ...formData,
+      minimum_requirements: (formData.minimum_requirements || []).filter(r => r.id !== id)
+    });
+  };
+
 
   const addLink = (field, id) => {
     if (!formData[field]?.includes(id)) {
@@ -185,7 +210,7 @@ export default function ProcessManagementDetail() {
           </Link>
           <Button onClick={handleSaveAndNew} variant="outline" className="border-teal-600 text-teal-700 hover:bg-teal-50">
             <Plus className="w-4 h-4 mr-2" />
-            Save & New
+            Save and New
           </Button>
           <Button onClick={handleSubmit} className="bg-teal-600 hover:bg-teal-700">
             <Save className="w-4 h-4 mr-2" />
@@ -223,6 +248,15 @@ export default function ProcessManagementDetail() {
               )}
             </TabsTrigger>
             <TabsTrigger value="execution">Execution</TabsTrigger>
+            {formData.level === 3 && (
+              <TabsTrigger value="min_requirements">
+                <ListChecks className="w-3.5 h-3.5 mr-1" />
+                Min. Requirements
+                {(formData.minimum_requirements?.length || 0) > 0 && (
+                  <Badge variant="secondary" className="ml-2">{formData.minimum_requirements.length}</Badge>
+                )}
+              </TabsTrigger>
+            )}
             {!isNew && processId && (
               <TabsTrigger value="flowchart">
                 <GitBranch className="w-3.5 h-3.5 mr-1" />
@@ -761,6 +795,88 @@ export default function ProcessManagementDetail() {
               </CardContent>
             </Card>
           </TabsContent>
+          {/* MINIMUM REQUIREMENTS TAB */}
+          {formData.level === 3 && (
+            <TabsContent value="min_requirements" className="space-y-6">
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <ListChecks className="w-5 h-5 text-teal-600" />
+                        Minimum Requirements
+                      </CardTitle>
+                      <p className="text-sm text-slate-500 mt-1">Define up to 10 minimum requirements for this sub-process.</p>
+                    </div>
+                    {(formData.minimum_requirements?.length || 0) < 10 && (
+                      <Button type="button" variant="outline" size="sm" onClick={addRequirement}>
+                        <Plus className="w-4 h-4 mr-1" />Add Requirement
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {(formData.minimum_requirements?.length || 0) === 0 ? (
+                    <div className="text-center py-10 text-slate-500">
+                      <ListChecks className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                      <p className="text-sm">No requirements added yet</p>
+                      <Button type="button" variant="outline" size="sm" className="mt-3" onClick={addRequirement}>
+                        <Plus className="w-4 h-4 mr-1" />Add First Requirement
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-slate-200">
+                            <th className="text-left py-2 px-3 font-semibold text-slate-700 w-8">#</th>
+                            <th className="text-left py-2 px-3 font-semibold text-slate-700 w-1/3">Requirement</th>
+                            <th className="text-left py-2 px-3 font-semibold text-slate-700">Description</th>
+                            <th className="w-10"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(formData.minimum_requirements || []).map((req, idx) => (
+                            <tr key={req.id} className="border-b border-slate-100 hover:bg-slate-50">
+                              <td className="py-2 px-3 text-slate-400 font-mono">{idx + 1}</td>
+                              <td className="py-2 px-3">
+                                <Input
+                                  value={req.requirement}
+                                  onChange={e => updateRequirement(req.id, "requirement", e.target.value)}
+                                  placeholder="Requirement title"
+                                  className="h-8 text-sm"
+                                />
+                              </td>
+                              <td className="py-2 px-3">
+                                <Textarea
+                                  value={req.description}
+                                  onChange={e => updateRequirement(req.id, "description", e.target.value)}
+                                  placeholder="Describe the requirement..."
+                                  rows={2}
+                                  className="text-sm resize-none"
+                                />
+                              </td>
+                              <td className="py-2 px-3">
+                                <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeRequirement(req.id)}>
+                                  <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {(formData.minimum_requirements?.length || 0) < 10 && (
+                        <Button type="button" variant="ghost" size="sm" className="mt-3 text-teal-600 hover:text-teal-700" onClick={addRequirement}>
+                          <Plus className="w-4 h-4 mr-1" />Add Row
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+
           {/* FLOW CHART TAB */}
           {!isNew && processId && (
             <TabsContent value="flowchart" className="space-y-4">
