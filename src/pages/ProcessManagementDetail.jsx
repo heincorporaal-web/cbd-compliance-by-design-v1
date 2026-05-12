@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Save, Plus, Trash2, Shield, AlertTriangle, AlertCircle,
-  Target, ClipboardCheck, X, User, Server, Users, GitBranch
+  Target, ClipboardCheck, X, User, Server, Users, GitBranch, Search, ChevronsUpDown
 } from "lucide-react";
 import ProcessFlowChart from "@/components/processmanagement/ProcessFlowChart";
 import { Link, useNavigate } from "react-router-dom";
@@ -44,6 +44,20 @@ export default function ProcessManagementDetail() {
   });
 
   const [activeDialog, setActiveDialog] = useState(null);
+  const [parentSearch, setParentSearch] = useState("");
+  const [parentPickerOpen, setParentPickerOpen] = useState(false);
+  const parentPickerRef = useRef(null);
+
+  useEffect(() => {
+    if (!parentPickerOpen) return;
+    const handler = (e) => {
+      if (parentPickerRef.current && !parentPickerRef.current.contains(e.target)) {
+        setParentPickerOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [parentPickerOpen]);
 
   const { data: existingProcess } = useQuery({
     queryKey: ["orgProcess", processId],
@@ -229,18 +243,75 @@ export default function ProcessManagementDetail() {
                   <Textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={3} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {formData.level > 0 && potentialParents.length > 0 && (
+                  {formData.level > 0 && (
                     <div className="space-y-2">
                       <Label>Parent Process</Label>
-                      <Select value={formData.parent_id || ""} onValueChange={v => setFormData({ ...formData, parent_id: v })}>
-                        <SelectTrigger><SelectValue placeholder="Select parent" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={null}>None</SelectItem>
-                          {potentialParents.map(p => (
-                            <SelectItem key={p.id} value={p.id}>L{p.level}: {p.process_code} – {p.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="relative" ref={parentPickerRef}>
+                        <button
+                          type="button"
+                          onClick={() => { setParentPickerOpen(v => !v); setParentSearch(""); }}
+                          className="w-full flex items-center justify-between border border-input bg-background rounded-md px-3 py-2 text-sm shadow-sm hover:bg-accent transition-colors"
+                        >
+                          <span className={formData.parent_id ? "text-foreground" : "text-muted-foreground"}>
+                            {formData.parent_id
+                              ? (() => { const p = processes.find(x => x.id === formData.parent_id); return p ? `${p.process_code} – ${p.name}` : "Select parent"; })()
+                              : "Search by code or name…"}
+                          </span>
+                          <ChevronsUpDown className="w-4 h-4 text-muted-foreground shrink-0 ml-2" />
+                        </button>
+                        {parentPickerOpen && (
+                          <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white border border-border rounded-md shadow-lg">
+                            <div className="p-2 border-b border-border">
+                              <div className="relative">
+                                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                                <input
+                                  autoFocus
+                                  className="w-full pl-7 pr-3 py-1.5 text-sm border border-input rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                                  placeholder="Search process code or name…"
+                                  value={parentSearch}
+                                  onChange={e => setParentSearch(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <div className="max-h-56 overflow-y-auto py-1">
+                              <div
+                                className="px-3 py-2 text-sm text-muted-foreground hover:bg-accent cursor-pointer"
+                                onClick={() => { setFormData({ ...formData, parent_id: "" }); setParentPickerOpen(false); }}
+                              >
+                                — None —
+                              </div>
+                              {potentialParents
+                                .filter(p => {
+                                  const q = parentSearch.toLowerCase();
+                                  return !q || p.process_code?.toLowerCase().includes(q) || p.name?.toLowerCase().includes(q);
+                                })
+                                .map(p => (
+                                  <div
+                                    key={p.id}
+                                    className={`px-3 py-2 text-sm cursor-pointer hover:bg-accent ${formData.parent_id === p.id ? "bg-primary/10 font-medium" : ""}`}
+                                    onClick={() => { setFormData({ ...formData, parent_id: p.id }); setParentPickerOpen(false); setParentSearch(""); }}
+                                  >
+                                    <span className="font-mono text-xs text-primary mr-2">{p.process_code}</span>
+                                    {p.name}
+                                    <span className="ml-2 text-xs text-muted-foreground">(L{p.level})</span>
+                                  </div>
+                                ))
+                              }
+                              {potentialParents.filter(p => {
+                                const q = parentSearch.toLowerCase();
+                                return !q || p.process_code?.toLowerCase().includes(q) || p.name?.toLowerCase().includes(q);
+                              }).length === 0 && (
+                                <p className="px-3 py-3 text-sm text-muted-foreground text-center">No matching processes</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {formData.parent_id && (
+                        <button type="button" className="text-xs text-red-500 hover:underline mt-1" onClick={() => setFormData({ ...formData, parent_id: "" })}>
+                          Clear parent
+                        </button>
+                      )}
                     </div>
                   )}
                   {formData.level === 0 && (
