@@ -101,6 +101,30 @@ export default function ProcessManagementDetail() {
     isNew || !processId ? createMutation.mutate(formData) : updateMutation.mutate(formData);
   };
 
+  const handleSaveAndNew = (e) => {
+    e.preventDefault();
+    const resetForm = () => {
+      setFormData({
+        process_code: "", name: "", description: "", company_id: formData.company_id,
+        level: formData.level, parent_id: "", value_chain: "",
+        process_owner: "", process_owner_id: "", deputy_owner: "",
+        global_control_owner: "", workstream: "", status: "active",
+        linked_system_ids: [], linked_risk_ids: [], linked_control_ids: [],
+        linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
+        linked_objective_ids: [], linked_principle_risk_ids: [], linked_org_objective_ids: [],
+        documentation_url: "", frequency: "ad_hoc", estimated_duration: "",
+        automation_level: "manual", criticality: "medium",
+        inputs: "", outputs: "", key_performance_indicators: "", notes: ""
+      });
+      navigate(createPageUrl("ProcessManagementDetail?new=true"));
+    };
+    if (isNew || !processId) {
+      createMutation.mutate(formData, { onSuccess: resetForm });
+    } else {
+      updateMutation.mutate(formData, { onSuccess: resetForm });
+    }
+  };
+
   const addLink = (field, id) => {
     if (!formData[field]?.includes(id)) {
       const updated = [...(formData[field] || []), id];
@@ -159,6 +183,10 @@ export default function ProcessManagementDetail() {
           <Link to={createPageUrl("ProcessManagement")}>
             <Button variant="outline">Cancel</Button>
           </Link>
+          <Button onClick={handleSaveAndNew} variant="outline" className="border-teal-600 text-teal-700 hover:bg-teal-50">
+            <Plus className="w-4 h-4 mr-2" />
+            Save & New
+          </Button>
           <Button onClick={handleSubmit} className="bg-teal-600 hover:bg-teal-700">
             <Save className="w-4 h-4 mr-2" />
             {isNew || !processId ? "Create Process" : "Save Changes"}
