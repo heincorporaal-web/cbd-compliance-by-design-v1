@@ -91,6 +91,7 @@ import iHPOM from './pages/iHPOM';
 import iHPOMTreeReport from './pages/iHPOMTreeReport';
 import ITCapabilities from './pages/ITCapabilities';
 import OrgObjectives from './pages/OrgObjectives';
+import ProcessCompanyReport from './pages/ProcessCompanyReport';
 import __Layout from './Layout.jsx';
 
 
@@ -139,6 +140,7 @@ export const PAGES = {
     "iHPOMTreeReport": iHPOMTreeReport,
     "ITCapabilities": ITCapabilities,
     "OrgObjectives": OrgObjectives,
+    "ProcessCompanyReport": ProcessCompanyReport,
 }
 
 export const pagesConfig = {
