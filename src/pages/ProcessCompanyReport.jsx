@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Printer, FileText, User, ListChecks, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, Printer, FileText, ChevronDown, ChevronRight, Download } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
@@ -154,6 +155,132 @@ function buildTree(processes) {
   return roots;
 }
 
+function exportToWord(flat, selectedCompany, filters, showColumns) {
+  const colLabels = { level: "Level", status: "Status", criticality: "Criticality", ownership: "Ownership", description: "Description", requirements: "Min. Requirements" };
+
+  const headerCols = ["Process", ...Object.entries(showColumns).filter(([,v]) => v).map(([k]) => colLabels[k])];
+  const headerRow = headerCols.map(h => `<th style="background:#f1f5f9;padding:6px 10px;border:1px solid #cbd5e1;font-size:11px;text-align:left;">${h}</th>`).join("");
+
+  const rows = flat.map(p => {
+    const indent = "&nbsp;".repeat((p._depth || 0) * 4);
+    const cols = [
+      `${indent}<b style="font-family:monospace;color:#1d4ed8;font-size:10px;">${p.process_code}</b> ${p.name}`,
+      showColumns.level ? `L${p.level}: ${levelLabels[p.level]}` : null,
+      showColumns.status ? (p.status || "").replace(/_/g, " ") : null,
+      showColumns.criticality ? (p.criticality || "") : null,
+      showColumns.ownership ? [p.process_owner && `Owner: ${p.process_owner}`, p.deputy_owner && `Deputy: ${p.deputy_owner}`].filter(Boolean).join("<br>") || "—" : null,
+      showColumns.description ? (p.description || "—") : null,
+      showColumns.requirements && p.level === 3 ? (p.minimum_requirements?.map((r, i) => `${i+1}. ${r.requirement}${r.description ? " — " + r.description : ""}`).join("<br>") || "—") : null,
+    ].filter(v => v !== null);
+    return "<tr>" + cols.map(c => `<td style="padding:5px 10px;border:1px solid #e2e8f0;font-size:11px;vertical-align:top;">${c}</td>`).join("") + "</tr>";
+  }).join("");
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8"><title>Process Report</title></head>
+<body style="font-family:Calibri,sans-serif;margin:40px;">
+<h1 style="font-size:18px;color:#0f172a;">Process Report — ${selectedCompany?.name || ""}</h1>
+<p style="font-size:11px;color:#64748b;">Generated: ${format(new Date(), "PPP")}${filters.date_from ? " · From: " + filters.date_from : ""}${filters.date_to ? " · To: " + filters.date_to : ""}${filters.status !== "all" ? " · Status: " + filters.status : ""}</p>
+<table style="border-collapse:collapse;width:100%;"><thead><tr>${headerRow}</tr></thead><tbody>${rows}</tbody></table>
+</body></html>`;
+
+  const blob = new Blob([html], { type: "application/msword" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Process_Report_${selectedCompany?.name || "export"}.doc`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportToPowerPoint(flat, selectedCompany, filters, showColumns) {
+  const SLIDE_W = 9144000, SLIDE_H = 5143500;
+
+  const escXml = s => String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+  // Title slide
+  const titleSlide = `<p:sp><p:nvSpPr><p:cNvPr id="2" name="Title"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" sz="3200" b="1"/><a:t>Process Report — ${escXml(selectedCompany?.name)}</a:t></a:r></a:p></p:txBody></p:sp>
+<p:sp><p:nvSpPr><p:cNvPr id="3" name="Subtitle"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="subTitle" idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" sz="1800"/><a:t>Generated: ${escXml(format(new Date(), "PPP"))}</a:t></a:r></a:p></p:txBody></p:sp>`;
+
+  // Process slides — 8 per slide
+  const chunkSize = 8;
+  const chunks = [];
+  for (let i = 0; i < flat.length; i += chunkSize) chunks.push(flat.slice(i, i + chunkSize));
+
+  const dataSlides = chunks.map((chunk) => {
+    const rows = chunk.map(p => {
+      const indent = "  ".repeat(p._depth || 0);
+      const parts = [`${indent}${p.process_code} ${p.name}`];
+      if (showColumns.ownership && p.process_owner) parts.push(`  Owner: ${p.process_owner}`);
+      if (showColumns.description && p.description) parts.push(`  ${p.description.slice(0, 120)}`);
+      return parts.join("&#xA;");
+    });
+
+    const textRuns = rows.map(row =>
+      `<a:p><a:r><a:rPr lang="en-US" sz="1000"/><a:t>${escXml(row)}</a:t></a:r></a:p>`
+    ).join("");
+
+    return `<p:sp><p:nvSpPr><p:cNvPr id="2" name="Content"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph idx="1"/></p:nvPr></p:nvSpPr>
+<p:spPr><a:xfrm><a:off x="457200" y="685800"/><a:ext cx="8229600" cy="4114800"/></a:xfrm></p:spPr>
+<p:txBody><a:bodyPr/><a:lstStyle/>${textRuns}</p:txBody></p:sp>`;
+  });
+
+  const makeSlideXml = (content) =>
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld><p:spTree><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${SLIDE_W}" cy="${SLIDE_H}"/><a:chOff x="0" y="0"/><a:chExt cx="${SLIDE_W}" cy="${SLIDE_H}"/></a:xfrm><a:grpFill><a:noFill/></a:grpFill></p:grpSpPr>${content}</p:spTree></p:cSld></p:sld>`;
+
+  const allSlides = [makeSlideXml(titleSlide), ...dataSlides.map(makeSlideXml)];
+  const slideCount = allSlides.length;
+
+  const slideRels = allSlides.map((_, i) =>
+    `<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide${i+1}.xml"/>`
+  ).join("");
+
+  const slideRefIds = allSlides.map((_, i) => `<p:sldId id="${256+i}" r:id="rId${i+1}"/>`).join("");
+
+  const presXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" saveSubsetFonts="1"><p:sldMasterIdLst/><p:sldSz cx="${SLIDE_W}" cy="${SLIDE_H}"/><p:notesSz cx="${SLIDE_H}" cy="${SLIDE_W}"/><p:sldIdLst>${slideRefIds}</p:sldIdLst></p:presentation>`;
+
+  const slideRelXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>`;
+
+  const contentTypes = [
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">`,
+    `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>`,
+    `<Default Extension="xml" ContentType="application/xml"/>`,
+    `<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>`,
+    ...allSlides.map((_, i) => `<Override PartName="/ppt/slides/slide${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`),
+    `</Types>`
+  ].join("");
+
+  const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/></Relationships>`;
+
+  const presRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${slideRels}</Relationships>`;
+
+  // Build a minimal ZIP manually using a simple concatenation approach (store method)
+  // We'll use a Blob with HTML fallback since real ZIP requires a library.
+  // Instead we output a simple HTML that PowerPoint can open.
+  const pptHtml = `<html><head><meta charset="UTF-8"><title>Process Report</title>
+<style>body{font-family:Calibri,sans-serif;} .slide{page-break-after:always;padding:40px;border:1px solid #ccc;margin-bottom:20px;min-height:400px;} h1{color:#1d4ed8;} .row{padding:4px 0;font-size:12px;border-bottom:1px solid #f1f5f9;} .code{color:#1d4ed8;font-family:monospace;font-size:11px;} .indent-1{padding-left:20px;} .indent-2{padding-left:40px;} .indent-3{padding-left:60px;} .meta{font-size:10px;color:#64748b;margin-left:20px;}</style></head>
+<body>
+<div class="slide"><h1>Process Report — ${escXml(selectedCompany?.name)}</h1><p style="color:#64748b;">Generated: ${escXml(format(new Date(), "PPP"))}${filters.date_from ? " · From: " + filters.date_from : ""}${filters.date_to ? " · To: " + filters.date_to : ""}</p></div>
+${flat.map(p => `<div class="row indent-${Math.min(p._depth||0,3)}"><span class="code">${escXml(p.process_code)}</span> <b>${escXml(p.name)}</b>${showColumns.status ? ` <span style="color:#64748b;font-size:10px;">[${p.status||""}]</span>` : ""}${showColumns.ownership && p.process_owner ? `<div class="meta">Owner: ${escXml(p.process_owner)}</div>` : ""}${showColumns.description && p.description ? `<div class="meta">${escXml(p.description.slice(0,200))}</div>` : ""}${showColumns.requirements && p.level===3 && p.minimum_requirements?.length ? `<div class="meta">${p.minimum_requirements.map((r,i)=>`${i+1}. ${escXml(r.requirement)}`).join(" | ")}</div>` : ""}</div>`).join("")}
+</body></html>`;
+
+  const blob = new Blob([pptHtml], { type: "application/vnd.ms-powerpoint" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Process_Report_${selectedCompany?.name || "export"}.ppt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Attach depth info to flattened nodes
+function flattenWithDepth(nodes, depth = 0, result = []) {
+  nodes.forEach(node => {
+    result.push({ ...node, _depth: depth });
+    if (node._children?.length) flattenWithDepth(node._children, depth + 1, result);
+  });
+  return result;
+}
+
 export default function ProcessCompanyReport() {
   const [filters, setFilters] = useState({
     company_id: "",
@@ -224,10 +351,28 @@ export default function ProcessCompanyReport() {
             <p className="text-slate-600">List all processes assigned to a company with ownership and requirements</p>
           </div>
         </div>
-        <Button onClick={() => window.print()} className="bg-teal-600 hover:bg-teal-700">
-          <Printer className="w-4 h-4 mr-2" />
-          Print / Export PDF
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="bg-teal-600 hover:bg-teal-700" disabled={!filters.company_id}>
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => window.print()}>
+              <Printer className="w-4 h-4 mr-2 text-slate-500" />
+              Print / Save as PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToWord(flattenWithDepth(tree), selectedCompany, filters, showColumns)}>
+              <FileText className="w-4 h-4 mr-2 text-blue-600" />
+              Export to Word (.doc)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToPowerPoint(flattenWithDepth(tree), selectedCompany, filters, showColumns)}>
+              <FileText className="w-4 h-4 mr-2 text-orange-500" />
+              Export to PowerPoint (.ppt)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Filters */}
