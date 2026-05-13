@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { FileText, Building2, TrendingUp, BarChart3 } from "lucide-react";
+import { FileText, Building2, TrendingUp, BarChart3, Network } from "lucide-react";
 
 export default function Reports() {
   const reports = [
@@ -22,6 +22,14 @@ export default function Reports() {
       icon: BarChart3,
       color: "from-purple-500 to-pink-600",
       url: createPageUrl("iHPOMTreeReport")
+    },
+    {
+      id: "process-company",
+      title: "Process Company Report",
+      description: "List all processes assigned to a company with date range filtering, hierarchy level selection, ownership, key requirements and descriptions",
+      icon: Network,
+      color: "from-teal-500 to-green-600",
+      url: createPageUrl("ProcessCompanyReport")
     }
   ];
 
