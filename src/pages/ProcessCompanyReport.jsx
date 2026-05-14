@@ -156,38 +156,126 @@ function buildTree(processes) {
 }
 
 function exportToWord(flat, selectedCompany, filters, showColumns) {
+  const esc = s => String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+
+  const wRun = (text, bold = false, color = null) => {
+    const rPr = [
+      bold ? "<w:b/>" : "",
+      color ? `<w:color w:val="${color}"/>` : "",
+      `<w:sz w:val="18"/>`,
+    ].join("");
+    return `<w:r><w:rPr>${rPr}</w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r>`;
+  };
+
+  const wPara = (runs, styleId = null, indentTwips = 0) => {
+    const pPr = [
+      styleId ? `<w:pStyle w:val="${styleId}"/>` : "",
+      indentTwips > 0 ? `<w:ind w:left="${indentTwips}"/>` : "",
+    ].join("");
+    return `<w:p><w:pPr>${pPr}</w:pPr>${runs}</w:p>`;
+  };
+
+  const wCell = (content, shaded = false) => {
+    const shade = shaded ? `<w:shd w:val="clear" w:color="auto" w:fill="F1F5F9"/>` : "";
+    return `<w:tc><w:tcPr>${shade}<w:tcBorders><w:top w:val="single" w:sz="4" w:color="CBD5E1"/><w:left w:val="single" w:sz="4" w:color="CBD5E1"/><w:bottom w:val="single" w:sz="4" w:color="CBD5E1"/><w:right w:val="single" w:sz="4" w:color="CBD5E1"/></w:tcBorders></w:tcPr>${content}</w:tc>`;
+  };
+
+  const wCellPara = (text, bold = false, color = null, shaded = false) =>
+    wCell(wPara(wRun(text, bold, color)), shaded);
+
+  // Determine active columns
+  const activeCols = Object.entries(showColumns).filter(([, v]) => v).map(([k]) => k);
   const colLabels = { level: "Level", status: "Status", criticality: "Criticality", ownership: "Ownership", description: "Description", requirements: "Min. Requirements" };
 
-  const headerCols = ["Process", ...Object.entries(showColumns).filter(([,v]) => v).map(([k]) => colLabels[k])];
-  const headerRow = headerCols.map(h => `<th style="background:#f1f5f9;padding:6px 10px;border:1px solid #cbd5e1;font-size:11px;text-align:left;">${h}</th>`).join("");
+  // Header row
+  const headerCells = [
+    wCellPara("Process", true, null, true),
+    ...activeCols.map(k => wCellPara(colLabels[k], true, null, true)),
+  ].join("");
+  const headerRow = `<w:tr>${headerCells}</w:tr>`;
 
-  const rows = flat.map(p => {
-    const indent = "&nbsp;".repeat((p._depth || 0) * 4);
-    const cols = [
-      `${indent}<b style="font-family:monospace;color:#1d4ed8;font-size:10px;">${p.process_code}</b> ${p.name}`,
-      showColumns.level ? `L${p.level}: ${levelLabels[p.level]}` : null,
-      showColumns.status ? (p.status || "").replace(/_/g, " ") : null,
-      showColumns.criticality ? (p.criticality || "") : null,
-      showColumns.ownership ? [p.process_owner && `Owner: ${p.process_owner}`, p.deputy_owner && `Deputy: ${p.deputy_owner}`].filter(Boolean).join("<br>") || "—" : null,
-      showColumns.description ? (p.description || "—") : null,
-      showColumns.requirements && p.level === 3 ? (p.minimum_requirements?.map((r, i) => `${i+1}. ${r.requirement}${r.description ? " — " + r.description : ""}`).join("<br>") || "—") : null,
-    ].filter(v => v !== null);
-    return "<tr>" + cols.map(c => `<td style="padding:5px 10px;border:1px solid #e2e8f0;font-size:11px;vertical-align:top;">${c}</td>`).join("") + "</tr>";
+  // Data rows
+  const dataRows = flat.map(p => {
+    const indent = "  ".repeat(p._depth || 0);
+    const nameText = `${indent}${p.process_code}  ${p.name}`;
+
+    const cells = [wCell(wPara(wRun(p.process_code, true, "1D4ED8") + wRun(`  ${indent.trimEnd() ? indent : ""}${p.name}`, false, null)))];
+
+    activeCols.forEach(k => {
+      switch (k) {
+        case "level":
+          cells.push(wCellPara(`L${p.level}: ${levelLabels[p.level] || ""}`));
+          break;
+        case "status":
+          cells.push(wCellPara((p.status || "").replace(/_/g, " ")));
+          break;
+        case "criticality":
+          cells.push(wCellPara(p.criticality || "—"));
+          break;
+        case "ownership": {
+          const lines = [
+            p.process_owner ? `Owner: ${p.process_owner}` : null,
+            p.deputy_owner ? `Deputy: ${p.deputy_owner}` : null,
+          ].filter(Boolean).join("  ");
+          cells.push(wCellPara(lines || "—"));
+          break;
+        }
+        case "description":
+          cells.push(wCellPara(p.description || "—"));
+          break;
+        case "requirements":
+          if (p.level === 3 && p.minimum_requirements?.length) {
+            const reqs = p.minimum_requirements.map((r, i) => `${i + 1}. ${r.requirement}${r.description ? " — " + r.description : ""}`).join("  ");
+            cells.push(wCellPara(reqs));
+          } else {
+            cells.push(wCellPara("—"));
+          }
+          break;
+        default:
+          cells.push(wCellPara(""));
+      }
+    });
+
+    return `<w:tr>${cells.join("")}</w:tr>`;
   }).join("");
 
-  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8"><title>Process Report</title></head>
-<body style="font-family:Calibri,sans-serif;margin:40px;">
-<h1 style="font-size:18px;color:#0f172a;">Process Report — ${selectedCompany?.name || ""}</h1>
-<p style="font-size:11px;color:#64748b;">Generated: ${format(new Date(), "PPP")}${filters.date_from ? " · From: " + filters.date_from : ""}${filters.date_to ? " · To: " + filters.date_to : ""}${filters.status !== "all" ? " · Status: " + filters.status : ""}</p>
-<table style="border-collapse:collapse;width:100%;"><thead><tr>${headerRow}</tr></thead><tbody>${rows}</tbody></table>
-</body></html>`;
+  const colCount = 1 + activeCols.length;
+  const colWidth = Math.floor(9000 / colCount);
+  const gridCols = Array(colCount).fill(`<w:gridCol w:w="${colWidth}"/>`).join("");
+  const table = `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="9000" w:type="dxa"/><w:tblBorders><w:insideH w:val="single" w:sz="4" w:color="CBD5E1"/><w:insideV w:val="single" w:sz="4" w:color="CBD5E1"/></w:tblBorders></w:tblPr><w:tblGrid>${gridCols}</w:tblGrid>${headerRow}${dataRows}</w:tbl>`;
 
-  const blob = new Blob([html], { type: "application/msword" });
+  const titlePara = wPara(wRun(`Process Report — ${selectedCompany?.name || ""}`, true, "0F172A"), null, 0).replace("<w:sz w:val=\"18\"/>", "<w:sz w:val=\"28\"/>");
+  const metaParts = [
+    `Generated: ${format(new Date(), "PPP")}`,
+    filters.date_from ? `From: ${filters.date_from}` : null,
+    filters.date_to ? `To: ${filters.date_to}` : null,
+    filters.status !== "all" ? `Status: ${filters.status}` : null,
+  ].filter(Boolean).join("  ·  ");
+  const metaPara = wPara(wRun(metaParts, false, "64748B"));
+
+  const xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"
+  xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<w:body>
+${titlePara}
+${metaPara}
+<w:p/>
+${table}
+<w:sectPr><w:pgSz w:w="15840" w:h="12240" w:orient="landscape"/><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720"/></w:sectPr>
+</w:body>
+</w:document>`;
+
+  const blob = new Blob([xml], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `Process_Report_${selectedCompany?.name || "export"}.doc`;
+  a.download = `Process_Report_${(selectedCompany?.name || "export").replace(/\s+/g, "_")}.docx`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -365,7 +453,7 @@ export default function ProcessCompanyReport() {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => exportToWord(flattenWithDepth(tree), selectedCompany, filters, showColumns)}>
               <FileText className="w-4 h-4 mr-2 text-blue-600" />
-              Export to Word (.doc)
+              Export to Word (.docx)
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => exportToPowerPoint(flattenWithDepth(tree), selectedCompany, filters, showColumns)}>
               <FileText className="w-4 h-4 mr-2 text-orange-500" />
