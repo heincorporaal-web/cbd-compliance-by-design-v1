@@ -44,10 +44,20 @@
       "default": "draft"
     },
     "reviewer": {
-      "type": "string"
+      "type": "string",
+      "description": "Reviewer name (denormalized)"
+    },
+    "reviewer_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (reviewer)"
     },
     "approver": {
-      "type": "string"
+      "type": "string",
+      "description": "Approver / control owner name (denormalized)"
+    },
+    "owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (control owner)"
     },
     "approval_date": {
       "type": "string",

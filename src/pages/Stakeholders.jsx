@@ -13,6 +13,7 @@ import StakeholderDialog from "@/components/stakeholders/StakeholderDialog";
 import HRImportDialog from "@/components/stakeholders/HRImportDialog";
 import StakeholderHistoryDialog from "@/components/stakeholders/StakeholderHistoryDialog";
 import { Upload } from "lucide-react";
+import { useDefaultStakeholderGroups } from "@/hooks/useDefaultStakeholderGroups";
 
 export default function Stakeholders() {
   const queryClient = useQueryClient();
@@ -44,6 +45,9 @@ export default function Stakeholders() {
     queryKey: ["users"],
     queryFn: () => base44.entities.User.list(),
   });
+
+  // Auto-provision default groups for all companies
+  useDefaultStakeholderGroups(companies.map(c => c.id));
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Stakeholder.create(data),

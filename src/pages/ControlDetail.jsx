@@ -18,6 +18,7 @@ import LifecycleActions from "@/components/lifecycle/LifecycleActions";
 import LifecycleHistory from "@/components/lifecycle/LifecycleHistory";
 import LifecycleNotifications from "@/components/lifecycle/LifecycleNotifications";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
+import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPicker";
 
 export default function ControlDetail() {
   const navigate = useNavigate();
@@ -34,7 +35,9 @@ export default function ControlDetail() {
     category: "",
     priority: "medium",
     compensating_control_ids: [],
-    linked_objective_ids: []
+    linked_objective_ids: [],
+    owner_stakeholder_id: "",
+    reviewer_stakeholder_id: "",
   });
 
   const [isAddingCompensating, setIsAddingCompensating] = useState(false);
@@ -344,6 +347,28 @@ export default function ControlDetail() {
                         <SelectItem value="low">Low</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <StakeholderOwnerPicker
+                      groupName="Control Owner"
+                      companyId={frameworks.find(f => f.id === formData.framework_id)?.company_id}
+                      value={formData.owner_stakeholder_id}
+                      onChange={(id, s) => setFormData({ ...formData, owner_stakeholder_id: id, approver: s?.full_name || "" })}
+                      label="Control Owner"
+                      placeholder="Select control owner…"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <StakeholderOwnerPicker
+                      groupName="Risk Owner"
+                      companyId={frameworks.find(f => f.id === formData.framework_id)?.company_id}
+                      value={formData.reviewer_stakeholder_id}
+                      onChange={(id, s) => setFormData({ ...formData, reviewer_stakeholder_id: id, reviewer: s?.full_name || "" })}
+                      label="Reviewer"
+                      placeholder="Select reviewer…"
+                    />
                   </div>
 
                   <div className="space-y-2 md:col-span-2">

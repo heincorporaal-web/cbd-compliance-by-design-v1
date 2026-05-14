@@ -1,0 +1,38 @@
+{
+  "name": "StakeholderGroup",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Group name (e.g. Process Owners, Risk Professionals, System Owners)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of this stakeholder group and its purpose"
+    },
+    "color": {
+      "type": "string",
+      "description": "Display color hex code for the group badge"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Default groups cannot be deleted \u2014 they are provisioned automatically for every company"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

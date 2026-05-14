@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { createPageUrl } from "@/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import ObjectiveSelector from "@/components/objectives/ObjectiveSelector";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
+import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPicker";
 
 export default function RiskDetail() {
   const navigate = useNavigate();
@@ -57,6 +58,7 @@ export default function RiskDetail() {
     impact: "medium",
     status: "identified",
     owner: "",
+    owner_stakeholder_id: "",
     control_ids: [],
     framework_ids: [],
     linked_objective_ids: [],
@@ -65,7 +67,7 @@ export default function RiskDetail() {
     identified_date: new Date().toISOString().split('T')[0]
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (risk) {
       setFormData({
         title: risk.title || "",
@@ -76,6 +78,7 @@ export default function RiskDetail() {
         impact: risk.impact || "medium",
         status: risk.status || "identified",
         owner: risk.owner || "",
+        owner_stakeholder_id: risk.owner_stakeholder_id || "",
         control_ids: risk.control_ids || [],
         framework_ids: risk.framework_ids || [],
         linked_objective_ids: risk.linked_objective_ids || [],
@@ -314,11 +317,13 @@ export default function RiskDetail() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="owner">Risk Owner</Label>
-                <Input
-                  id="owner"
-                  value={formData.owner}
-                  onChange={(e) => setFormData({...formData, owner: e.target.value})}
+                <StakeholderOwnerPicker
+                  groupName="Risk Owner"
+                  companyId={formData.company_id}
+                  value={formData.owner_stakeholder_id}
+                  onChange={(id, s) => setFormData({ ...formData, owner_stakeholder_id: id, owner: s?.full_name || "" })}
+                  label="Risk Owner"
+                  placeholder="Select risk owner…"
                 />
               </div>
               <div className="space-y-2">

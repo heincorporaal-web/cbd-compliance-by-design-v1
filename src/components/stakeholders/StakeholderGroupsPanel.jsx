@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Lock } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const PRESET_COLORS = [
   // Blues & Purples
@@ -77,13 +78,25 @@ export default function StakeholderGroupsPanel({ groups, companies }) {
                     {g.status === "inactive" && <Badge variant="secondary" className="text-xs mt-0.5">Inactive</Badge>}
                   </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 items-center">
+                  {g.is_default && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="p-1"><Lock className="w-3 h-3 text-slate-400" /></span>
+                        </TooltipTrigger>
+                        <TooltipContent>Default group — cannot be deleted</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(g)}>
                     <Pencil className="w-3.5 h-3.5 text-slate-500" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteMutation.mutate(g.id)}>
-                    <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                  </Button>
+                  {!g.is_default && (
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteMutation.mutate(g.id)}>
+                      <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                    </Button>
+                  )}
                 </div>
               </div>
               {g.description && <p className="mt-2 text-xs text-slate-500">{g.description}</p>}

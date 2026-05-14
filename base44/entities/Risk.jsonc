@@ -70,7 +70,11 @@
     },
     "owner": {
       "type": "string",
-      "description": "Risk owner"
+      "description": "Risk owner name (denormalized from stakeholder)"
+    },
+    "owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (risk owner)"
     },
     "mitigation_plan": {
       "type": "string"
