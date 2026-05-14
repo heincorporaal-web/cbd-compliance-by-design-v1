@@ -15,6 +15,7 @@ import {
   Target, ClipboardCheck, X, User, Server, Users, GitBranch, Search, ChevronsUpDown, ListChecks
 } from "lucide-react";
 import ProcessFlowChart from "@/components/processmanagement/ProcessFlowChart";
+import StakeholderPickerDialog from "@/components/processmanagement/StakeholderPickerDialog";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -33,7 +34,7 @@ export default function ProcessManagementDetail() {
   const [formData, setFormData] = useState({
     process_code: "", name: "", description: "", company_id: "",
     level: 0, parent_id: "", value_chain: "",
-    process_owner: "", process_owner_id: "", deputy_owner: "",
+    process_owner: "", process_owner_id: "", process_owner_stakeholder_id: "", deputy_owner: "",
     global_control_owner: "", workstream: "", status: "active",
     linked_system_ids: [], linked_risk_ids: [], linked_control_ids: [],
     linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
@@ -46,18 +47,29 @@ export default function ProcessManagementDetail() {
   const [activeDialog, setActiveDialog] = useState(null);
   const [parentSearch, setParentSearch] = useState("");
   const [parentPickerOpen, setParentPickerOpen] = useState(false);
+  const [stakeholderPickerTarget, setStakeholderPickerTarget] = useState(null); // 'owner' | 'deputy' | 'gco'
+  const [userSearchOwner, setUserSearchOwner] = useState("");
+  const [userPickerOpen, setUserPickerOpen] = useState(false);
   const parentPickerRef = useRef(null);
+  const userPickerRef = useRef(null);
 
   useEffect(() => {
     if (!parentPickerOpen) return;
     const handler = (e) => {
-      if (parentPickerRef.current && !parentPickerRef.current.contains(e.target)) {
-        setParentPickerOpen(false);
-      }
+      if (parentPickerRef.current && !parentPickerRef.current.contains(e.target)) setParentPickerOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [parentPickerOpen]);
+
+  useEffect(() => {
+    if (!userPickerOpen) return;
+    const handler = (e) => {
+      if (userPickerRef.current && !userPickerRef.current.contains(e.target)) setUserPickerOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [userPickerOpen]);
 
   const { data: existingProcess } = useQuery({
     queryKey: ["orgProcess", processId],
@@ -75,6 +87,8 @@ export default function ProcessManagementDetail() {
   const { data: systems = [] } = useQuery({ queryKey: ["ictSystems"], queryFn: () => base44.entities.ICTSystem.list() });
   const { data: users = [] } = useQuery({ queryKey: ["users"], queryFn: () => base44.entities.User.list() });
   const { data: orgObjectives = [] } = useQuery({ queryKey: ["orgObjectives"], queryFn: () => base44.entities.OrgObjective.list() });
+  const { data: stakeholders = [] } = useQuery({ queryKey: ["stakeholders"], queryFn: () => base44.entities.Stakeholder.list() });
+  const { data: stakeholderGroups = [] } = useQuery({ queryKey: ["stakeholderGroups"], queryFn: () => base44.entities.StakeholderGroup.list() });
 
   useEffect(() => {
     if (existingProcess?.[0]) setFormData(existingProcess[0]);
@@ -99,7 +113,7 @@ export default function ProcessManagementDetail() {
   const blankForm = {
     process_code: "", name: "", description: "", company_id: "",
     level: 0, parent_id: "", value_chain: "",
-    process_owner: "", process_owner_id: "", deputy_owner: "",
+    process_owner: "", process_owner_id: "", process_owner_stakeholder_id: "", deputy_owner: "",
     global_control_owner: "", workstream: "", status: "active",
     linked_system_ids: [], linked_risk_ids: [], linked_control_ids: [],
     linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
@@ -189,6 +203,27 @@ export default function ProcessManagementDetail() {
   const linkedOrgObjectives = orgObjectives.filter(o => linkedOrgObjectiveIds.includes(o.id));
 
   const selectedOwnerUser = users.find(u => u.id === formData.process_owner_id);
+  const selectedOwnerStakeholder = stakeholders.find(s => s.id === formData.process_owner_stakeholder_id);
+
+  const handleSelectStakeholder = (stakeholder, target) => {
+    if (target === "owner") {
+      setFormData(prev => ({
+        ...prev,
+        process_owner_stakeholder_id: stakeholder.id,
+        process_owner: stakeholder.full_name,
+        process_owner_id: "", // clear user link when stakeholder selected
+      }));
+    } else if (target === "deputy") {
+      setFormData(prev => ({ ...prev, deputy_owner: stakeholder.full_name }));
+    } else if (target === "gco") {
+      setFormData(prev => ({ ...prev, global_control_owner: stakeholder.full_name }));
+    }
+  };
+
+  const filteredUsersForOwner = users.filter(u => {
+    const q = userSearchOwner.toLowerCase();
+    return !q || u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q);
+  });
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -421,60 +456,149 @@ export default function ProcessManagementDetail() {
 
           {/* OWNERSHIP TAB */}
           <TabsContent value="ownership" className="space-y-6">
+            <StakeholderPickerDialog
+              open={!!stakeholderPickerTarget}
+              onOpenChange={open => !open && setStakeholderPickerTarget(null)}
+              stakeholders={formData.company_id ? stakeholders.filter(s => s.company_id === formData.company_id) : stakeholders}
+              stakeholderGroups={stakeholderGroups}
+              onSelect={s => handleSelectStakeholder(s, stakeholderPickerTarget)}
+            />
+
+            {/* Process Owner */}
             <Card className="border-none shadow-lg">
               <CardHeader className="border-b border-slate-100">
-                <CardTitle className="flex items-center gap-2"><User className="w-5 h-5 text-indigo-600" />Process Ownership</CardTitle>
+                <CardTitle className="flex items-center gap-2"><User className="w-5 h-5 text-indigo-600" />Process Owner</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-5">
+                {/* Stakeholder link */}
+                <div className="space-y-2">
+                  <Label>Assign from Stakeholder Register</Label>
+                  <div className="flex items-center gap-2">
+                    {selectedOwnerStakeholder ? (
+                      <div className="flex-1 flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+                        <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm shrink-0">
+                          {(selectedOwnerStakeholder.full_name || "?").split(" ").map(n => n[0]).join("").toUpperCase().slice(0,2)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-900 text-sm">{selectedOwnerStakeholder.full_name}</p>
+                          <p className="text-xs text-slate-500">{selectedOwnerStakeholder.job_title}{selectedOwnerStakeholder.department ? ` · ${selectedOwnerStakeholder.department}` : ""}</p>
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => setFormData(prev => ({ ...prev, process_owner_stakeholder_id: "", process_owner: "" }))}>
+                          <X className="w-3.5 h-3.5 text-slate-500" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button type="button" variant="outline" className="flex-1 justify-start text-slate-500" onClick={() => setStakeholderPickerTarget("owner")}>
+                        <Search className="w-4 h-4 mr-2 text-slate-400" />
+                        Search stakeholders by name or job title…
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* User profile link */}
+                <div className="space-y-2">
+                  <Label>Assign from User Profiles</Label>
+                  <div className="relative" ref={userPickerRef}>
+                    <button
+                      type="button"
+                      onClick={() => setUserPickerOpen(v => !v)}
+                      className="w-full flex items-center justify-between border border-input bg-background rounded-md px-3 py-2 text-sm shadow-sm hover:bg-accent transition-colors"
+                    >
+                      <span className={formData.process_owner_id ? "text-foreground" : "text-muted-foreground"}>
+                        {selectedOwnerUser ? `${selectedOwnerUser.full_name || selectedOwnerUser.email} (${selectedOwnerUser.email})` : "Search and select a user profile…"}
+                      </span>
+                      <ChevronsUpDown className="w-4 h-4 text-muted-foreground shrink-0 ml-2" />
+                    </button>
+                    {userPickerOpen && (
+                      <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white border border-border rounded-md shadow-lg">
+                        <div className="p-2 border-b border-border">
+                          <div className="relative">
+                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                            <input
+                              autoFocus
+                              className="w-full pl-7 pr-3 py-1.5 text-sm border border-input rounded bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                              placeholder="Search name or email…"
+                              value={userSearchOwner}
+                              onChange={e => setUserSearchOwner(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-56 overflow-y-auto py-1">
+                          <div className="px-3 py-2 text-sm text-muted-foreground hover:bg-accent cursor-pointer"
+                            onClick={() => { setFormData(prev => ({ ...prev, process_owner_id: "" })); setUserPickerOpen(false); setUserSearchOwner(""); }}>
+                            — Not assigned —
+                          </div>
+                          {filteredUsersForOwner.map(u => (
+                            <div key={u.id}
+                              className={`px-3 py-2 text-sm cursor-pointer hover:bg-accent ${formData.process_owner_id === u.id ? "bg-primary/10 font-medium" : ""}`}
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, process_owner_id: u.id, process_owner: u.full_name || u.email, process_owner_stakeholder_id: "" }));
+                                setUserPickerOpen(false);
+                                setUserSearchOwner("");
+                              }}>
+                              <span className="font-medium">{u.full_name || u.email}</span>
+                              <span className="ml-2 text-xs text-muted-foreground">{u.email}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {selectedOwnerUser && (
+                    <p className="text-xs text-slate-500">{selectedOwnerUser.email} · <Badge className="text-xs bg-indigo-100 text-indigo-700">{selectedOwnerUser.role}</Badge></p>
+                  )}
+                </div>
+
+                {/* Free text fallback */}
+                <div className="space-y-2">
+                  <Label>Process Owner (Free Text)</Label>
+                  <p className="text-xs text-slate-400">Use this for third parties or external owners not in the system</p>
+                  <Input
+                    value={formData.process_owner}
+                    onChange={e => setFormData({ ...formData, process_owner: e.target.value, process_owner_id: "", process_owner_stakeholder_id: "" })}
+                    placeholder="e.g. Third Party Vendor Name"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Deputy & GCO */}
+            <Card className="border-none shadow-lg">
+              <CardHeader className="border-b border-slate-100">
+                <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5 text-slate-500" />Deputy & Control Ownership</CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Process Owner (User)</Label>
-                    <Select value={formData.process_owner_id || ""} onValueChange={v => {
-                      const user = users.find(u => u.id === v);
-                      setFormData({ ...formData, process_owner_id: v, process_owner: user ? user.full_name || user.email : formData.process_owner });
-                    }}>
-                      <SelectTrigger><SelectValue placeholder="Select a user" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={null}>Not assigned</SelectItem>
-                        {users.map(u => (
-                          <SelectItem key={u.id} value={u.id}>
-                            {u.full_name || u.email}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {selectedOwnerUser && (
-                      <p className="text-xs text-slate-500">{selectedOwnerUser.email}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Process Owner (Free Text)</Label>
-                    <Input value={formData.process_owner} onChange={e => setFormData({ ...formData, process_owner: e.target.value })} placeholder="Name if not a system user" />
-                  </div>
-                  <div className="space-y-2">
                     <Label>Deputy Owner</Label>
-                    <Input value={formData.deputy_owner} onChange={e => setFormData({ ...formData, deputy_owner: e.target.value })} placeholder="Deputy or backup owner" />
+                    <div className="flex gap-2">
+                      <Input
+                        value={formData.deputy_owner}
+                        onChange={e => setFormData({ ...formData, deputy_owner: e.target.value })}
+                        placeholder="Deputy or backup owner"
+                        className="flex-1"
+                      />
+                      <Button type="button" variant="outline" size="icon" title="Search stakeholders" onClick={() => setStakeholderPickerTarget("deputy")}>
+                        <Search className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Global Control Owner</Label>
-                    <Input value={formData.global_control_owner} onChange={e => setFormData({ ...formData, global_control_owner: e.target.value })} />
-                  </div>
-                </div>
-
-                {selectedOwnerUser && (
-                  <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-                        {(selectedOwnerUser.full_name || selectedOwnerUser.email || "U")[0].toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">{selectedOwnerUser.full_name || selectedOwnerUser.email}</p>
-                        <p className="text-sm text-slate-600">{selectedOwnerUser.email}</p>
-                        <Badge className="mt-1 text-xs bg-indigo-100 text-indigo-700">{selectedOwnerUser.role}</Badge>
-                      </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={formData.global_control_owner}
+                        onChange={e => setFormData({ ...formData, global_control_owner: e.target.value })}
+                        placeholder="Global control owner"
+                        className="flex-1"
+                      />
+                      <Button type="button" variant="outline" size="icon" title="Search stakeholders" onClick={() => setStakeholderPickerTarget("gco")}>
+                        <Search className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

@@ -41,11 +41,15 @@
     },
     "process_owner": {
       "type": "string",
-      "description": "Process owner name (free text)"
+      "description": "Process owner name (free text, e.g. third party)"
     },
     "process_owner_id": {
       "type": "string",
       "description": "Reference to User entity (process owner)"
+    },
+    "process_owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (process owner)"
     },
     "deputy_owner": {
       "type": "string",
