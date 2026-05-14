@@ -1,0 +1,104 @@
+{
+  "name": "WorkflowInstance",
+  "type": "object",
+  "properties": {
+    "workflow_id": {
+      "type": "string",
+      "description": "Reference to Workflow entity"
+    },
+    "entity_type": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string"
+    },
+    "current_step": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "approved",
+        "rejected",
+        "completed",
+        "returned"
+      ],
+      "default": "pending"
+    },
+    "step_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_id": {
+            "type": "string"
+          },
+          "step_name": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "notified",
+              "completed",
+              "returned",
+              "escalated",
+              "resubmitted"
+            ]
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pending_approvers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "returned_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the item was last returned to originator"
+    },
+    "return_reason": {
+      "type": "string",
+      "description": "Reason for returning to originator"
+    },
+    "originator_email": {
+      "type": "string",
+      "description": "Email of the person who submitted"
+    },
+    "resubmit_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times resubmitted after return"
+    }
+  },
+  "required": [
+    "workflow_id",
+    "entity_type",
+    "entity_id"
+  ]
+}

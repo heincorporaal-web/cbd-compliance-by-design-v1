@@ -1,0 +1,165 @@
+{
+  "name": "Workflow",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Workflow name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Workflow description"
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "Assessment",
+        "ProcessAssessment",
+        "BusinessProcess",
+        "Risk",
+        "Control",
+        "Framework",
+        "Issue"
+      ],
+      "description": "Entity type this workflow applies to"
+    },
+    "trigger_condition": {
+      "type": "string",
+      "enum": [
+        "on_create",
+        "on_update",
+        "on_status_change",
+        "manual"
+      ],
+      "default": "manual",
+      "description": "When to trigger this workflow"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "approval",
+              "notification",
+              "action",
+              "return_to_originator",
+              "parallel_approval",
+              "conditional",
+              "escalation",
+              "delay"
+            ]
+          },
+          "approvers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assigned_user_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notification_template": {
+            "type": "string"
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "order": {
+            "type": "number"
+          },
+          "require_all_approvers": {
+            "type": "boolean",
+            "default": false
+          },
+          "comment_required": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether a comment is mandatory for this step"
+          },
+          "escalation_after_days": {
+            "type": "number",
+            "description": "Escalate if no action after N days"
+          },
+          "escalation_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Who to escalate to"
+          },
+          "delay_hours": {
+            "type": "number",
+            "description": "Delay in hours before moving to next step"
+          },
+          "condition_field": {
+            "type": "string",
+            "description": "Entity field to evaluate for conditional step"
+          },
+          "condition_operator": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "not_equals",
+              "contains",
+              "greater_than",
+              "less_than"
+            ]
+          },
+          "condition_value": {
+            "type": "string"
+          },
+          "condition_true_step": {
+            "type": "number",
+            "description": "Step index to jump to if condition is true"
+          },
+          "condition_false_step": {
+            "type": "number",
+            "description": "Step index to jump to if condition is false"
+          },
+          "return_reason_required": {
+            "type": "boolean",
+            "default": true,
+            "description": "Require reason when returning to originator"
+          }
+        }
+      },
+      "description": "Workflow steps"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "auto_notify_days_before": {
+      "type": "number",
+      "description": "Days before due date to send notification"
+    },
+    "allow_originator_resubmit": {
+      "type": "boolean",
+      "default": true,
+      "description": "Allow originator to resubmit after return"
+    }
+  },
+  "required": [
+    "name",
+    "entity_type"
+  ]
+}
