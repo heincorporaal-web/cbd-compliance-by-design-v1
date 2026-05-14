@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,11 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   ArrowLeft, CheckCircle, XCircle, Clock, User,
-  CornerDownLeft, GitMerge, GitFork, AlertTriangle, Bell, Zap, RefreshCw
+  CornerDownLeft, GitMerge, GitFork, AlertTriangle, Bell, Zap, RefreshCw, Users
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
+import { resolveAssignees } from "@/lib/workflowAssigneeResolver";
 
 const STEP_TYPE_ICONS = {
   approval: CheckCircle,
@@ -87,6 +88,41 @@ export default function WorkflowApproval() {
     queryFn: () => base44.auth.me(),
   });
 
+  // Load the entity record so we can resolve dynamic roles (e.g. process_owner_id)
+  const { data: entityRecord } = useQuery({
+    queryKey: ['wf_entity', instanceData?.entity_type, instanceData?.entity_id],
+    queryFn: async () => {
+      const entityName = instanceData.entity_type;
+      try {
+        const records = await base44.entities[entityName]?.filter({ id: instanceData.entity_id });
+        return records?.[0] || null;
+      } catch { return null; }
+    },
+    enabled: !!instanceData?.entity_type && !!instanceData?.entity_id,
+  });
+
+  // If instance has no pending_approvers yet (just created), resolve them from the first step
+  const initResolveMutation = useMutation({
+    mutationFn: async () => {
+      if (!workflowData || !instanceData || !entityRecord) return;
+      if ((instanceData.pending_approvers?.length || 0) > 0) return; // already resolved
+      const step0 = workflowData.steps[0];
+      if (!step0) return;
+      const resolved = await resolveAssignees(step0, entityRecord, 'approver');
+      if (resolved.length > 0) {
+        await base44.entities.WorkflowInstance.update(instanceId, { pending_approvers: resolved, status: 'in_progress' });
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries(['workflowInstance', instanceId]),
+  });
+
+  // Trigger init resolution once entity record is available
+  React.useEffect(() => {
+    if (entityRecord && workflowData && instanceData && (instanceData.pending_approvers?.length || 0) === 0 && (instanceData.status === 'pending' || instanceData.status === 'in_progress')) {
+      initResolveMutation.mutate();
+    }
+  }, [entityRecord, workflowData, instanceData?.id]);
+
   const actionMutation = useMutation({
     mutationFn: async ({ action, reason }) => {
       const currentStep = workflowData.steps[instanceData.current_step];
@@ -109,11 +145,15 @@ export default function WorkflowApproval() {
       let returnReasonValue = instanceData.return_reason;
       let completedDate = instanceData.completed_date;
 
+      // Helper: resolve approvers for a given step using entity record
+      const resolveForStep = async (step) => {
+        return resolveAssignees(step, entityRecord || {}, 'approver');
+      };
+
       if (action === 'approved') {
-        // For parallel_approval: check min approvals
         if (currentStep.type === 'parallel_approval') {
           pendingApprovers = pendingApprovers.filter(email => email !== currentUser.email);
-          const totalApprovers = (currentStep.approvers || []).length;
+          const totalApprovers = (await resolveForStep(currentStep)).length;
           const minApprovals = currentStep.min_approvals || totalApprovers;
           const approvedCount = totalApprovers - pendingApprovers.length;
           if (approvedCount >= minApprovals) {
@@ -122,11 +162,10 @@ export default function WorkflowApproval() {
               newStatus = 'completed';
               completedDate = new Date().toISOString();
             } else {
-              pendingApprovers = workflowData.steps[newCurrentStep].approvers || [];
+              pendingApprovers = await resolveForStep(workflowData.steps[newCurrentStep]);
             }
           }
         } else {
-          // Standard approval
           pendingApprovers = pendingApprovers.filter(email => email !== currentUser.email);
           if (pendingApprovers.length === 0 || !currentStep.require_all_approvers) {
             newCurrentStep++;
@@ -135,7 +174,7 @@ export default function WorkflowApproval() {
               completedDate = new Date().toISOString();
             } else {
               newStatus = 'in_progress';
-              pendingApprovers = workflowData.steps[newCurrentStep].approvers || [];
+              pendingApprovers = await resolveForStep(workflowData.steps[newCurrentStep]);
             }
           }
         }
@@ -147,12 +186,11 @@ export default function WorkflowApproval() {
         returnedDate = new Date().toISOString();
         returnReasonValue = reason;
       } else if (action === 'resubmitted') {
-        // Reset back to step 0 or the step after the return_to_originator step
         newStatus = 'in_progress';
         newCurrentStep = 0;
         returnedDate = undefined;
         returnReasonValue = undefined;
-        pendingApprovers = workflowData.steps[0]?.approvers || [];
+        pendingApprovers = await resolveForStep(workflowData.steps[0]);
       }
 
       const updateData = {
@@ -188,8 +226,8 @@ export default function WorkflowApproval() {
             });
           }
         } else if (action === 'approved' && newStatus !== 'completed') {
-          const nextStep = workflowData.steps[newCurrentStep];
-          for (const approver of (nextStep?.approvers || [])) {
+          // pendingApprovers was already resolved via resolveForStep above
+          for (const approver of pendingApprovers) {
             await base44.integrations.Core.SendEmail({
               to: approver,
               subject: `Approval Required: ${instanceData.entity_name}`,
@@ -337,11 +375,23 @@ export default function WorkflowApproval() {
                       <h3 className="font-semibold text-slate-900">{step.name}</h3>
                       <Badge variant="outline" className="text-xs capitalize">{step.type.replace(/_/g,' ')}</Badge>
                     </div>
-                    {step.approvers?.length > 0 && (
+                    {/* Show how approvers are configured */}
+                    {step.assignee_type === 'stakeholder_group' && step.stakeholder_group_ids?.length > 0 && (
+                      <p className="text-sm text-slate-600 flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5 text-purple-500" />
+                        Group(s): {step.stakeholder_group_ids.join(', ')}
+                        <span className="text-xs text-slate-400">(resolved at runtime)</span>
+                      </p>
+                    )}
+                    {step.assignee_type === 'dynamic_role' && step.dynamic_role_field && (
+                      <p className="text-sm text-slate-600">Role: <code className="bg-slate-100 px-1 rounded text-xs">{step.dynamic_role_field}</code></p>
+                    )}
+                    {(!step.assignee_type || step.assignee_type === 'named_emails') && step.approvers?.length > 0 && (
                       <p className="text-sm text-slate-600">Approvers: {step.approvers.join(', ')}</p>
                     )}
                     {isCurrent && instanceData.pending_approvers?.length > 0 && (
-                      <p className="text-sm text-blue-600 mt-0.5">
+                      <p className="text-sm text-blue-600 mt-0.5 flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
                         Awaiting: {instanceData.pending_approvers.join(', ')}
                       </p>
                     )}

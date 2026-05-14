@@ -224,6 +224,7 @@ export default function Workflows() {
               <WorkflowBuilder
                 steps={formData.steps}
                 onChange={(steps) => setFormData({...formData, steps})}
+                entityType={formData.entity_type}
               />
 
               <div className="flex justify-end gap-2">

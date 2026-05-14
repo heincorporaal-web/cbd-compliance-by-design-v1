@@ -11,6 +11,9 @@ import {
   Plus, Trash2, ArrowDown, CheckCircle, Bell, Zap,
   CornerDownLeft, GitMerge, GitFork, AlertTriangle, Clock, Info
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import StepAssigneePicker from "./StepAssigneePicker";
 
 const STEP_TYPES = [
   { value: "approval",             label: "Approval",              icon: CheckCircle,    color: "text-green-600",  bg: "bg-green-50 border-green-200",  description: "One or more approvers must approve before moving forward." },
@@ -40,8 +43,11 @@ function StepTypeBadge({ type }) {
   );
 }
 
-export default function WorkflowBuilder({ steps, onChange }) {
+export default function WorkflowBuilder({ steps, onChange, entityType = "" }) {
   const [editingStep, setEditingStep] = useState(null);
+
+  const { data: stakeholders = [] } = useQuery({ queryKey: ['stakeholders'], queryFn: () => base44.entities.Stakeholder.list() });
+  const { data: stakeholderGroups = [] } = useQuery({ queryKey: ['stakeholderGroups'], queryFn: () => base44.entities.StakeholderGroup.list() });
 
   const addStep = () => {
     const newStep = {
@@ -87,6 +93,34 @@ export default function WorkflowBuilder({ steps, onChange }) {
     [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
     updated[index].order = index;
     updated[newIndex].order = newIndex;
+    onChange(updated);
+  };
+
+  // Handles changes from StepAssigneePicker for approvers
+  const handleApproverChange = (index, { assigneeType, emails, groupIds, stakeholderIds, dynamicField }) => {
+    const updated = [...steps];
+    updated[index] = {
+      ...updated[index],
+      assignee_type: assigneeType,
+      approvers: emails,
+      stakeholder_group_ids: groupIds,
+      named_stakeholder_ids: stakeholderIds,
+      dynamic_role_field: dynamicField,
+    };
+    onChange(updated);
+  };
+
+  // Handles changes from StepAssigneePicker for recipients
+  const handleRecipientChange = (index, { assigneeType, emails, groupIds, stakeholderIds, dynamicField }) => {
+    const updated = [...steps];
+    updated[index] = {
+      ...updated[index],
+      recipient_assignee_type: assigneeType,
+      recipients: emails,
+      recipient_stakeholder_group_ids: groupIds,
+      recipient_named_stakeholder_ids: stakeholderIds,
+      recipient_dynamic_role_field: dynamicField,
+    };
     onChange(updated);
   };
 
@@ -171,7 +205,10 @@ export default function WorkflowBuilder({ steps, onChange }) {
                         {!isEditing && (
                           <p className="text-xs text-slate-500 mt-1">
                             {typeDef?.description}
-                            {step.approvers?.length > 0 && ` • ${step.approvers.length} approver(s)`}
+                            {(step.assignee_type === 'stakeholder_group') && step.stakeholder_group_ids?.length > 0 && ` • Group: ${step.stakeholder_group_ids.map(id => stakeholderGroups.find(g=>g.id===id)?.name || id).join(', ')}`}
+                            {(step.assignee_type === 'named_stakeholders') && step.named_stakeholder_ids?.length > 0 && ` • ${step.named_stakeholder_ids.length} named stakeholder(s)`}
+                            {(step.assignee_type === 'dynamic_role') && step.dynamic_role_field && ` • Role: ${step.dynamic_role_field}`}
+                            {(!step.assignee_type || step.assignee_type === 'named_emails') && step.approvers?.length > 0 && ` • ${step.approvers.length} approver(s)`}
                             {step.recipients?.length > 0 && ` • ${step.recipients.length} recipient(s)`}
                             {step.escalation_after_days && step.type === 'escalation' && ` • Escalate after ${step.escalation_after_days}d`}
                             {step.delay_hours && step.type === 'delay' && ` • Wait ${step.delay_hours}h`}
@@ -223,15 +260,18 @@ export default function WorkflowBuilder({ steps, onChange }) {
                             {/* === APPROVAL === */}
                             {step.type === 'approval' && (
                               <div className="space-y-3">
-                                <div className="space-y-1.5">
-                                  <Label className="text-xs">Approver Emails <span className="text-slate-400">(comma-separated)</span></Label>
-                                  <Input
-                                    value={step.approvers?.join(', ') || ''}
-                                    onChange={(e) => updateStep(index, 'approvers', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-                                    placeholder="user1@example.com, user2@example.com"
-                                    className="h-8 text-sm"
-                                  />
-                                </div>
+                                <StepAssigneePicker
+                                  label="Approvers"
+                                  assigneeType={step.assignee_type || 'named_emails'}
+                                  emails={step.approvers || []}
+                                  groupIds={step.stakeholder_group_ids || []}
+                                  stakeholderIds={step.named_stakeholder_ids || []}
+                                  dynamicField={step.dynamic_role_field || ''}
+                                  entityType={entityType}
+                                  stakeholders={stakeholders}
+                                  stakeholderGroups={stakeholderGroups}
+                                  onChange={(v) => handleApproverChange(index, v)}
+                                />
                                 <div className="flex flex-wrap gap-4">
                                   <label className="flex items-center gap-2 cursor-pointer">
                                     <Checkbox
@@ -254,15 +294,18 @@ export default function WorkflowBuilder({ steps, onChange }) {
                             {/* === PARALLEL APPROVAL === */}
                             {step.type === 'parallel_approval' && (
                               <div className="space-y-3">
-                                <div className="space-y-1.5">
-                                  <Label className="text-xs">Approver Emails <span className="text-slate-400">(comma-separated)</span></Label>
-                                  <Input
-                                    value={step.approvers?.join(', ') || ''}
-                                    onChange={(e) => updateStep(index, 'approvers', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-                                    placeholder="user1@example.com, user2@example.com"
-                                    className="h-8 text-sm"
-                                  />
-                                </div>
+                                <StepAssigneePicker
+                                  label="Approvers"
+                                  assigneeType={step.assignee_type || 'named_emails'}
+                                  emails={step.approvers || []}
+                                  groupIds={step.stakeholder_group_ids || []}
+                                  stakeholderIds={step.named_stakeholder_ids || []}
+                                  dynamicField={step.dynamic_role_field || ''}
+                                  entityType={entityType}
+                                  stakeholders={stakeholders}
+                                  stakeholderGroups={stakeholderGroups}
+                                  onChange={(v) => handleApproverChange(index, v)}
+                                />
                                 <div className="space-y-1.5">
                                   <Label className="text-xs">Minimum approvals required</Label>
                                   <Input
@@ -322,15 +365,18 @@ export default function WorkflowBuilder({ steps, onChange }) {
                             {/* === NOTIFICATION === */}
                             {step.type === 'notification' && (
                               <div className="space-y-3">
-                                <div className="space-y-1.5">
-                                  <Label className="text-xs">Recipient Emails <span className="text-slate-400">(comma-separated)</span></Label>
-                                  <Input
-                                    value={step.recipients?.join(', ') || ''}
-                                    onChange={(e) => updateStep(index, 'recipients', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-                                    placeholder="user1@example.com, user2@example.com"
-                                    className="h-8 text-sm"
-                                  />
-                                </div>
+                                <StepAssigneePicker
+                                  label="Recipients"
+                                  assigneeType={step.recipient_assignee_type || 'named_emails'}
+                                  emails={step.recipients || []}
+                                  groupIds={step.recipient_stakeholder_group_ids || []}
+                                  stakeholderIds={step.recipient_named_stakeholder_ids || []}
+                                  dynamicField={step.recipient_dynamic_role_field || ''}
+                                  entityType={entityType}
+                                  stakeholders={stakeholders}
+                                  stakeholderGroups={stakeholderGroups}
+                                  onChange={(v) => handleRecipientChange(index, v)}
+                                />
                                 <div className="space-y-1.5">
                                   <Label className="text-xs">Email Template</Label>
                                   <Textarea
@@ -348,15 +394,18 @@ export default function WorkflowBuilder({ steps, onChange }) {
                             {/* === ACTION === */}
                             {step.type === 'action' && (
                               <div className="space-y-3">
-                                <div className="space-y-1.5">
-                                  <Label className="text-xs">Assigned To (emails)</Label>
-                                  <Input
-                                    value={step.recipients?.join(', ') || ''}
-                                    onChange={(e) => updateStep(index, 'recipients', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-                                    placeholder="user1@example.com"
-                                    className="h-8 text-sm"
-                                  />
-                                </div>
+                                <StepAssigneePicker
+                                  label="Assigned To"
+                                  assigneeType={step.recipient_assignee_type || 'named_emails'}
+                                  emails={step.recipients || []}
+                                  groupIds={step.recipient_stakeholder_group_ids || []}
+                                  stakeholderIds={step.recipient_named_stakeholder_ids || []}
+                                  dynamicField={step.recipient_dynamic_role_field || ''}
+                                  entityType={entityType}
+                                  stakeholders={stakeholders}
+                                  stakeholderGroups={stakeholderGroups}
+                                  onChange={(v) => handleRecipientChange(index, v)}
+                                />
                                 <div className="space-y-1.5">
                                   <Label className="text-xs">Action Description / Instructions</Label>
                                   <Textarea
