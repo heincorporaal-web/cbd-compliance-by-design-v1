@@ -16,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ObjectiveSelector from "@/components/objectives/ObjectiveSelector";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPicker";
+import RiskSignOffPanel from "@/components/risks/RiskSignOffPanel";
 
 export default function RiskDetail() {
   const navigate = useNavigate();
@@ -551,6 +552,10 @@ export default function RiskDetail() {
           onClose={() => setIsObjectiveDialogOpen(false)}
         />
       </form>
+
+      {riskId && !isNew && (
+        <RiskSignOffPanel risk={risk || { id: riskId, status: formData.status, workflow_status_history: [] }} companyId={formData.company_id} />
+      )}
 
       {riskId && !isNew && (
         <WorkflowPanel
