@@ -14,6 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import ObjectiveSelector from "@/components/objectives/ObjectiveSelector";
+import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 
 export default function RiskDetail() {
   const navigate = useNavigate();
@@ -545,6 +546,17 @@ export default function RiskDetail() {
           onClose={() => setIsObjectiveDialogOpen(false)}
         />
       </form>
+
+      {riskId && !isNew && (
+        <WorkflowPanel
+          entityType="Risk"
+          entityId={riskId}
+          entityName={risk?.title || "Risk"}
+          companyId={formData.company_id}
+          record={risk}
+          onInstanceCreated={() => queryClient.invalidateQueries(['risk', riskId])}
+        />
+      )}
     </div>
   );
 }

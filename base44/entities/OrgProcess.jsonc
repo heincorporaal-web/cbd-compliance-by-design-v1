@@ -29,19 +29,16 @@
         5,
         6
       ],
-      "description": "Process hierarchy level: 0=Value Chain, 1=Process Group, 2=Process, 3=Sub-Process, 4=Procedure, 5=Task, 6=Activity/Keystroke"
+      "description": "Process hierarchy level"
     },
     "parent_id": {
-      "type": "string",
-      "description": "Parent process ID for hierarchy"
+      "type": "string"
     },
     "value_chain": {
-      "type": "string",
-      "description": "Associated value chain (for level 0 processes)"
+      "type": "string"
     },
     "process_owner": {
-      "type": "string",
-      "description": "Process owner name (free text, e.g. third party)"
+      "type": "string"
     },
     "process_owner_id": {
       "type": "string",
@@ -52,16 +49,13 @@
       "description": "Reference to Stakeholder entity (process owner)"
     },
     "deputy_owner": {
-      "type": "string",
-      "description": "Deputy process owner name"
+      "type": "string"
     },
     "global_control_owner": {
-      "type": "string",
-      "description": "Global control owner responsible for this process"
+      "type": "string"
     },
     "workstream": {
-      "type": "string",
-      "description": "Associated workstream"
+      "type": "string"
     },
     "status": {
       "type": "string",
@@ -71,82 +65,70 @@
         "archived",
         "under_review"
       ],
-      "default": "active",
-      "description": "Process status"
+      "default": "active"
     },
     "linked_system_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Linked ICT System IDs"
+      }
     },
     "linked_it_capability_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Linked IT Capability IDs (primarily for Sub-Process level)"
+      }
     },
     "linked_risk_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Linked risk IDs"
+      }
     },
     "linked_control_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Linked control IDs"
+      }
     },
     "linked_issue_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Linked issue IDs"
+      }
     },
     "linked_goal_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Linked GRC goal IDs"
+      }
     },
     "linked_assessment_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Linked assessment IDs"
+      }
     },
     "linked_objective_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs of linked company objectives (from Company entity)"
+      }
     },
     "linked_principle_risk_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs of linked principle risks"
+      }
     },
     "linked_org_objective_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs of linked OrgObjective records"
+      }
     },
     "documentation_url": {
-      "type": "string",
-      "description": "Link to process documentation"
+      "type": "string"
     },
     "frequency": {
       "type": "string",
@@ -158,12 +140,10 @@
         "quarterly",
         "annually",
         "ad_hoc"
-      ],
-      "description": "Process execution frequency"
+      ]
     },
     "estimated_duration": {
-      "type": "string",
-      "description": "Estimated time to complete"
+      "type": "string"
     },
     "automation_level": {
       "type": "string",
@@ -172,8 +152,7 @@
         "semi_automated",
         "fully_automated"
       ],
-      "default": "manual",
-      "description": "Level of automation"
+      "default": "manual"
     },
     "criticality": {
       "type": "string",
@@ -183,24 +162,19 @@
         "medium",
         "low"
       ],
-      "default": "medium",
-      "description": "Business criticality"
+      "default": "medium"
     },
     "inputs": {
-      "type": "string",
-      "description": "Process inputs"
+      "type": "string"
     },
     "outputs": {
-      "type": "string",
-      "description": "Process outputs"
+      "type": "string"
     },
     "key_performance_indicators": {
-      "type": "string",
-      "description": "KPIs for this process"
+      "type": "string"
     },
     "notes": {
-      "type": "string",
-      "description": "Additional notes"
+      "type": "string"
     },
     "minimum_requirements": {
       "type": "array",
@@ -217,8 +191,32 @@
             "type": "string"
           }
         }
-      },
-      "description": "Minimum requirements for Sub-Process level (up to 10 items)"
+      }
+    },
+    "workflow_instance_id": {
+      "type": "string",
+      "description": "Active WorkflowInstance ID"
+    },
+    "workflow_status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "required": [

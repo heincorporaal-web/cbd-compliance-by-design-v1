@@ -61,6 +61,7 @@ import GRCGoalDetail from './pages/GRCGoalDetail';
 import GRCGoals from './pages/GRCGoals';
 import Home from './pages/Home';
 import ICTSystems from './pages/ICTSystems';
+import ICTSystemDetail from './pages/ICTSystemDetail';
 import Incidents from './pages/Incidents';
 import Issues from './pages/Issues';
 import KnowledgeArticleDetail from './pages/KnowledgeArticleDetail';
@@ -110,6 +111,7 @@ export const PAGES = {
     "GRCGoals": GRCGoals,
     "Home": Home,
     "ICTSystems": ICTSystems,
+    "ICTSystemDetail": ICTSystemDetail,
     "Incidents": Incidents,
     "Issues": Issues,
     "KnowledgeArticleDetail": KnowledgeArticleDetail,

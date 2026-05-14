@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import LifecycleActions from "@/components/lifecycle/LifecycleActions";
 import LifecycleHistory from "@/components/lifecycle/LifecycleHistory";
 import LifecycleNotifications from "@/components/lifecycle/LifecycleNotifications";
+import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 
 export default function ControlDetail() {
   const navigate = useNavigate();
@@ -588,6 +589,17 @@ export default function ControlDetail() {
             </Tabs>
 
             </form>
+
+            {controlId && !isNew && (
+              <WorkflowPanel
+                entityType="Control"
+                entityId={controlId}
+                entityName={formData.title || "Control"}
+                companyId={frameworks.find(f => f.id === formData.framework_id)?.company_id}
+                record={existingControl?.[0]}
+                onInstanceCreated={() => queryClient.invalidateQueries(['control', controlId])}
+              />
+            )}
             </div>
             );
             }

@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Workflow description"
     },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity \u2014 scopes this workflow to a specific company"
+    },
     "entity_type": {
       "type": "string",
       "enum": [
@@ -20,7 +24,9 @@
         "Control",
         "Framework",
         "Issue",
-        "OrgProcess"
+        "OrgProcess",
+        "ICTSystem",
+        "Survey"
       ],
       "description": "Entity type this workflow applies to"
     },
@@ -66,33 +72,28 @@
               "dynamic_role",
               "named_stakeholders"
             ],
-            "default": "named_emails",
-            "description": "How assignees/approvers are resolved"
+            "default": "named_emails"
           },
           "approvers": {
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "description": "Static email addresses (used when assignee_type=named_emails)"
+            }
           },
           "stakeholder_group_ids": {
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "description": "Stakeholder group IDs whose members become approvers (assignee_type=stakeholder_group)"
+            }
           },
           "named_stakeholder_ids": {
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "description": "Specific Stakeholder record IDs to assign (assignee_type=named_stakeholders)"
+            }
           },
           "dynamic_role_field": {
-            "type": "string",
-            "description": "Field on the entity to read the assignee from, e.g. process_owner, process_owner_id, process_owner_stakeholder_id"
+            "type": "string"
           },
           "assigned_user_emails": {
             "type": "array",

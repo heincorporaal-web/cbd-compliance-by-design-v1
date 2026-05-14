@@ -1,0 +1,118 @@
+{
+  "name": "Framework",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Framework name (e.g., ISO 27001, NIST CSF)"
+    },
+    "version": {
+      "type": "string",
+      "description": "Framework version"
+    },
+    "description": {
+      "type": "string",
+      "description": "Framework description"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "information_security",
+        "privacy",
+        "compliance",
+        "operational_risk",
+        "financial",
+        "other"
+      ],
+      "description": "Framework category"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending_review",
+        "returned",
+        "approved",
+        "active",
+        "archived"
+      ],
+      "default": "draft",
+      "description": "Framework lifecycle status"
+    },
+    "reviewer": {
+      "type": "string"
+    },
+    "approver": {
+      "type": "string"
+    },
+    "approval_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "return_comments": {
+      "type": "string"
+    },
+    "lifecycle_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "linked_objective_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_principle_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workflow_instance_id": {
+      "type": "string",
+      "description": "Active WorkflowInstance ID"
+    },
+    "workflow_status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ]
+}

@@ -16,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import SurveyDistribution from "../components/surveys/SurveyDistribution";
 import AIAnalysis from "../components/surveys/AIAnalysis";
+import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 
 export default function SurveyDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -379,6 +380,17 @@ export default function SurveyDetail() {
           />
         </TabsContent>
       </Tabs>
+
+      {surveyId && (
+        <WorkflowPanel
+          entityType="Survey"
+          entityId={surveyId}
+          entityName={survey?.title || "Survey"}
+          companyId={null}
+          record={survey}
+          onInstanceCreated={() => queryClient.invalidateQueries(['survey', surveyId])}
+        />
+      )}
     </div>
   );
 }

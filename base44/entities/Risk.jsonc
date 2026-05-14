@@ -1,0 +1,135 @@
+{
+  "name": "Risk",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Risk title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed risk description"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "financial",
+        "strategic",
+        "compliance",
+        "cyber_security",
+        "third_party",
+        "reputational",
+        "technology"
+      ],
+      "default": "operational"
+    },
+    "likelihood": {
+      "type": "string",
+      "enum": [
+        "very_low",
+        "low",
+        "medium",
+        "high",
+        "very_high"
+      ],
+      "default": "medium"
+    },
+    "impact": {
+      "type": "string",
+      "enum": [
+        "very_low",
+        "low",
+        "medium",
+        "high",
+        "very_high"
+      ],
+      "default": "medium"
+    },
+    "inherent_risk_score": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "identified",
+        "pending_review",
+        "returned",
+        "approved",
+        "assessed",
+        "mitigated",
+        "accepted",
+        "closed"
+      ],
+      "default": "identified"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Risk owner"
+    },
+    "mitigation_plan": {
+      "type": "string"
+    },
+    "review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "identified_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_objective_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workflow_instance_id": {
+      "type": "string",
+      "description": "Active WorkflowInstance ID"
+    },
+    "workflow_status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Status change history driven by workflow"
+    }
+  },
+  "required": [
+    "title",
+    "company_id"
+  ]
+}

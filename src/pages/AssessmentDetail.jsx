@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, CheckCircle2, XCircle, AlertCircle, Clock, FileText, AlertTriangle, Plus, Save, PlayCircle, Send, RotateCcw, CheckCheck, History } from "lucide-react";
+import { resolveAssignees } from "@/lib/workflowAssigneeResolver";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Label } from "@/components/ui/label";
@@ -74,8 +75,12 @@ export default function AssessmentDetail() {
   });
 
   const { data: workflows = [] } = useQuery({
-    queryKey: ['workflows'],
-    queryFn: () => base44.entities.Workflow.filter({ entity_type: 'Assessment' }),
+    queryKey: ['workflows', 'Assessment', assessment?.company_id],
+    queryFn: async () => {
+      const all = await base44.entities.Workflow.filter({ entity_type: 'Assessment', status: 'active' });
+      return all.filter(w => !w.company_id || w.company_id === assessment?.company_id);
+    },
+    enabled: !!assessment,
   });
 
   const createControlAssessmentMutation = useMutation({
@@ -176,6 +181,12 @@ export default function AssessmentDetail() {
   const startWorkflowMutation = useMutation({
     mutationFn: async (workflowId) => {
       const workflow = workflows.find(w => w.id === workflowId);
+      const user = await base44.auth.me();
+      const step0 = workflow.steps?.[0];
+      let initialApprovers = step0?.approvers || [];
+      if (step0 && assessment) {
+        try { initialApprovers = await resolveAssignees(step0, assessment, 'approver'); } catch {}
+      }
       const instance = await base44.entities.WorkflowInstance.create({
         workflow_id: workflowId,
         entity_type: 'Assessment',
@@ -183,7 +194,8 @@ export default function AssessmentDetail() {
         entity_name: assessment.name,
         status: 'in_progress',
         current_step: 0,
-        pending_approvers: workflow.steps?.[0]?.approvers || []
+        pending_approvers: initialApprovers,
+        originator_email: user?.email,
       });
       await base44.entities.Assessment.update(assessmentId, { workflow_instance_id: instance.id });
       return instance;

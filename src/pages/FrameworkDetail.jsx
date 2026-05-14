@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ArrowLeft, Save, Plus, X, Target, AlertTriangle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 
 export default function FrameworkDetail() {
   const navigate = useNavigate();
@@ -364,6 +365,17 @@ export default function FrameworkDetail() {
           </Card>
         </div>
       </form>
+
+      {frameworkId && !isNew && (
+        <WorkflowPanel
+          entityType="Framework"
+          entityId={frameworkId}
+          entityName={formData.name || "Framework"}
+          companyId={selectedCompanyId}
+          record={existingFramework?.[0]}
+          onInstanceCreated={() => queryClient.invalidateQueries(['framework', frameworkId])}
+        />
+      )}
     </div>
   );
 }

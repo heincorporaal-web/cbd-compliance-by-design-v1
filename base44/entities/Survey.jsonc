@@ -3,12 +3,10 @@
   "type": "object",
   "properties": {
     "title": {
-      "type": "string",
-      "description": "Survey title"
+      "type": "string"
     },
     "description": {
-      "type": "string",
-      "description": "Survey description and purpose"
+      "type": "string"
     },
     "linked_entity_type": {
       "type": "string",
@@ -17,16 +15,13 @@
         "ThirdPartyProvider",
         "Framework",
         "ITCapability"
-      ],
-      "description": "Type of entity this survey is linked to"
+      ]
     },
     "linked_entity_id": {
-      "type": "string",
-      "description": "ID of the linked entity"
+      "type": "string"
     },
     "linked_entity_name": {
-      "type": "string",
-      "description": "Name of the linked entity for easy reference"
+      "type": "string"
     },
     "questions": {
       "type": "array",
@@ -60,8 +55,7 @@
             "type": "boolean"
           }
         }
-      },
-      "description": "Survey questions"
+      }
     },
     "status": {
       "type": "string",
@@ -70,13 +64,11 @@
         "active",
         "closed"
       ],
-      "default": "draft",
-      "description": "Survey status"
+      "default": "draft"
     },
     "due_date": {
       "type": "string",
-      "format": "date",
-      "description": "Survey completion due date"
+      "format": "date"
     },
     "recipients": {
       "type": "array",
@@ -93,8 +85,7 @@
             "type": "boolean"
           }
         }
-      },
-      "description": "Survey recipients and completion status"
+      }
     },
     "reminder_schedule": {
       "type": "object",
@@ -109,8 +100,7 @@
           "type": "string",
           "format": "date-time"
         }
-      },
-      "description": "Automated reminder settings"
+      }
     },
     "ai_analysis": {
       "type": "object",
@@ -137,8 +127,32 @@
           "type": "string",
           "format": "date-time"
         }
-      },
-      "description": "AI-generated analysis of responses"
+      }
+    },
+    "workflow_instance_id": {
+      "type": "string",
+      "description": "Active WorkflowInstance ID"
+    },
+    "workflow_status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "required": [

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import ProcessFlowChart from "@/components/processmanagement/ProcessFlowChart";
 import StakeholderPickerDialog from "@/components/processmanagement/StakeholderPickerDialog";
+import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -1084,6 +1085,17 @@ export default function ProcessManagementDetail() {
           )}
         </Tabs>
       </form>
+
+      {processId && !isNew && (
+        <WorkflowPanel
+          entityType="OrgProcess"
+          entityId={processId}
+          entityName={formData.name || "Process"}
+          companyId={formData.company_id}
+          record={existingProcess?.[0]}
+          onInstanceCreated={() => queryClient.invalidateQueries(["orgProcess", processId])}
+        />
+      )}
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Server, Plus, Search, Edit2, Trash2, AlertCircle } from "lucide-react";
+import { Server, Plus, Search, Edit2, Trash2, AlertCircle, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -369,6 +369,11 @@ export default function ICTSystems() {
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        <Link to={createPageUrl(`ICTSystemDetail?id=${system.id}`)}>
+                          <Button variant="ghost" size="icon" title="View details">
+                            <ExternalLink className="w-4 h-4 text-blue-500" />
+                          </Button>
+                        </Link>
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(system)}>
                           <Edit2 className="w-4 h-4" />
                         </Button>

@@ -1,0 +1,127 @@
+{
+  "name": "ICTSystem",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "System name"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "system_type": {
+      "type": "string",
+      "enum": [
+        "core_banking",
+        "payment_processing",
+        "trading_platform",
+        "risk_management",
+        "customer_relationship",
+        "data_analytics",
+        "infrastructure",
+        "security",
+        "other"
+      ],
+      "description": "Type of ICT system"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "important",
+        "supporting"
+      ],
+      "default": "supporting",
+      "description": "Business criticality level as per DORA"
+    },
+    "description": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "vendor": {
+      "type": "string"
+    },
+    "hosting_type": {
+      "type": "string",
+      "enum": [
+        "on_premise",
+        "cloud",
+        "hybrid",
+        "managed_service"
+      ]
+    },
+    "recovery_time_objective": {
+      "type": "string"
+    },
+    "recovery_point_objective": {
+      "type": "string"
+    },
+    "last_assessment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_assessment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "decommissioned",
+        "planned",
+        "under_review"
+      ],
+      "default": "active"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "data_classification": {
+      "type": "string",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "highly_confidential"
+      ]
+    },
+    "workflow_instance_id": {
+      "type": "string",
+      "description": "Active WorkflowInstance ID"
+    },
+    "workflow_status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Status change history driven by workflow"
+    }
+  },
+  "required": [
+    "name",
+    "company_id",
+    "criticality"
+  ]
+}

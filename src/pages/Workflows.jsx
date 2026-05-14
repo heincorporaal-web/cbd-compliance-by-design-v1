@@ -9,12 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GitBranch, Plus, Edit2, Trash2, Play, Clock, CheckCircle2, XCircle, Search } from "lucide-react";
+import { GitBranch, Plus, Edit2, Trash2, Play, Clock, CheckCircle2, XCircle, Search, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import WorkflowBuilder from "@/components/workflows/WorkflowBuilder";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function Workflows() {
+  const [globalCompany] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWorkflow, setEditingWorkflow] = useState(null);
@@ -23,6 +25,7 @@ export default function Workflows() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    company_id: "",
     entity_type: "Assessment",
     trigger_condition: "manual",
     status: "active",
@@ -33,6 +36,11 @@ export default function Workflows() {
   const { data: workflows = [], isLoading } = useQuery({
     queryKey: ['workflows'],
     queryFn: () => base44.entities.Workflow.list('-created_date'),
+  });
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list(),
   });
 
   const { data: workflowInstances = [] } = useQuery({
@@ -69,6 +77,7 @@ export default function Workflows() {
     setFormData({
       name: "",
       description: "",
+      company_id: "",
       entity_type: "Assessment",
       trigger_condition: "manual",
       status: "active",
@@ -99,9 +108,11 @@ export default function Workflows() {
     }
   };
 
-  const filteredWorkflows = workflows.filter(w =>
-    w.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredWorkflows = workflows.filter(w => {
+    const matchesSearch = w.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCompany = globalCompany === "all" || !w.company_id || w.company_id === globalCompany;
+    return matchesSearch && matchesCompany;
+  });
 
   const getStatusColor = (status) => {
     const colors = {
@@ -161,20 +172,39 @@ export default function Workflows() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="entity_type">Applies To *</Label>
-                  <Select value={formData.entity_type} onValueChange={(value) => setFormData({...formData, entity_type: value})} required>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Assessment">Assessment</SelectItem>
-                      <SelectItem value="ProcessAssessment">Process Assessment</SelectItem>
-                      <SelectItem value="BusinessProcess">Business Process</SelectItem>
-                      <SelectItem value="Risk">Risk</SelectItem>
-                      <SelectItem value="Issue">Issue</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                   <Label htmlFor="entity_type">Applies To *</Label>
+                   <Select value={formData.entity_type} onValueChange={(value) => setFormData({...formData, entity_type: value})} required>
+                     <SelectTrigger>
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="Assessment">Assessment</SelectItem>
+                       <SelectItem value="ProcessAssessment">Process Assessment</SelectItem>
+                       <SelectItem value="BusinessProcess">Business Process (iHPOM)</SelectItem>
+                       <SelectItem value="OrgProcess">Org Process</SelectItem>
+                       <SelectItem value="Risk">Risk</SelectItem>
+                       <SelectItem value="Control">Control</SelectItem>
+                       <SelectItem value="Framework">Framework</SelectItem>
+                       <SelectItem value="ICTSystem">ICT System</SelectItem>
+                       <SelectItem value="Survey">Survey</SelectItem>
+                       <SelectItem value="Issue">Issue</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+                 <div className="space-y-2">
+                   <Label htmlFor="company_id">Company <span className="text-slate-400 font-normal">(optional — leave blank for global)</span></Label>
+                   <Select value={formData.company_id || "global"} onValueChange={(value) => setFormData({...formData, company_id: value === "global" ? "" : value})}>
+                     <SelectTrigger>
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="global">All companies (global)</SelectItem>
+                       {companies.map(c => (
+                         <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="trigger_condition">Trigger When</Label>
                   <Select value={formData.trigger_condition} onValueChange={(value) => setFormData({...formData, trigger_condition: value})}>
@@ -309,15 +339,23 @@ export default function Workflows() {
                           <GitBranch className="w-6 h-6 text-purple-600" />
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-slate-900">{workflow.name}</h3>
-                            <Badge variant="outline" className={`${getStatusColor(workflow.status)} border`}>
-                              {workflow.status}
-                            </Badge>
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                              {workflow.entity_type}
-                            </Badge>
-                          </div>
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                             <h3 className="font-semibold text-slate-900">{workflow.name}</h3>
+                             <Badge variant="outline" className={`${getStatusColor(workflow.status)} border`}>
+                               {workflow.status}
+                             </Badge>
+                             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                               {workflow.entity_type}
+                             </Badge>
+                             {workflow.company_id ? (
+                               <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1">
+                                 <Building2 className="w-3 h-3" />
+                                 {companies.find(c => c.id === workflow.company_id)?.name || "Company"}
+                               </Badge>
+                             ) : (
+                               <Badge variant="outline" className="bg-slate-50 text-slate-500 border-slate-200">Global</Badge>
+                             )}
+                           </div>
                           <div className="text-sm text-slate-600">
                             <p>{workflow.description}</p>
                             <p className="mt-1">

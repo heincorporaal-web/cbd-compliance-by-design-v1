@@ -1,0 +1,123 @@
+{
+  "name": "Control",
+  "type": "object",
+  "properties": {
+    "framework_id": {
+      "type": "string",
+      "description": "Reference to Framework entity"
+    },
+    "control_id": {
+      "type": "string",
+      "description": "Control identifier (e.g., A.5.1)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Control title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Control description"
+    },
+    "category": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending_review",
+        "returned",
+        "approved",
+        "active",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "reviewer": {
+      "type": "string"
+    },
+    "approver": {
+      "type": "string"
+    },
+    "approval_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "return_comments": {
+      "type": "string"
+    },
+    "lifecycle_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "linked_objective_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "compensating_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workflow_instance_id": {
+      "type": "string",
+      "description": "Active WorkflowInstance ID"
+    },
+    "workflow_status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "framework_id",
+    "control_id",
+    "title"
+  ]
+}
