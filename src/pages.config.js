@@ -94,6 +94,7 @@ import ITCapabilities from './pages/ITCapabilities';
 import OrgObjectives from './pages/OrgObjectives';
 import ProcessCompanyReport from './pages/ProcessCompanyReport';
 import RACIMatrix from './pages/RACIMatrix';
+import CompanyBranding from './pages/CompanyBranding';
 import __Layout from './Layout.jsx';
 
 
@@ -145,6 +146,7 @@ export const PAGES = {
     "OrgObjectives": OrgObjectives,
     "ProcessCompanyReport": ProcessCompanyReport,
     "RACIMatrix": RACIMatrix,
+    "CompanyBranding": CompanyBranding,
 }
 
 export const pagesConfig = {

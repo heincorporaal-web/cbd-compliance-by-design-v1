@@ -1,0 +1,118 @@
+{
+  "name": "Company",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Industry sector"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Primary contact person"
+    },
+    "contact_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Contact email"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "onboarding"
+      ],
+      "default": "active"
+    },
+    "description": {
+      "type": "string",
+      "description": "Company description or notes"
+    },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Company objectives"
+    },
+    "principle_risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Principle risks"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL of the company logo image"
+    },
+    "brand_colors": {
+      "type": "object",
+      "description": "Company brand colour palette",
+      "properties": {
+        "primary": {
+          "type": "string",
+          "description": "Primary brand colour (hex)"
+        },
+        "secondary": {
+          "type": "string",
+          "description": "Secondary brand colour (hex)"
+        },
+        "accent": {
+          "type": "string",
+          "description": "Accent colour (hex)"
+        },
+        "background": {
+          "type": "string",
+          "description": "Background colour (hex)"
+        },
+        "text": {
+          "type": "string",
+          "description": "Primary text colour (hex)"
+        }
+      }
+    },
+    "include_logo_in_reports": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to include the company logo in exported reports"
+    },
+    "report_header_text": {
+      "type": "string",
+      "description": "Optional custom header text shown on reports"
+    },
+    "report_footer_text": {
+      "type": "string",
+      "description": "Optional custom footer text shown on reports"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
