@@ -81,6 +81,13 @@
       },
       "description": "Linked ICT System IDs"
     },
+    "linked_it_capability_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked IT Capability IDs (primarily for Sub-Process level)"
+    },
     "linked_risk_ids": {
       "type": "array",
       "items": {

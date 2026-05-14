@@ -33,7 +33,7 @@ const statusColors = {
   under_review: "bg-amber-100 text-amber-700",
 };
 
-function ProcessRow({ process, showColumns, depth = 0 }) {
+function ProcessRow({ process, showColumns, depth = 0, systemsMap = {}, capabilitiesMap = {} }) {
   const [expanded, setExpanded] = useState(true);
   const indent = depth * 20;
 
@@ -60,6 +60,8 @@ function ProcessRow({ process, showColumns, depth = 0 }) {
               showColumns.criticality ? "90px" : null,
               showColumns.ownership ? "140px" : null,
               showColumns.description ? "1fr" : null,
+              showColumns.systems ? "160px" : null,
+              showColumns.capabilities ? "160px" : null,
               showColumns.requirements && process.level === 3 ? "1fr" : null,
             ].filter(Boolean).join(" ")
           }}>
@@ -108,6 +110,36 @@ function ProcessRow({ process, showColumns, depth = 0 }) {
               </div>
             )}
 
+            {showColumns.systems && (
+              <div className="self-center">
+                {(process.linked_system_ids?.length || 0) > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {process.linked_system_ids.map(sid => {
+                      const sys = systemsMap[sid];
+                      return sys ? (
+                        <span key={sid} className="inline-block bg-teal-100 text-teal-700 text-xs px-1.5 py-0.5 rounded">{sys.name}</span>
+                      ) : null;
+                    })}
+                  </div>
+                ) : <span className="text-xs text-slate-400">—</span>}
+              </div>
+            )}
+
+            {showColumns.capabilities && (
+              <div className="self-center">
+                {(process.linked_it_capability_ids?.length || 0) > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {process.linked_it_capability_ids.map(cid => {
+                      const cap = capabilitiesMap[cid];
+                      return cap ? (
+                        <span key={cid} className="inline-block bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded">{cap.name}</span>
+                      ) : null;
+                    })}
+                  </div>
+                ) : <span className="text-xs text-slate-400">—</span>}
+              </div>
+            )}
+
             {showColumns.requirements && process.level === 3 && (
               <div className="self-center">
                 {(process.minimum_requirements?.length || 0) > 0 ? (
@@ -127,7 +159,7 @@ function ProcessRow({ process, showColumns, depth = 0 }) {
       </div>
 
       {expanded && process._children?.map(child => (
-        <ProcessRow key={child.id} process={child} showColumns={showColumns} depth={depth + 1} />
+        <ProcessRow key={child.id} process={child} showColumns={showColumns} depth={depth + 1} systemsMap={systemsMap} capabilitiesMap={capabilitiesMap} />
       ))}
     </div>
   );
@@ -155,7 +187,7 @@ function buildTree(processes) {
   return roots;
 }
 
-function exportToWord(flat, selectedCompany, filters, showColumns) {
+function exportToWord(flat, selectedCompany, filters, showColumns, systemsMap = {}, capabilitiesMap = {}) {
   const esc = s => String(s || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -190,7 +222,7 @@ function exportToWord(flat, selectedCompany, filters, showColumns) {
 
   // Determine active columns
   const activeCols = Object.entries(showColumns).filter(([, v]) => v).map(([k]) => k);
-  const colLabels = { level: "Level", status: "Status", criticality: "Criticality", ownership: "Ownership", description: "Description", requirements: "Min. Requirements" };
+  const colLabels = { level: "Level", status: "Status", criticality: "Criticality", ownership: "Ownership", description: "Description", systems: "ICT Systems", capabilities: "IT Capabilities", requirements: "Min. Requirements" };
 
   // Header row
   const headerCells = [
@@ -228,6 +260,16 @@ function exportToWord(flat, selectedCompany, filters, showColumns) {
         case "description":
           cells.push(wCellPara(p.description || "—"));
           break;
+        case "systems": {
+          const names = (p.linked_system_ids || []).map(id => systemsMap[id]?.name).filter(Boolean).join(", ");
+          cells.push(wCellPara(names || "—"));
+          break;
+        }
+        case "capabilities": {
+          const names = (p.linked_it_capability_ids || []).map(id => capabilitiesMap[id]?.name).filter(Boolean).join(", ");
+          cells.push(wCellPara(names || "—"));
+          break;
+        }
         case "requirements":
           if (p.level === 3 && p.minimum_requirements?.length) {
             const reqs = p.minimum_requirements.map((r, i) => `${i + 1}. ${r.requirement}${r.description ? " — " + r.description : ""}`).join("  ");
@@ -280,7 +322,7 @@ ${table}
   URL.revokeObjectURL(url);
 }
 
-function exportToPowerPoint(flat, selectedCompany, filters, showColumns) {
+function exportToPowerPoint(flat, selectedCompany, filters, showColumns, systemsMap = {}, capabilitiesMap = {}) {
   const SLIDE_W = 9144000, SLIDE_H = 5143500;
 
   const escXml = s => String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -300,6 +342,8 @@ function exportToPowerPoint(flat, selectedCompany, filters, showColumns) {
       const parts = [`${indent}${p.process_code} ${p.name}`];
       if (showColumns.ownership && p.process_owner) parts.push(`  Owner: ${p.process_owner}`);
       if (showColumns.description && p.description) parts.push(`  ${p.description.slice(0, 120)}`);
+      if (showColumns.systems && p.linked_system_ids?.length) parts.push(`  Systems: ${p.linked_system_ids.map(id => systemsMap[id]?.name).filter(Boolean).join(", ")}`);
+      if (showColumns.capabilities && p.linked_it_capability_ids?.length) parts.push(`  Capabilities: ${p.linked_it_capability_ids.map(id => capabilitiesMap[id]?.name).filter(Boolean).join(", ")}`);
       return parts.join("&#xA;");
     });
 
@@ -348,7 +392,7 @@ function exportToPowerPoint(flat, selectedCompany, filters, showColumns) {
 <style>body{font-family:Calibri,sans-serif;} .slide{page-break-after:always;padding:40px;border:1px solid #ccc;margin-bottom:20px;min-height:400px;} h1{color:#1d4ed8;} .row{padding:4px 0;font-size:12px;border-bottom:1px solid #f1f5f9;} .code{color:#1d4ed8;font-family:monospace;font-size:11px;} .indent-1{padding-left:20px;} .indent-2{padding-left:40px;} .indent-3{padding-left:60px;} .meta{font-size:10px;color:#64748b;margin-left:20px;}</style></head>
 <body>
 <div class="slide"><h1>Process Report — ${escXml(selectedCompany?.name)}</h1><p style="color:#64748b;">Generated: ${escXml(format(new Date(), "PPP"))}${filters.date_from ? " · From: " + filters.date_from : ""}${filters.date_to ? " · To: " + filters.date_to : ""}</p></div>
-${flat.map(p => `<div class="row indent-${Math.min(p._depth||0,3)}"><span class="code">${escXml(p.process_code)}</span> <b>${escXml(p.name)}</b>${showColumns.status ? ` <span style="color:#64748b;font-size:10px;">[${p.status||""}]</span>` : ""}${showColumns.ownership && p.process_owner ? `<div class="meta">Owner: ${escXml(p.process_owner)}</div>` : ""}${showColumns.description && p.description ? `<div class="meta">${escXml(p.description.slice(0,200))}</div>` : ""}${showColumns.requirements && p.level===3 && p.minimum_requirements?.length ? `<div class="meta">${p.minimum_requirements.map((r,i)=>`${i+1}. ${escXml(r.requirement)}`).join(" | ")}</div>` : ""}</div>`).join("")}
+${flat.map(p => `<div class="row indent-${Math.min(p._depth||0,3)}"><span class="code">${escXml(p.process_code)}</span> <b>${escXml(p.name)}</b>${showColumns.status ? ` <span style="color:#64748b;font-size:10px;">[${p.status||""}]</span>` : ""}${showColumns.ownership && p.process_owner ? `<div class="meta">Owner: ${escXml(p.process_owner)}</div>` : ""}${showColumns.description && p.description ? `<div class="meta">${escXml(p.description.slice(0,200))}</div>` : ""}${showColumns.systems && p.linked_system_ids?.length ? `<div class="meta">Systems: ${escXml(p.linked_system_ids.map(id=>systemsMap[id]?.name).filter(Boolean).join(", "))}</div>` : ""}${showColumns.capabilities && p.linked_it_capability_ids?.length ? `<div class="meta">Capabilities: ${escXml(p.linked_it_capability_ids.map(id=>capabilitiesMap[id]?.name).filter(Boolean).join(", "))}</div>` : ""}${showColumns.requirements && p.level===3 && p.minimum_requirements?.length ? `<div class="meta">${p.minimum_requirements.map((r,i)=>`${i+1}. ${escXml(r.requirement)}`).join(" | ")}</div>` : ""}</div>`).join("")}
 </body></html>`;
 
   const blob = new Blob([pptHtml], { type: "application/vnd.ms-powerpoint" });
@@ -383,11 +427,15 @@ export default function ProcessCompanyReport() {
     criticality: true,
     ownership: true,
     description: true,
+    systems: true,
+    capabilities: true,
     requirements: true,
   });
 
   const { data: companies = [] } = useQuery({ queryKey: ["companies"], queryFn: () => base44.entities.Company.list() });
   const { data: allProcesses = [] } = useQuery({ queryKey: ["orgProcesses"], queryFn: () => base44.entities.OrgProcess.list() });
+  const { data: allSystems = [] } = useQuery({ queryKey: ["ictSystems"], queryFn: () => base44.entities.ICTSystem.list() });
+  const { data: allCapabilities = [] } = useQuery({ queryKey: ["itCapabilities"], queryFn: () => base44.entities.ITCapability.list() });
 
   const filteredProcesses = useMemo(() => {
     let result = allProcesses;
@@ -414,6 +462,9 @@ export default function ProcessCompanyReport() {
   const tree = useMemo(() => buildTree(filteredProcesses), [filteredProcesses]);
 
   const selectedCompany = companies.find(c => c.id === filters.company_id);
+
+  const systemsMap = useMemo(() => Object.fromEntries(allSystems.map(s => [s.id, s])), [allSystems]);
+  const capabilitiesMap = useMemo(() => Object.fromEntries(allCapabilities.map(c => [c.id, c])), [allCapabilities]);
 
   const toggleLevel = (level) => {
     setFilters(prev => ({
@@ -451,11 +502,11 @@ export default function ProcessCompanyReport() {
               <Printer className="w-4 h-4 mr-2 text-slate-500" />
               Print / Save as PDF
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToWord(flattenWithDepth(tree), selectedCompany, filters, showColumns)}>
+            <DropdownMenuItem onClick={() => exportToWord(flattenWithDepth(tree), selectedCompany, filters, showColumns, systemsMap, capabilitiesMap)}>
               <FileText className="w-4 h-4 mr-2 text-blue-600" />
               Export to Word (.docx)
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToPowerPoint(flattenWithDepth(tree), selectedCompany, filters, showColumns)}>
+            <DropdownMenuItem onClick={() => exportToPowerPoint(flattenWithDepth(tree), selectedCompany, filters, showColumns, systemsMap, capabilitiesMap)}>
               <FileText className="w-4 h-4 mr-2 text-orange-500" />
               Export to PowerPoint (.ppt)
             </DropdownMenuItem>
@@ -528,7 +579,9 @@ export default function ProcessCompanyReport() {
             <div className="flex flex-wrap gap-3">
               {Object.entries({
                 level: "Level", status: "Status", criticality: "Criticality",
-                ownership: "Ownership", description: "Description", requirements: "Min. Requirements (L3)"
+                ownership: "Ownership", description: "Description",
+                systems: "ICT Systems", capabilities: "IT Capabilities",
+                requirements: "Min. Requirements (L3)"
               }).map(([key, label]) => (
                 <div key={key} className="flex items-center gap-1.5">
                   <Checkbox
@@ -586,6 +639,8 @@ export default function ProcessCompanyReport() {
                       showColumns.criticality ? "90px" : null,
                       showColumns.ownership ? "140px" : null,
                       showColumns.description ? "1fr" : null,
+                      showColumns.systems ? "160px" : null,
+                      showColumns.capabilities ? "160px" : null,
                       showColumns.requirements ? "1fr" : null,
                     ].filter(Boolean).join(" ")
                   }}>
@@ -595,6 +650,8 @@ export default function ProcessCompanyReport() {
                     {showColumns.criticality && <span>Criticality</span>}
                     {showColumns.ownership && <span>Ownership</span>}
                     {showColumns.description && <span>Description</span>}
+                    {showColumns.systems && <span>ICT Systems</span>}
+                    {showColumns.capabilities && <span>IT Capabilities</span>}
                     {showColumns.requirements && <span>Min. Requirements</span>}
                   </div>
                 </div>
@@ -602,7 +659,7 @@ export default function ProcessCompanyReport() {
 
               {tree.length > 0 ? (
                 tree.map(proc => (
-                  <ProcessRow key={proc.id} process={proc} showColumns={showColumns} depth={0} />
+                  <ProcessRow key={proc.id} process={proc} showColumns={showColumns} depth={0} systemsMap={systemsMap} capabilitiesMap={capabilitiesMap} />
                 ))
               ) : (
                 <div className="text-center py-12 text-slate-500">

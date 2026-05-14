@@ -36,7 +36,7 @@ export default function ProcessManagementDetail() {
     level: 0, parent_id: "", value_chain: "",
     process_owner: "", process_owner_id: "", process_owner_stakeholder_id: "", deputy_owner: "",
     global_control_owner: "", workstream: "", status: "active",
-    linked_system_ids: [], linked_risk_ids: [], linked_control_ids: [],
+    linked_system_ids: [], linked_it_capability_ids: [], linked_risk_ids: [], linked_control_ids: [],
     linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
     linked_objective_ids: [], linked_principle_risk_ids: [], linked_org_objective_ids: [],
     documentation_url: "", frequency: "ad_hoc", estimated_duration: "",
@@ -85,6 +85,7 @@ export default function ProcessManagementDetail() {
   const { data: goals = [] } = useQuery({ queryKey: ["grcGoals"], queryFn: () => base44.entities.GRCGoal.list() });
   const { data: assessments = [] } = useQuery({ queryKey: ["assessments"], queryFn: () => base44.entities.Assessment.list() });
   const { data: systems = [] } = useQuery({ queryKey: ["ictSystems"], queryFn: () => base44.entities.ICTSystem.list() });
+  const { data: itCapabilities = [] } = useQuery({ queryKey: ["itCapabilities"], queryFn: () => base44.entities.ITCapability.list() });
   const { data: users = [] } = useQuery({ queryKey: ["users"], queryFn: () => base44.entities.User.list() });
   const { data: orgObjectives = [] } = useQuery({ queryKey: ["orgObjectives"], queryFn: () => base44.entities.OrgObjective.list() });
   const { data: stakeholders = [] } = useQuery({ queryKey: ["stakeholders"], queryFn: () => base44.entities.Stakeholder.list() });
@@ -115,7 +116,7 @@ export default function ProcessManagementDetail() {
     level: 0, parent_id: "", value_chain: "",
     process_owner: "", process_owner_id: "", process_owner_stakeholder_id: "", deputy_owner: "",
     global_control_owner: "", workstream: "", status: "active",
-    linked_system_ids: [], linked_risk_ids: [], linked_control_ids: [],
+    linked_system_ids: [], linked_it_capability_ids: [], linked_risk_ids: [], linked_control_ids: [],
     linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
     linked_objective_ids: [], linked_principle_risk_ids: [], linked_org_objective_ids: [],
     documentation_url: "", frequency: "ad_hoc", estimated_duration: "",
@@ -190,6 +191,7 @@ export default function ProcessManagementDetail() {
   const availablePrincipleRisks = company?.principle_risks || [];
 
   const linkedSystems = systems.filter(s => formData.linked_system_ids?.includes(s.id));
+  const linkedCapabilities = itCapabilities.filter(c => formData.linked_it_capability_ids?.includes(c.id));
   const linkedRisks = risks.filter(r => formData.linked_risk_ids?.includes(r.id));
   const linkedControls = controls.filter(c => formData.linked_control_ids?.includes(c.id));
   const linkedIssues = issues.filter(i => formData.linked_issue_ids?.includes(i.id));
@@ -265,9 +267,9 @@ export default function ProcessManagementDetail() {
               )}
             </TabsTrigger>
             <TabsTrigger value="systems">
-              Systems
-              {(formData.linked_system_ids?.length || 0) > 0 && (
-                <Badge variant="secondary" className="ml-2">{formData.linked_system_ids.length}</Badge>
+              Systems & Capabilities
+              {((formData.linked_system_ids?.length || 0) + (formData.linked_it_capability_ids?.length || 0)) > 0 && (
+                <Badge variant="secondary" className="ml-2">{(formData.linked_system_ids?.length || 0) + (formData.linked_it_capability_ids?.length || 0)}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="links">
@@ -608,7 +610,7 @@ export default function ProcessManagementDetail() {
             <Card className="border-none shadow-lg">
               <CardHeader className="border-b border-slate-100">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2"><Server className="w-5 h-5 text-teal-600" />Allocated Systems</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><Server className="w-5 h-5 text-teal-600" />ICT Systems</CardTitle>
                   <Dialog open={activeDialog === "system"} onOpenChange={open => setActiveDialog(open ? "system" : null)}>
                     <DialogTrigger asChild>
                       <Button type="button" variant="outline" size="sm"><Plus className="w-4 h-4 mr-1" />Link System</Button>
@@ -662,6 +664,64 @@ export default function ProcessManagementDetail() {
                   <div className="text-center py-8 text-slate-500">
                     <Server className="w-10 h-10 text-slate-300 mx-auto mb-2" />
                     <p className="text-sm">No systems allocated yet</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* IT Capabilities — available for all levels */}
+            <Card className="border-none shadow-lg">
+              <CardHeader className="border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Server className="w-5 h-5 text-purple-600" />IT Capabilities
+                    {formData.level === 3 && <Badge className="ml-2 text-xs bg-purple-100 text-purple-700">Sub-Process</Badge>}
+                  </CardTitle>
+                  <Dialog open={activeDialog === "capability"} onOpenChange={open => setActiveDialog(open ? "capability" : null)}>
+                    <DialogTrigger asChild>
+                      <Button type="button" variant="outline" size="sm"><Plus className="w-4 h-4 mr-1" />Link Capability</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Link IT Capability</DialogTitle></DialogHeader>
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {itCapabilities
+                          .filter(c => (!formData.company_id || c.company_id === formData.company_id) && !formData.linked_it_capability_ids?.includes(c.id))
+                          .map(cap => (
+                            <div key={cap.id} className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer" onClick={() => addLink("linked_it_capability_ids", cap.id)}>
+                              <div className="flex items-center justify-between">
+                                <p className="font-medium">{cap.name}</p>
+                                <Badge variant="outline" className="text-xs text-slate-600 capitalize">{cap.category?.replace(/_/g, " ")}</Badge>
+                              </div>
+                              {cap.maturity_level && <p className="text-xs text-slate-500 mt-1">Maturity: {cap.maturity_level}</p>}
+                            </div>
+                          ))}
+                        {itCapabilities.filter(c => (!formData.company_id || c.company_id === formData.company_id) && !formData.linked_it_capability_ids?.includes(c.id)).length === 0 && (
+                          <p className="text-sm text-slate-500 text-center py-4">No IT capabilities available to link.</p>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {linkedCapabilities.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {linkedCapabilities.map(cap => (
+                      <div key={cap.id} className="flex items-start justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-900 text-sm">{cap.name}</p>
+                          <p className="text-xs text-slate-500 capitalize mt-0.5">{cap.category?.replace(/_/g, " ")}{cap.maturity_level ? ` · ${cap.maturity_level}` : ""}</p>
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => removeLink("linked_it_capability_ids", cap.id)}>
+                          <X className="w-3 h-3 text-slate-500" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-slate-500">
+                    <Server className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                    <p className="text-sm">No IT capabilities linked yet</p>
                   </div>
                 )}
               </CardContent>
