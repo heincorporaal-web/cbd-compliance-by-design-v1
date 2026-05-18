@@ -382,6 +382,49 @@ export default function Companies() {
                 </TabsContent>
 
                 <TabsContent value="branding" className="space-y-5 mt-4">
+
+                  {/* Live preview */}
+                  <div className="space-y-2">
+                    <Label className="font-medium flex items-center gap-2"><Eye className="w-4 h-4 text-violet-500" /> Live Preview</Label>
+                    <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                      {/* Report header preview */}
+                      <div className="px-5 py-3 flex items-center justify-between" style={{ backgroundColor: formData.brand_colors?.primary || DEFAULT_COLORS.primary }}>
+                        <div className="flex items-center gap-3">
+                          {formData.logo_url && formData.include_logo_in_reports !== false ? (
+                            <img src={formData.logo_url} alt="logo" className="h-8 object-contain rounded" />
+                          ) : (
+                            <div className="w-8 h-8 rounded bg-white/20 flex items-center justify-center">
+                              <Building2 className="w-4 h-4 text-white/60" />
+                            </div>
+                          )}
+                          <span className="text-white font-semibold text-sm">
+                            {formData.report_header_text || formData.name || "Company Name — Risk Assessment"}
+                          </span>
+                        </div>
+                        <span className="text-white/60 text-xs">Report Preview</span>
+                      </div>
+                      {/* Body preview */}
+                      <div className="px-5 py-4" style={{ backgroundColor: formData.brand_colors?.background || DEFAULT_COLORS.background }}>
+                        <div className="flex gap-3 mb-3">
+                          {["primary", "secondary", "accent"].map(k => (
+                            <div key={k} className="h-2 rounded-full flex-1" style={{ backgroundColor: formData.brand_colors?.[k] || DEFAULT_COLORS[k] }} />
+                          ))}
+                        </div>
+                        <div className="space-y-2">
+                          <div className="h-3 rounded" style={{ backgroundColor: formData.brand_colors?.text || DEFAULT_COLORS.text, opacity: 0.15, width: "70%" }} />
+                          <div className="h-3 rounded" style={{ backgroundColor: formData.brand_colors?.text || DEFAULT_COLORS.text, opacity: 0.1, width: "50%" }} />
+                        </div>
+                      </div>
+                      {/* Footer preview */}
+                      <div className="px-5 py-2 border-t flex items-center justify-between" style={{ backgroundColor: formData.brand_colors?.secondary || DEFAULT_COLORS.secondary }}>
+                        <span className="text-white/80 text-xs">
+                          {formData.report_footer_text || "Confidential — Internal Use Only"}
+                        </span>
+                        <span className="text-white/50 text-xs">Page 1</span>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Logo */}
                   <div className="space-y-2">
                     <Label className="font-medium flex items-center gap-2"><Image className="w-4 h-4 text-violet-500" /> Company Logo</Label>
