@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   CalendarDays, Plus, Trash2, Edit2, Send, CheckCircle2,
-  Clock, MapPin, Users, RefreshCw, CalendarCheck
+  Clock, MapPin, Users, RefreshCw, CalendarCheck, List
 } from "lucide-react";
 import { format } from "date-fns";
+import CalendarMonthView from "./CalendarMonthView";
 
 const EVENT_TYPES = [
   { value: "review", label: "Review", color: "bg-blue-100 text-blue-700" },
@@ -43,6 +44,16 @@ export default function CompanyCalendarTab({ companyId }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [attendeeInput, setAttendeeInput] = useState("");
   const [pushingId, setPushingId] = useState(null);
+  const [viewMode, setViewMode] = useState("calendar"); // "calendar" | "list"
+  const [selectedIds, setSelectedIds] = useState(new Set());
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['company-calendar', companyId],
@@ -111,17 +122,63 @@ export default function CompanyCalendarTab({ companyId }) {
   const upcomingEvents = events.filter(e => e.status !== 'completed' && e.status !== 'cancelled');
   const pastEvents = events.filter(e => e.status === 'completed' || e.status === 'cancelled');
 
+  const selectedEvents = events.filter(e => selectedIds.has(e.id));
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-500">Track key GRC events — push directly to Outlook or Google Calendar.</p>
-        <Button type="button" size="sm" onClick={openCreate} className="gap-2 bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4" /> Add Event
-        </Button>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+          <Button
+            type="button" size="sm" variant="ghost"
+            onClick={() => setViewMode("calendar")}
+            className={`gap-1.5 h-7 px-3 text-xs ${viewMode === "calendar" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`}
+          >
+            <CalendarDays className="w-3.5 h-3.5" /> Calendar
+          </Button>
+          <Button
+            type="button" size="sm" variant="ghost"
+            onClick={() => setViewMode("list")}
+            className={`gap-1.5 h-7 px-3 text-xs ${viewMode === "list" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`}
+          >
+            <List className="w-3.5 h-3.5" /> List
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          {selectedIds.size > 0 && (
+            <span className="text-xs text-blue-600 font-medium">{selectedIds.size} selected</span>
+          )}
+          <Button type="button" size="sm" onClick={openCreate} className="gap-2 bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4" /> Add Event
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
         <div className="text-center py-8 text-slate-400 text-sm">Loading events…</div>
+      ) : viewMode === "calendar" ? (
+        events.length === 0 ? (
+          <div className="text-center py-10 border-2 border-dashed rounded-xl">
+            <CalendarDays className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm text-slate-500">No calendar events yet</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <CalendarMonthView
+              events={events}
+              selectedIds={selectedIds}
+              onToggleSelect={toggleSelect}
+              onEditEvent={openEdit}
+            />
+            {selectedEvents.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Selected Events</p>
+                {selectedEvents.map(ev => (
+                  <EventRow key={ev.id} ev={ev} onEdit={openEdit} onDelete={id => { deleteMutation.mutate(id); setSelectedIds(p => { const n = new Set(p); n.delete(id); return n; }); }} onPush={pushToCalendar} pushingId={pushingId} />
+                ))}
+              </div>
+            )}
+          </div>
+        )
       ) : upcomingEvents.length === 0 && pastEvents.length === 0 ? (
         <div className="text-center py-10 border-2 border-dashed rounded-xl">
           <CalendarDays className="w-10 h-10 text-slate-300 mx-auto mb-2" />
