@@ -1,0 +1,96 @@
+{
+  "name": "CompanyCalendarEvent",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "title": {
+      "type": "string",
+      "description": "Event title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Event description"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "review",
+        "assessment",
+        "audit",
+        "monitoring",
+        "board_meeting",
+        "regulatory",
+        "training",
+        "other"
+      ],
+      "default": "review"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "all_day": {
+      "type": "boolean",
+      "default": false
+    },
+    "location": {
+      "type": "string"
+    },
+    "attendees": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Email addresses of attendees"
+    },
+    "recurrence": {
+      "type": "string",
+      "enum": [
+        "none",
+        "weekly",
+        "monthly",
+        "quarterly",
+        "annually"
+      ],
+      "default": "none"
+    },
+    "outlook_event_id": {
+      "type": "string",
+      "description": "Microsoft Graph event ID after push"
+    },
+    "google_event_id": {
+      "type": "string",
+      "description": "Google Calendar event ID after push"
+    },
+    "pushed_to_outlook": {
+      "type": "boolean",
+      "default": false
+    },
+    "pushed_to_google": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "upcoming",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "upcoming"
+    }
+  },
+  "required": [
+    "company_id",
+    "title",
+    "start_date"
+  ]
+}
