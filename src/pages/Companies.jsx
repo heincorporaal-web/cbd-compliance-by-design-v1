@@ -217,6 +217,11 @@ export default function Companies() {
                     )}
                   </TabsTrigger>
                   <TabsTrigger value="branding">Branding</TabsTrigger>
+                  {editingCompany && (
+                    <TabsTrigger value="calendar" className="gap-1.5">
+                      <CalendarDays className="w-3.5 h-3.5" /> Calendar
+                    </TabsTrigger>
+                  )}
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4 mt-4">
@@ -509,6 +514,11 @@ export default function Companies() {
                     </div>
                   </div>
                 </TabsContent>
+                {editingCompany && (
+                  <TabsContent value="calendar" className="mt-4">
+                    <CompanyCalendarTab companyId={editingCompany.id} />
+                  </TabsContent>
+                )}
               </Tabs>
 
               <div className="flex justify-end gap-2 pt-4 border-t">
