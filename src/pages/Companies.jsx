@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,14 +8,29 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle } from "lucide-react";
+import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle, Upload, Palette, RefreshCw, Image, FileText, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const DEFAULT_COLORS = {
+  primary: "#1e40af", secondary: "#3b82f6", accent: "#0ea5e9", background: "#f8fafc", text: "#0f172a",
+};
+
+const COLOR_PRESETS = [
+  { name: "Ocean Blue", colors: { primary: "#1e40af", secondary: "#3b82f6", accent: "#0ea5e9", background: "#f0f9ff", text: "#0f172a" } },
+  { name: "Forest Green", colors: { primary: "#166534", secondary: "#16a34a", accent: "#4ade80", background: "#f0fdf4", text: "#0f172a" } },
+  { name: "Royal Purple", colors: { primary: "#6b21a8", secondary: "#9333ea", accent: "#c084fc", background: "#faf5ff", text: "#0f172a" } },
+  { name: "Sunset Orange", colors: { primary: "#9a3412", secondary: "#ea580c", accent: "#fb923c", background: "#fff7ed", text: "#0f172a" } },
+  { name: "Charcoal", colors: { primary: "#1e293b", secondary: "#475569", accent: "#94a3b8", background: "#f8fafc", text: "#0f172a" } },
+  { name: "Rose", colors: { primary: "#9f1239", secondary: "#e11d48", accent: "#fb7185", background: "#fff1f2", text: "#0f172a" } },
+];
 
 export default function Companies() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const fileInputRef = useRef();
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
@@ -26,7 +41,12 @@ export default function Companies() {
     status: "active",
     description: "",
     objectives: [],
-    principle_risks: []
+    principle_risks: [],
+    logo_url: "",
+    brand_colors: { ...DEFAULT_COLORS },
+    include_logo_in_reports: true,
+    report_header_text: "",
+    report_footer_text: "",
   });
 
   const { data: companies = [], isLoading } = useQuery({
@@ -68,9 +88,23 @@ export default function Companies() {
       status: "active",
       description: "",
       objectives: [],
-      principle_risks: []
+      principle_risks: [],
+      logo_url: "",
+      brand_colors: { ...DEFAULT_COLORS },
+      include_logo_in_reports: true,
+      report_header_text: "",
+      report_footer_text: "",
     });
     setEditingCompany(null);
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setFormData(prev => ({ ...prev, logo_url: file_url }));
+    setUploadingLogo(false);
   };
 
   const addObjective = () => {
@@ -116,7 +150,11 @@ export default function Companies() {
 
   const handleEdit = (company) => {
     setEditingCompany(company);
-    setFormData(company);
+    setFormData({
+      ...company,
+      brand_colors: { ...DEFAULT_COLORS, ...(company.brand_colors || {}) },
+      include_logo_in_reports: company.include_logo_in_reports !== false,
+    });
     setIsDialogOpen(true);
   };
 
@@ -177,6 +215,7 @@ export default function Companies() {
                       <Badge variant="secondary" className="ml-2">{formData.principle_risks.length}</Badge>
                     )}
                   </TabsTrigger>
+                  <TabsTrigger value="branding">Branding</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4 mt-4">
@@ -340,6 +379,91 @@ export default function Companies() {
                       <p className="text-sm text-slate-500">No principle risks defined yet</p>
                     </div>
                   )}
+                </TabsContent>
+
+                <TabsContent value="branding" className="space-y-5 mt-4">
+                  {/* Logo */}
+                  <div className="space-y-2">
+                    <Label className="font-medium flex items-center gap-2"><Image className="w-4 h-4 text-violet-500" /> Company Logo</Label>
+                    <div className="flex items-start gap-4">
+                      <div className="w-24 h-16 rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center bg-slate-50 shrink-0">
+                        {formData.logo_url ? (
+                          <img src={formData.logo_url} alt="logo" className="max-w-full max-h-full object-contain p-1 rounded" />
+                        ) : (
+                          <Image className="w-6 h-6 text-slate-300" />
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex gap-2 flex-wrap">
+                          <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadingLogo} className="gap-2">
+                            <Upload className="w-3.5 h-3.5" />
+                            {uploadingLogo ? "Uploading…" : "Upload Logo"}
+                          </Button>
+                          {formData.logo_url && (
+                            <Button type="button" variant="ghost" size="sm" onClick={() => setFormData(p => ({ ...p, logo_url: "" }))} className="text-red-500 gap-2">
+                              <Trash2 className="w-3.5 h-3.5" /> Remove
+                            </Button>
+                          )}
+                        </div>
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                        {formData.logo_url && (
+                          <div className="flex items-center gap-2">
+                            <input id="include-logo" type="checkbox" checked={formData.include_logo_in_reports !== false} onChange={e => setFormData(p => ({ ...p, include_logo_in_reports: e.target.checked }))} className="rounded" />
+                            <Label htmlFor="include-logo" className="text-sm text-slate-600 cursor-pointer">Include logo in exported reports</Label>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Colour palette */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="font-medium flex items-center gap-2"><Palette className="w-4 h-4 text-violet-500" /> Colour Palette</Label>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setFormData(p => ({ ...p, brand_colors: { ...DEFAULT_COLORS } }))} className="text-slate-500 gap-1">
+                        <RefreshCw className="w-3.5 h-3.5" /> Reset
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {COLOR_PRESETS.map(preset => (
+                        <button type="button" key={preset.name} onClick={() => setFormData(p => ({ ...p, brand_colors: { ...p.brand_colors, ...preset.colors } }))}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 hover:border-violet-300 hover:bg-violet-50 text-xs font-medium text-slate-600 transition-colors">
+                          <span className="flex gap-0.5">
+                            {["primary", "secondary", "accent"].map(k => (
+                              <span key={k} className="w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: preset.colors[k] }} />
+                            ))}
+                          </span>
+                          {preset.name}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {[{ key: "primary", label: "Primary" }, { key: "secondary", label: "Secondary" }, { key: "accent", label: "Accent" }, { key: "background", label: "Background" }, { key: "text", label: "Text" }].map(({ key, label }) => (
+                        <div key={key} className="space-y-1">
+                          <Label className="text-xs text-slate-500">{label}</Label>
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg border border-slate-200 shadow-sm cursor-pointer relative overflow-hidden" style={{ backgroundColor: formData.brand_colors?.[key] || DEFAULT_COLORS[key] }}>
+                              <input type="color" value={formData.brand_colors?.[key] || DEFAULT_COLORS[key]} onChange={e => setFormData(p => ({ ...p, brand_colors: { ...p.brand_colors, [key]: e.target.value } }))} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+                            </div>
+                            <Input value={formData.brand_colors?.[key] || DEFAULT_COLORS[key]} onChange={e => setFormData(p => ({ ...p, brand_colors: { ...p.brand_colors, [key]: e.target.value } }))} className="h-8 text-xs font-mono w-24" maxLength={7} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Report settings */}
+                  <div className="space-y-3">
+                    <Label className="font-medium flex items-center gap-2"><FileText className="w-4 h-4 text-violet-500" /> Report Settings</Label>
+                    <div className="space-y-2">
+                      <Label className="text-sm">Report Header Text</Label>
+                      <Input value={formData.report_header_text || ""} onChange={e => setFormData(p => ({ ...p, report_header_text: e.target.value }))} placeholder={formData.name || "Company Name — Risk Assessment"} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm">Report Footer Text</Label>
+                      <Textarea value={formData.report_footer_text || ""} onChange={e => setFormData(p => ({ ...p, report_footer_text: e.target.value }))} placeholder="Confidential — Internal Use Only" rows={2} />
+                    </div>
+                  </div>
                 </TabsContent>
               </Tabs>
 
