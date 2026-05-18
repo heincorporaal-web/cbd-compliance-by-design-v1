@@ -202,7 +202,7 @@ export default function Companies() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Tabs defaultValue="details">
-                <TabsList>
+                <TabsList className="flex flex-wrap h-auto gap-1">
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="objectives">
                     Objectives
