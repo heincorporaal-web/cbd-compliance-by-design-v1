@@ -53,6 +53,17 @@ export default function ValueChains() {
     queryFn: () => base44.entities.Company.list(),
   });
 
+  const { data: workstreams = [] } = useQuery({
+    queryKey: ["workstreams-all", selectedCompanyId],
+    queryFn: () =>
+      selectedCompanyId
+        ? base44.entities.Workstream.filter({ company_id: selectedCompanyId })
+        : base44.entities.Workstream.list(),
+  });
+
+  // Build a set of value_chain_ids that have at least one workstream
+  const vcIdsWithWorkstreams = new Set(workstreams.map(ws => ws.value_chain_id));
+
   const { data: valueChains = [], isLoading } = useQuery({
     queryKey: ["value-chains", selectedCompanyId],
     queryFn: () =>
@@ -121,6 +132,20 @@ export default function ValueChains() {
 
   const toggleCollapse = (key) => setCollapsed(p => ({ ...p, [key]: !p[key] }));
   const toggleWS = (id) => setExpandedWS(p => ({ ...p, [id]: !p[id] }));
+
+  const chainDescriptions = {
+    "Customer Relationship Management": "Covers marketing, sales, service and customer engagement processes to acquire, retain and grow customer relationships.",
+    "Enterprise Asset Management": "Manages the full lifecycle of physical assets — acquisition, maintenance, monitoring and decommissioning — to maximise reliability and value.",
+    "Enterprise Governance and Shareholder": "Provides board-level governance, shareholder value management and enterprise leadership frameworks.",
+    "Enterprise IT Management": "Governs IT strategy, architecture, development, operations, security and service management across the enterprise.",
+    "Enterprise Perfomance Management": "Connects strategy to execution through planning, budgeting, forecasting, reporting and performance monitoring.",
+    "Financial Management": "Covers all financial processes from procurement and payables through to record-keeping, reporting and treasury.",
+    "Governance, Risk & Compliance": "Provides the frameworks, controls, risk management and compliance processes to protect the organisation and ensure regulatory adherence.",
+    "Human Capital Management": "Manages the employee lifecycle from hire to retire, including HR, payroll, talent and workforce planning.",
+    "Inventory Management": "Controls stock levels, logistics, warehouse operations and manufacturing to ensure product availability and operational efficiency.",
+    "Product Management": "Drives new product development, concept validation, go-to-market and product lifecycle management.",
+    "Strategic Planning & Direction": "Sets enterprise strategy, goals and success factors to create alignment, accountability and sustainable competitive advantage.",
+  };
 
   const chainColors = {
     "Customer Relationship Management": "bg-cyan-100 text-cyan-700",
@@ -197,6 +222,18 @@ export default function ValueChains() {
                 >
                   {isOpen ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
                   <span className={`text-sm font-semibold px-2.5 py-0.5 rounded-full ${badgeCls}`}>{chain}</span>
+                  {chainDescriptions[chain] && (
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-3.5 h-3.5 text-slate-400 hover:text-primary cursor-help shrink-0" onClick={e => e.stopPropagation()} />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-sm text-xs leading-relaxed">
+                          {chainDescriptions[chain]}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   <span className="text-xs text-slate-400 ml-auto">{items.length} item{items.length !== 1 ? "s" : ""}</span>
                 </button>
                 {isOpen && (
@@ -229,8 +266,11 @@ export default function ValueChains() {
                          </TooltipProvider>
                        )}
                        {vc.status !== "active" && (
-                         <Badge variant="outline" className="text-xs capitalize">{vc.status}</Badge>
-                       )}
+                          <Badge variant="outline" className="text-xs capitalize">{vc.status}</Badge>
+                        )}
+                        {!vcIdsWithWorkstreams.has(vc.id) && (
+                          <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 bg-amber-50">No workstreams</Badge>
+                        )}
                       </div>
                       {company && (
                        <p className="text-xs text-slate-400 mt-0.5">{company.name}</p>
