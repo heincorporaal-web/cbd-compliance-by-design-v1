@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Search, Network, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Network, ChevronDown, ChevronRight, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
 
@@ -203,29 +204,38 @@ export default function ValueChains() {
                     {items.map(vc => {
                       const company = companies.find(c => c.id === vc.company_id);
                       return (
-                        <div key={vc.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
-                          <div className="flex items-start gap-3">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <button
-                                  onClick={() => toggleWS(vc.id)}
-                                  className="flex items-center gap-1 text-left"
-                                >
-                                  {expandedWS[vc.id] ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
-                                  <span className="font-medium text-sm text-slate-900">{vc.name}</span>
-                                </button>
-                                <span className="text-xs text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{vc.value_chain_code}</span>
-                                {vc.status !== "active" && (
-                                  <Badge variant="outline" className="text-xs capitalize">{vc.status}</Badge>
-                                )}
-                              </div>
-                              {vc.description && (
-                                <p className="text-xs text-slate-500 mt-1 line-clamp-2">{vc.description}</p>
-                              )}
-                              {company && (
-                                <p className="text-xs text-slate-400 mt-0.5">{company.name}</p>
-                              )}
-                            </div>
+                      <div key={vc.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
+                      <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                       <button
+                         onClick={() => toggleWS(vc.id)}
+                         className="flex items-center gap-1 text-left"
+                       >
+                         {expandedWS[vc.id] ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
+                         <span className="font-medium text-sm text-slate-900">{vc.name}</span>
+                       </button>
+                       <span className="text-xs text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{vc.value_chain_code}</span>
+                       {vc.description && (
+                         <TooltipProvider delayDuration={200}>
+                           <Tooltip>
+                             <TooltipTrigger asChild>
+                               <Info className="w-3.5 h-3.5 text-slate-400 hover:text-primary cursor-help shrink-0" />
+                             </TooltipTrigger>
+                             <TooltipContent side="right" className="max-w-sm text-xs leading-relaxed">
+                               {vc.description}
+                             </TooltipContent>
+                           </Tooltip>
+                         </TooltipProvider>
+                       )}
+                       {vc.status !== "active" && (
+                         <Badge variant="outline" className="text-xs capitalize">{vc.status}</Badge>
+                       )}
+                      </div>
+                      {company && (
+                       <p className="text-xs text-slate-400 mt-0.5">{company.name}</p>
+                      )}
+                      </div>
                             <div className="flex items-center gap-1 shrink-0">
                               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(vc)}>
                                 <Pencil className="w-3.5 h-3.5" />
