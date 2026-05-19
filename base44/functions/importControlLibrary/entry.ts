@@ -43,8 +43,10 @@ Deno.serve(async (req) => {
     console.log('Sample row data:', rows[0]);
 
     // Map rows to Control entity schema
-    const controls = rows.map(row => {
-      const controlRef = String(row['ControlRef'] || row['controlRef'] || '').trim();
+    const controls = rows.map((row, idx) => {
+      const controlRef = (row['ControlRef'] || '').toString().trim();
+      const controlDesc = (row['ControlDesc'] || '').toString().trim();
+      
       // Extract framework code from ControlRef (e.g., CTCM.FINMC.1.01 -> CTCM)
       const frameworkCode = controlRef.split('.')[0]?.toLowerCase().trim();
       let framework_id = frameworkMap.get(frameworkCode) || '';
@@ -62,26 +64,26 @@ Deno.serve(async (req) => {
       return {
         framework_id: framework_id,
         control_id: controlRef,
-        title: String(row['ControlDesc'] || row['controlDesc'] || 'Untitled Control').trim().substring(0, 500),
-        description: String(row['ControlDesc'] || row['controlDesc'] || '').trim(),
+        title: controlDesc.substring(0, 500),
+        description: controlDesc,
         is_library_control: true,
-        global: Boolean(row['Global']) || Boolean(row['global']),
-        control_ccm: Boolean(row['ControlCCM']) || Boolean(row['controlCCM']),
-        self_assessment: Boolean(row['SelfAssessment']) || Boolean(row['selfAssessment']),
-        control_criticality: String(row['ControlCriticality'] || row['controlCriticality'] || 'Should Have').trim(),
-        control_owner: String(row['ControlOwner'] || row['controlOwner'] || '').trim(),
-        key_control: Boolean(row['KeyControl']) || Boolean(row['keyControl']),
-        control_execution_type: String(row['ControlExecutionType'] || row['controlExecutionType'] || 'Manual').trim(),
-        control_type: String(row['ControlType'] || row['controlType'] || 'Preventive').trim(),
-        finance_control_consideration: Boolean(row['FinanceControlConsideration']) || Boolean(row['financeControlConsideration']),
-        control_frequency: String(row['ControlFrequency'] || row['controlFrequency'] || 'Monthly').trim(),
-        compensating_control: Boolean(row['CompensatingControl']) || Boolean(row['compensatingControl']),
-        compensating_control_risk: String(row['CompensatingControlRisk'] || row['compensatingControlRisk'] || '').trim(),
-        control_narrative_url: String(row['ControlNarrativeURL'] || row['controlNarrativeURL'] || '').trim(),
-        upload_document: String(row['Upload Document'] || row['uploadDocument'] || '0').trim(),
-        control_objective_id: (row['ControlObjectiveID'] || row['controlObjectiveID']) ? String(row['ControlObjectiveID'] || row['controlObjectiveID']).trim() : '',
-        process_phase: String(row['ProcessPhase'] || row['processPhase'] || 'Process - Input').trim(),
-        risk_id: (row['RiskID'] || row['riskID']) ? String(row['RiskID'] || row['riskID']).trim() : '',
+        global: row['Global'] === true || row['Global'] === 'true' || row['Global'] === 1,
+        control_ccm: row['ControlCCM'] === true || row['ControlCCM'] === 'true' || row['ControlCCM'] === 1,
+        self_assessment: row['SelfAssessment'] === true || row['SelfAssessment'] === 'true' || row['SelfAssessment'] === 1,
+        control_criticality: (row['ControlCriticality'] || 'Should Have').toString().trim(),
+        control_owner: (row['ControlOwner'] || '').toString().trim(),
+        key_control: row['KeyControl'] === true || row['KeyControl'] === 'true' || row['KeyControl'] === 1,
+        control_execution_type: (row['ControlExecutionType'] || 'Manual').toString().trim(),
+        control_type: (row['ControlType'] || 'Preventive').toString().trim(),
+        finance_control_consideration: row['FinanceControlConsideration'] === true || row['FinanceControlConsideration'] === 'true' || row['FinanceControlConsideration'] === 1,
+        control_frequency: (row['ControlFrequency'] || 'Monthly').toString().trim(),
+        compensating_control: row['CompensatingControl'] === true || row['CompensatingControl'] === 'true' || row['CompensatingControl'] === 1,
+        compensating_control_risk: (row['CompensatingControlRisk'] || '').toString().trim(),
+        control_narrative_url: (row['ControlNarrativeURL'] || '').toString().trim(),
+        upload_document: (row['Upload Document'] || '0').toString().trim(),
+        control_objective_id: row['ControlObjectiveID'] ? String(row['ControlObjectiveID']).trim() : '',
+        process_phase: (row['ProcessPhase'] || 'Process - Input').toString().trim(),
+        risk_id: row['RiskID'] ? String(row['RiskID']).trim() : '',
         status: 'active',
       };
     });
