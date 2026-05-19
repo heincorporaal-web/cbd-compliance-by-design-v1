@@ -29,12 +29,12 @@ export function getICTSystemErrors(system) {
 export function getICTModuleErrors(module) {
   const errors = [];
   
-  if (!module.module_owner_stakeholder_id && !module.module_owner_name) {
-    errors.push({ type: 'no_owner', message: 'No owner' });
-  }
-  
   if (!module.workstream_id && !module.workstream_name) {
     errors.push({ type: 'no_workstream', message: 'No workstream' });
+  }
+  
+  if (module.workstream_id && module.workstream_name && !module.module_owner_stakeholder_id && !module.module_owner_name) {
+    errors.push({ type: 'no_owner', message: 'No owner' });
   }
   
   return errors;

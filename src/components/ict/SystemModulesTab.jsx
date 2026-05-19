@@ -166,16 +166,20 @@ export default function SystemModulesTab({ systemId, companyId }) {
                                 <TooltipTrigger asChild>
                                   <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
                                 </TooltipTrigger>
-                                <TooltipContent side="right" className="max-w-xs">
-                                  <div className="space-y-1">
-                                    <p className="font-semibold text-red-600">{errors.length} error{errors.length !== 1 ? 's' : ''}</p>
-                                    <ul className="text-xs space-y-0.5">
-                                      {errors.map((err, idx) => (
-                                        <li key={idx} className="text-slate-700">• {err.message}</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                </TooltipContent>
+                                <TooltipContent 
+                                  side="right" 
+                                  className="max-w-xs bg-white border-2"
+                                  style={{ borderColor: '#5C7F99' }}
+                                >
+                                   <div className="space-y-1">
+                                     <p className="font-semibold text-red-600">{errors.length} error{errors.length !== 1 ? 's' : ''}</p>
+                                     <ul className="text-xs space-y-0.5">
+                                       {errors.map((err, idx) => (
+                                         <li key={idx} className="text-blue-700">• {err.message}</li>
+                                       ))}
+                                     </ul>
+                                   </div>
+                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
                           );
@@ -197,12 +201,14 @@ export default function SystemModulesTab({ systemId, companyId }) {
                     </div>
                     {mod.description && <p className="text-xs text-slate-500 mb-1 line-clamp-2">{mod.description}</p>}
                     <div className="flex flex-wrap gap-3 text-xs text-slate-400 mt-1">
-                      {mod.module_owner_name && <span>Owner: {mod.module_owner_name}</span>}
-                      {mod.workstream_name && <span>Workstream: {mod.workstream_name}</span>}
-                      {mod.ict_scope && <span>Scope: {mod.ict_scope}</span>}
-                      {mod.active_from && <span>From: {mod.active_from}</span>}
-                      {mod.active_to && <span>To: {mod.active_to}</span>}
-                    </div>
+                       {mod.module_owner_name && <span>Owner: {mod.module_owner_name}</span>}
+                       {mod.workstream_name ? (
+                         <span>Workstream: {mod.workstream_name}</span>
+                       ) : null}
+                       {mod.ict_scope && <span>Scope: {mod.ict_scope}</span>}
+                       {mod.active_from && <span>From: {mod.active_from}</span>}
+                       {mod.active_to && <span>To: {mod.active_to}</span>}
+                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(mod)}>

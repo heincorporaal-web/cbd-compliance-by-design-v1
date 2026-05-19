@@ -111,12 +111,16 @@ export default function WorkstreamPanel({ valueChainId, companyId }) {
                             <TooltipTrigger asChild>
                               <AlertTriangle className="w-3 h-3 text-red-500" />
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-xs">
+                            <TooltipContent 
+                              side="top" 
+                              className="max-w-xs bg-white border-2"
+                              style={{ borderColor: '#5C7F99' }}
+                            >
                               <div className="space-y-1">
                                 <p className="font-semibold text-red-600">{errors.length} error{errors.length !== 1 ? 's' : ''}</p>
                                 <ul className="text-xs space-y-0.5">
                                   {errors.map((err, idx) => (
-                                    <li key={idx} className="text-slate-700">• {err.message}</li>
+                                    <li key={idx} className="text-blue-700">• {err.message}</li>
                                   ))}
                                 </ul>
                               </div>
