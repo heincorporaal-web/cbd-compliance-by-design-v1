@@ -52,6 +52,17 @@ export default function RiskRegister() {
   const assignMutation = useMutation({
     mutationFn: async ({ libraryRisk, companyId }) => {
       const company = companies.find(c => c.id === companyId);
+      
+      // Check for duplicate: risk with same library_risk_id already assigned to this company
+      const existingRisks = await base44.entities.Risk.filter({ 
+        library_risk_id: libraryRisk.id, 
+        company_id: companyId 
+      });
+      
+      if (existingRisks && existingRisks.length > 0) {
+        throw new Error(`Risk already assigned to ${company?.name}`);
+      }
+      
       return base44.entities.Risk.create({
         title: libraryRisk.title,
         description: libraryRisk.description,
@@ -82,6 +93,10 @@ export default function RiskRegister() {
       const company = companies.find(c => c.id === companyId);
       queryClient.invalidateQueries(['risks']);
       toast.success(`Risk assigned to ${company?.name || "company"} with status "Auto Assigned"`);
+      setAssigningRisk(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to assign risk");
       setAssigningRisk(null);
     },
   });
