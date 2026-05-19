@@ -14,7 +14,7 @@ import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function Dashboard() {
-  const [globalCompany] = useCompanyFilter();
+  const [globalCompany, setSelectedCompany] = useCompanyFilter();
   const [visibleWidgets, setVisibleWidgets] = useState({
     compliance: true,
     resilience: true,
@@ -36,7 +36,7 @@ export default function Dashboard() {
   });
 
   const { data: assessments = [] } = useQuery({
-    queryKey: ['assessments'],
+    queryKey: ['assessments', globalCompany],
     queryFn: () => base44.entities.Assessment.list('-created_date'),
   });
 
@@ -46,42 +46,42 @@ export default function Dashboard() {
   });
 
   const { data: ictSystems = [] } = useQuery({
-    queryKey: ['ictSystems'],
+    queryKey: ['ictSystems', globalCompany],
     queryFn: () => base44.entities.ICTSystem.list(),
   });
 
   const { data: incidents = [] } = useQuery({
-    queryKey: ['incidents'],
+    queryKey: ['incidents', globalCompany],
     queryFn: () => base44.entities.Incident.list('-detected_date', 10),
   });
 
   const { data: thirdParties = [] } = useQuery({
-    queryKey: ['thirdParties'],
+    queryKey: ['thirdParties', globalCompany],
     queryFn: () => base44.entities.ThirdPartyProvider.list(),
   });
 
   const { data: issues = [] } = useQuery({
-    queryKey: ['issues'],
+    queryKey: ['issues', globalCompany],
     queryFn: () => base44.entities.Issue.list('-created_date'),
   });
 
   const { data: processes = [] } = useQuery({
-    queryKey: ['businessProcesses'],
+    queryKey: ['businessProcesses', globalCompany],
     queryFn: () => base44.entities.BusinessProcess.list(),
   });
 
   const { data: processAssessments = [] } = useQuery({
-    queryKey: ['processAssessments'],
+    queryKey: ['processAssessments', globalCompany],
     queryFn: () => base44.entities.ProcessAssessment.list('-assessment_date'),
   });
 
   const { data: goals = [] } = useQuery({
-    queryKey: ['grcGoals'],
+    queryKey: ['grcGoals', globalCompany],
     queryFn: () => base44.entities.GRCGoal.list(),
   });
 
   const { data: risks = [] } = useQuery({
-    queryKey: ['risks'],
+    queryKey: ['risks', globalCompany],
     queryFn: () => base44.entities.Risk.list(),
   });
 
