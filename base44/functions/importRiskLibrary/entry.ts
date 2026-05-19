@@ -1,18 +1,17 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-
-const LIKELIHOOD_MAP = {
-  1: 'very_low', 2: 'low', 3: 'medium', 4: 'high', 5: 'very_high',
-  'very_low': 'very_low', 'low': 'low', 'medium': 'medium', 'high': 'high', 'very_high': 'very_high'
-};
-
-const IMPACT_MAP = LIKELIHOOD_MAP;
+import * as XLSX from 'npm:xlsx@0.18.5';
 
 function mapLikelihood(val) {
-  if (!val) return 'medium';
+  if (!val || val === 0) return 'medium';
   const n = parseInt(val);
-  if (!isNaN(n) && LIKELIHOOD_MAP[n]) return LIKELIHOOD_MAP[n];
-  const s = String(val).toLowerCase().replace(/\s/g, '_');
-  return LIKELIHOOD_MAP[s] || 'medium';
+  if (n === 1) return 'very_low';
+  if (n === 2) return 'low';
+  if (n === 3) return 'medium';
+  if (n === 4) return 'high';
+  if (n === 5) return 'very_high';
+  const s = String(val).toLowerCase().trim().replace(/\s+/g, '_');
+  const map = { very_low: 'very_low', low: 'low', medium: 'medium', high: 'high', very_high: 'very_high' };
+  return map[s] || 'medium';
 }
 
 Deno.serve(async (req) => {
@@ -26,76 +25,45 @@ Deno.serve(async (req) => {
     const { file_url } = await req.json();
     if (!file_url) return Response.json({ error: 'file_url required' }, { status: 400 });
 
-    // Fetch the Excel file
+    // Fetch the Excel file as ArrayBuffer
     const fileRes = await fetch(file_url);
     if (!fileRes.ok) return Response.json({ error: 'Failed to fetch file' }, { status: 400 });
 
-    // Use Base44 ExtractDataFromUploadedFile integration
-    const extracted = await base44.asServiceRole.integrations.Core.ExtractDataFromUploadedFile({
-      file_url,
-      json_schema: {
-        type: 'object',
-        properties: {
-          rows: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                RiskID: { type: 'string' },
-                ValueChain: { type: 'string' },
-                'Sub-Process': { type: 'string' },
-                Workstream: { type: 'string' },
-                iHPOM_Node_ID: { type: 'string' },
-                RACML3: { type: 'string' },
-                'Process Activity': { type: 'string' },
-                RiskReferenceNr: { type: 'string' },
-                RiskType: { type: 'string' },
-                RACMRiskType: { type: 'string' },
-                RiskStatement: { type: 'string' },
-                RootCause: { type: 'string' },
-                RiskImpact: { type: 'string' },
-                RootCauseCategory: { type: 'string' },
-                RootcauseType: { type: 'string' },
-                RiskLikelihood: { type: 'string' },
-                RiskInherentRating: { type: 'string' },
-                Framework: { type: 'string' },
-              }
-            }
-          }
-        }
-      }
-    });
+    const arrayBuffer = await fileRes.arrayBuffer();
+    const data = new Uint8Array(arrayBuffer);
 
-    if (extracted.status !== 'success' || !extracted.output) {
-      return Response.json({ error: 'Extraction failed', details: extracted.details }, { status: 500 });
-    }
+    // Parse with xlsx
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
-    const rows = Array.isArray(extracted.output) ? extracted.output : extracted.output.rows || [];
+    console.log(`Parsed ${rows.length} rows. Sample keys:`, Object.keys(rows[0] || {}));
 
     // Map rows to Risk entity schema
     const risks = rows.map(row => ({
-      title: row['RiskStatement'] || row['Process Activity'] || `Risk ${row['RiskID']}`,
-      description: row['RiskStatement'] || '',
+      title: String(row['RiskStatement'] || row['Process Activity'] || row['RiskReferenceNr'] || 'Untitled Risk').trim().substring(0, 500),
+      description: String(row['RiskStatement'] || '').trim(),
       is_library_risk: true,
       company_id: '',
       status: 'identified',
       category: 'operational',
       likelihood: mapLikelihood(row['RiskLikelihood']),
       impact: mapLikelihood(row['RiskImpact']),
-      inherent_risk_score: parseInt(row['RiskInherentRating']) || 0,
-      risk_reference_nr: row['RiskReferenceNr'] || '',
-      risk_type: row['RiskType'] || '',
-      racm_risk_type: row['RACMRiskType'] || '',
-      risk_statement: row['RiskStatement'] || '',
-      root_cause: row['RootCause'] || '',
-      root_cause_type: row['RootcauseType'] || row['RootCauseCategory'] || '',
-      value_chain: row['ValueChain'] || '',
-      sub_process: row['Sub-Process'] || '',
-      workstream: row['Workstream'] || '',
-      ihpom_node_id: row['iHPOM_Node_ID'] ? String(row['iHPOM_Node_ID']) : '',
-      racm_l3: row['RACML3'] || '',
-      process_activity: row['Process Activity'] || '',
-      framework_reference: row['Framework'] || '',
+      inherent_risk_score: parseFloat(row['RiskInherentRating']) || 0,
+      risk_reference_nr: String(row['RiskReferenceNr'] || '').trim(),
+      risk_type: String(row['RiskType'] || '').trim(),
+      racm_risk_type: String(row['RACMRiskType'] || '').trim(),
+      risk_statement: String(row['RiskStatement'] || '').trim(),
+      root_cause: String(row['RootCause'] || '').trim(),
+      root_cause_type: String(row['RootcauseType'] || row['RootCauseCategory'] || '').trim(),
+      value_chain: String(row['ValueChain'] || '').trim(),
+      sub_process: String(row['Sub-Process'] || '').trim(),
+      workstream: String(row['Workstream'] || '').trim(),
+      ihpom_node_id: row['iHPOM_Node_ID'] ? String(row['iHPOM_Node_ID']).trim() : '',
+      racm_l3: String(row['RACML3'] || '').trim(),
+      process_activity: String(row['Process Activity'] || '').trim(),
+      framework_reference: String(row['Framework'] || '').trim(),
     }));
 
     // Bulk insert in batches of 100
@@ -105,10 +73,12 @@ Deno.serve(async (req) => {
       const batch = risks.slice(i, i + BATCH);
       await base44.asServiceRole.entities.Risk.bulkCreate(batch);
       created += batch.length;
+      console.log(`Inserted ${created}/${risks.length}`);
     }
 
     return Response.json({ success: true, imported: created, total: risks.length });
   } catch (error) {
+    console.error('Import error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
