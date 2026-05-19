@@ -286,7 +286,7 @@ export default function RiskDetail() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
+            <h1 className="text-base font-semibold text-slate-900">
               {isNew ? 'Add New Risk' : risk?.title || 'Risk Details'}
             </h1>
           </div>
