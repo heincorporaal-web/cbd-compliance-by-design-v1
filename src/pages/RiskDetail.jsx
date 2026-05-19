@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, X, Shield, Target, BookOpen } from "lucide-react";
+import { ArrowLeft, Plus, X, Shield, Target, BookOpen, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -629,7 +630,7 @@ export default function RiskDetail() {
                       {items.map(f => {
                         const checked = formData.framework_ids?.includes(f.id);
                         return (
-                          <label key={f.id} title={f.name} className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0">
+                          <label key={f.id} className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0">
                             <input
                               type="checkbox"
                               checked={checked}
@@ -642,6 +643,16 @@ export default function RiskDetail() {
                               className="rounded border-slate-300 text-primary"
                             />
                             <span className="text-xs font-medium text-slate-700">{f.framework_code || f.name}</span>
+                            <TooltipProvider delayDuration={100}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 shrink-0" />
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="max-w-xs text-xs">
+                                  {f.name}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </label>
                         );
                       })}
@@ -654,12 +665,19 @@ export default function RiskDetail() {
                   {formData.framework_ids.map(id => {
                     const f = frameworks.find(fw => fw.id === id);
                     return f ? (
-                      <Badge key={id} variant="outline" title={f.name} className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200 gap-1">
-                        {f.framework_code || f.name}
-                        <button type="button" onClick={() => setFormData(p => ({ ...p, framework_ids: p.framework_ids.filter(i => i !== id) }))}>
-                          <X className="w-2.5 h-2.5" />
-                        </button>
-                      </Badge>
+                      <TooltipProvider key={id} delayDuration={100}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="outline" className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200 gap-1 cursor-default">
+                              {f.framework_code || f.name}
+                              <button type="button" onClick={() => setFormData(p => ({ ...p, framework_ids: p.framework_ids.filter(i => i !== id) }))}>
+                                <X className="w-2.5 h-2.5" />
+                              </button>
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs text-xs">{f.name}</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     ) : null;
                   })}
                 </div>
@@ -839,8 +857,18 @@ export default function RiskDetail() {
               ) : (
                 <div className="space-y-2">
                   {linkedFrameworks.map(framework => (
-                    <div key={framework.id} title={framework.name} className="flex items-center justify-between p-2 bg-slate-50 rounded border border-slate-200">
-                      <p className="text-sm font-medium">{framework.framework_code || framework.name}</p>
+                    <div key={framework.id} className="flex items-center justify-between p-2 bg-slate-50 rounded border border-slate-200">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium">{framework.framework_code || framework.name}</p>
+                        <TooltipProvider delayDuration={100}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 cursor-default" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs text-xs">{framework.name}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
