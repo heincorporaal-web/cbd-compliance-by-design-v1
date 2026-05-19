@@ -149,6 +149,17 @@ function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false })
 }
 
 // ─── Collapsible group ────────────────────────────────────────────────────────
+const groupColors = {
+  overview: "bg-cyan-100 text-cyan-700",
+  governance: "bg-blue-100 text-blue-700",
+  risk: "bg-orange-100 text-orange-700",
+  compliance: "bg-green-100 text-green-700",
+  process: "bg-indigo-100 text-indigo-700",
+  stakeholders: "bg-pink-100 text-pink-700",
+  admin: "bg-slate-100 text-slate-700",
+  configuration: "bg-violet-100 text-violet-700",
+};
+
 function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   const hasActive = group.items.some(i => location.pathname === i.url);
@@ -163,7 +174,7 @@ function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false
       <button
         onClick={() => setOpen(v => !v)}
         className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors ${
-          hasActive ? "text-primary bg-primary/8" : "text-slate-500 hover:bg-slate-100"
+          hasActive ? groupColors[group.id] || "bg-slate-100 text-slate-700" : "text-slate-500 hover:bg-slate-100"
         }`}
       >
         <group.icon className="w-3.5 h-3.5 shrink-0" />
