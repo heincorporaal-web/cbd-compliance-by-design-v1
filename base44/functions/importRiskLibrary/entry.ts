@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
       workstream: String(row['Workstream'] || '').trim(),
       ihpom_node_id: row['iHPOM_Node_ID'] ? String(row['iHPOM_Node_ID']).trim() : '',
       racm_l3: String(row['RACML3'] || '').trim(),
-      process_activity: String(row['Process Activity'] || '').trim(),
+      process_activity: String(row['Process Activity'] || '').trim().replace(/^[A-Z0-9]+-\d+-\d+[:\s]\s*/i, ''),
       framework_reference: String(row['Framework'] || '').trim(),
     }));
 
