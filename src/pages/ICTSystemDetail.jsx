@@ -274,9 +274,10 @@ export default function ICTSystemDetail() {
                   </div>
                   <div className="space-y-2">
                     <Label>IT Capability</Label>
-                    <Select value={formData.it_capability_ids?.[0] || ""} onValueChange={v => setFormData({ ...formData, it_capability_ids: v ? [v] : [] })}>
+                    <Select value={formData.it_capability_ids?.[0] || ""} onValueChange={v => setFormData({ ...formData, it_capability_ids: v && v !== "na" ? [v] : [] })}>
                       <SelectTrigger><SelectValue placeholder="Select capability" /></SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="na">N/A</SelectItem>
                         {itCapabilities.filter(cap => cap.company_id === formData.company_id || globalCompany === "all").map(cap => (
                           <SelectItem key={cap.id} value={cap.id}>{cap.name}</SelectItem>
                         ))}
