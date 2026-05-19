@@ -4,7 +4,7 @@
   "properties": {
     "title": {
       "type": "string",
-      "description": "Risk title"
+      "description": "Risk title / Risk Statement"
     },
     "description": {
       "type": "string",
@@ -12,7 +12,7 @@
     },
     "company_id": {
       "type": "string",
-      "description": "Reference to Company entity"
+      "description": "Reference to Company entity (null for master library risks)"
     },
     "category": {
       "type": "string",
@@ -130,6 +130,75 @@
         }
       },
       "description": "Status change history driven by workflow"
+    },
+    "risk_reference_nr": {
+      "type": "string",
+      "description": "Risk reference number (e.g. RTCM.FINMC.1.01)"
+    },
+    "risk_type": {
+      "type": "string",
+      "description": "Risk type classification (e.g. Financial, Operational, Strategic, Governance & Compliance)",
+      "enum": [
+        "Financial",
+        "Operational",
+        "Strategic",
+        "Governance & Compliance",
+        "Governance",
+        "Unspecified"
+      ]
+    },
+    "racm_risk_type": {
+      "type": "string",
+      "description": "RACM risk type (may differ from primary risk type)"
+    },
+    "risk_statement": {
+      "type": "string",
+      "description": "Formal risk statement describing what could go wrong"
+    },
+    "root_cause": {
+      "type": "string",
+      "description": "Narrative description of the root cause"
+    },
+    "root_cause_category_id": {
+      "type": "string",
+      "description": "Reference to RootCauseCategory entity"
+    },
+    "root_cause_type": {
+      "type": "string",
+      "description": "Specific root cause type label (denormalized)"
+    },
+    "value_chain": {
+      "type": "string",
+      "description": "Value chain this risk belongs to (e.g. FIN - Order to Cash)"
+    },
+    "sub_process": {
+      "type": "string",
+      "description": "Sub-process within the value chain"
+    },
+    "workstream": {
+      "type": "string",
+      "description": "Workstream associated with this risk"
+    },
+    "ihpom_node_id": {
+      "type": "string",
+      "description": "iHPOM node ID reference"
+    },
+    "racm_l3": {
+      "type": "string",
+      "description": "RACM Level 3 process step (e.g. Manage Cash)"
+    },
+    "process_activity": {
+      "type": "string",
+      "description": "Process activity / step name (activity name only, without reference number)"
+    },
+    "framework_reference": {
+      "type": "string",
+      "description": "Framework reference text (e.g. IFRS ICFR)"
+    },
+    "is_library_risk": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this is a master library risk not yet assigned to a company"
     }
   },
   "required": [

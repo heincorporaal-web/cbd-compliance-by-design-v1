@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, X, Shield, Target } from "lucide-react";
+import { ArrowLeft, Plus, X, Shield, Target, BookOpen } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,6 +17,48 @@ import ObjectiveSelector from "@/components/objectives/ObjectiveSelector";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPicker";
 import RiskSignOffPanel from "@/components/risks/RiskSignOffPanel";
+
+const RISK_TYPES = ["Financial", "Operational", "Strategic", "Governance & Compliance", "Governance", "Unspecified"];
+
+const VALUE_CHAINS = [
+  "FIN -Order to Cash (O2C)",
+  "FIN - Record-to-Report (R2R)",
+  "FIN -Procure-to-Pay P2P",
+  "FIN - Management & Performance Reporting",
+  "HCM-Hire-to-Retire",
+  "GRC - Delegation, Independence & Segregation",
+  "SCM - Supply Chain Management",
+  "EAM - Enterprise Asset Management",
+  "EIT - Enterprise IT",
+];
+
+const WORKSTREAMS = [
+  "FIN - R2R - Cash Management",
+  "EPM - FR - Financials Capital Planning",
+  "EPM - FR - Financials Cash Flow",
+  "EPM - FR - Financials Expense",
+  "SCM - P2P - Expense Management",
+  "SCM - P2P - Payables Management",
+  "FIN - R2R - Period-End processing and Closure",
+  "EPM - FR - Financials Balance Sheet",
+  "EPM - FR - Financials Close Financials Consolidation",
+  "FIN - R2R - Tax",
+  "EPM - FR - Tax Reporting",
+  "SCM - O2C-Order Management",
+  "SCM - O2C - Incentive Compensation",
+  "SCM - O2C-Customer Billing to Receivables",
+  "SCM - MDM Manage Customer Records and Data",
+  "SCM - O2C Point of Sales, Cash Receipts and Retail Operations",
+  "SCM - O2C-Advanced Collections",
+  "FIN - R2R - General Ledger",
+  "HCM - MDM Manage Employee Master Records and Documentation",
+  "HCM - PRM Manage Enterprise and Bureau Payroll",
+  "HCM - H2R - HCM Core",
+  "HCM - H2R - Compensation Management",
+  "HCM - H2R Human Resource Strategy & Objective setting",
+  "HCM - H2R Employee Tax, Legal and Statutory",
+  "EIT - MDM -End User Master Records Management",
+];
 
 export default function RiskDetail() {
   const navigate = useNavigate();
@@ -65,7 +107,28 @@ export default function RiskDetail() {
     linked_objective_ids: [],
     mitigation_plan: "",
     review_date: "",
-    identified_date: new Date().toISOString().split('T')[0]
+    identified_date: new Date().toISOString().split('T')[0],
+    // Library fields
+    risk_reference_nr: "",
+    risk_type: "",
+    racm_risk_type: "",
+    risk_statement: "",
+    root_cause: "",
+    root_cause_category_id: "",
+    root_cause_type: "",
+    value_chain: "",
+    sub_process: "",
+    workstream: "",
+    ihpom_node_id: "",
+    racm_l3: "",
+    process_activity: "",
+    framework_reference: "",
+    is_library_risk: false,
+  });
+
+  const { data: rootCauseCategories = [] } = useQuery({
+    queryKey: ["root-cause-categories"],
+    queryFn: () => base44.entities.RootCauseCategory.list("sort_order"),
   });
 
   useEffect(() => {
@@ -85,7 +148,23 @@ export default function RiskDetail() {
         linked_objective_ids: risk.linked_objective_ids || [],
         mitigation_plan: risk.mitigation_plan || "",
         review_date: risk.review_date || "",
-        identified_date: risk.identified_date || new Date().toISOString().split('T')[0]
+        identified_date: risk.identified_date || new Date().toISOString().split('T')[0],
+        // Library fields
+        risk_reference_nr: risk.risk_reference_nr || "",
+        risk_type: risk.risk_type || "",
+        racm_risk_type: risk.racm_risk_type || "",
+        risk_statement: risk.risk_statement || "",
+        root_cause: risk.root_cause || "",
+        root_cause_category_id: risk.root_cause_category_id || "",
+        root_cause_type: risk.root_cause_type || "",
+        value_chain: risk.value_chain || "",
+        sub_process: risk.sub_process || "",
+        workstream: risk.workstream || "",
+        ihpom_node_id: risk.ihpom_node_id || "",
+        racm_l3: risk.racm_l3 || "",
+        process_activity: risk.process_activity || "",
+        framework_reference: risk.framework_reference || "",
+        is_library_risk: risk.is_library_risk || false,
       });
     }
   }, [risk]);
@@ -182,6 +261,19 @@ export default function RiskDetail() {
   const company = companies.find(c => c.id === formData.company_id);
   const linkedObjectives = company?.objectives?.filter(obj => formData.linked_objective_ids?.includes(obj.id)) || [];
   const riskScore = getRiskLevel(formData.likelihood, formData.impact);
+
+  // Group root cause categories for cascading picker
+  const rootCauseCategoryGroups = rootCauseCategories.reduce((acc, rc) => {
+    if (!acc[rc.category]) acc[rc.category] = [];
+    acc[rc.category].push(rc);
+    return acc;
+  }, {});
+
+  // When root_cause_category_id changes, auto-fill root_cause_type label
+  const handleRootCatChange = (id) => {
+    const found = rootCauseCategories.find(r => r.id === id);
+    setFormData(p => ({ ...p, root_cause_category_id: id, root_cause_type: found?.root_cause_type || "" }));
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -353,6 +445,174 @@ export default function RiskDetail() {
                 value={formData.mitigation_plan}
                 onChange={(e) => setFormData({...formData, mitigation_plan: e.target.value})}
                 rows={3}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ── Library Details ─────────────────────────────────────── */}
+        <Card className="border-none shadow-lg">
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-indigo-600" />
+              Risk Library Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6 space-y-4">
+            {/* Row 1 – Reference, Risk Type, RACM Risk Type */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Risk Reference Nr</Label>
+                <Input
+                  value={formData.risk_reference_nr}
+                  onChange={e => setFormData(p => ({ ...p, risk_reference_nr: e.target.value }))}
+                  placeholder="e.g. RTCM.FINMC.1.01"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Risk Type</Label>
+                <Select value={formData.risk_type || "__none__"} onValueChange={v => setFormData(p => ({ ...p, risk_type: v === "__none__" ? "" : v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— None —</SelectItem>
+                    {RISK_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>RACM Risk Type</Label>
+                <Select value={formData.racm_risk_type || "__none__"} onValueChange={v => setFormData(p => ({ ...p, racm_risk_type: v === "__none__" ? "" : v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— None —</SelectItem>
+                    {RISK_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Row 2 – Risk Statement */}
+            <div className="space-y-2">
+              <Label>Risk Statement</Label>
+              <Textarea
+                value={formData.risk_statement}
+                onChange={e => setFormData(p => ({ ...p, risk_statement: e.target.value }))}
+                rows={2}
+                placeholder="Formal description of what could go wrong…"
+              />
+            </div>
+
+            {/* Row 3 – Root Cause narrative */}
+            <div className="space-y-2">
+              <Label>Root Cause</Label>
+              <Textarea
+                value={formData.root_cause}
+                onChange={e => setFormData(p => ({ ...p, root_cause: e.target.value }))}
+                rows={2}
+                placeholder="Describe the underlying cause…"
+              />
+            </div>
+
+            {/* Row 4 – Root Cause Category (linked) + Root Cause Type (auto-filled) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Root Cause Category</Label>
+                <Select value={formData.root_cause_category_id || "__none__"} onValueChange={v => handleRootCatChange(v === "__none__" ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="Select category…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— None —</SelectItem>
+                    {Object.entries(rootCauseCategoryGroups).map(([cat, items]) => (
+                      <React.Fragment key={cat}>
+                        <div className="px-2 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50">{cat}</div>
+                        {items.map(rc => (
+                          <SelectItem key={rc.id} value={rc.id}>{rc.root_cause_type}</SelectItem>
+                        ))}
+                      </React.Fragment>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Root Cause Type</Label>
+                <Input
+                  value={formData.root_cause_type}
+                  onChange={e => setFormData(p => ({ ...p, root_cause_type: e.target.value }))}
+                  placeholder="Auto-filled from category selection"
+                />
+              </div>
+            </div>
+
+            {/* Row 5 – Value Chain, Sub-Process */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Value Chain</Label>
+                <Select value={formData.value_chain || "__none__"} onValueChange={v => setFormData(p => ({ ...p, value_chain: v === "__none__" ? "" : v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select value chain…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— None —</SelectItem>
+                    {VALUE_CHAINS.map(vc => <SelectItem key={vc} value={vc}>{vc}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Sub-Process</Label>
+                <Input
+                  value={formData.sub_process}
+                  onChange={e => setFormData(p => ({ ...p, sub_process: e.target.value }))}
+                  placeholder="e.g. Treasury and Cash Management"
+                />
+              </div>
+            </div>
+
+            {/* Row 6 – Workstream, RACM L3 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Workstream</Label>
+                <Select value={formData.workstream || "__none__"} onValueChange={v => setFormData(p => ({ ...p, workstream: v === "__none__" ? "" : v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select workstream…" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— None —</SelectItem>
+                    {WORKSTREAMS.map(ws => <SelectItem key={ws} value={ws}>{ws}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>RACM L3 (Process Step)</Label>
+                <Input
+                  value={formData.racm_l3}
+                  onChange={e => setFormData(p => ({ ...p, racm_l3: e.target.value }))}
+                  placeholder="e.g. Manage Cash"
+                />
+              </div>
+            </div>
+
+            {/* Row 7 – Process Activity, iHPOM Node ID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Process Activity</Label>
+                <Input
+                  value={formData.process_activity}
+                  onChange={e => setFormData(p => ({ ...p, process_activity: e.target.value }))}
+                  placeholder="Activity name (no reference number)"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>iHPOM Node ID</Label>
+                <Input
+                  value={formData.ihpom_node_id}
+                  onChange={e => setFormData(p => ({ ...p, ihpom_node_id: e.target.value }))}
+                  placeholder="e.g. 1352"
+                />
+              </div>
+            </div>
+
+            {/* Row 8 – Framework Reference */}
+            <div className="space-y-2">
+              <Label>Framework Reference</Label>
+              <Input
+                value={formData.framework_reference}
+                onChange={e => setFormData(p => ({ ...p, framework_reference: e.target.value }))}
+                placeholder="e.g. IFRS ICFR"
               />
             </div>
           </CardContent>
