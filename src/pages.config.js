@@ -96,6 +96,7 @@ import ProcessCompanyReport from './pages/ProcessCompanyReport';
 import RACIMatrix from './pages/RACIMatrix';
 import CompanyBranding from './pages/CompanyBranding';
 import ValueChains from './pages/ValueChains';
+import RootCauseCategories from './pages/RootCauseCategories';
 import __Layout from './Layout.jsx';
 
 
@@ -149,6 +150,7 @@ export const PAGES = {
     "RACIMatrix": RACIMatrix,
     "CompanyBranding": CompanyBranding,
     "ValueChains": ValueChains,
+    "RootCauseCategories": RootCauseCategories,
 }
 
 export const pagesConfig = {

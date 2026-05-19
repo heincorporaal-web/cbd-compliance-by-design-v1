@@ -1,0 +1,43 @@
+{
+  "name": "RootCauseCategory",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "category": {
+      "type": "string",
+      "description": "High-level category (e.g. Human-Related, Process-Related)",
+      "enum": [
+        "Human-Related",
+        "Process-Related",
+        "Technology-Related",
+        "Governance & Management",
+        "External",
+        "Unspecified"
+      ]
+    },
+    "root_cause_type": {
+      "type": "string",
+      "description": "Specific root cause type"
+    },
+    "example": {
+      "type": "string",
+      "description": "Example of this root cause type"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Display sort order"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "company_id",
+    "category",
+    "root_cause_type"
+  ]
+}
