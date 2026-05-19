@@ -295,6 +295,21 @@ export default function RiskDetail() {
           <Link to={createPageUrl("RiskRegister")}>
             <Button type="button" variant="outline">Cancel</Button>
           </Link>
+          {!isNew && riskId && (
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={async () => {
+                if (confirm('Are you sure you want to delete this risk? This action cannot be undone.')) {
+                  await base44.entities.Risk.delete(riskId);
+                  queryClient.invalidateQueries(['risks']);
+                  navigate(createPageUrl("RiskRegister"));
+                }
+              }}
+            >
+              Delete Risk
+            </Button>
+          )}
           <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
             {isNew ? 'Create Risk' : 'Update Risk'}
           </Button>
