@@ -229,8 +229,12 @@ export default function ValueChains() {
                         <TooltipTrigger asChild>
                           <Info className="w-3.5 h-3.5 text-slate-400 hover:text-primary cursor-help shrink-0" onClick={e => e.stopPropagation()} />
                         </TooltipTrigger>
-                        <TooltipContent side="right" className="max-w-sm text-xs leading-relaxed">
-                          {chainDescriptions[chain]}
+                        <TooltipContent 
+                          side="right" 
+                          className="max-w-sm text-xs leading-relaxed bg-white border-2 text-slate-900"
+                          style={{ borderColor: '#5C7F99' }}
+                        >
+                          <p className="text-slate-900">{chainDescriptions[chain]}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -261,8 +265,12 @@ export default function ValueChains() {
                              <TooltipTrigger asChild>
                                <Info className="w-3.5 h-3.5 text-slate-400 hover:text-primary cursor-help shrink-0" />
                              </TooltipTrigger>
-                             <TooltipContent side="right" className="max-w-sm text-xs leading-relaxed">
-                               {vc.description}
+                             <TooltipContent 
+                               side="right" 
+                               className="max-w-sm text-xs leading-relaxed bg-white border-2 text-slate-900"
+                               style={{ borderColor: '#5C7F99' }}
+                             >
+                               <p className="text-slate-900">{vc.description}</p>
                              </TooltipContent>
                            </Tooltip>
                          </TooltipProvider>
