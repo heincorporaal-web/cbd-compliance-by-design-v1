@@ -173,9 +173,7 @@ function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false
     <div className="mb-1">
       <button
         onClick={() => setOpen(v => !v)}
-        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs uppercase tracking-wider transition-colors ${
-          hasActive ? groupColors[group.id] : "text-slate-500 hover:bg-slate-100"
-        }`}
+        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-secondary font-medium uppercase tracking-wider transition-colors hover:bg-slate-100"
       >
         <group.icon className="w-3.5 h-3.5 shrink-0" />
         <span className="flex-1 text-left">{group.label}</span>
