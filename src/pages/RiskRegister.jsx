@@ -32,8 +32,8 @@ export default function RiskRegister() {
 
   // Company risks: has a company_id and is NOT a library risk
   const companyRisks = risks.filter(r => r.company_id && !r.is_library_risk);
-  // Library risks: marked as library
-  const libraryRisks = risks.filter(r => r.is_library_risk);
+  // Library risks: explicitly marked as library OR has no company_id
+  const libraryRisks = risks.filter(r => r.is_library_risk || !r.company_id);
 
   const filteredCompanyRisks = companyRisks.filter(risk => {
     const matchesSearch = risk.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||

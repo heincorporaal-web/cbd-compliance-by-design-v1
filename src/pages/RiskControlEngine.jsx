@@ -54,8 +54,8 @@ export default function RiskControlEngine() {
     queryFn: () => base44.entities.Risk.list(),
   });
 
-  // Library risks = master template risks
-  const libraryRisks = allRisks.filter(r => r.is_library_risk);
+  // Library risks = explicitly marked OR have no company_id
+  const libraryRisks = allRisks.filter(r => r.is_library_risk || !r.company_id);
 
   const generateMutation = useMutation({
     mutationFn: async () => {
@@ -67,11 +67,18 @@ export default function RiskControlEngine() {
       for (const assessment of assessments) {
         const companyId = assessment.company_id;
         if (!companyId) continue;
-        const frameworkId = assessment.framework_id;
 
-        // Library risks that apply to this framework
+        // Support both framework_id (single) and framework_ids (array)
+        const frameworkIds = assessment.framework_ids?.length
+          ? assessment.framework_ids
+          : assessment.framework_id
+            ? [assessment.framework_id]
+            : [];
+        if (frameworkIds.length === 0) continue;
+
+        // Library risks that apply to any of this assessment's frameworks
         const matchingLibraryRisks = libraryRisks.filter(lr =>
-          lr.framework_ids?.includes(frameworkId)
+          frameworkIds.some(fid => lr.framework_ids?.includes(fid))
         );
 
         for (const libRisk of matchingLibraryRisks) {
@@ -113,15 +120,20 @@ export default function RiskControlEngine() {
         await base44.entities.Risk.bulkCreate(risksToCreate);
       }
 
-      return risksToCreate.length;
+      return { count: risksToCreate.length, libraryTotal: libraryRisks.length, assessmentTotal: assessments.length };
     },
-    onSuccess: (count) => {
+    onSuccess: ({ count, libraryTotal, assessmentTotal }) => {
       queryClient.invalidateQueries(['risks']);
       queryClient.invalidateQueries(['proposedRiskControls']);
-      toast.success(count > 0
-        ? `Auto-assigned ${count} risks to companies based on their frameworks`
-        : 'No new risks to assign — all matching risks are already assigned'
-      );
+      if (count > 0) {
+        toast.success(`Auto-assigned ${count} risks to companies based on their frameworks`);
+      } else if (libraryTotal === 0) {
+        toast.info('No library risks found. Create risks without a company_id to use them as library risks.');
+      } else if (assessmentTotal === 0) {
+        toast.info('No assessments found. Create assessments linking companies to frameworks first.');
+      } else {
+        toast.info('All matching risks are already assigned — nothing new to create.');
+      }
     },
   });
 
