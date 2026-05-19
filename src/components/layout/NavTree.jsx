@@ -123,7 +123,7 @@ const saveFavorites = (userId, favs) => {
 function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false }) {
   const isFav = favorites.includes(item.id);
   return (
-    <div className="group flex items-center rounded-lg hover:bg-blue-50 transition-colors">
+    <div className="group flex items-center rounded-lg hover:bg-slate-50 transition-colors">
       <Link
         to={item.url}
         className={`flex items-center gap-2.5 px-3 py-2 flex-1 min-w-0 text-sm ${
