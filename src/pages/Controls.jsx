@@ -80,6 +80,15 @@ export default function Controls() {
     return colors[priority] || 'bg-slate-500 text-white';
   };
 
+  const getCriticalityColor = (criticality) => {
+    const colors = {
+      'Must Have': 'bg-red-100 text-red-800 border-red-300',
+      'Should Have': 'bg-amber-100 text-amber-800 border-amber-300',
+      'Nice to Have': 'bg-green-100 text-green-800 border-green-300'
+    };
+    return colors[criticality] || 'bg-slate-100 text-slate-800 border-slate-300';
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -190,7 +199,7 @@ export default function Controls() {
                                 {framework && <span>{framework.framework_code || framework.name}</span>}
                                 {control.category && <span>• {control.category}</span>}
                                 {control.control_criticality && (
-                                  <Badge variant="outline" className="text-xs">
+                                  <Badge variant="outline" className={`text-xs border-2 ${getCriticalityColor(control.control_criticality)}`}>
                                     {control.control_criticality}
                                   </Badge>
                                 )}
@@ -242,7 +251,7 @@ export default function Controls() {
                                 {framework && <span>{framework.framework_code || framework.name}</span>}
                                 {control.category && <span>• {control.category}</span>}
                                 {control.control_criticality && (
-                                  <Badge variant="outline" className="text-xs">
+                                  <Badge variant="outline" className={`text-xs border-2 ${getCriticalityColor(control.control_criticality)}`}>
                                     {control.control_criticality}
                                   </Badge>
                                 )}
