@@ -26,6 +26,27 @@
       ],
       "description": "Framework category"
     },
+    "framework_code": {
+      "type": "string",
+      "description": "Short code / identifier (e.g. COSO, ISO27001, DORA)"
+    },
+    "framework_family": {
+      "type": "string",
+      "description": "Framework family / grouping (e.g. GRC/Audit Management, IT and Cybersecurity)"
+    },
+    "issuing_body": {
+      "type": "string",
+      "description": "Body that issues or owns the framework"
+    },
+    "is_master": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this is a master library framework (not company-specific)"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Display sort order"
+    },
     "status": {
       "type": "string",
       "enum": [

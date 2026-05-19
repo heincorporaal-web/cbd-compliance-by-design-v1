@@ -606,14 +606,65 @@ export default function RiskDetail() {
               </div>
             </div>
 
-            {/* Row 8 – Framework Reference */}
+            {/* Row 8 – Applicable Frameworks (multi-select from master library) */}
             <div className="space-y-2">
-              <Label>Framework Reference</Label>
-              <Input
-                value={formData.framework_reference}
-                onChange={e => setFormData(p => ({ ...p, framework_reference: e.target.value }))}
-                placeholder="e.g. IFRS ICFR"
-              />
+              <Label>Applicable Frameworks</Label>
+              <p className="text-xs text-slate-500">Select all frameworks this risk applies to. Companies can then filter and assign risks based on their chosen frameworks.</p>
+              <div className="border border-slate-200 rounded-lg max-h-56 overflow-y-auto">
+                {frameworks.length === 0 ? (
+                  <p className="text-sm text-slate-400 text-center py-6 italic">No master frameworks loaded yet.</p>
+                ) : (
+                  Object.entries(
+                    frameworks
+                      .filter(f => f.is_master)
+                      .reduce((acc, f) => {
+                        const grp = f.framework_family || "Other";
+                        if (!acc[grp]) acc[grp] = [];
+                        acc[grp].push(f);
+                        return acc;
+                      }, {})
+                  ).map(([family, items]) => (
+                    <div key={family}>
+                      <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100 sticky top-0">{family}</div>
+                      {items.map(f => {
+                        const checked = formData.framework_ids?.includes(f.id);
+                        return (
+                          <label key={f.id} className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => {
+                                const next = checked
+                                  ? formData.framework_ids.filter(id => id !== f.id)
+                                  : [...(formData.framework_ids || []), f.id];
+                                setFormData(p => ({ ...p, framework_ids: next }));
+                              }}
+                              className="rounded border-slate-300 text-primary"
+                            />
+                            <span className="text-xs font-medium text-slate-700 min-w-[80px]">{f.framework_code || f.name}</span>
+                            <span className="text-xs text-slate-500 truncate">{f.description || f.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ))
+                )}
+              </div>
+              {formData.framework_ids?.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {formData.framework_ids.map(id => {
+                    const f = frameworks.find(fw => fw.id === id);
+                    return f ? (
+                      <Badge key={id} variant="outline" className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200 gap-1">
+                        {f.framework_code || f.name}
+                        <button type="button" onClick={() => setFormData(p => ({ ...p, framework_ids: p.framework_ids.filter(i => i !== id) }))}>
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -767,9 +818,14 @@ export default function RiskDetail() {
                           className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer"
                           onClick={() => addFramework(framework.id)}
                         >
-                          <p className="font-medium text-sm">{framework.name}</p>
-                          {framework.description && (
-                            <p className="text-xs text-slate-600">{framework.description}</p>
+                          <div className="flex items-center gap-2">
+                            {framework.framework_code && (
+                              <Badge variant="outline" className="text-xs shrink-0">{framework.framework_code}</Badge>
+                            )}
+                            <p className="font-medium text-sm">{framework.name}</p>
+                          </div>
+                          {framework.framework_family && (
+                            <p className="text-xs text-slate-400 mt-0.5">{framework.framework_family}</p>
                           )}
                         </div>
                       ))}
