@@ -48,6 +48,8 @@ export default function WorkflowBuilder({ steps, onChange, entityType = "" }) {
 
   const { data: stakeholders = [] } = useQuery({ queryKey: ['stakeholders'], queryFn: () => base44.entities.Stakeholder.list() });
   const { data: stakeholderGroups = [] } = useQuery({ queryKey: ['stakeholderGroups'], queryFn: () => base44.entities.StakeholderGroup.list() });
+  const { data: valueChains = [] } = useQuery({ queryKey: ['valueChains'], queryFn: () => base44.entities.ValueChain.list() });
+  const { data: workstreams = [] } = useQuery({ queryKey: ['workstreams'], queryFn: () => base44.entities.Workstream.list() });
 
   const addStep = () => {
     const newStep = {
@@ -77,6 +79,12 @@ export default function WorkflowBuilder({ steps, onChange, entityType = "" }) {
   const updateStep = (index, field, value) => {
     const updated = [...steps];
     updated[index] = { ...updated[index], [field]: value };
+    onChange(updated);
+  };
+
+  const updateStepFields = (index, patch) => {
+    const updated = [...steps];
+    updated[index] = { ...updated[index], ...patch };
     onChange(updated);
   };
 
@@ -212,6 +220,8 @@ export default function WorkflowBuilder({ steps, onChange, entityType = "" }) {
                             {step.recipients?.length > 0 && ` • ${step.recipients.length} recipient(s)`}
                             {step.escalation_after_days && step.type === 'escalation' && ` • Escalate after ${step.escalation_after_days}d`}
                             {step.delay_hours && step.type === 'delay' && ` • Wait ${step.delay_hours}h`}
+                            {step.value_chain_name && ` • VC: ${step.value_chain_name}`}
+                            {step.workstream_name && ` • WS: ${step.workstream_name}`}
                           </p>
                         )}
 
@@ -254,6 +264,64 @@ export default function WorkflowBuilder({ steps, onChange, entityType = "" }) {
                               <div className={`flex items-start gap-2 p-2.5 rounded-lg border text-xs ${typeDef.bg} ${typeDef.color}`}>
                                 <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                                 {typeDef.description}
+                              </div>
+                            )}
+
+                            {/* === VALUE CHAIN & WORKSTREAM === */}
+                            {valueChains.length > 0 && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <div className="space-y-1.5">
+                                  <Label className="text-xs text-slate-600">Value Chain <span className="text-slate-400">(optional)</span></Label>
+                                  <Select
+                                    value={step.value_chain_id || ""}
+                                    onValueChange={(v) => {
+                                      const vc = valueChains.find(c => c.id === v);
+                                      const ws = workstreams.find(w => w.id === step.workstream_id);
+                                      const clearWs = ws && ws.value_chain_id !== v;
+                                      updateStepFields(index, {
+                                        value_chain_id: v || null,
+                                        value_chain_name: vc?.name || '',
+                                        ...(clearWs ? { workstream_id: null, workstream_name: '' } : {}),
+                                      });
+                                    }}
+                                  >
+                                    <SelectTrigger className="h-8 text-sm">
+                                      <SelectValue placeholder="All value chains" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value={null}>All value chains</SelectItem>
+                                      {valueChains.filter(vc => vc.status !== 'archived').map(vc => (
+                                        <SelectItem key={vc.id} value={vc.id}>{vc.name}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="space-y-1.5">
+                                  <Label className="text-xs text-slate-600">Workstream <span className="text-slate-400">(optional)</span></Label>
+                                  <Select
+                                    value={step.workstream_id || ""}
+                                    onValueChange={(v) => {
+                                      const ws = workstreams.find(w => w.id === v);
+                                      updateStepFields(index, {
+                                        workstream_id: v || null,
+                                        workstream_name: ws?.name || '',
+                                      });
+                                    }}
+                                    disabled={!step.value_chain_id}
+                                  >
+                                    <SelectTrigger className="h-8 text-sm">
+                                      <SelectValue placeholder={step.value_chain_id ? "All workstreams" : "Select a value chain first"} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value={null}>All workstreams</SelectItem>
+                                      {workstreams
+                                        .filter(w => w.value_chain_id === step.value_chain_id && w.status !== 'archived')
+                                        .map(w => (
+                                          <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
                               </div>
                             )}
 

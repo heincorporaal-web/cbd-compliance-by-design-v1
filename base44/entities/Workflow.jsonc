@@ -64,6 +64,22 @@
               "delay"
             ]
           },
+          "value_chain_id": {
+            "type": "string",
+            "description": "Reference to ValueChain entity \u2014 scopes this step to a specific value chain"
+          },
+          "value_chain_name": {
+            "type": "string",
+            "description": "Value chain name (denormalized)"
+          },
+          "workstream_id": {
+            "type": "string",
+            "description": "Reference to Workstream entity \u2014 scopes this step to a specific workstream"
+          },
+          "workstream_name": {
+            "type": "string",
+            "description": "Workstream name (denormalized)"
+          },
           "assignee_type": {
             "type": "string",
             "enum": [
