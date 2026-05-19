@@ -150,14 +150,14 @@ function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false })
 
 // ─── Collapsible group ────────────────────────────────────────────────────────
 const groupColors = {
-  overview: "bg-cyan-100 text-cyan-700",
-  governance: "bg-blue-100 text-blue-700",
-  risk: "bg-orange-100 text-orange-700",
-  compliance: "bg-green-100 text-green-700",
-  process: "bg-indigo-100 text-indigo-700",
-  stakeholders: "bg-pink-100 text-pink-700",
-  admin: "bg-slate-100 text-slate-700",
-  configuration: "bg-violet-100 text-violet-700",
+  overview: "text-secondary font-medium",
+  governance: "text-secondary font-medium",
+  risk: "text-secondary font-medium",
+  compliance: "text-secondary font-medium",
+  process: "text-secondary font-medium",
+  stakeholders: "text-secondary font-medium",
+  admin: "text-secondary font-medium",
+  configuration: "text-secondary font-medium",
 };
 
 function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false }) {
@@ -173,8 +173,8 @@ function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false
     <div className="mb-1">
       <button
         onClick={() => setOpen(v => !v)}
-        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors ${
-          hasActive ? groupColors[group.id] || "bg-slate-100 text-slate-700" : "text-slate-500 hover:bg-slate-100"
+        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs uppercase tracking-wider transition-colors ${
+          hasActive ? groupColors[group.id] : "text-slate-500 hover:bg-slate-100"
         }`}
       >
         <group.icon className="w-3.5 h-3.5 shrink-0" />
