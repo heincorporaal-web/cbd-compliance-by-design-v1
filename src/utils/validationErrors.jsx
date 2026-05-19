@@ -72,9 +72,13 @@ export function ErrorIcon({ errors, className = "w-3.5 h-3.5" }) {
         <TooltipTrigger asChild>
           <AlertTriangle className={`${className} text-red-500`} />
         </TooltipTrigger>
-        <TooltipContent side="right" className="max-w-xs bg-blue-50 border-blue-200">
+        <TooltipContent 
+          side="right" 
+          className="max-w-xs bg-white border-2"
+          style={{ borderColor: '#5C7F99' }}
+        >
           <div className="space-y-1">
-            <p className="font-semibold text-blue-800">{errors.length} error{errors.length !== 1 ? 's' : ''}</p>
+            <p className="font-semibold text-red-600">{errors.length} error{errors.length !== 1 ? 's' : ''}</p>
             <ul className="text-xs space-y-0.5">
               {errors.map((err, idx) => (
                 <li key={idx} className="text-blue-700">• {err.message}</li>
