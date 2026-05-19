@@ -1,0 +1,49 @@
+{
+  "name": "ValueChain",
+  "type": "object",
+  "properties": {
+    "value_chain_code": {
+      "type": "string",
+      "description": "Unique value chain code (e.g., EAM-Acquire-to-Decommission)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Value chain name"
+    },
+    "management_chain": {
+      "type": "string",
+      "description": "Management chain / category (e.g., Enterprise Asset Management)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the value chain"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Display sort order"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this value chain is active"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "archived"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "value_chain_code",
+    "name",
+    "company_id"
+  ]
+}

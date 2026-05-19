@@ -89,6 +89,14 @@ export const NAV_GROUPS = [
       { id: "audit_logs", title: "Audit Logs", url: createPageUrl("AuditLogs"), icon: Activity },
     ],
   },
+  {
+    id: "configuration",
+    label: "Configuration",
+    icon: Cog,
+    items: [
+      { id: "value_chains", title: "Value Chains", url: createPageUrl("ValueChains"), icon: Network },
+    ],
+  },
 ];
 
 // Flatten all items for quick lookup
