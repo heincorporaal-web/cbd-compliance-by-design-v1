@@ -104,13 +104,13 @@ button:focus-visible {
     --chart-4: 39 84% 52%;
     --chart-5: 14 85% 55%;
     --radius: 0.5rem;
-    --sidebar-background: 202 50% 16%;
-    --sidebar-foreground: 0 0% 98%;
+    --sidebar-background: 220 13% 91%;
+    --sidebar-foreground: 202 39% 20%;
     --sidebar-primary: 198 51% 42%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 39 84% 52%;
     --sidebar-accent-foreground: 0 0% 12%;
-    --sidebar-border: 202 30% 25%;
+    --sidebar-border: 220 10% 80%;
     --sidebar-ring: 198 51% 42%;
   }
   .dark {
