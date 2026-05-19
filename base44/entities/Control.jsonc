@@ -8,7 +8,7 @@
     },
     "control_id": {
       "type": "string",
-      "description": "Control identifier (e.g., A.5.1)"
+      "description": "Control identifier (e.g., CTCM.FINMC.1.01)"
     },
     "title": {
       "type": "string",
@@ -43,6 +43,118 @@
       ],
       "default": "draft"
     },
+    "global": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a global control"
+    },
+    "control_ccm": {
+      "type": "boolean",
+      "default": false,
+      "description": "Control CCM flag"
+    },
+    "self_assessment": {
+      "type": "boolean",
+      "default": false,
+      "description": "Self assessment flag"
+    },
+    "control_criticality": {
+      "type": "string",
+      "enum": [
+        "Must Have",
+        "Should Have",
+        "Nice to Have"
+      ],
+      "default": "Should Have"
+    },
+    "control_owner": {
+      "type": "string",
+      "description": "Control owner role/name"
+    },
+    "owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (control owner)"
+    },
+    "key_control": {
+      "type": "boolean",
+      "default": false
+    },
+    "control_execution_type": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Automated",
+        "Semi-Automated"
+      ],
+      "default": "Manual"
+    },
+    "control_type": {
+      "type": "string",
+      "enum": [
+        "Preventive",
+        "Detective",
+        "Corrective"
+      ],
+      "default": "Preventive"
+    },
+    "finance_control_consideration": {
+      "type": "boolean",
+      "default": false
+    },
+    "control_frequency": {
+      "type": "string",
+      "enum": [
+        "Daily",
+        "Weekly",
+        "Monthly",
+        "Quarterly",
+        "Annually",
+        "Continuous",
+        "Ad-hoc"
+      ],
+      "default": "Monthly"
+    },
+    "compensating_control": {
+      "type": "boolean",
+      "default": false
+    },
+    "compensating_control_risk": {
+      "type": "string"
+    },
+    "control_narrative_url": {
+      "type": "string"
+    },
+    "upload_document": {
+      "type": "string",
+      "description": "Document upload flag or URL"
+    },
+    "control_objective_id": {
+      "type": "string",
+      "description": "Reference to control objective"
+    },
+    "process_phase": {
+      "type": "string",
+      "enum": [
+        "Pre-Input",
+        "Process - Input",
+        "Process - Output",
+        "Post-Output"
+      ],
+      "default": "Process - Input"
+    },
+    "risk_id": {
+      "type": "string",
+      "description": "Associated risk ID from library"
+    },
+    "is_library_control": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this is a master library control"
+    },
+    "library_control_id": {
+      "type": "string",
+      "description": "Source library control ID if assigned from master library"
+    },
     "reviewer": {
       "type": "string",
       "description": "Reviewer name (denormalized)"
@@ -54,10 +166,6 @@
     "approver": {
       "type": "string",
       "description": "Approver / control owner name (denormalized)"
-    },
-    "owner_stakeholder_id": {
-      "type": "string",
-      "description": "Reference to Stakeholder entity (control owner)"
     },
     "approval_date": {
       "type": "string",

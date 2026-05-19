@@ -34,10 +34,30 @@ export default function ControlDetail() {
     description: "",
     category: "",
     priority: "medium",
+    status: "draft",
     compensating_control_ids: [],
     linked_objective_ids: [],
     owner_stakeholder_id: "",
     reviewer_stakeholder_id: "",
+    // Library fields from Excel schema
+    global: false,
+    control_ccm: false,
+    self_assessment: false,
+    control_criticality: "Should Have",
+    control_owner: "",
+    key_control: false,
+    control_execution_type: "Manual",
+    control_type: "Preventive",
+    finance_control_consideration: false,
+    control_frequency: "Monthly",
+    compensating_control: false,
+    compensating_control_risk: "",
+    control_narrative_url: "",
+    upload_document: "0",
+    control_objective_id: "",
+    process_phase: "Process - Input",
+    risk_id: "",
+    is_library_control: false,
   });
 
   const [isAddingCompensating, setIsAddingCompensating] = useState(false);
@@ -76,7 +96,27 @@ export default function ControlDetail() {
 
   useEffect(() => {
     if (existingControl?.[0]) {
-      setFormData(existingControl[0]);
+      setFormData({
+        ...existingControl[0],
+        global: existingControl[0].global ?? false,
+        control_ccm: existingControl[0].control_ccm ?? false,
+        self_assessment: existingControl[0].self_assessment ?? false,
+        control_criticality: existingControl[0].control_criticality || "Should Have",
+        control_owner: existingControl[0].control_owner || "",
+        key_control: existingControl[0].key_control ?? false,
+        control_execution_type: existingControl[0].control_execution_type || "Manual",
+        control_type: existingControl[0].control_type || "Preventive",
+        finance_control_consideration: existingControl[0].finance_control_consideration ?? false,
+        control_frequency: existingControl[0].control_frequency || "Monthly",
+        compensating_control: existingControl[0].compensating_control ?? false,
+        compensating_control_risk: existingControl[0].compensating_control_risk || "",
+        control_narrative_url: existingControl[0].control_narrative_url || "",
+        upload_document: existingControl[0].upload_document || "0",
+        control_objective_id: existingControl[0].control_objective_id || "",
+        process_phase: existingControl[0].process_phase || "Process - Input",
+        risk_id: existingControl[0].risk_id || "",
+        is_library_control: existingControl[0].is_library_control ?? false,
+      });
     }
   }, [existingControl]);
 
@@ -256,6 +296,7 @@ export default function ControlDetail() {
         <Tabs defaultValue="details" className="space-y-6">
           <TabsList>
             <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="library">Library Fields</TabsTrigger>
             {!isNew && controlId && (
               <TabsTrigger value="assessments">
                 Assessments
@@ -297,7 +338,9 @@ export default function ControlDetail() {
                       </SelectTrigger>
                       <SelectContent>
                         {frameworks.map(f => (
-                          <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                          <SelectItem key={f.id} value={f.id}>
+                            {f.framework_code || f.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -383,6 +426,198 @@ export default function ControlDetail() {
                 </div>
               </CardContent>
             </Card>
+
+            <TabsContent value="library" className="space-y-6">
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle>Control Library Fields</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Control Criticality</Label>
+                      <Select value={formData.control_criticality} onValueChange={(v) => setFormData({...formData, control_criticality: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Must Have">Must Have</SelectItem>
+                          <SelectItem value="Should Have">Should Have</SelectItem>
+                          <SelectItem value="Nice to Have">Nice to Have</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Control Execution Type</Label>
+                      <Select value={formData.control_execution_type} onValueChange={(v) => setFormData({...formData, control_execution_type: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Manual">Manual</SelectItem>
+                          <SelectItem value="Automated">Automated</SelectItem>
+                          <SelectItem value="Semi-Automated">Semi-Automated</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Control Type</Label>
+                      <Select value={formData.control_type} onValueChange={(v) => setFormData({...formData, control_type: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Preventive">Preventive</SelectItem>
+                          <SelectItem value="Detective">Detective</SelectItem>
+                          <SelectItem value="Corrective">Corrective</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Control Frequency</Label>
+                      <Select value={formData.control_frequency} onValueChange={(v) => setFormData({...formData, control_frequency: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Daily">Daily</SelectItem>
+                          <SelectItem value="Weekly">Weekly</SelectItem>
+                          <SelectItem value="Monthly">Monthly</SelectItem>
+                          <SelectItem value="Quarterly">Quarterly</SelectItem>
+                          <SelectItem value="Annually">Annually</SelectItem>
+                          <SelectItem value="Continuous">Continuous</SelectItem>
+                          <SelectItem value="Ad-hoc">Ad-hoc</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Process Phase</Label>
+                      <Select value={formData.process_phase} onValueChange={(v) => setFormData({...formData, process_phase: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pre-Input">Pre-Input</SelectItem>
+                          <SelectItem value="Process - Input">Process - Input</SelectItem>
+                          <SelectItem value="Process - Output">Process - Output</SelectItem>
+                          <SelectItem value="Post-Output">Post-Output</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Control Owner</Label>
+                      <Input
+                        value={formData.control_owner}
+                        onChange={(e) => setFormData({...formData, control_owner: e.target.value})}
+                        placeholder="e.g., OpCo - Treasury Analyst"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.global}
+                          onChange={(e) => setFormData({...formData, global: e.target.checked})}
+                          className="rounded border-slate-300"
+                        />
+                        Global Control
+                      </Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.control_ccm}
+                          onChange={(e) => setFormData({...formData, control_ccm: e.target.checked})}
+                          className="rounded border-slate-300"
+                        />
+                        Control CCM
+                      </Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.self_assessment}
+                          onChange={(e) => setFormData({...formData, self_assessment: e.target.checked})}
+                          className="rounded border-slate-300"
+                        />
+                        Self Assessment
+                      </Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.key_control}
+                          onChange={(e) => setFormData({...formData, key_control: e.target.checked})}
+                          className="rounded border-slate-300"
+                        />
+                        Key Control
+                      </Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.finance_control_consideration}
+                          onChange={(e) => setFormData({...formData, finance_control_consideration: e.target.checked})}
+                          className="rounded border-slate-300"
+                        />
+                        Finance Control
+                      </Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.compensating_control}
+                          onChange={(e) => setFormData({...formData, compensating_control: e.target.checked})}
+                          className="rounded border-slate-300"
+                        />
+                        Compensating Control
+                      </Label>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Compensating Control Risk</Label>
+                      <Input
+                        value={formData.compensating_control_risk}
+                        onChange={(e) => setFormData({...formData, compensating_control_risk: e.target.value})}
+                        placeholder="Risk description"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Control Narrative URL</Label>
+                      <Input
+                        value={formData.control_narrative_url}
+                        onChange={(e) => setFormData({...formData, control_narrative_url: e.target.value})}
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Upload Document</Label>
+                      <Input
+                        value={formData.upload_document}
+                        onChange={(e) => setFormData({...formData, upload_document: e.target.value})}
+                        placeholder="Document reference"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Control Objective ID</Label>
+                      <Input
+                        value={formData.control_objective_id}
+                        onChange={(e) => setFormData({...formData, control_objective_id: e.target.value})}
+                        placeholder="Objective ID"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Risk ID</Label>
+                      <Input
+                        value={formData.risk_id}
+                        onChange={(e) => setFormData({...formData, risk_id: e.target.value})}
+                        placeholder="Associated Risk ID"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             {!isNew && (
               <Card className="border-none shadow-lg">

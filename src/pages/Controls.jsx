@@ -1,18 +1,24 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Search, ArrowRight, Plus } from "lucide-react";
+import { Shield, Search, ArrowRight, Plus, Download, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { toast } from "sonner";
+import FileUpload from "@/components/FileUpload";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function Controls() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterFramework, setFilterFramework] = useState("all");
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const { data: controls = [] } = useQuery({
     queryKey: ['controls'],
@@ -22,6 +28,25 @@ export default function Controls() {
   const { data: frameworks = [] } = useQuery({
     queryKey: ['frameworks'],
     queryFn: () => base44.entities.Framework.list(),
+  });
+
+  const importControlLibrary = useMutation({
+    mutationFn: async (file) => {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      return base44.functions.invoke('importControlLibrary', { file_url });
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(`Successfully imported ${data.imported} controls from library`);
+        queryClient.invalidateQueries(['controls']);
+        setIsImportDialogOpen(false);
+      } else {
+        toast.error('Import failed');
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Import failed');
+    },
   });
 
   const filteredControls = controls.filter(control => {
@@ -49,12 +74,40 @@ export default function Controls() {
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Controls</h1>
           <p className="text-slate-600">Browse and manage security controls across frameworks</p>
         </div>
-        <Link to={createPageUrl("ControlDetail?new=true")}>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Control
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Upload className="w-4 h-4 mr-2" />
+                Import Library
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Import Control Library</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-sm text-slate-600">
+                  Upload an Excel file containing control library data. Controls will be added to the master library.
+                </p>
+                <FileUpload
+                  accept=".xlsx,.xls"
+                  onUpload={(file) => importControlLibrary.mutate(file)}
+                  disabled={importing}
+                />
+                {importing && (
+                  <p className="text-sm text-slate-500">Importing controls...</p>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Link to={createPageUrl("ControlDetail?new=true")}>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Control
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card className="border-none shadow-lg">
@@ -76,7 +129,9 @@ export default function Controls() {
               <SelectContent>
                 <SelectItem value="all">All Frameworks</SelectItem>
                 {frameworks.map(framework => (
-                  <SelectItem key={framework.id} value={framework.id}>{framework.name}</SelectItem>
+                  <SelectItem key={framework.id} value={framework.id}>
+                    {framework.framework_code || framework.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -106,8 +161,13 @@ export default function Controls() {
                             <p className="text-sm text-slate-600 mb-2">{control.description}</p>
                           )}
                           <div className="flex items-center gap-3 text-sm text-slate-500">
-                            {framework && <span>{framework.name}</span>}
+                            {framework && <span>{framework.framework_code || framework.name}</span>}
                             {control.category && <span>• {control.category}</span>}
+                            {control.control_criticality && (
+                              <Badge variant="outline" className="text-xs">
+                                {control.control_criticality}
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
