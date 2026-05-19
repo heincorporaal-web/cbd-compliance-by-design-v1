@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Search, Network, ChevronDown, ChevronRight } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
 
 const EMPTY_FORM = {
   value_chain_code: "",
@@ -44,6 +45,7 @@ export default function ValueChains() {
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [collapsed, setCollapsed] = useState({});
+  const [expandedWS, setExpandedWS] = useState({});
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
@@ -117,6 +119,7 @@ export default function ValueChains() {
   }, {});
 
   const toggleCollapse = (key) => setCollapsed(p => ({ ...p, [key]: !p[key] }));
+  const toggleWS = (id) => setExpandedWS(p => ({ ...p, [id]: !p[id] }));
 
   const chainColors = {
     "Customer Relationship Management": "bg-cyan-100 text-cyan-700",
@@ -200,30 +203,41 @@ export default function ValueChains() {
                     {items.map(vc => {
                       const company = companies.find(c => c.id === vc.company_id);
                       return (
-                        <div key={vc.id} className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium text-sm text-slate-900">{vc.name}</span>
-                              <span className="text-xs text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{vc.value_chain_code}</span>
-                              {vc.status !== "active" && (
-                                <Badge variant="outline" className="text-xs capitalize">{vc.status}</Badge>
+                        <div key={vc.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <button
+                                  onClick={() => toggleWS(vc.id)}
+                                  className="flex items-center gap-1 text-left"
+                                >
+                                  {expandedWS[vc.id] ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
+                                  <span className="font-medium text-sm text-slate-900">{vc.name}</span>
+                                </button>
+                                <span className="text-xs text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{vc.value_chain_code}</span>
+                                {vc.status !== "active" && (
+                                  <Badge variant="outline" className="text-xs capitalize">{vc.status}</Badge>
+                                )}
+                              </div>
+                              {vc.description && (
+                                <p className="text-xs text-slate-500 mt-1 line-clamp-2">{vc.description}</p>
+                              )}
+                              {company && (
+                                <p className="text-xs text-slate-400 mt-0.5">{company.name}</p>
                               )}
                             </div>
-                            {vc.description && (
-                              <p className="text-xs text-slate-500 mt-1 line-clamp-2">{vc.description}</p>
-                            )}
-                            {company && (
-                              <p className="text-xs text-slate-400 mt-0.5">{company.name}</p>
-                            )}
+                            <div className="flex items-center gap-1 shrink-0">
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(vc)}>
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteMutation.mutate(vc.id)}>
+                                <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(vc)}>
-                              <Pencil className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteMutation.mutate(vc.id)}>
-                              <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                            </Button>
-                          </div>
+                          {expandedWS[vc.id] && (
+                            <WorkstreamPanel valueChainId={vc.id} companyId={vc.company_id} />
+                          )}
                         </div>
                       );
                     })}
