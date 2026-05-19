@@ -25,6 +25,7 @@ export default function ICTSystems() {
     name: "",
     company_id: "",
     system_type: "other",
+    system_type_custom: "",
     criticality: "supporting",
     description: "",
     owner: "",
@@ -76,6 +77,7 @@ export default function ICTSystems() {
       name: "",
       company_id: "",
       system_type: "other",
+      system_type_custom: "",
       criticality: "supporting",
       description: "",
       owner: "",
@@ -184,7 +186,7 @@ export default function ICTSystems() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="system_type">System Type</Label>
-                  <Select value={formData.system_type} onValueChange={(value) => setFormData({...formData, system_type: value})}>
+                  <Select value={formData.system_type} onValueChange={(value) => setFormData({...formData, system_type: value, system_type_custom: value !== 'custom' ? '' : formData.system_type_custom})}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -198,8 +200,16 @@ export default function ICTSystems() {
                       <SelectItem value="infrastructure">Infrastructure</SelectItem>
                       <SelectItem value="security">Security</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="custom">Custom…</SelectItem>
                     </SelectContent>
                   </Select>
+                  {formData.system_type === 'custom' && (
+                    <Input
+                      placeholder="Enter custom type name…"
+                      value={formData.system_type_custom || ""}
+                      onChange={(e) => setFormData({...formData, system_type_custom: e.target.value})}
+                    />
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="criticality">Criticality *</Label>
@@ -352,7 +362,7 @@ export default function ICTSystems() {
                             </Badge>
                           </div>
                           <div className="text-sm text-slate-600 space-y-1">
-                            <p>{company?.name || 'Unknown Company'} • {system.system_type.replace(/_/g, ' ')}</p>
+                            <p>{company?.name || 'Unknown Company'} • {system.system_type === 'custom' && system.system_type_custom ? system.system_type_custom : system.system_type?.replace(/_/g, ' ')}</p>
                             {system.vendor && <p>Vendor: {system.vendor}</p>}
                             {system.owner && <p>Owner: {system.owner}</p>}
                             {(system.recovery_time_objective || system.recovery_point_objective) && (

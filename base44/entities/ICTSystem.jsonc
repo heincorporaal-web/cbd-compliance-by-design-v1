@@ -21,9 +21,14 @@
         "data_analytics",
         "infrastructure",
         "security",
-        "other"
+        "other",
+        "custom"
       ],
       "description": "Type of ICT system"
+    },
+    "system_type_custom": {
+      "type": "string",
+      "description": "Custom system type label when system_type is 'custom'"
     },
     "criticality": {
       "type": "string",

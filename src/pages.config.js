@@ -97,6 +97,7 @@ import RACIMatrix from './pages/RACIMatrix';
 import CompanyBranding from './pages/CompanyBranding';
 import ValueChains from './pages/ValueChains';
 import RootCauseCategories from './pages/RootCauseCategories';
+import Configuration from './pages/Configuration';
 import __Layout from './Layout.jsx';
 
 
@@ -151,6 +152,7 @@ export const PAGES = {
     "CompanyBranding": CompanyBranding,
     "ValueChains": ValueChains,
     "RootCauseCategories": RootCauseCategories,
+    "Configuration": Configuration,
 }
 
 export const pagesConfig = {

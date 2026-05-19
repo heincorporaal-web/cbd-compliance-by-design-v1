@@ -96,6 +96,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "value_chains", title: "Value Chains", url: createPageUrl("ValueChains"), icon: Network },
       { id: "root_cause_categories", title: "Root Cause Categories", url: createPageUrl("RootCauseCategories"), icon: AlertCircle },
+      { id: "configuration", title: "Configuration & Imports", url: createPageUrl("Configuration"), icon: Settings },
     ],
   },
 ];

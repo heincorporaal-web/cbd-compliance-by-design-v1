@@ -1,0 +1,79 @@
+{
+  "name": "ICTModule",
+  "type": "object",
+  "properties": {
+    "ict_system_id": {
+      "type": "string",
+      "description": "Reference to ICTSystem entity"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "module_name": {
+      "type": "string",
+      "description": "Module name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Module description"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this module is active"
+    },
+    "module_owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (module owner)"
+    },
+    "module_owner_name": {
+      "type": "string",
+      "description": "Module owner name (denormalized)"
+    },
+    "active_from": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this module became active"
+    },
+    "active_to": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this module was deactivated"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Management domain (Management Chain)",
+      "enum": [
+        "Customer Relationship Management",
+        "Enterprise Asset Management",
+        "Enterprise Governance and Shareholder",
+        "Enterprise IT Management",
+        "Enterprise Perfomance Management",
+        "Financial Management",
+        "Governance, Risk & Compliance",
+        "Human Capital Management",
+        "Inventory Management",
+        "Product Management",
+        "Strategic Planning & Direction"
+      ]
+    },
+    "ict_scope": {
+      "type": "string",
+      "description": "ICT scope description"
+    },
+    "workstream_id": {
+      "type": "string",
+      "description": "Reference to Workstream entity"
+    },
+    "workstream_name": {
+      "type": "string",
+      "description": "Workstream name (denormalized)"
+    }
+  },
+  "required": [
+    "ict_system_id",
+    "module_name",
+    "company_id"
+  ]
+}
