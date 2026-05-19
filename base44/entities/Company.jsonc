@@ -68,6 +68,32 @@
       },
       "description": "Principle risks"
     },
+    "framework_assignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "framework_id": {
+            "type": "string",
+            "description": "Reference to Framework entity"
+          },
+          "framework_name": {
+            "type": "string",
+            "description": "Framework name (denormalized)"
+          },
+          "justification": {
+            "type": "string",
+            "description": "Why this framework is applied to this company"
+          },
+          "assigned_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when framework was assigned"
+          }
+        }
+      },
+      "description": "Frameworks assigned to this company with justifications"
+    },
     "logo_url": {
       "type": "string",
       "description": "URL of the company logo image"

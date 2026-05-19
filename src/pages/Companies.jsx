@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle, Upload, Palette, RefreshCw, Image, FileText, Eye, CalendarDays } from "lucide-react";
+import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle, Upload, Palette, RefreshCw, Image, FileText, Eye, CalendarDays, BookOpen } from "lucide-react";
 import CompanyCalendarTab from "@/components/companies/CompanyCalendarTab";
+import FrameworkAssignmentTab from "@/components/companies/FrameworkAssignmentTab";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -43,11 +44,18 @@ export default function Companies() {
     description: "",
     objectives: [],
     principle_risks: [],
+    framework_assignments: [],
     logo_url: "",
     brand_colors: { ...DEFAULT_COLORS },
     include_logo_in_reports: true,
     report_header_text: "",
     report_footer_text: "",
+  });
+
+  // Fetch frameworks for assignment
+  const { data: frameworks = [] } = useQuery({
+    queryKey: ['frameworks'],
+    queryFn: () => base44.entities.Framework.list('-created_date'),
   });
 
   const { data: companies = [], isLoading } = useQuery({
@@ -90,6 +98,7 @@ export default function Companies() {
       description: "",
       objectives: [],
       principle_risks: [],
+      framework_assignments: [],
       logo_url: "",
       brand_colors: { ...DEFAULT_COLORS },
       include_logo_in_reports: true,
@@ -97,6 +106,11 @@ export default function Companies() {
       report_footer_text: "",
     });
     setEditingCompany(null);
+  };
+
+  // Handle framework assignments update
+  const handleFrameworkAssignmentsChange = (assignments) => {
+    setFormData(prev => ({ ...prev, framework_assignments: assignments }));
   };
 
   const handleLogoUpload = async (e) => {
@@ -155,6 +169,7 @@ export default function Companies() {
       ...company,
       brand_colors: { ...DEFAULT_COLORS, ...(company.brand_colors || {}) },
       include_logo_in_reports: company.include_logo_in_reports !== false,
+      framework_assignments: company.framework_assignments || [],
     });
     setIsDialogOpen(true);
   };
@@ -217,6 +232,13 @@ export default function Companies() {
                     )}
                   </TabsTrigger>
                   <TabsTrigger value="branding">Branding</TabsTrigger>
+                  <TabsTrigger value="frameworks">
+                    <BookOpen className="w-3.5 h-3.5 mr-1" />
+                    Frameworks
+                    {formData.framework_assignments?.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">{formData.framework_assignments.length}</Badge>
+                    )}
+                  </TabsTrigger>
                   {editingCompany && (
                     <TabsTrigger value="calendar" className="gap-1.5">
                       <CalendarDays className="w-3.5 h-3.5" /> Calendar
@@ -514,6 +536,16 @@ export default function Companies() {
                     </div>
                   </div>
                 </TabsContent>
+
+                <TabsContent value="frameworks" className="space-y-4 mt-4">
+                  <FrameworkAssignmentTab
+                    companyId={editingCompany?.id}
+                    existingAssignments={formData.framework_assignments || []}
+                    frameworks={frameworks}
+                    onAssignmentsChange={handleFrameworkAssignmentsChange}
+                  />
+                </TabsContent>
+
                 {editingCompany && (
                   <TabsContent value="calendar" className="mt-4">
                     <CompanyCalendarTab companyId={editingCompany.id} />
@@ -578,6 +610,14 @@ export default function Companies() {
                         )}
                         {company.description && (
                           <p className="text-sm text-slate-500 mt-2">{company.description}</p>
+                        )}
+                        {company.framework_assignments?.length > 0 && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                            <span className="text-xs text-slate-500">
+                              {company.framework_assignments.length} framework{company.framework_assignments.length !== 1 ? 's' : ''} assigned
+                            </span>
+                          </div>
                         )}
                       </div>
                     </div>
