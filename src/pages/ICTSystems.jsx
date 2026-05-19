@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import { getICTSystemErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
 
 export default function ICTSystems() {
   const [globalCompany] = useCompanyFilter();
@@ -354,6 +355,7 @@ export default function ICTSystems() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-semibold text-slate-900">{system.name}</h3>
+                            <ErrorIcon errors={getICTSystemErrors(system)} />
                             <Badge className={getCriticalityColor(system.criticality)}>
                               {system.criticality}
                             </Badge>

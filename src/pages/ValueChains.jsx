@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2, Search, Network, ChevronDown, ChevronRight, Info 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
+import { getValueChainErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
 
 const EMPTY_FORM = {
   value_chain_code: "",
@@ -252,6 +253,7 @@ export default function ValueChains() {
                          {expandedWS[vc.id] ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
                          <span className="font-medium text-sm text-slate-900">{vc.name}</span>
                        </button>
+                       <ErrorIcon errors={getValueChainErrors(vc)} />
                        <span className="text-xs text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{vc.value_chain_code}</span>
                        {vc.description && (
                          <TooltipProvider delayDuration={200}>

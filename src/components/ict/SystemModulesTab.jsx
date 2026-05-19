@@ -9,7 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, Pencil, Trash2, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { getICTModuleErrors } from "@/utils/validationErrors.jsx";
 
 const MANAGEMENT_CHAINS = [
   "Customer Relationship Management",
@@ -155,6 +157,31 @@ export default function SystemModulesTab({ systemId, companyId }) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="font-semibold text-slate-900 text-sm">{mod.module_name}</span>
+                      {(() => {
+                        const errors = getICTModuleErrors(mod);
+                        if (errors.length > 0) {
+                          return (
+                            <TooltipProvider delayDuration={200}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="max-w-xs">
+                                  <div className="space-y-1">
+                                    <p className="font-semibold text-red-600">{errors.length} error{errors.length !== 1 ? 's' : ''}</p>
+                                    <ul className="text-xs space-y-0.5">
+                                      {errors.map((err, idx) => (
+                                        <li key={idx} className="text-slate-700">• {err.message}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          );
+                        }
+                        return null;
+                      })()}
                       {mod.is_active ? (
                         <Badge className="bg-green-100 text-green-700 border-green-200 text-xs border gap-1">
                           <CheckCircle className="w-3 h-3" /> Active

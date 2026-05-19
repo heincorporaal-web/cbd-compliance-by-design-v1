@@ -14,6 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import SystemModulesTab from "@/components/ict/SystemModulesTab";
+import { getICTSystemErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
 
 const SYSTEM_TYPES = [
   { value: "core_banking", label: "Core Banking" },
@@ -115,10 +116,15 @@ export default function ICTSystemDetail() {
               <h1 className="text-2xl font-bold text-slate-900">
                 {isNew ? "New ICT System" : formData.name || "ICT System"}
               </h1>
-              {!isNew && formData.criticality && (
-                <Badge variant="outline" className={`${getCriticalityColor(formData.criticality)} border`}>
-                  {formData.criticality}
-                </Badge>
+              {!isNew && (
+                <>
+                  <ErrorIcon errors={getICTSystemErrors(formData)} />
+                  {formData.criticality && (
+                    <Badge variant="outline" className={`${getCriticalityColor(formData.criticality)} border`}>
+                      {formData.criticality}
+                    </Badge>
+                  )}
+                </>
               )}
             </div>
             <p className="text-slate-600 text-sm mt-0.5">ICT Systems Inventory</p>

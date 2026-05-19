@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Layers } from "lucide-react";
+import { Plus, Pencil, Trash2, Layers, AlertTriangle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getWorkstreamErrors } from "@/utils/validationErrors.jsx";
 
 const EMPTY_FORM = {
   workstream_code: "",
@@ -100,6 +102,31 @@ export default function WorkstreamPanel({ valueChainId, companyId }) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs font-medium text-slate-800">{ws.name}</span>
+                  {(() => {
+                    const errors = getWorkstreamErrors(ws);
+                    if (errors.length > 0) {
+                      return (
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <AlertTriangle className="w-3 h-3 text-red-500" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <div className="space-y-1">
+                                <p className="font-semibold text-red-600">{errors.length} error{errors.length !== 1 ? 's' : ''}</p>
+                                <ul className="text-xs space-y-0.5">
+                                  {errors.map((err, idx) => (
+                                    <li key={idx} className="text-slate-700">• {err.message}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      );
+                    }
+                    return null;
+                  })()}
                   {ws.workstream_code && (
                     <span className="text-xs font-mono bg-slate-100 text-slate-500 px-1 rounded">{ws.workstream_code}</span>
                   )}
