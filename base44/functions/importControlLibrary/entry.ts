@@ -27,45 +27,61 @@ Deno.serve(async (req) => {
 
     console.log(`Parsed ${rows.length} rows. Sample keys:`, Object.keys(rows[0] || {}));
 
-    // Get master frameworks to map RiskID to framework_id
+    // Get master frameworks to map framework code to framework_id
     const frameworks = await base44.asServiceRole.entities.Framework.filter({ is_master: true });
     const frameworkMap = new Map();
     frameworks.forEach(fw => {
-      // Map by framework code or name
-      if (fw.framework_code) frameworkMap.set(fw.framework_code.toLowerCase(), fw.id);
-      frameworkMap.set(fw.name.toLowerCase(), fw.id);
+      const code = (fw.framework_code || '').toLowerCase().trim();
+      const name = (fw.name || '').toLowerCase().trim();
+      if (code) frameworkMap.set(code, fw.id);
+      if (name) frameworkMap.set(name, fw.id);
+      // Also map common abbreviations
+      if (code === 'ctcm') frameworkMap.set('ctcm', fw.id);
+      if (code === 'ifrs icfr') frameworkMap.set('ifrs icfr', fw.id);
     });
+
+    console.log('Sample row data:', rows[0]);
 
     // Map rows to Control entity schema
     const controls = rows.map(row => {
-      const controlRef = String(row['ControlRef'] || '').trim();
+      const controlRef = String(row['ControlRef'] || row['controlRef'] || '').trim();
       // Extract framework code from ControlRef (e.g., CTCM.FINMC.1.01 -> CTCM)
-      const frameworkCode = controlRef.split('.')[0]?.toLowerCase();
-      const framework_id = frameworkMap.get(frameworkCode) || '';
+      const frameworkCode = controlRef.split('.')[0]?.toLowerCase().trim();
+      let framework_id = frameworkMap.get(frameworkCode) || '';
+      
+      // Fallback: try to find by partial match
+      if (!framework_id) {
+        for (const [key, value] of frameworkMap.entries()) {
+          if (key.includes(frameworkCode) || frameworkCode.includes(key)) {
+            framework_id = value;
+            break;
+          }
+        }
+      }
 
       return {
         framework_id: framework_id,
-        control_id: String(row['ControlRef'] || '').trim(),
-        title: String(row['ControlDesc'] || 'Untitled Control').trim().substring(0, 500),
-        description: String(row['ControlDesc'] || '').trim(),
+        control_id: controlRef,
+        title: String(row['ControlDesc'] || row['controlDesc'] || 'Untitled Control').trim().substring(0, 500),
+        description: String(row['ControlDesc'] || row['controlDesc'] || '').trim(),
         is_library_control: true,
-        global: Boolean(row['Global']),
-        control_ccm: Boolean(row['ControlCCM']),
-        self_assessment: Boolean(row['SelfAssessment']),
-        control_criticality: String(row['ControlCriticality'] || 'Should Have').trim(),
-        control_owner: String(row['ControlOwner'] || '').trim(),
-        key_control: Boolean(row['KeyControl']),
-        control_execution_type: String(row['ControlExecutionType'] || 'Manual').trim(),
-        control_type: String(row['ControlType'] || 'Preventive').trim(),
-        finance_control_consideration: Boolean(row['FinanceControlConsideration']),
-        control_frequency: String(row['ControlFrequency'] || 'Monthly').trim(),
-        compensating_control: Boolean(row['CompensatingControl']),
-        compensating_control_risk: String(row['CompensatingControlRisk'] || '').trim(),
-        control_narrative_url: String(row['ControlNarrativeURL'] || '').trim(),
-        upload_document: String(row['Upload Document'] || '0').trim(),
-        control_objective_id: row['ControlObjectiveID'] ? String(row['ControlObjectiveID']).trim() : '',
-        process_phase: String(row['ProcessPhase'] || 'Process - Input').trim(),
-        risk_id: row['RiskID'] ? String(row['RiskID']).trim() : '',
+        global: Boolean(row['Global']) || Boolean(row['global']),
+        control_ccm: Boolean(row['ControlCCM']) || Boolean(row['controlCCM']),
+        self_assessment: Boolean(row['SelfAssessment']) || Boolean(row['selfAssessment']),
+        control_criticality: String(row['ControlCriticality'] || row['controlCriticality'] || 'Should Have').trim(),
+        control_owner: String(row['ControlOwner'] || row['controlOwner'] || '').trim(),
+        key_control: Boolean(row['KeyControl']) || Boolean(row['keyControl']),
+        control_execution_type: String(row['ControlExecutionType'] || row['controlExecutionType'] || 'Manual').trim(),
+        control_type: String(row['ControlType'] || row['controlType'] || 'Preventive').trim(),
+        finance_control_consideration: Boolean(row['FinanceControlConsideration']) || Boolean(row['financeControlConsideration']),
+        control_frequency: String(row['ControlFrequency'] || row['controlFrequency'] || 'Monthly').trim(),
+        compensating_control: Boolean(row['CompensatingControl']) || Boolean(row['compensatingControl']),
+        compensating_control_risk: String(row['CompensatingControlRisk'] || row['compensatingControlRisk'] || '').trim(),
+        control_narrative_url: String(row['ControlNarrativeURL'] || row['controlNarrativeURL'] || '').trim(),
+        upload_document: String(row['Upload Document'] || row['uploadDocument'] || '0').trim(),
+        control_objective_id: (row['ControlObjectiveID'] || row['controlObjectiveID']) ? String(row['ControlObjectiveID'] || row['controlObjectiveID']).trim() : '',
+        process_phase: String(row['ProcessPhase'] || row['processPhase'] || 'Process - Input').trim(),
+        risk_id: (row['RiskID'] || row['riskID']) ? String(row['RiskID'] || row['riskID']).trim() : '',
         status: 'active',
       };
     });
