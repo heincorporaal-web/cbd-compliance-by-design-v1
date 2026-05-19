@@ -629,7 +629,7 @@ export default function RiskDetail() {
                       {items.map(f => {
                         const checked = formData.framework_ids?.includes(f.id);
                         return (
-                          <label key={f.id} className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0">
+                          <label key={f.id} title={f.name} className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0">
                             <input
                               type="checkbox"
                               checked={checked}
@@ -641,8 +641,7 @@ export default function RiskDetail() {
                               }}
                               className="rounded border-slate-300 text-primary"
                             />
-                            <span className="text-xs font-medium text-slate-700 min-w-[80px]">{f.framework_code || f.name}</span>
-                            <span className="text-xs text-slate-500 truncate">{f.description || f.name}</span>
+                            <span className="text-xs font-medium text-slate-700">{f.framework_code || f.name}</span>
                           </label>
                         );
                       })}
@@ -655,7 +654,7 @@ export default function RiskDetail() {
                   {formData.framework_ids.map(id => {
                     const f = frameworks.find(fw => fw.id === id);
                     return f ? (
-                      <Badge key={id} variant="outline" className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200 gap-1">
+                      <Badge key={id} variant="outline" title={f.name} className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200 gap-1">
                         {f.framework_code || f.name}
                         <button type="button" onClick={() => setFormData(p => ({ ...p, framework_ids: p.framework_ids.filter(i => i !== id) }))}>
                           <X className="w-2.5 h-2.5" />
@@ -840,8 +839,8 @@ export default function RiskDetail() {
               ) : (
                 <div className="space-y-2">
                   {linkedFrameworks.map(framework => (
-                    <div key={framework.id} className="flex items-center justify-between p-2 bg-slate-50 rounded border border-slate-200">
-                      <p className="text-sm font-medium">{framework.name}</p>
+                    <div key={framework.id} title={framework.name} className="flex items-center justify-between p-2 bg-slate-50 rounded border border-slate-200">
+                      <p className="text-sm font-medium">{framework.framework_code || framework.name}</p>
                       <Button
                         type="button"
                         variant="ghost"
