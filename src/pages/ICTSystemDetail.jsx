@@ -15,6 +15,7 @@ import { createPageUrl } from "@/utils";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import SystemModulesTab from "@/components/ict/SystemModulesTab";
 import { getICTSystemErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 const SYSTEM_TYPES = [
   { value: "core_banking", label: "Core Banking" },
@@ -32,6 +33,7 @@ const SYSTEM_TYPES = [
 export default function ICTSystemDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [globalCompany] = useCompanyFilter();
   const urlParams = new URLSearchParams(window.location.search);
   const systemId = urlParams.get("id");
   const isNew = urlParams.get("new") === "true";
@@ -43,7 +45,7 @@ export default function ICTSystemDetail() {
     system_type_custom: "",
     criticality: "supporting",
     description: "",
-    owner: "",
+    owner_stakeholder_id: "",
     vendor: "",
     hosting_type: "on_premise",
     recovery_time_objective: "",
@@ -52,6 +54,9 @@ export default function ICTSystemDetail() {
     status: "active",
     last_assessment_date: "",
     next_assessment_date: "",
+    it_capability_ids: [],
+    value_chain_id: "",
+    workstream_id: "",
   });
 
   const { data: existingSystem } = useQuery({
@@ -63,6 +68,26 @@ export default function ICTSystemDetail() {
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
     queryFn: () => base44.entities.Company.list(),
+  });
+
+  const { data: stakeholders = [] } = useQuery({
+    queryKey: ["stakeholders", globalCompany],
+    queryFn: () => base44.entities.Stakeholder.list(),
+  });
+
+  const { data: itCapabilities = [] } = useQuery({
+    queryKey: ["itCapabilities", globalCompany],
+    queryFn: () => base44.entities.ITCapability.list(),
+  });
+
+  const { data: valueChains = [] } = useQuery({
+    queryKey: ["valueChains", globalCompany],
+    queryFn: () => base44.entities.ValueChain.filter({ is_active: true }),
+  });
+
+  const { data: workstreams = [] } = useQuery({
+    queryKey: ["workstreams", globalCompany],
+    queryFn: () => base44.entities.Workstream.filter({ is_active: true }),
   });
 
   useEffect(() => {
@@ -209,8 +234,15 @@ export default function ICTSystemDetail() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Owner</Label>
-                    <Input value={formData.owner} onChange={e => setFormData({ ...formData, owner: e.target.value })} />
+                    <Label>System Owner</Label>
+                    <Select value={formData.owner_stakeholder_id || ""} onValueChange={v => setFormData({ ...formData, owner_stakeholder_id: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select owner" /></SelectTrigger>
+                      <SelectContent>
+                        {stakeholders.filter(s => s.company_id === formData.company_id || globalCompany === "all").map(s => (
+                          <SelectItem key={s.id} value={s.id}>{s.full_name} {s.job_title ? `(${s.job_title})` : ""}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Vendor</Label>
@@ -237,6 +269,39 @@ export default function ICTSystemDetail() {
                         <SelectItem value="internal">Internal</SelectItem>
                         <SelectItem value="confidential">Confidential</SelectItem>
                         <SelectItem value="highly_confidential">Highly Confidential</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>IT Capability</Label>
+                    <Select value={formData.it_capability_ids?.[0] || ""} onValueChange={v => setFormData({ ...formData, it_capability_ids: v ? [v] : [] })}>
+                      <SelectTrigger><SelectValue placeholder="Select capability" /></SelectTrigger>
+                      <SelectContent>
+                        {itCapabilities.filter(cap => cap.company_id === formData.company_id || globalCompany === "all").map(cap => (
+                          <SelectItem key={cap.id} value={cap.id}>{cap.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Value Chain</Label>
+                    <Select value={formData.value_chain_id || ""} onValueChange={v => setFormData({ ...formData, value_chain_id: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select value chain" /></SelectTrigger>
+                      <SelectContent>
+                        {valueChains.filter(vc => vc.company_id === formData.company_id || globalCompany === "all").map(vc => (
+                          <SelectItem key={vc.id} value={vc.id}>{vc.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Workstream</Label>
+                    <Select value={formData.workstream_id || ""} onValueChange={v => setFormData({ ...formData, workstream_id: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select workstream" /></SelectTrigger>
+                      <SelectContent>
+                        {workstreams.filter(ws => ws.company_id === formData.company_id || globalCompany === "all").map(ws => (
+                          <SelectItem key={ws.id} value={ws.id}>{ws.full_label || ws.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

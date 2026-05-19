@@ -43,8 +43,9 @@
     "description": {
       "type": "string"
     },
-    "owner": {
-      "type": "string"
+    "owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (system owner)"
     },
     "vendor": {
       "type": "string"
@@ -96,6 +97,21 @@
         "confidential",
         "highly_confidential"
       ]
+    },
+    "it_capability_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to ITCapability entities"
+    },
+    "value_chain_id": {
+      "type": "string",
+      "description": "Reference to ValueChain entity"
+    },
+    "workstream_id": {
+      "type": "string",
+      "description": "Reference to Workstream entity"
     },
     "workflow_instance_id": {
       "type": "string",
