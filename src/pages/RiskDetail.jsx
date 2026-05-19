@@ -399,6 +399,7 @@ export default function RiskDetail() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="auto_assigned">Auto Assigned</SelectItem>
                     <SelectItem value="identified">Identified</SelectItem>
                     <SelectItem value="pending_review">Pending Review</SelectItem>
                     <SelectItem value="returned">Returned</SelectItem>

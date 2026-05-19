@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Cog, RefreshCw, CheckCircle, XCircle, Clock, Shield, AlertTriangle, Network } from "lucide-react";
+import { Cog, RefreshCw, CheckCircle, XCircle, Clock, Shield, AlertTriangle, Network, BookOpen, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 
 export default function RiskControlEngine() {
@@ -47,81 +49,79 @@ export default function RiskControlEngine() {
     queryFn: () => base44.entities.BusinessProcess.list(),
   });
 
+  const { data: allRisks = [] } = useQuery({
+    queryKey: ['risks'],
+    queryFn: () => base44.entities.Risk.list(),
+  });
+
+  // Library risks = master template risks
+  const libraryRisks = allRisks.filter(r => r.is_library_risk);
+
   const generateMutation = useMutation({
     mutationFn: async () => {
-      const proposalsToCreate = [];
-      
-      // From Frameworks via Assessments
+      // For each company, find which frameworks they have (via Assessments)
+      // Then find library risks that reference those frameworks
+      // Auto-assign if not already assigned
+      const risksToCreate = [];
+
       for (const assessment of assessments) {
-        const framework = frameworks.find(f => f.id === assessment.framework_id);
-        const frameworkControls = controls.filter(c => c.framework_id === assessment.framework_id);
-        
-        for (const control of frameworkControls) {
-          const existing = proposals.find(p => 
-            p.company_id === assessment.company_id && 
-            p.control_id === control.id && 
-            p.source_type === 'framework' &&
-            p.status === 'pending'
+        const companyId = assessment.company_id;
+        if (!companyId) continue;
+        const frameworkId = assessment.framework_id;
+
+        // Library risks that apply to this framework
+        const matchingLibraryRisks = libraryRisks.filter(lr =>
+          lr.framework_ids?.includes(frameworkId)
+        );
+
+        for (const libRisk of matchingLibraryRisks) {
+          // Skip if already assigned to this company (from this library risk)
+          const alreadyExists = allRisks.some(r =>
+            r.library_risk_id === libRisk.id && r.company_id === companyId
           );
-          
-          if (!existing) {
-            proposalsToCreate.push({
-              company_id: assessment.company_id,
-              source_type: 'framework',
-              source_id: assessment.framework_id,
-              source_name: framework?.name || 'Framework',
-              control_id: control.id,
-              control_name: control.title,
-              suggested_risk_title: `Non-compliance with ${control.control_id}: ${control.title}`,
-              suggested_risk_description: control.description || `Risk of not implementing control ${control.control_id}`,
-              suggested_risk_category: 'compliance',
-              status: 'pending'
-            });
-          }
+          if (alreadyExists) continue;
+
+          risksToCreate.push({
+            title: libRisk.title,
+            description: libRisk.description,
+            company_id: companyId,
+            category: libRisk.category || "operational",
+            likelihood: libRisk.likelihood || "medium",
+            impact: libRisk.impact || "medium",
+            status: "auto_assigned",
+            framework_ids: libRisk.framework_ids || [],
+            framework_reference: libRisk.framework_reference || "",
+            risk_reference_nr: libRisk.risk_reference_nr || "",
+            risk_type: libRisk.risk_type || "",
+            racm_risk_type: libRisk.racm_risk_type || "",
+            risk_statement: libRisk.risk_statement || "",
+            root_cause: libRisk.root_cause || "",
+            root_cause_type: libRisk.root_cause_type || "",
+            value_chain: libRisk.value_chain || "",
+            sub_process: libRisk.sub_process || "",
+            workstream: libRisk.workstream || "",
+            racm_l3: libRisk.racm_l3 || "",
+            process_activity: libRisk.process_activity || "",
+            is_library_risk: false,
+            library_risk_id: libRisk.id,
+            identified_date: new Date().toISOString().split('T')[0],
+          });
         }
       }
 
-      // From Processes
-      for (const process of processes) {
-        if (process.linked_control_ids && process.linked_control_ids.length > 0) {
-          for (const controlId of process.linked_control_ids) {
-            const control = controls.find(c => c.id === controlId);
-            if (!control) continue;
-            
-            const existing = proposals.find(p => 
-              p.company_id === process.company_id && 
-              p.control_id === controlId && 
-              p.source_type === 'process' &&
-              p.status === 'pending'
-            );
-            
-            if (!existing) {
-              proposalsToCreate.push({
-                company_id: process.company_id,
-                source_type: 'process',
-                source_id: process.id,
-                source_name: process.name,
-                control_id: controlId,
-                control_name: control.title,
-                suggested_risk_title: `Process risk: ${process.name} - ${control.title}`,
-                suggested_risk_description: `Risk related to ${control.control_id} in process ${process.process_code}`,
-                suggested_risk_category: 'operational',
-                status: 'pending'
-              });
-            }
-          }
-        }
+      if (risksToCreate.length > 0) {
+        await base44.entities.Risk.bulkCreate(risksToCreate);
       }
 
-      if (proposalsToCreate.length > 0) {
-        await base44.entities.ProposedRiskControl.bulkCreate(proposalsToCreate);
-      }
-      
-      return proposalsToCreate.length;
+      return risksToCreate.length;
     },
     onSuccess: (count) => {
+      queryClient.invalidateQueries(['risks']);
       queryClient.invalidateQueries(['proposedRiskControls']);
-      toast.success(`Generated ${count} new proposals`);
+      toast.success(count > 0
+        ? `Auto-assigned ${count} risks to companies based on their frameworks`
+        : 'No new risks to assign — all matching risks are already assigned'
+      );
     },
   });
 
@@ -185,6 +185,12 @@ export default function RiskControlEngine() {
   const acceptedCount = proposals.filter(p => p.status === 'accepted').length;
   const rejectedCount = proposals.filter(p => p.status === 'rejected').length;
 
+  // Auto-assigned risks
+  const autoAssignedRisks = allRisks.filter(r => r.status === 'auto_assigned');
+  const filteredAutoRisks = autoAssignedRisks.filter(r =>
+    selectedCompany === "all" || r.company_id === selectedCompany
+  );
+
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -218,16 +224,40 @@ export default function RiskControlEngine() {
           className="bg-indigo-600 hover:bg-indigo-700"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${generateMutation.isPending ? 'animate-spin' : ''}`} />
-          Generate Proposals
+          Generate Assignments
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="border-none shadow-lg bg-gradient-to-br from-purple-50 to-indigo-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Auto Assigned</p>
+                <p className="text-3xl font-bold text-slate-900">{autoAssignedRisks.length}</p>
+              </div>
+              <BookOpen className="w-8 h-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="border-none shadow-lg">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 mb-1">Pending</p>
+                <p className="text-sm text-slate-600 mb-1">Library Risks</p>
+                <p className="text-3xl font-bold text-slate-900">{libraryRisks.length}</p>
+              </div>
+              <Shield className="w-8 h-8 text-indigo-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-lg">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 mb-1">Proposals Pending</p>
                 <p className="text-3xl font-bold text-slate-900">{pendingCount}</p>
               </div>
               <Clock className="w-8 h-8 text-yellow-600" />
@@ -239,33 +269,30 @@ export default function RiskControlEngine() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 mb-1">Accepted</p>
+                <p className="text-sm text-slate-600 mb-1">Proposals Accepted</p>
                 <p className="text-3xl font-bold text-slate-900">{acceptedCount}</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
-
-        <Card className="border-none shadow-lg">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 mb-1">Rejected</p>
-                <p className="text-3xl font-bold text-slate-900">{rejectedCount}</p>
-              </div>
-              <XCircle className="w-8 h-8 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
+      {/* Auto-assigned risks awaiting activation */}
       <Card className="border-none shadow-lg">
         <CardHeader className="border-b border-slate-100">
           <div className="flex items-center justify-between">
-            <CardTitle>Proposals</CardTitle>
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-purple-600" />
+                Auto-Assigned Risks
+              </CardTitle>
+              <p className="text-sm text-slate-500 mt-1">
+                These risks were auto-assigned from the master library. Change their status to <strong>Identified</strong> to activate them for the company.
+              </p>
+            </div>
             <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-              <SelectTrigger className="w-64">
+              <SelectTrigger className="w-52">
                 <SelectValue placeholder="Filter by company" />
               </SelectTrigger>
               <SelectContent>
@@ -276,6 +303,46 @@ export default function RiskControlEngine() {
               </SelectContent>
             </Select>
           </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {filteredAutoRisks.length === 0 ? (
+            <div className="p-10 text-center">
+              <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+              <p className="text-slate-500 mb-1">No auto-assigned risks</p>
+              <p className="text-sm text-slate-400">Run "Generate Assignments" to auto-assign library risks to companies based on their frameworks.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {filteredAutoRisks.map(risk => {
+                const company = companies.find(c => c.id === risk.company_id);
+                return (
+                  <div key={risk.id} className="p-4 hover:bg-slate-50 flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {risk.risk_reference_nr && (
+                          <span className="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">{risk.risk_reference_nr}</span>
+                        )}
+                        <span className="text-xs text-purple-700 bg-purple-100 px-2 py-0.5 rounded font-medium">Auto Assigned</span>
+                        {company && <span className="text-sm text-slate-500">{company.name}</span>}
+                      </div>
+                      <p className="font-medium text-slate-900 text-sm">{risk.title}</p>
+                    </div>
+                    <Link to={createPageUrl(`RiskDetail?id=${risk.id}`)}>
+                      <Button size="sm" variant="outline" className="shrink-0">
+                        Review & Activate <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-none shadow-lg">
+        <CardHeader className="border-b border-slate-100">
+          <CardTitle>Control Proposals (Legacy)</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
