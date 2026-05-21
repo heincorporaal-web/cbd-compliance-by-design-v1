@@ -161,6 +161,8 @@ export const PAGES = {
     "RiskAssessmentCycleDetail": RiskAssessmentCycleDetail,
     "ControlAssessmentCycles": ControlAssessmentCycles,
     "ControlAssessmentCycleDetail": ControlAssessmentCycleDetail,
+    "ControlAssessmentCycles": ControlAssessmentCycles,
+    "ControlAssessmentCycleDetail": ControlAssessmentCycleDetail,
 }
 
 export const pagesConfig = {

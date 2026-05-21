@@ -9,11 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Search, ClipboardList, Calendar, Shield } from "lucide-react";
+import { Plus, Search, Shield, Calendar, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
-import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 const STATUS_COLORS = {
   planning: "bg-blue-100 text-blue-700 border-blue-200",
@@ -25,10 +24,10 @@ const STATUS_LABELS = { planning: "Planning", in_review: "In Review", approved: 
 
 export default function ControlAssessmentCycles() {
   const queryClient = useQueryClient();
-  const [selectedCompanyId] = useCompanyFilter();
   const [search, setSearch] = useState("");
+  const [filterCompany, setFilterCompany] = useState("__all__");
   const [showCreate, setShowCreate] = useState(false);
-  const [newCycle, setNewCycle] = useState({
+  const [newForm, setNewForm] = useState({
     name: "", description: "", cycle_year: new Date().getFullYear(),
     start_date: "", end_date: "", company_id: "",
   });
@@ -45,80 +44,92 @@ export default function ControlAssessmentCycles() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.ControlAssessmentCycle.create(data),
-    onSuccess: () => {
+    onSuccess: (created) => {
       queryClient.invalidateQueries(["control-assessment-cycles"]);
-      toast.success("Assessment cycle created");
+      toast.success("Control assessment cycle created");
       setShowCreate(false);
-      setNewCycle({ name: "", description: "", cycle_year: new Date().getFullYear(), start_date: "", end_date: "", company_id: "" });
+      setNewForm({ name: "", description: "", cycle_year: new Date().getFullYear(), start_date: "", end_date: "", company_id: "" });
+      window.location.href = createPageUrl(`ControlAssessmentCycleDetail?id=${created.id}`);
     },
   });
 
   const filtered = cycles.filter(c => {
-    const matchCompany = !selectedCompanyId || c.company_id === selectedCompanyId;
-    const matchSearch = !search.trim() || c.name?.toLowerCase().includes(search.toLowerCase());
-    return matchCompany && matchSearch;
+    const matchSearch = !search || c.name?.toLowerCase().includes(search.toLowerCase());
+    const matchCompany = filterCompany === "__all__" || c.company_id === filterCompany;
+    return matchSearch && matchCompany;
   });
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Control Assessment Cycles</h1>
-          <p className="text-slate-500 text-sm mt-1">Plan and manage periodic control assessment programs</p>
+          <p className="text-slate-500 text-sm mt-1">Manage periodic control assessment programs</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowCreate(true)}>
           <Plus className="w-4 h-4 mr-2" /> New Cycle
         </Button>
       </div>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <Input placeholder="Search cycles…" value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+      {/* Filters */}
+      <div className="flex gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-48">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input placeholder="Search cycles…" value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <Select value={filterCompany} onValueChange={setFilterCompany}>
+          <SelectTrigger className="w-48"><SelectValue placeholder="All Companies" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All Companies</SelectItem>
+            {companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
 
+      {/* List */}
       {isLoading ? (
-        <div className="text-center py-16 text-slate-400">Loading…</div>
+        <div className="text-center py-12 text-slate-400">Loading…</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <ClipboardList className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-500 font-medium">No assessment cycles yet</p>
-          <p className="text-slate-400 text-sm mt-1">Create your first control assessment cycle to get started.</p>
+          <Shield className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+          <p className="text-slate-500">No assessment cycles found.</p>
+          <Button className="mt-4 bg-blue-600 hover:bg-blue-700" onClick={() => setShowCreate(true)}>
+            <Plus className="w-4 h-4 mr-2" /> Create First Cycle
+          </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="space-y-3">
           {filtered.map(cycle => {
             const company = companies.find(c => c.id === cycle.company_id);
             return (
               <Link key={cycle.id} to={createPageUrl(`ControlAssessmentCycleDetail?id=${cycle.id}`)}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
+                <Card className="border border-slate-200 hover:shadow-md transition-shadow cursor-pointer">
                   <CardContent className="p-5">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <h3 className="font-semibold text-slate-900 leading-tight">{cycle.name}</h3>
-                      <Badge variant="outline" className={`${STATUS_COLORS[cycle.status]} border shrink-0 text-xs`}>
-                        {STATUS_LABELS[cycle.status]}
-                      </Badge>
-                    </div>
-                    {cycle.description && (
-                      <p className="text-sm text-slate-500 mb-3 line-clamp-2">{cycle.description}</p>
-                    )}
-                    <div className="flex items-center gap-4 text-xs text-slate-400 flex-wrap">
-                      {company && (
-                        <span className="flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />
-                          {company.name}
-                        </span>
-                      )}
-                      {cycle.cycle_year && <span>{cycle.cycle_year}</span>}
-                      {cycle.end_date && (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" /> Due {cycle.end_date}
-                        </span>
-                      )}
-                      {cycle.control_ids?.length > 0 && (
-                        <span className="flex items-center gap-1">
-                          <Shield className="w-3 h-3" /> {cycle.control_ids.length} controls
-                        </span>
-                      )}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <h3 className="font-semibold text-slate-900">{cycle.name}</h3>
+                          <Badge variant="outline" className={`${STATUS_COLORS[cycle.status]} border text-xs`}>
+                            {STATUS_LABELS[cycle.status] || cycle.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-slate-500 flex-wrap">
+                          {company && <span className="font-medium text-slate-700">{company.name}</span>}
+                          {cycle.cycle_year && <span>Year: {cycle.cycle_year}</span>}
+                          {cycle.start_date && cycle.end_date && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {cycle.start_date} → {cycle.end_date}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Shield className="w-3.5 h-3.5" />
+                            {(cycle.control_ids || []).length} control{(cycle.control_ids || []).length !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                        {cycle.description && <p className="text-xs text-slate-400 mt-1 truncate">{cycle.description}</p>}
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 shrink-0 mt-1" />
                     </div>
                   </CardContent>
                 </Card>
@@ -128,23 +139,16 @@ export default function ControlAssessmentCycles() {
         </div>
       )}
 
-      <Dialog open={showCreate} onOpenChange={o => { if (!o) setShowCreate(false); }}>
+      {/* Create dialog */}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>New Control Assessment Cycle</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1">
-              <Label>Cycle Name *</Label>
-              <Input
-                placeholder="e.g. Annual Control Assessment 2026"
-                value={newCycle.name}
-                onChange={e => setNewCycle(p => ({ ...p, name: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1">
               <Label>Company *</Label>
-              <Select value={newCycle.company_id} onValueChange={v => setNewCycle(p => ({ ...p, company_id: v }))}>
+              <Select value={newForm.company_id} onValueChange={v => setNewForm(f => ({ ...f, company_id: v }))}>
                 <SelectTrigger><SelectValue placeholder="Select company…" /></SelectTrigger>
                 <SelectContent>
                   {companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -152,36 +156,35 @@ export default function ControlAssessmentCycles() {
               </Select>
             </div>
             <div className="space-y-1">
+              <Label>Cycle Name *</Label>
+              <Input value={newForm.name} onChange={e => setNewForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Annual Control Assessment 2026" />
+            </div>
+            <div className="space-y-1">
               <Label>Description</Label>
-              <Textarea
-                placeholder="Scope and objectives of this assessment cycle…"
-                value={newCycle.description}
-                onChange={e => setNewCycle(p => ({ ...p, description: e.target.value }))}
-                rows={3}
-              />
+              <Textarea value={newForm.description} onChange={e => setNewForm(f => ({ ...f, description: e.target.value }))} rows={2} />
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label>Year</Label>
-                <Input type="number" value={newCycle.cycle_year} onChange={e => setNewCycle(p => ({ ...p, cycle_year: Number(e.target.value) }))} />
+                <Input type="number" value={newForm.cycle_year} onChange={e => setNewForm(f => ({ ...f, cycle_year: Number(e.target.value) }))} />
               </div>
               <div className="space-y-1">
                 <Label>Start Date</Label>
-                <Input type="date" value={newCycle.start_date} onChange={e => setNewCycle(p => ({ ...p, start_date: e.target.value }))} />
+                <Input type="date" value={newForm.start_date} onChange={e => setNewForm(f => ({ ...f, start_date: e.target.value }))} />
               </div>
               <div className="space-y-1">
                 <Label>End Date</Label>
-                <Input type="date" value={newCycle.end_date} onChange={e => setNewCycle(p => ({ ...p, end_date: e.target.value }))} />
+                <Input type="date" value={newForm.end_date} onChange={e => setNewForm(f => ({ ...f, end_date: e.target.value }))} />
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t">
               <Button variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
               <Button
                 className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => createMutation.mutate(newCycle)}
-                disabled={!newCycle.name || !newCycle.company_id || createMutation.isPending}
+                onClick={() => createMutation.mutate(newForm)}
+                disabled={!newForm.name || !newForm.company_id || createMutation.isPending}
               >
-                {createMutation.isPending ? "Creating…" : "Create Cycle"}
+                {createMutation.isPending ? "Creating…" : "Create & Configure"}
               </Button>
             </div>
           </div>

@@ -29,7 +29,7 @@ const STATUS_LABELS = { planning: "Planning", in_review: "In Review", approved: 
 const PRIORITY_COLORS = {
   critical: "bg-red-500 text-white",
   high: "bg-orange-500 text-white",
-  medium: "bg-yellow-500 text-white",
+  medium: "bg-yellow-400 text-white",
   low: "bg-green-500 text-white",
 };
 
@@ -41,6 +41,8 @@ export default function ControlAssessmentCycleDetail() {
     name: "", description: "", cycle_year: new Date().getFullYear(), start_date: "", end_date: "",
   });
   const [selectedControlIds, setSelectedControlIds] = useState([]);
+
+  // Amendment state
   const [isAmending, setIsAmending] = useState(false);
   const [amendmentReason, setAmendmentReason] = useState("");
   const [amendOriginalEndDate, setAmendOriginalEndDate] = useState("");
@@ -94,8 +96,30 @@ export default function ControlAssessmentCycleDetail() {
     },
   });
 
-  const getOrCreateWorkflow = async (iamEmails) => {
+  const handleSave = () => {
+    updateMutation.mutate({ ...formData, control_ids: selectedControlIds });
+  };
+
+  const startAmendment = () => {
+    setAmendOriginalEndDate(cycle.end_date || "");
+    setAmendOriginalControlIds([...(cycle.control_ids || [])]);
+    setAmendmentReason("");
+    setIsAmending(true);
+  };
+
+  const cancelAmendment = () => {
+    setIsAmending(false);
+    setAmendmentReason("");
+    setFormData(f => ({ ...f, end_date: cycle.end_date || "" }));
+    setSelectedControlIds(cycle.control_ids || []);
+  };
+
+  const getOrCreateWorkflow = async (stakeholders) => {
     const allWorkflows = await base44.entities.Workflow.list();
+    const iamEmails = stakeholders
+      .filter(s => s.job_title?.toLowerCase().includes("internal audit") || s.job_title?.toLowerCase().includes("audit manager"))
+      .map(s => s.email).filter(Boolean);
+
     let workflow = allWorkflows.find(w => w.entity_type === "ControlAssessmentCycle" && w.status === "active");
     if (!workflow) {
       workflow = await base44.entities.Workflow.create({
@@ -111,18 +135,14 @@ export default function ControlAssessmentCycleDetail() {
         ],
       });
     }
-    return workflow;
+    return { workflow, iamEmails };
   };
 
   const submitForReviewMutation = useMutation({
     mutationFn: async () => {
       const me = await base44.auth.me();
       const allStakeholders = await base44.entities.Stakeholder.list();
-      const iamEmails = allStakeholders
-        .filter(s => s.job_title?.toLowerCase().includes("internal audit") || s.job_title?.toLowerCase().includes("audit manager"))
-        .map(s => s.email).filter(Boolean);
-
-      const workflow = await getOrCreateWorkflow(iamEmails);
+      const { workflow, iamEmails } = await getOrCreateWorkflow(allStakeholders);
 
       const instance = await base44.entities.WorkflowInstance.create({
         workflow_id: workflow.id,
@@ -152,25 +172,11 @@ export default function ControlAssessmentCycleDetail() {
     onError: (err) => toast.error(err.message || "Failed to submit"),
   });
 
-  const startAmendment = () => {
-    setAmendOriginalEndDate(cycle.end_date || "");
-    setAmendOriginalControlIds([...(cycle.control_ids || [])]);
-    setAmendmentReason("");
-    setIsAmending(true);
-  };
-
-  const cancelAmendment = () => {
-    setIsAmending(false);
-    setAmendmentReason("");
-    setFormData(f => ({ ...f, end_date: cycle.end_date || "" }));
-    setSelectedControlIds(cycle.control_ids || []);
-  };
-
   const submitAmendmentMutation = useMutation({
     mutationFn: async () => {
       const me = await base44.auth.me();
       const changes = [];
-      if (formData.end_date !== amendOriginalEndDate) changes.push(`End date changed from ${amendOriginalEndDate || "(none)"} to ${formData.end_date || "(none)"}`);
+      if (formData.end_date !== amendOriginalEndDate) changes.push(`End date: ${amendOriginalEndDate || "(none)"} → ${formData.end_date || "(none)"}`);
       const added = selectedControlIds.filter(id => !amendOriginalControlIds.includes(id));
       const removed = amendOriginalControlIds.filter(id => !selectedControlIds.includes(id));
       if (added.length > 0) changes.push(`${added.length} control(s) added`);
@@ -189,11 +195,7 @@ export default function ControlAssessmentCycleDetail() {
       };
 
       const allStakeholders = await base44.entities.Stakeholder.list();
-      const iamEmails = allStakeholders
-        .filter(s => s.job_title?.toLowerCase().includes("internal audit") || s.job_title?.toLowerCase().includes("audit manager"))
-        .map(s => s.email).filter(Boolean);
-
-      const workflow = await getOrCreateWorkflow(iamEmails);
+      const { workflow, iamEmails } = await getOrCreateWorkflow(allStakeholders);
       const submissionNote = `AMENDMENT — ${changeSummary}. Reason: ${amendmentReason}`;
 
       const instance = await base44.entities.WorkflowInstance.create({
@@ -225,8 +227,6 @@ export default function ControlAssessmentCycleDetail() {
     },
     onError: (err) => toast.error(err.message || "Failed to submit amendment"),
   });
-
-  const handleSave = () => updateMutation.mutate({ ...formData, control_ids: selectedControlIds });
 
   if (!cycleId) return <div className="p-8 text-center text-slate-500">No cycle ID provided.</div>;
   if (isLoading) return <div className="p-8 text-center text-slate-400">Loading...</div>;
@@ -296,10 +296,7 @@ export default function ControlAssessmentCycleDetail() {
         <Card className={`border-l-4 ${workflowInstance.status === "approved" ? "border-l-green-500 bg-green-50" : "border-l-orange-500 bg-orange-50"}`}>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              {workflowInstance.status === "approved"
-                ? <CheckCircle className="w-5 h-5 text-green-600" />
-                : <Clock className="w-5 h-5 text-orange-600" />
-              }
+              {workflowInstance.status === "approved" ? <CheckCircle className="w-5 h-5 text-green-600" /> : <Clock className="w-5 h-5 text-orange-600" />}
               <div>
                 <p className="font-medium text-sm text-slate-900">
                   Workflow: {workflowInstance.status === "approved" ? "Approved" : "Pending Review"}
@@ -355,6 +352,7 @@ export default function ControlAssessmentCycleDetail() {
         </Card>
       )}
 
+      {/* Tabs */}
       <Tabs defaultValue="details">
         <TabsList>
           <TabsTrigger value="details">Cycle Details</TabsTrigger>
@@ -377,20 +375,15 @@ export default function ControlAssessmentCycleDetail() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <Label>Cycle Year</Label>
-                  <Input type="number" value={formData.cycle_year} disabled={true} />
+                  <Input type="number" value={formData.cycle_year} onChange={e => setFormData(p => ({ ...p, cycle_year: Number(e.target.value) }))} disabled={true} />
                 </div>
                 <div className="space-y-1">
                   <Label>Start Date</Label>
-                  <Input type="date" value={formData.start_date} disabled={true} />
+                  <Input type="date" value={formData.start_date} onChange={e => setFormData(p => ({ ...p, start_date: e.target.value }))} disabled={true} />
                 </div>
                 <div className="space-y-1">
                   <Label>End Date {isAmendMode && <span className="text-amber-600 text-xs ml-1">(editable)</span>}</Label>
-                  <Input
-                    type="date"
-                    value={formData.end_date}
-                    onChange={e => setFormData(p => ({ ...p, end_date: e.target.value }))}
-                    disabled={!isEditable && !isAmendMode}
-                  />
+                  <Input type="date" value={formData.end_date} onChange={e => setFormData(p => ({ ...p, end_date: e.target.value }))} disabled={!isEditable && !isAmendMode} />
                 </div>
               </div>
               {isEditable && (
@@ -424,17 +417,12 @@ export default function ControlAssessmentCycleDetail() {
                       <div key={control.id} className="p-4 flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="font-mono text-xs text-slate-400">{control.control_id}</span>
                             <span className="font-medium text-slate-900">{control.title}</span>
-                            {control.priority && (
-                              <Badge className={`${PRIORITY_COLORS[control.priority] || "bg-slate-200 text-slate-700"} text-xs`}>
-                                {control.priority}
-                              </Badge>
-                            )}
+                            {control.priority && <Badge className={`${PRIORITY_COLORS[control.priority]} text-xs`}>{control.priority}</Badge>}
+                            {control.control_id && <span className="font-mono text-xs text-slate-400">{control.control_id}</span>}
                           </div>
                           <div className="text-xs text-slate-400 flex gap-3 flex-wrap">
-                            {fw && <span>{fw.name}</span>}
-                            {control.category && <span>{control.category}</span>}
+                            {fw && <span>{fw.framework_code || fw.name}</span>}
                             {control.control_type && <span>{control.control_type}</span>}
                             {control.control_frequency && <span>{control.control_frequency}</span>}
                           </div>
@@ -478,7 +466,7 @@ export default function ControlAssessmentCycleDetail() {
         )}
       </Tabs>
 
-      {/* Submit / Amendment Dialog */}
+      {/* Submit / Amendment dialog */}
       <Dialog open={showSubmitDialog} onOpenChange={o => { if (!o) setShowSubmitDialog(false); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -507,11 +495,7 @@ export default function ControlAssessmentCycleDetail() {
               <p className="text-xs text-slate-500">The cycle will be returned to <strong>In Review</strong> and the Internal Audit Manager will be notified.</p>
               <div className="flex justify-end gap-2 pt-2 border-t">
                 <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>Cancel</Button>
-                <Button
-                  className="bg-amber-600 hover:bg-amber-700"
-                  onClick={() => submitAmendmentMutation.mutate()}
-                  disabled={submitAmendmentMutation.isPending}
-                >
+                <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => submitAmendmentMutation.mutate()} disabled={submitAmendmentMutation.isPending}>
                   <Send className="w-4 h-4 mr-2" />
                   {submitAmendmentMutation.isPending ? "Submitting..." : "Submit Amendment"}
                 </Button>
@@ -534,20 +518,11 @@ export default function ControlAssessmentCycleDetail() {
               </div>
               <div className="space-y-1">
                 <Label>Submission Note (optional)</Label>
-                <Textarea
-                  value={iamComment}
-                  onChange={e => setIamComment(e.target.value)}
-                  placeholder="Add a note for the reviewers..."
-                  rows={3}
-                />
+                <Textarea value={iamComment} onChange={e => setIamComment(e.target.value)} placeholder="Add a note for the reviewers..." rows={3} />
               </div>
               <div className="flex justify-end gap-2 pt-2 border-t">
                 <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>Cancel</Button>
-                <Button
-                  className="bg-orange-600 hover:bg-orange-700"
-                  onClick={() => submitForReviewMutation.mutate()}
-                  disabled={submitForReviewMutation.isPending}
-                >
+                <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => submitForReviewMutation.mutate()} disabled={submitForReviewMutation.isPending}>
                   <Send className="w-4 h-4 mr-2" />
                   {submitForReviewMutation.isPending ? "Submitting..." : "Submit for Review"}
                 </Button>
