@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Shield, CheckCircle, AlertTriangle, Plus, Trash2, History, Target } from "lucide-react";
+import { ArrowLeft, Save, Shield, CheckCircle, AlertTriangle, Plus, Trash2, History, Target, Pencil, Send } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -61,6 +61,10 @@ export default function ControlDetail() {
   });
 
   const [isAddingCompensating, setIsAddingCompensating] = useState(false);
+  const [isAmending, setIsAmending] = useState(false);
+  const [amendmentReason, setAmendmentReason] = useState("");
+  const [amendOriginalData, setAmendOriginalData] = useState(null);
+  const [showAmendSubmitDialog, setShowAmendSubmitDialog] = useState(false);
 
   const { data: existingControl } = useQuery({
     queryKey: ['control', controlId],
@@ -176,6 +180,94 @@ export default function ControlDetail() {
     toast.success("Control approved");
   };
 
+  const startAmendment = () => {
+    setAmendOriginalData({ ...formData });
+    setAmendmentReason("");
+    setIsAmending(true);
+  };
+
+  const cancelAmendment = () => {
+    if (amendOriginalData) setFormData(amendOriginalData);
+    setIsAmending(false);
+    setAmendmentReason("");
+    setAmendOriginalData(null);
+  };
+
+  const submitAmendmentMutation = useMutation({
+    mutationFn: async () => {
+      const me = await base44.auth.me();
+      const changes = [];
+      if (formData.title !== amendOriginalData?.title) changes.push(`Title changed`);
+      if (formData.description !== amendOriginalData?.description) changes.push(`Description updated`);
+      if (formData.priority !== amendOriginalData?.priority) changes.push(`Priority: ${amendOriginalData?.priority} → ${formData.priority}`);
+      if (formData.control_type !== amendOriginalData?.control_type) changes.push(`Control type: ${amendOriginalData?.control_type} → ${formData.control_type}`);
+      if (formData.control_frequency !== amendOriginalData?.control_frequency) changes.push(`Frequency: ${amendOriginalData?.control_frequency} → ${formData.control_frequency}`);
+      if (formData.control_execution_type !== amendOriginalData?.control_execution_type) changes.push(`Execution type: ${amendOriginalData?.control_execution_type} → ${formData.control_execution_type}`);
+      const changeSummary = changes.length > 0 ? changes.join("; ") : "Minor updates";
+
+      const amendmentRecord = {
+        amended_by: me.email,
+        amended_at: new Date().toISOString(),
+        reason: amendmentReason,
+        changes: changeSummary,
+      };
+
+      const allWorkflows = await base44.entities.Workflow.list();
+      const allStakeholders = await base44.entities.Stakeholder.list();
+      const reviewerEmails = allStakeholders
+        .filter(s => s.job_title?.toLowerCase().includes("audit") || s.job_title?.toLowerCase().includes("compliance"))
+        .map(s => s.email).filter(Boolean);
+
+      let workflow = allWorkflows.find(w => w.entity_type === "Control" && w.status === "active");
+      if (!workflow) {
+        workflow = await base44.entities.Workflow.create({
+          name: "Control - Review and Approval",
+          entity_type: "Control",
+          trigger_condition: "manual",
+          status: "active",
+          allow_originator_resubmit: true,
+          steps: [
+            { id: "step_review", name: "Control Review", type: "approval", order: 1, assignee_type: "named_emails", approvers: reviewerEmails, comment_required: true },
+            { id: "step_approve", name: "Control Approval", type: "approval", order: 2, assignee_type: "named_emails", approvers: reviewerEmails, comment_required: false },
+          ],
+        });
+      }
+
+      const submissionNote = `AMENDMENT — ${changeSummary}. Reason: ${amendmentReason}`;
+      const instance = await base44.entities.WorkflowInstance.create({
+        workflow_id: workflow.id,
+        entity_type: "Control",
+        entity_id: controlId,
+        entity_name: formData.title,
+        status: "in_progress",
+        current_step: 0,
+        originator_email: me.email,
+        step_history: [{ step_id: "amendment_submitted", step_name: "Amendment Submitted", action: "approved", actor: me.email, timestamp: new Date().toISOString(), comments: submissionNote }],
+        pending_approvers: workflow.steps?.[0]?.approvers || reviewerEmails,
+      });
+
+      const ctrl = existingControl?.[0];
+      await base44.entities.Control.update(controlId, {
+        ...formData,
+        status: "pending_review",
+        workflow_instance_id: instance.id,
+        amendment_history: [...(ctrl?.amendment_history || []), amendmentRecord],
+        workflow_status_history: [...(ctrl?.workflow_status_history || []), { status: "pending_review", actor: me.email, timestamp: new Date().toISOString(), comments: submissionNote }],
+        lifecycle_history: [...(ctrl?.lifecycle_history || []), { status: "pending_review", actor: me.email, timestamp: new Date().toISOString(), comments: submissionNote }],
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["controls"]);
+      queryClient.invalidateQueries(["control", controlId]);
+      toast.success("Amendment submitted for re-approval.");
+      setIsAmending(false);
+      setAmendmentReason("");
+      setAmendOriginalData(null);
+      setShowAmendSubmitDialog(false);
+    },
+    onError: (err) => toast.error(err.message || "Failed to submit amendment"),
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isNew || !controlId) {
@@ -274,6 +366,23 @@ export default function ControlDetail() {
           </div>
           </div>
           <div className="flex gap-2">
+          {isAmending && (
+            <>
+              <Button variant="outline" onClick={cancelAmendment}>Cancel</Button>
+              <Button
+                className="bg-amber-600 hover:bg-amber-700"
+                onClick={() => setShowAmendSubmitDialog(true)}
+                disabled={!amendmentReason.trim()}
+              >
+                <Send className="w-4 h-4 mr-2" /> Submit Amendment
+              </Button>
+            </>
+          )}
+          {!isAmending && !isNew && existingControl?.[0] && (existingControl[0].status === "approved" || existingControl[0].status === "active") && (
+            <Button className="bg-amber-600 hover:bg-amber-700" onClick={startAmendment}>
+              <Pencil className="w-4 h-4 mr-2" /> Amend Control
+            </Button>
+          )}
           {!isNew && existingControl?.[0] && (
             <LifecycleActions
               entity={existingControl[0]}
@@ -291,6 +400,46 @@ export default function ControlDetail() {
           </Button>
           </div>
       </div>
+
+      {isAmending && (
+        <Card className="border-l-4 border-l-amber-500 bg-amber-50">
+          <CardContent className="p-4 space-y-3">
+            <p className="text-sm font-semibold text-amber-800">Amendment Mode — you may edit any control fields. Changes will be re-submitted for approval.</p>
+            <div className="space-y-1">
+              <Label className="text-amber-800">Motivation / Reason for Amendment *</Label>
+              <Textarea
+                value={amendmentReason}
+                onChange={e => setAmendmentReason(e.target.value)}
+                placeholder="Explain why this approved control needs to be changed..."
+                rows={3}
+                className="border-amber-300 focus:border-amber-500"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {existingControl?.[0]?.amendment_history?.length > 0 && (
+        <Card className="border-none shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center gap-2"><History className="w-4 h-4" /> Amendment History</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y divide-slate-100">
+              {existingControl[0].amendment_history.slice().reverse().map((a, i) => (
+                <div key={i} className="p-4 text-sm">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="font-medium text-slate-800">{a.amended_by}</span>
+                    <span className="text-xs text-slate-400">{a.amended_at ? new Date(a.amended_at).toLocaleDateString() : ""}</span>
+                  </div>
+                  <p className="text-slate-600 mb-1"><span className="font-medium">Changes:</span> {a.changes}</p>
+                  <p className="text-slate-500 italic">Reason: {a.reason}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <form onSubmit={handleSubmit}>
         <Tabs defaultValue="details" className="space-y-6">
@@ -860,6 +1009,44 @@ export default function ControlDetail() {
                 onInstanceCreated={() => queryClient.invalidateQueries(['control', controlId])}
               />
             )}
+      <Dialog open={showAmendSubmitDialog} onOpenChange={o => { if (!o) setShowAmendSubmitDialog(false); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Submit Control Amendment for Approval</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <p className="text-sm text-amber-800 font-medium mb-2">Amendment summary:</p>
+              {amendOriginalData && (
+                <ul className="text-xs text-amber-700 space-y-1">
+                  {formData.title !== amendOriginalData.title && <li>• Title changed</li>}
+                  {formData.description !== amendOriginalData.description && <li>• Description updated</li>}
+                  {formData.priority !== amendOriginalData.priority && <li>• Priority: <strong>{amendOriginalData.priority}</strong> → <strong>{formData.priority}</strong></li>}
+                  {formData.control_type !== amendOriginalData.control_type && <li>• Control type: <strong>{amendOriginalData.control_type}</strong> → <strong>{formData.control_type}</strong></li>}
+                  {formData.control_frequency !== amendOriginalData.control_frequency && <li>• Frequency: <strong>{amendOriginalData.control_frequency}</strong> → <strong>{formData.control_frequency}</strong></li>}
+                  {formData.control_execution_type !== amendOriginalData.control_execution_type && <li>• Execution type: <strong>{amendOriginalData.control_execution_type}</strong> → <strong>{formData.control_execution_type}</strong></li>}
+                </ul>
+              )}
             </div>
-            );
-            }
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-xs text-slate-500 mb-1">Reason for amendment:</p>
+              <p className="text-sm text-slate-800">{amendmentReason}</p>
+            </div>
+            <p className="text-xs text-slate-500">The control will be returned to <strong>Pending Review</strong> and sent to reviewers/approvers.</p>
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <Button variant="outline" onClick={() => setShowAmendSubmitDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-amber-600 hover:bg-amber-700"
+                onClick={() => submitAmendmentMutation.mutate()}
+                disabled={submitAmendmentMutation.isPending}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {submitAmendmentMutation.isPending ? "Submitting..." : "Submit Amendment"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+    );
+    }
