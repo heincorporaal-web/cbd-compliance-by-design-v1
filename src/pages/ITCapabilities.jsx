@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Search, Edit2, Trash2, Cpu, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, Cpu, Users, ChevronDown, ChevronUp, CalendarOff } from "lucide-react";
+import EndDateBadge from "@/components/ui/EndDateBadge";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 const CATEGORIES = [
@@ -56,7 +57,7 @@ const statusColor = (s) => ({
 
 const EMPTY_FORM = {
   name: "", description: "", company_id: "", category: "other",
-  maturity_level: "initial", status: "active", owner: "", stakeholder_ids: [], notes: ""
+  maturity_level: "initial", status: "active", end_date: "", owner: "", stakeholder_ids: [], notes: ""
 };
 
 export default function ITCapabilities() {
@@ -120,6 +121,7 @@ export default function ITCapabilities() {
       category: cap.category || "other",
       maturity_level: cap.maturity_level || "initial",
       status: cap.status || "active",
+      end_date: cap.end_date || "",
       owner: cap.owner || "",
       stakeholder_ids: cap.stakeholder_ids || [],
       notes: cap.notes || "",
@@ -230,6 +232,7 @@ export default function ITCapabilities() {
                       <Badge variant="outline" className={`border text-xs ${statusColor(cap.status)}`}>
                         {cap.status}
                       </Badge>
+                      <EndDateBadge endDate={cap.end_date} />
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(cap)}>
                         <Edit2 className="w-3.5 h-3.5" />
                       </Button>
@@ -334,6 +337,11 @@ export default function ITCapabilities() {
               <div className="space-y-2">
                 <Label>Owner</Label>
                 <Input value={form.owner} onChange={e => setForm({ ...form, owner: e.target.value })} placeholder="Owner name" />
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><CalendarOff className="w-3.5 h-3.5 text-slate-400" /> End Date</Label>
+                <Input type="date" value={form.end_date || ""} onChange={e => setForm({ ...form, end_date: e.target.value })} />
+                <p className="text-xs text-slate-400">Set to mark this capability as retired on that date</p>
               </div>
               <div className="space-y-2">
                 <Label>Notes</Label>

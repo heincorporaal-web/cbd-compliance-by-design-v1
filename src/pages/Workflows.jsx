@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GitBranch, Plus, Edit2, Trash2, Play, Clock, CheckCircle2, XCircle, Search, Building2 } from "lucide-react";
+import { GitBranch, Plus, Edit2, Trash2, Play, Clock, CheckCircle2, XCircle, Search, Building2, CalendarOff } from "lucide-react";
+import EndDateBadge from "@/components/ui/EndDateBadge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import WorkflowBuilder from "@/components/workflows/WorkflowBuilder";
@@ -29,6 +30,7 @@ export default function Workflows() {
     entity_type: "Assessment",
     trigger_condition: "manual",
     status: "active",
+    end_date: "",
     steps: [],
     auto_notify_days_before: 3
   });
@@ -81,6 +83,7 @@ export default function Workflows() {
       entity_type: "Assessment",
       trigger_condition: "manual",
       status: "active",
+      end_date: "",
       steps: [],
       auto_notify_days_before: 3
     });
@@ -240,6 +243,16 @@ export default function Workflows() {
                     onChange={(e) => setFormData({...formData, auto_notify_days_before: parseInt(e.target.value)})}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="end_date" className="flex items-center gap-1.5"><CalendarOff className="w-3.5 h-3.5 text-slate-400" /> End Date</Label>
+                  <Input
+                    id="end_date"
+                    type="date"
+                    value={formData.end_date || ""}
+                    onChange={(e) => setFormData({...formData, end_date: e.target.value})}
+                  />
+                  <p className="text-xs text-slate-400">Set to retire this workflow on that date</p>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -344,6 +357,7 @@ export default function Workflows() {
                              <Badge variant="outline" className={`${getStatusColor(workflow.status)} border`}>
                                {workflow.status}
                              </Badge>
+                             <EndDateBadge endDate={workflow.end_date} />
                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                                {workflow.entity_type}
                              </Badge>

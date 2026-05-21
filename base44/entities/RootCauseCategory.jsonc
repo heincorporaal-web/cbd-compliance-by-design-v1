@@ -30,6 +30,11 @@
       "type": "number",
       "description": "Display sort order"
     },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this root cause type is retired and should no longer be used"
+    },
     "is_active": {
       "type": "boolean",
       "default": true

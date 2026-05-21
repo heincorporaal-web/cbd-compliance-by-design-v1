@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Search, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, AlertCircle, ChevronDown, ChevronRight, CalendarOff } from "lucide-react";
+import EndDateBadge from "@/components/ui/EndDateBadge";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 const CATEGORIES = [
@@ -36,6 +37,7 @@ const EMPTY_FORM = {
   example: "",
   sort_order: 0,
   is_active: true,
+  end_date: "",
 };
 
 export default function RootCauseCategories() {
@@ -92,6 +94,7 @@ export default function RootCauseCategories() {
       example: item.example || "",
       sort_order: item.sort_order ?? 0,
       is_active: item.is_active !== false,
+      end_date: item.end_date || "",
     });
     setShowForm(true);
   };
@@ -191,6 +194,7 @@ export default function RootCauseCategories() {
                                 {!item.is_active && (
                                   <Badge variant="outline" className="text-xs">Inactive</Badge>
                                 )}
+                                <EndDateBadge endDate={item.end_date} />
                               </div>
                               {item.example && (
                                 <p className="text-xs text-slate-500 mt-0.5 italic">e.g. {item.example}</p>
@@ -269,6 +273,11 @@ export default function RootCauseCategories() {
                 value={formData.sort_order}
                 onChange={e => setFormData(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))}
               />
+            </div>
+            <div className="space-y-1">
+              <Label className="flex items-center gap-1.5"><CalendarOff className="w-3.5 h-3.5 text-slate-400" /> End Date</Label>
+              <Input type="date" value={formData.end_date || ""} onChange={e => setFormData(p => ({ ...p, end_date: e.target.value }))} />
+              <p className="text-xs text-slate-400">Set to retire this root cause type on that date</p>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t">
               <Button type="button" variant="outline" onClick={closeForm}>Cancel</Button>

@@ -43,6 +43,11 @@
       "default": true,
       "description": "Whether this workstream is active"
     },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this workstream is considered expired / decommissioned"
+    },
     "status": {
       "type": "string",
       "enum": [

@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Search, Network, ChevronDown, ChevronRight, Info } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Network, ChevronDown, ChevronRight, Info, CalendarOff } from "lucide-react";
+import EndDateBadge from "@/components/ui/EndDateBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
@@ -23,6 +24,7 @@ const EMPTY_FORM = {
   sort_order: 0,
   is_active: true,
   status: "active",
+  end_date: "",
 };
 
 const MANAGEMENT_CHAINS = [
@@ -107,6 +109,7 @@ export default function ValueChains() {
       sort_order: item.sort_order ?? 0,
       is_active: item.is_active !== false,
       status: item.status || "active",
+      end_date: item.end_date || "",
     });
     setShowForm(true);
   };
@@ -276,8 +279,9 @@ export default function ValueChains() {
                          </TooltipProvider>
                        )}
                        {vc.status !== "active" && (
-                          <Badge variant="outline" className="text-xs capitalize">{vc.status}</Badge>
-                        )}
+                           <Badge variant="outline" className="text-xs capitalize">{vc.status}</Badge>
+                         )}
+                         <EndDateBadge endDate={vc.end_date} />
                         {!vcIdsWithWorkstreams.has(vc.id) && (
                           <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 bg-amber-50">No workstreams</Badge>
                         )}
@@ -358,6 +362,11 @@ export default function ValueChains() {
             <div className="space-y-1">
               <Label>Sort Order</Label>
               <Input type="number" value={formData.sort_order} onChange={e => setFormData(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))} />
+            </div>
+            <div className="space-y-1">
+              <Label className="flex items-center gap-1.5"><CalendarOff className="w-3.5 h-3.5 text-slate-400" /> End Date</Label>
+              <Input type="date" value={formData.end_date || ""} onChange={e => setFormData(p => ({ ...p, end_date: e.target.value }))} />
+              <p className="text-xs text-slate-400">Set to mark this value chain as expired on that date</p>
             </div>
             <div className="space-y-1">
               <Label>Description</Label>

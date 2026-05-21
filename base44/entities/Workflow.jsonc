@@ -65,20 +65,6 @@
               "delay"
             ]
           },
-          "value_chain_id": {
-            "type": "string",
-            "description": "Reference to ValueChain entity"
-          },
-          "value_chain_name": {
-            "type": "string"
-          },
-          "workstream_id": {
-            "type": "string",
-            "description": "Reference to Workstream entity"
-          },
-          "workstream_name": {
-            "type": "string"
-          },
           "assignee_type": {
             "type": "string",
             "enum": [
@@ -204,6 +190,11 @@
           }
         }
       }
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this workflow is retired and should no longer be used"
     },
     "status": {
       "type": "string",

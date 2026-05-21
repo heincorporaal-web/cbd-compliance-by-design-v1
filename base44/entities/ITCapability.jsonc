@@ -43,6 +43,11 @@
       "default": "initial",
       "description": "Current maturity level"
     },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this capability is considered retired / decommissioned"
+    },
     "status": {
       "type": "string",
       "enum": [
