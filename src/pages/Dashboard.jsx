@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Eye, EyeOff, Settings } from "lucide-react";
+import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Settings, LayoutDashboard } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -13,17 +13,47 @@ import { Label } from "@/components/ui/label";
 import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
+const WIDGET_LABELS = {
+  compliance: "Compliance Overview",
+  riskPosture: "Risk & Control Posture",
+  resilience: "DORA Resilience & Issues",
+  processHealth: "Process Health",
+  goals: "Goal Achievement",
+  recentIncidents: "Recent Incidents",
+  quickActions: "Quick Actions",
+};
+
+const CATEGORY_VIEWS = [
+  { id: "all", label: "All", widgets: ["compliance", "riskPosture", "resilience", "processHealth", "goals", "recentIncidents", "quickActions"] },
+  { id: "compliance", label: "Compliance", widgets: ["compliance", "recentIncidents", "quickActions"] },
+  { id: "risk", label: "Risk", widgets: ["riskPosture", "recentIncidents", "quickActions"] },
+  { id: "resilience", label: "Resilience", widgets: ["resilience", "recentIncidents", "quickActions"] },
+  { id: "process", label: "Process", widgets: ["processHealth", "goals", "quickActions"] },
+];
+
+const DEFAULT_WIDGETS = { compliance: true, resilience: true, processHealth: true, goals: true, riskPosture: true, recentIncidents: true, quickActions: true };
+
 export default function Dashboard() {
   const [globalCompany, setSelectedCompany] = useCompanyFilter();
-  const [visibleWidgets, setVisibleWidgets] = useState({
-    compliance: true,
-    resilience: true,
-    processHealth: true,
-    goals: true,
-    riskPosture: true,
-    recentIncidents: true,
-    quickActions: true
+  const [activeView, setActiveView] = useState("all");
+  const [visibleWidgets, setVisibleWidgets] = useState(() => {
+    try {
+      const saved = localStorage.getItem("dashboard_widgets");
+      return saved ? JSON.parse(saved) : DEFAULT_WIDGETS;
+    } catch { return DEFAULT_WIDGETS; }
   });
+
+  useEffect(() => {
+    try { localStorage.setItem("dashboard_widgets", JSON.stringify(visibleWidgets)); } catch {}
+  }, [visibleWidgets]);
+
+  const applyView = (viewId) => {
+    setActiveView(viewId);
+    const view = CATEGORY_VIEWS.find(v => v.id === viewId);
+    if (!view) return;
+    const updated = Object.fromEntries(Object.keys(DEFAULT_WIDGETS).map(k => [k, view.widgets.includes(k)]));
+    setVisibleWidgets(updated);
+  };
 
   const { data: companies = [] } = useQuery({
     queryKey: ['companies'],
@@ -149,6 +179,7 @@ export default function Dashboard() {
   const recentIncidents = filteredIncidents.slice(0, 5);
 
   const toggleWidget = (widget) => {
+    setActiveView("custom");
     setVisibleWidgets(prev => ({ ...prev, [widget]: !prev[widget] }));
   };
 
@@ -174,12 +205,14 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Executive Dashboard</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-1 flex items-center gap-2">
+            <LayoutDashboard className="w-7 h-7 text-primary" /> Executive Dashboard
+          </h1>
           <p className="text-slate-600">Real-time overview of risk, compliance, and operational performance</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <CompanyFilterBar />
           <Dialog>
           <DialogTrigger asChild>
@@ -190,18 +223,18 @@ export default function Dashboard() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Dashboard Widgets</DialogTitle>
+              <DialogTitle>Customise Widgets</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-3 py-4">
               {Object.entries(visibleWidgets).map(([key, value]) => (
-                <div key={key} className="flex items-center space-x-2">
+                <div key={key} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
                   <Checkbox
                     id={key}
                     checked={value}
                     onCheckedChange={() => toggleWidget(key)}
                   />
-                  <Label htmlFor={key} className="capitalize cursor-pointer">
-                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                  <Label htmlFor={key} className="cursor-pointer font-medium text-slate-700 flex-1">
+                    {WIDGET_LABELS[key] || key}
                   </Label>
                 </div>
               ))}
@@ -209,6 +242,26 @@ export default function Dashboard() {
           </DialogContent>
         </Dialog>
         </div>
+      </div>
+
+      {/* Category View Pills */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {CATEGORY_VIEWS.map(view => (
+          <button
+            key={view.id}
+            onClick={() => applyView(view.id)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+              activeView === view.id
+                ? "bg-primary text-white border-primary shadow-sm"
+                : "bg-white text-slate-600 border-slate-200 hover:border-primary/50 hover:text-primary"
+            }`}
+          >
+            {view.label}
+          </button>
+        ))}
+        {activeView === "custom" && (
+          <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-amber-50 text-amber-700 border border-amber-200">Custom</span>
+        )}
       </div>
 
       {visibleWidgets.compliance && (
