@@ -26,7 +26,8 @@
         "Issue",
         "OrgProcess",
         "ICTSystem",
-        "Survey"
+        "Survey",
+        "RiskAssessmentCycle"
       ],
       "description": "Entity type this workflow applies to"
     },
@@ -66,19 +67,17 @@
           },
           "value_chain_id": {
             "type": "string",
-            "description": "Reference to ValueChain entity \u2014 scopes this step to a specific value chain"
+            "description": "Reference to ValueChain entity"
           },
           "value_chain_name": {
-            "type": "string",
-            "description": "Value chain name (denormalized)"
+            "type": "string"
           },
           "workstream_id": {
             "type": "string",
-            "description": "Reference to Workstream entity \u2014 scopes this step to a specific workstream"
+            "description": "Reference to Workstream entity"
           },
           "workstream_name": {
-            "type": "string",
-            "description": "Workstream name (denormalized)"
+            "type": "string"
           },
           "assignee_type": {
             "type": "string",

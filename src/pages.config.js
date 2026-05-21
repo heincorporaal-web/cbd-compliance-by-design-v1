@@ -98,6 +98,8 @@ import CompanyBranding from './pages/CompanyBranding';
 import ValueChains from './pages/ValueChains';
 import RootCauseCategories from './pages/RootCauseCategories';
 import Configuration from './pages/Configuration';
+import RiskAssessmentCycles from './pages/RiskAssessmentCycles';
+import RiskAssessmentCycleDetail from './pages/RiskAssessmentCycleDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -153,6 +155,8 @@ export const PAGES = {
     "ValueChains": ValueChains,
     "RootCauseCategories": RootCauseCategories,
     "Configuration": Configuration,
+    "RiskAssessmentCycles": RiskAssessmentCycles,
+    "RiskAssessmentCycleDetail": RiskAssessmentCycleDetail,
 }
 
 export const pagesConfig = {

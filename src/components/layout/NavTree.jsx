@@ -43,6 +43,7 @@ export const NAV_GROUPS = [
     icon: TriangleAlert,
     items: [
       { id: "risk_register", title: "Risk Register", url: createPageUrl("RiskRegister"), icon: TriangleAlert },
+      { id: "risk_assessment_cycles", title: "Assessment Cycles", url: createPageUrl("RiskAssessmentCycles"), icon: ClipboardList },
       { id: "risk_engine", title: "Risk Engine", url: createPageUrl("RiskControlEngine"), icon: Cog },
       { id: "raci_matrix", title: "RACI Matrix", url: createPageUrl("RACIMatrix"), icon: Layers },
       { id: "issues", title: "Issues", url: createPageUrl("Issues"), icon: AlertCircle },

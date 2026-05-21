@@ -1,0 +1,79 @@
+{
+  "name": "RiskAssessmentCycle",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Assessment cycle name (e.g. Annual Risk Assessment 2026)"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description and scope of the assessment cycle"
+    },
+    "cycle_year": {
+      "type": "number",
+      "description": "Assessment cycle year"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date of the assessment period"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date of the assessment period"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "in_review",
+        "approved",
+        "closed"
+      ],
+      "default": "planning",
+      "description": "Lifecycle status of the assessment cycle"
+    },
+    "risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of risks included in this assessment cycle"
+    },
+    "workflow_instance_id": {
+      "type": "string",
+      "description": "Active WorkflowInstance ID"
+    },
+    "workflow_status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "name",
+    "company_id"
+  ]
+}
