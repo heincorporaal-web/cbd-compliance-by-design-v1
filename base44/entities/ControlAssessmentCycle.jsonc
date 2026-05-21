@@ -1,0 +1,119 @@
+{
+  "name": "ControlAssessmentCycle",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Assessment cycle name (e.g. Annual Control Assessment 2026)"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description and scope of the assessment cycle"
+    },
+    "cycle_year": {
+      "type": "number",
+      "description": "Assessment cycle year"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date of the assessment period"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date / due date of the assessment period"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "in_review",
+        "approved",
+        "closed"
+      ],
+      "default": "planning",
+      "description": "Lifecycle status of the assessment cycle"
+    },
+    "control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of controls included in this assessment cycle"
+    },
+    "amendment_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "amended_by": {
+            "type": "string"
+          },
+          "amended_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "changes": {
+            "type": "string"
+          },
+          "previous_end_date": {
+            "type": "string"
+          },
+          "new_end_date": {
+            "type": "string"
+          },
+          "controls_added": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "controls_removed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "History of amendments made to an approved cycle"
+    },
+    "workflow_instance_id": {
+      "type": "string",
+      "description": "Active WorkflowInstance ID"
+    },
+    "workflow_status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "name",
+    "company_id"
+  ]
+}

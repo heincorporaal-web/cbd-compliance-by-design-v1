@@ -100,6 +100,8 @@ import RootCauseCategories from './pages/RootCauseCategories';
 import Configuration from './pages/Configuration';
 import RiskAssessmentCycles from './pages/RiskAssessmentCycles';
 import RiskAssessmentCycleDetail from './pages/RiskAssessmentCycleDetail';
+import ControlAssessmentCycles from './pages/ControlAssessmentCycles';
+import ControlAssessmentCycleDetail from './pages/ControlAssessmentCycleDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -157,6 +159,8 @@ export const PAGES = {
     "Configuration": Configuration,
     "RiskAssessmentCycles": RiskAssessmentCycles,
     "RiskAssessmentCycleDetail": RiskAssessmentCycleDetail,
+    "ControlAssessmentCycles": ControlAssessmentCycles,
+    "ControlAssessmentCycleDetail": ControlAssessmentCycleDetail,
 }
 
 export const pagesConfig = {
