@@ -18,6 +18,11 @@
       "type": "string",
       "description": "Reference to Company entity"
     },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this group is considered expired / decommissioned"
+    },
     "status": {
       "type": "string",
       "enum": [

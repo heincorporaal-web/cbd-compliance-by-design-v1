@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Plus, Download, CheckCircle2, ChevronRight, Search, Edit2 } from "lucide-react";
+import EndDateBadge from "@/components/ui/EndDateBadge";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -219,9 +220,10 @@ export default function Frameworks() {
                       <p className="text-sm text-slate-500 mb-2">Version {framework.version}</p>
                       <p className="text-sm text-slate-600 mb-3">{framework.description}</p>
                       <div className="flex items-center gap-3">
-                        <Badge variant="outline" className={`${getCategoryColor(framework.category)} border`}>
+                         <Badge variant="outline" className={`${getCategoryColor(framework.category)} border`}>
                           {framework.category.replace(/_/g, ' ')}
                         </Badge>
+                        <EndDateBadge endDate={framework.end_date} />
                         <div className="flex items-center gap-2 text-sm text-slate-600">
                           <CheckCircle2 className="w-4 h-4 text-green-600" />
                           {frameworkControls.length} controls

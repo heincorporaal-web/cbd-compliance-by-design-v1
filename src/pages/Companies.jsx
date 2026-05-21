@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle, Upload, Palette, RefreshCw, Image, FileText, Eye, CalendarDays, BookOpen } from "lucide-react";
+import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle, Upload, Palette, RefreshCw, Image, FileText, Eye, CalendarDays, BookOpen, CalendarOff } from "lucide-react";
+import EndDateBadge, { isExpired } from "@/components/ui/EndDateBadge";
 import CompanyCalendarTab from "@/components/companies/CompanyCalendarTab";
 import FrameworkAssignmentTab from "@/components/companies/FrameworkAssignmentTab";
 import { Badge } from "@/components/ui/badge";
@@ -35,12 +36,14 @@ export default function Companies() {
   const fileInputRef = useRef();
   const queryClient = useQueryClient();
 
+  const [showExpired, setShowExpired] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     industry: "",
     contact_name: "",
     contact_email: "",
     status: "active",
+    end_date: "",
     description: "",
     objectives: [],
     principle_risks: [],
@@ -95,6 +98,7 @@ export default function Companies() {
       contact_name: "",
       contact_email: "",
       status: "active",
+      end_date: "",
       description: "",
       objectives: [],
       principle_risks: [],
@@ -180,10 +184,12 @@ export default function Companies() {
     }
   };
 
-  const filteredCompanies = companies.filter(company =>
-    company.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.industry?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCompanies = companies.filter(company => {
+    const matchesSearch = company.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      company.industry?.toLowerCase().includes(searchTerm.toLowerCase());
+    const expired = isExpired(company.end_date);
+    return matchesSearch && (showExpired || !expired);
+  });
 
   const getStatusColor = (status) => {
     const colors = {
@@ -294,6 +300,18 @@ export default function Companies() {
                       <SelectItem value="onboarding">Onboarding</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="end_date" className="flex items-center gap-1.5">
+                    <CalendarOff className="w-3.5 h-3.5 text-slate-400" /> End Date
+                  </Label>
+                  <Input
+                    id="end_date"
+                    type="date"
+                    value={formData.end_date || ""}
+                    onChange={(e) => setFormData({...formData, end_date: e.target.value})}
+                  />
+                  <p className="text-xs text-slate-400">Set to mark this company as expired on that date</p>
                 </div>
               </div>
               <div className="space-y-2">
@@ -578,6 +596,10 @@ export default function Companies() {
                 className="pl-10"
               />
             </div>
+            <Button variant={showExpired ? "default" : "outline"} size="sm" onClick={() => setShowExpired(v => !v)} className="gap-1.5 shrink-0">
+              <CalendarOff className="w-4 h-4" />
+              {showExpired ? "Hiding Expired" : "Show Expired"}
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -598,6 +620,7 @@ export default function Companies() {
                           <Badge variant="outline" className={`${getStatusColor(company.status)} border`}>
                             {company.status}
                           </Badge>
+                          <EndDateBadge endDate={company.end_date} />
                         </div>
                         {company.industry && (
                           <p className="text-sm text-slate-600 mb-1">{company.industry}</p>

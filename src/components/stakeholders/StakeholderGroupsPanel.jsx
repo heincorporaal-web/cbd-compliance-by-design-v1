@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Users, Lock } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Lock, CalendarOff } from "lucide-react";
+import EndDateBadge from "@/components/ui/EndDateBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const PRESET_COLORS = [
@@ -25,7 +26,7 @@ const PRESET_COLORS = [
   "#64748B", "#475569", "#6B7280", "#374151",
 ];
 
-const emptyGroup = { name: "", description: "", color: "#3B82F6", company_id: "", status: "active" };
+const emptyGroup = { name: "", description: "", color: "#3B82F6", company_id: "", status: "active", end_date: "" };
 
 export default function StakeholderGroupsPanel({ groups, companies }) {
   const qc = useQueryClient();
@@ -76,6 +77,7 @@ export default function StakeholderGroupsPanel({ groups, companies }) {
                   <div>
                     <p className="font-semibold text-slate-900">{g.name}</p>
                     {g.status === "inactive" && <Badge variant="secondary" className="text-xs mt-0.5">Inactive</Badge>}
+                  <EndDateBadge endDate={g.end_date} />
                   </div>
                 </div>
                 <div className="flex gap-1 items-center">
@@ -154,6 +156,11 @@ export default function StakeholderGroupsPanel({ groups, companies }) {
                   <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5"><CalendarOff className="w-3.5 h-3.5 text-slate-400" /> End Date</Label>
+              <Input type="date" value={form.end_date || ""} onChange={e => setForm({ ...form, end_date: e.target.value })} />
+              <p className="text-xs text-slate-400">Set to mark this group as expired on that date</p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>

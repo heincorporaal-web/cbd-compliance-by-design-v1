@@ -28,6 +28,11 @@
       ],
       "default": "active"
     },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this company record is considered expired / decommissioned"
+    },
     "description": {
       "type": "string",
       "description": "Company description or notes"

@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Check, AlertCircle } from "lucide-react";
+import { X, Check, AlertCircle, CalendarOff } from "lucide-react";
+import EndDateBadge from "@/components/ui/EndDateBadge";
 
 const empty = {
   employee_number: "", full_name: "", email: "", job_title: "", department: "",
-  phone: "", company_id: "", user_id: "", group_ids: [], status: "active", notes: ""
+  phone: "", company_id: "", user_id: "", group_ids: [], status: "active", end_date: "", notes: ""
 };
 
 export default function StakeholderDialog({ open, onOpenChange, stakeholder, groups, companies, users, allStakeholders = [], onSave }) {
@@ -90,6 +91,10 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
                   <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5"><CalendarOff className="w-3.5 h-3.5 text-slate-400" /> End Date</Label>
+              <Input type="date" value={form.end_date || ""} onChange={e => setForm({ ...form, end_date: e.target.value })} />
             </div>
             <div className="space-y-1.5 col-span-2">
               <Label>Full Name *</Label>

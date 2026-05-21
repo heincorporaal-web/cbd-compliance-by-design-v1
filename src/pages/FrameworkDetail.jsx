@@ -30,6 +30,7 @@ export default function FrameworkDetail() {
     description: "",
     category: "information_security",
     status: "active",
+    end_date: "",
     linked_objective_ids: [],
     linked_principle_risk_ids: []
   });
@@ -201,6 +202,16 @@ export default function FrameworkDetail() {
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="end_date">End Date</Label>
+                <Input
+                  id="end_date"
+                  type="date"
+                  value={formData.end_date || ""}
+                  onChange={(e) => setFormData({...formData, end_date: e.target.value})}
+                />
+                <p className="text-xs text-slate-400">Set to mark this framework as expired on that date</p>
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="description">Description</Label>

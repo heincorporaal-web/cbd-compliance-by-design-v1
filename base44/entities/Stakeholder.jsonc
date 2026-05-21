@@ -1,0 +1,68 @@
+{
+  "name": "Stakeholder",
+  "type": "object",
+  "properties": {
+    "employee_number": {
+      "type": "string",
+      "description": "Unique employee number / HR identifier"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Stakeholder full name"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Job title or position"
+    },
+    "department": {
+      "type": "string",
+      "description": "Department or business unit"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Linked system User ID (optional)"
+    },
+    "group_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of StakeholderGroups this person belongs to"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this stakeholder is considered inactive / departed"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "full_name",
+    "email",
+    "company_id"
+  ]
+}

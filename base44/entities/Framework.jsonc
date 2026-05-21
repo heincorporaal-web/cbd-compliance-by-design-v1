@@ -47,6 +47,11 @@
       "type": "number",
       "description": "Display sort order"
     },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this framework is considered expired / archived"
+    },
     "status": {
       "type": "string",
       "enum": [
