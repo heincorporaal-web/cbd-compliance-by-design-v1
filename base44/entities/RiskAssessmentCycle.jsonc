@@ -46,6 +46,46 @@
       },
       "description": "IDs of risks included in this assessment cycle"
     },
+    "amendment_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "amended_by": {
+            "type": "string"
+          },
+          "amended_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "changes": {
+            "type": "string"
+          },
+          "previous_end_date": {
+            "type": "string"
+          },
+          "new_end_date": {
+            "type": "string"
+          },
+          "risks_added": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "risks_removed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "History of amendments made to an approved cycle"
+    },
     "workflow_instance_id": {
       "type": "string",
       "description": "Active WorkflowInstance ID"
