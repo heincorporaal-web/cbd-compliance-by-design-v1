@@ -31,7 +31,6 @@ export const NAV_GROUPS = [
       { id: "frameworks", title: "Frameworks", url: createPageUrl("Frameworks"), icon: Shield },
       { id: "controls", title: "Controls", url: createPageUrl("Controls"), icon: Shield },
       { id: "control_assessment_cycles", title: "Control Assessment Cycles", url: createPageUrl("ControlAssessmentCycles"), icon: ClipboardList },
-      { id: "control_assessment_cycles", title: "Control Assessment Cycles", url: createPageUrl("ControlAssessmentCycles"), icon: ClipboardList },
       { id: "framework_mapper", title: "Framework Mapper (AI)", url: createPageUrl("FrameworkControlMapper"), icon: Sparkles },
       { id: "grc_goals", title: "GRC Goals", url: createPageUrl("GRCGoals"), icon: Target },
       { id: "org_objectives", title: "Org. Objectives", url: createPageUrl("OrgObjectives"), icon: Target },
