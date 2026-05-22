@@ -384,17 +384,23 @@ export default function BusinessUnits() {
               </div>
             </div>
 
-            {/* Status */}
-            <div className="space-y-1">
-              <Label>Status</Label>
-              <Select value={form.status} onValueChange={v => handleChange("status", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="archived">Archived</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* End Date + Status */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>End Date</Label>
+                <Input type="date" value={form.end_date} onChange={e => handleChange("end_date", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label>Status</Label>
+                <Select value={form.status} onValueChange={v => handleChange("status", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

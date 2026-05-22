@@ -61,6 +61,11 @@
       "type": "number",
       "default": 0
     },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this business unit is considered expired / decommissioned"
+    },
     "status": {
       "type": "string",
       "enum": [
