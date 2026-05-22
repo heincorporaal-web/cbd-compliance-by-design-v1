@@ -104,6 +104,7 @@ import ControlAssessmentCycles from './pages/ControlAssessmentCycles';
 import ControlAssessmentCycleDetail from './pages/ControlAssessmentCycleDetail';
 import DelegationOfAuthority from './pages/DelegationOfAuthority';
 import DelegationOfAuthorityDetail from './pages/DelegationOfAuthorityDetail';
+import BusinessUnits from './pages/BusinessUnits';
 import __Layout from './Layout.jsx';
 
 
@@ -167,6 +168,7 @@ export const PAGES = {
     "ControlAssessmentCycleDetail": ControlAssessmentCycleDetail,
     "DelegationOfAuthority": DelegationOfAuthority,
     "DelegationOfAuthorityDetail": DelegationOfAuthorityDetail,
+    "BusinessUnits": BusinessUnits,
 }
 
 export const pagesConfig = {

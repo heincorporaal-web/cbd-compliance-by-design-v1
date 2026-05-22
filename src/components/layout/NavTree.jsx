@@ -19,6 +19,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "dashboard", title: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard },
       { id: "companies", title: "Companies", url: createPageUrl("Companies"), icon: Building2 },
+      { id: "business_units", title: "Business Units", url: createPageUrl("BusinessUnits"), icon: Network },
       { id: "knowledge", title: "Knowledge", url: createPageUrl("KnowledgeManagement"), icon: BookOpen },
       { id: "reports", title: "Reports", url: createPageUrl("Reports"), icon: FileText },
     ],
