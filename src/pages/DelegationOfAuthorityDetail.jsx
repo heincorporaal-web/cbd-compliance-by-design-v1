@@ -336,7 +336,7 @@ export default function DelegationOfAuthorityDetail() {
             <Label>DOA Owner *</Label>
             <Select value={header.owner_stakeholder_id} onValueChange={v => handleHeaderChange("owner_stakeholder_id", v)}>
               <SelectTrigger><SelectValue placeholder="Select owner…" /></SelectTrigger>
-              <SelectContent>{stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}</SelectContent>
+              <SelectContent>{stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}{s.job_title ? ` — ${s.job_title}` : ""}</SelectItem>)}</SelectContent>
             </Select>
           </div>
         </div>
@@ -571,7 +571,7 @@ export default function DelegationOfAuthorityDetail() {
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select…" /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="none">— None —</SelectItem>
-                            {stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
+                            {stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}{s.job_title ? ` — ${s.job_title}` : ""}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
