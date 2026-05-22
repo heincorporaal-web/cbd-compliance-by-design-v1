@@ -35,7 +35,6 @@ export const NAV_GROUPS = [
       { id: "grc_goals", title: "GRC Goals", url: createPageUrl("GRCGoals"), icon: Target },
       { id: "org_objectives", title: "Org. Objectives", url: createPageUrl("OrgObjectives"), icon: Target },
       { id: "sign_offs", title: "Sign-Offs", url: createPageUrl("SignOffs"), icon: FileCheck },
-      { id: "workflows", title: "Workflows", url: createPageUrl("Workflows"), icon: GitBranch },
     ],
   },
   {
@@ -98,6 +97,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "value_chains", title: "Value Chains", url: createPageUrl("ValueChains"), icon: Network },
       { id: "root_cause_categories", title: "Root Cause Categories", url: createPageUrl("RootCauseCategories"), icon: AlertCircle },
+      { id: "workflows", title: "Workflows", url: createPageUrl("Workflows"), icon: GitBranch },
       { id: "configuration", title: "Configuration & Imports", url: createPageUrl("Configuration"), icon: Settings },
     ],
   },
