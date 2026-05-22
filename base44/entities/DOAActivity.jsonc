@@ -1,0 +1,120 @@
+{
+  "name": "DOAActivity",
+  "type": "object",
+  "properties": {
+    "doa_id": {
+      "type": "string",
+      "description": "Reference to DelegationOfAuthority entity"
+    },
+    "activity_name": {
+      "type": "string",
+      "description": "Activity / delegation item name"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Control",
+        "Process",
+        "Approval",
+        "Review",
+        "Authorization",
+        "Other"
+      ],
+      "default": "Control"
+    },
+    "process_node_code": {
+      "type": "string",
+      "description": "Process node reference code"
+    },
+    "process_node_id": {
+      "type": "string",
+      "description": "Reference to OrgProcess / BusinessProcess entity"
+    },
+    "value_chain_id": {
+      "type": "string",
+      "description": "Reference to ValueChain entity"
+    },
+    "workstream_id": {
+      "type": "string",
+      "description": "Reference to Workstream entity"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    },
+    "value_range_rules": {
+      "type": "array",
+      "description": "Value-based delegation rules",
+      "items": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "value_min": {
+            "type": "number"
+          },
+          "value_max": {
+            "type": "number"
+          },
+          "enforcement": {
+            "type": "string",
+            "enum": [
+              "Mandatory",
+              "Advisory",
+              "Informational"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "approvers": {
+      "type": "array",
+      "description": "Hierarchical approver chain for this activity",
+      "items": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "number",
+            "description": "Approval level (1 = first approver)"
+          },
+          "role": {
+            "type": "string"
+          },
+          "stakeholder_id": {
+            "type": "string"
+          },
+          "stakeholder_name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean",
+            "default": true
+          },
+          "delegatable": {
+            "type": "boolean",
+            "default": false
+          },
+          "valid_till": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "doa_id",
+    "activity_name"
+  ]
+}

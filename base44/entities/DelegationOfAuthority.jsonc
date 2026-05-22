@@ -1,0 +1,68 @@
+{
+  "name": "DelegationOfAuthority",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "DOA title (required)"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "business_unit": {
+      "type": "string",
+      "description": "Business unit scope"
+    },
+    "review_frequency": {
+      "type": "string",
+      "enum": [
+        "Weekly",
+        "Monthly",
+        "Quarterly",
+        "Bi-Annually",
+        "Annually",
+        "Ad-hoc"
+      ],
+      "default": "Annually"
+    },
+    "reminder_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Reminder review date"
+    },
+    "owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder (DOA Owner)"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "DOA Owner name (denormalized)"
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date"
+    },
+    "valid_to": {
+      "type": "string",
+      "format": "date"
+    },
+    "scope_notes": {
+      "type": "string",
+      "description": "Scope notes describing DOA coverage"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "archived"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "title",
+    "company_id"
+  ]
+}

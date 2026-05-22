@@ -102,6 +102,8 @@ import RiskAssessmentCycles from './pages/RiskAssessmentCycles';
 import RiskAssessmentCycleDetail from './pages/RiskAssessmentCycleDetail';
 import ControlAssessmentCycles from './pages/ControlAssessmentCycles';
 import ControlAssessmentCycleDetail from './pages/ControlAssessmentCycleDetail';
+import DelegationOfAuthority from './pages/DelegationOfAuthority';
+import DelegationOfAuthorityDetail from './pages/DelegationOfAuthorityDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -163,6 +165,8 @@ export const PAGES = {
     "ControlAssessmentCycleDetail": ControlAssessmentCycleDetail,
     "ControlAssessmentCycles": ControlAssessmentCycles,
     "ControlAssessmentCycleDetail": ControlAssessmentCycleDetail,
+    "DelegationOfAuthority": DelegationOfAuthority,
+    "DelegationOfAuthorityDetail": DelegationOfAuthorityDetail,
 }
 
 export const pagesConfig = {

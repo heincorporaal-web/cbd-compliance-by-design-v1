@@ -6,7 +6,7 @@ import {
   AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert,
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
-  Activity, X, PlusCircle, Sparkles, Cpu, Search
+  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -80,6 +80,7 @@ export const NAV_GROUPS = [
       { id: "stakeholders", title: "Stakeholder Management", url: createPageUrl("Stakeholders"), icon: Users },
       { id: "stakeholder_groups", title: "Stakeholder Groups", url: createPageUrl("Stakeholders") + "?tab=groups", icon: Users },
       { id: "sign_offs", title: "Sign-Offs", url: createPageUrl("SignOffs"), icon: FileCheck },
+      { id: "doa", title: "Delegation of Authority", url: createPageUrl("DelegationOfAuthority"), icon: ShieldCheck },
     ],
   },
   {
