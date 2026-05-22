@@ -374,7 +374,7 @@ export default function BusinessUnits() {
                   <SelectTrigger><SelectValue placeholder="Select owner…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
-                    {stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
+                    {stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}{s.job_title ? ` — ${s.job_title}` : ""}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
