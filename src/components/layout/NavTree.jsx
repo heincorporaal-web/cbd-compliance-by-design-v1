@@ -34,7 +34,7 @@ export const NAV_GROUPS = [
       { id: "framework_mapper", title: "Framework Mapper (AI)", url: createPageUrl("FrameworkControlMapper"), icon: Sparkles },
       { id: "grc_goals", title: "GRC Goals", url: createPageUrl("GRCGoals"), icon: Target },
       { id: "org_objectives", title: "Org. Objectives", url: createPageUrl("OrgObjectives"), icon: Target },
-      { id: "sign_offs", title: "Sign-Offs", url: createPageUrl("SignOffs"), icon: FileCheck },
+      { id: "root_cause_categories", title: "Root Cause Categories", url: createPageUrl("RootCauseCategories"), icon: AlertCircle },
     ],
   },
   {
@@ -69,6 +69,7 @@ export const NAV_GROUPS = [
       { id: "process_assessments", title: "Process Assessments", url: createPageUrl("ProcessAssessments"), icon: ClipboardCheck },
       { id: "ict_systems", title: "ICT Systems", url: createPageUrl("ICTSystems"), icon: Server },
       { id: "it_capabilities", title: "IT Capabilities", url: createPageUrl("ITCapabilities"), icon: Cpu },
+      { id: "value_chains", title: "Value Chains", url: createPageUrl("ValueChains"), icon: Network },
     ],
   },
   {
@@ -78,6 +79,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "stakeholders", title: "Stakeholder Management", url: createPageUrl("Stakeholders"), icon: Users },
       { id: "stakeholder_groups", title: "Stakeholder Groups", url: createPageUrl("Stakeholders") + "?tab=groups", icon: Users },
+      { id: "sign_offs", title: "Sign-Offs", url: createPageUrl("SignOffs"), icon: FileCheck },
     ],
   },
   {
@@ -95,8 +97,6 @@ export const NAV_GROUPS = [
     label: "Configuration",
     icon: Cog,
     items: [
-      { id: "value_chains", title: "Value Chains", url: createPageUrl("ValueChains"), icon: Network },
-      { id: "root_cause_categories", title: "Root Cause Categories", url: createPageUrl("RootCauseCategories"), icon: AlertCircle },
       { id: "workflows", title: "Workflows", url: createPageUrl("Workflows"), icon: GitBranch },
       { id: "configuration", title: "Configuration & Imports", url: createPageUrl("Configuration"), icon: Settings },
     ],
