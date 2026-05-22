@@ -32,7 +32,7 @@ export default function DelegationOfAuthorityDetail() {
 
   // ── Header form state ─────────────────────────────────────────────────────
   const [header, setHeader] = useState({
-    title: "", company_id: "", business_unit: "", review_frequency: "Annually",
+    title: "", company_id: "", business_unit: "", business_unit_id: "", review_frequency: "Annually",
     reminder_date: "", owner_stakeholder_id: "", owner_name: "", valid_from: "", valid_to: "",
     scope_notes: "", status: "draft",
   });
@@ -67,6 +67,11 @@ export default function DelegationOfAuthorityDetail() {
     queryFn: () => base44.entities.Stakeholder.list(),
   });
 
+  const { data: businessUnits = [] } = useQuery({
+    queryKey: ["business-units"],
+    queryFn: () => base44.entities.BusinessUnit.list(),
+  });
+
   const { data: valueChains = [] } = useQuery({
     queryKey: ["value-chains"],
     queryFn: () => base44.entities.ValueChain.list("sort_order"),
@@ -84,6 +89,7 @@ export default function DelegationOfAuthorityDetail() {
         title: doa.title || "",
         company_id: doa.company_id || "",
         business_unit: doa.business_unit || "",
+        business_unit_id: doa.business_unit_id || "",
         review_frequency: doa.review_frequency || "Annually",
         reminder_date: doa.reminder_date || "",
         owner_stakeholder_id: doa.owner_stakeholder_id || "",
@@ -281,7 +287,24 @@ export default function DelegationOfAuthorityDetail() {
           </div>
           <div className="space-y-1">
             <Label>Business Unit</Label>
-            <Input value={header.business_unit} onChange={e => handleHeaderChange("business_unit", e.target.value)} />
+            <Select
+              value={header.business_unit_id || "none"}
+              onValueChange={v => {
+                const bu = businessUnits.find(b => b.id === v);
+                handleHeaderChange("business_unit_id", v === "none" ? "" : v);
+                if (bu) setHeader(p => ({ ...p, business_unit: bu.name, business_unit_id: v }));
+                else setHeader(p => ({ ...p, business_unit: "", business_unit_id: "" }));
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Select business unit…" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— None —</SelectItem>
+                {businessUnits
+                  .filter(b => !header.company_id || b.company_id === header.company_id)
+                  .map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)
+                }
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1">
             <Label>Status</Label>

@@ -12,7 +12,11 @@
     },
     "business_unit": {
       "type": "string",
-      "description": "Business unit scope"
+      "description": "Business unit scope (legacy free text)"
+    },
+    "business_unit_id": {
+      "type": "string",
+      "description": "Reference to BusinessUnit entity"
     },
     "review_frequency": {
       "type": "string",
