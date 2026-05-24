@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Search, FileText, Calendar, User, Building2, ChevronRight, ShieldCheck } from "lucide-react";
+import { Plus, Search, FileText, Calendar, User, Building2, ChevronRight, ShieldCheck, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { format } from "date-fns";
@@ -34,6 +34,16 @@ export default function DelegationOfAuthority() {
     queryKey: ["companies"],
     queryFn: () => base44.entities.Company.list(),
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.DelegationOfAuthority.delete(id),
+    onSuccess: () => queryClient.invalidateQueries(["doa"]),
+  });
+
+  const handleDelete = (e, id) => {
+    e.preventDefault();
+    if (confirm("Delete this draft DOA? This cannot be undone.")) deleteMutation.mutate(id);
+  };
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.DelegationOfAuthority.create(data),
@@ -136,7 +146,16 @@ export default function DelegationOfAuthority() {
                     )}
                   </div>
                   <ChevronRight className="w-5 h-5 text-slate-400 shrink-0 mt-1" />
-                </Link>
+                  </Link>
+                  {doa.status === "draft" && (
+                  <button
+                    onClick={(e) => handleDelete(e, doa.id)}
+                    className="ml-2 p-1.5 rounded hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors shrink-0"
+                    title="Delete draft"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  )}
               </CardContent>
             </Card>
           ))}
