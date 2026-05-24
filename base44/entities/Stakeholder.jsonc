@@ -31,6 +31,10 @@
       "type": "string",
       "description": "Reference to Company entity"
     },
+    "manager_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (direct reporting manager)"
+    },
     "user_id": {
       "type": "string",
       "description": "Linked system User ID (optional)"

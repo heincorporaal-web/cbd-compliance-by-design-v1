@@ -11,7 +11,7 @@ import EndDateBadge from "@/components/ui/EndDateBadge";
 
 const empty = {
   employee_number: "", full_name: "", email: "", job_title: "", department: "",
-  phone: "", company_id: "", user_id: "", group_ids: [], status: "active", end_date: "", notes: ""
+  phone: "", company_id: "", manager_id: "", user_id: "", group_ids: [], status: "active", end_date: "", notes: ""
 };
 
 export default function StakeholderDialog({ open, onOpenChange, stakeholder, groups, companies, users, allStakeholders = [], onSave }) {
@@ -115,6 +115,22 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
             <div className="space-y-1.5">
               <Label>Phone</Label>
               <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 col-span-2">
+              <Label>Reporting Manager</Label>
+              <Select value={form.manager_id || "none"} onValueChange={v => setForm({ ...form, manager_id: v === "none" ? "" : v })}>
+                <SelectTrigger><SelectValue placeholder="No manager" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No manager</SelectItem>
+                  {allStakeholders
+                    .filter(s => s.id !== stakeholder?.id && s.status !== "inactive" && (!form.company_id || s.company_id === form.company_id))
+                    .map(s => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.full_name}{s.job_title ? ` — ${s.job_title}` : ""}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

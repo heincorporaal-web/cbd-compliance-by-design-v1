@@ -80,6 +80,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "stakeholders", title: "Stakeholder Management", url: createPageUrl("Stakeholders"), icon: Users },
       { id: "stakeholder_groups", title: "Stakeholder Groups", url: createPageUrl("Stakeholders") + "?tab=groups", icon: Users },
+      { id: "stakeholder_hierarchy", title: "Stakeholder Hierarchy", url: createPageUrl("StakeholderHierarchy"), icon: GitBranch },
       { id: "sign_offs", title: "Sign-Offs", url: createPageUrl("SignOffs"), icon: FileCheck },
       { id: "doa", title: "Delegation of Authority", url: createPageUrl("DelegationOfAuthority"), icon: ShieldCheck },
     ],
