@@ -100,6 +100,17 @@ export default function ControlDetail() {
     queryFn: () => base44.entities.Company.list(),
   });
 
+  const { data: libraryRisks = [] } = useQuery({
+    queryKey: ['libraryRisks'],
+    queryFn: () => base44.entities.Risk.filter({ is_library_risk: true }),
+    enabled: !!formData.is_library_control,
+  });
+
+  // Derive the expected risk reference by swapping leading 'C' → 'D' in the control ref
+  const suggestedRiskRef = formData.control_id ? formData.control_id.replace(/^C/, 'D') : '';
+  const suggestedRisk = libraryRisks.find(r => r.risk_reference_nr === suggestedRiskRef);
+  const linkedRisk = formData.risk_id ? libraryRisks.find(r => r.id === formData.risk_id) : null;
+
   useEffect(() => {
     if (existingControl?.[0]) {
       setFormData({
@@ -544,6 +555,7 @@ export default function ControlDetail() {
                     </Select>
                   </div>
 
+                  {!formData.is_library_control && (
                   <div className="space-y-2">
                     <StakeholderOwnerPicker
                       groupName="Control Owner"
@@ -554,7 +566,9 @@ export default function ControlDetail() {
                       placeholder="Select control owner…"
                     />
                   </div>
+                  )}
 
+                  {!formData.is_library_control && (
                   <div className="space-y-2">
                     <StakeholderOwnerPicker
                       groupName="Risk Owner"
@@ -565,6 +579,7 @@ export default function ControlDetail() {
                       placeholder="Select reviewer…"
                     />
                   </div>
+                  )}
 
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="description">Description</Label>
@@ -758,13 +773,51 @@ export default function ControlDetail() {
                         placeholder="Objective ID"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Risk ID</Label>
-                      <Input
-                        value={formData.risk_id}
-                        onChange={(e) => setFormData({...formData, risk_id: e.target.value})}
-                        placeholder="Associated Risk ID"
-                      />
+                    <div className="space-y-2 md:col-span-2">
+                      <Label>Linked Risk (Reference Library)</Label>
+                      {/* Show auto-match suggestion if nothing linked yet */}
+                      {!formData.risk_id && suggestedRisk && (
+                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs text-blue-500 font-medium mb-0.5">Auto-matched risk</p>
+                            <p className="font-medium text-slate-900 text-sm">{suggestedRisk.risk_reference_nr}</p>
+                            <p className="text-xs text-slate-600">{suggestedRisk.title}</p>
+                          </div>
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700 shrink-0" onClick={() => setFormData({...formData, risk_id: suggestedRisk.id})}>
+                            Link Risk
+                          </Button>
+                        </div>
+                      )}
+                      {/* Show linked risk */}
+                      {linkedRisk && (
+                        <div className="p-3 bg-green-50 rounded-lg border border-green-200 flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs text-green-600 font-medium mb-0.5">Linked risk</p>
+                            <p className="font-medium text-slate-900 text-sm">{linkedRisk.risk_reference_nr}</p>
+                            <p className="text-xs text-slate-600">{linkedRisk.title}</p>
+                          </div>
+                          <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 shrink-0" onClick={() => setFormData({...formData, risk_id: ''})}>
+                            Unlink
+                          </Button>
+                        </div>
+                      )}
+                      {/* Manual select */}
+                      <Select
+                        value={formData.risk_id || "none"}
+                        onValueChange={(v) => setFormData({...formData, risk_id: v === 'none' ? '' : v})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Search and select a risk from the library…" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          <SelectItem value="none">— None —</SelectItem>
+                          {libraryRisks.map(r => (
+                            <SelectItem key={r.id} value={r.id}>
+                              {r.risk_reference_nr} — {r.title?.slice(0, 60)}{r.title?.length > 60 ? '…' : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </CardContent>
