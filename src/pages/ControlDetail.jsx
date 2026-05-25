@@ -20,6 +20,7 @@ import LifecycleNotifications from "@/components/lifecycle/LifecycleNotification
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPicker";
 import CompensatingControlPicker from "@/components/controls/CompensatingControlPicker";
+import TestPlanPanel from "@/components/controls/TestPlanPanel";
 
 export default function ControlDetail() {
   const navigate = useNavigate();
@@ -443,6 +444,11 @@ export default function ControlDetail() {
           <TabsList>
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="library">Library Fields</TabsTrigger>
+            {!isNew && controlId && (
+              <TabsTrigger value="test_plan" className="gap-2">
+                <span>Test Plan</span>
+              </TabsTrigger>
+            )}
             {!isNew && controlId && (
               <TabsTrigger value="assessments">
                 Assessments
@@ -937,6 +943,20 @@ export default function ControlDetail() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {!isNew && controlId && (
+            <TabsContent value="test_plan">
+              <Card className="border-none shadow-lg">
+                <CardHeader className="border-b border-slate-100">
+                  <CardTitle>Test Plan</CardTitle>
+                  <p className="text-sm text-slate-500">Define the testing steps and workpapers assessors must follow to validate this control.</p>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <TestPlanPanel controlId={controlId} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            )}
 
             {!isNew && controlId && existingControl?.[0] && (
             <TabsContent value="history">

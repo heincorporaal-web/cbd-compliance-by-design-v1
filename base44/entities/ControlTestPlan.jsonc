@@ -1,0 +1,96 @@
+{
+  "name": "ControlTestPlan",
+  "type": "object",
+  "properties": {
+    "control_id": {
+      "type": "string",
+      "description": "Reference to Control entity"
+    },
+    "name": {
+      "type": "string",
+      "description": "Test plan name / title"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version label (e.g. v1.0)",
+      "default": "v1.0"
+    },
+    "objective": {
+      "type": "string",
+      "description": "Overall testing objective / scope"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "retired"
+      ],
+      "default": "draft"
+    },
+    "steps": {
+      "type": "array",
+      "description": "Ordered list of test steps / workpaper activities",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          },
+          "step_type": {
+            "type": "string",
+            "enum": [
+              "Activity",
+              "Artefact",
+              "IUC",
+              "Process Step",
+              "Data Extract",
+              "Report",
+              "Interview",
+              "Observation",
+              "Inquiry",
+              "Inspection",
+              "Re-performance",
+              "Walkthrough"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "expected_evidence": {
+            "type": "string",
+            "description": "What evidence / artefact is expected"
+          },
+          "population": {
+            "type": "string",
+            "description": "Population / sample description (for data extracts)"
+          },
+          "sample_size": {
+            "type": "string"
+          },
+          "mandatory": {
+            "type": "boolean",
+            "default": true
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "General notes on the test plan"
+    }
+  },
+  "required": [
+    "control_id",
+    "name"
+  ]
+}
