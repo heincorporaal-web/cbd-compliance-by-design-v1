@@ -19,6 +19,7 @@ import LifecycleHistory from "@/components/lifecycle/LifecycleHistory";
 import LifecycleNotifications from "@/components/lifecycle/LifecycleNotifications";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPicker";
+import CompensatingControlPicker from "@/components/controls/CompensatingControlPicker";
 
 export default function ControlDetail() {
   const navigate = useNavigate();
@@ -321,11 +322,7 @@ export default function ControlDetail() {
     if (controlId) updateMutation.mutate(newData);
   };
 
-  const compensatingControls = allControls.filter(c => formData.compensating_control_ids?.includes(c.id));
-  const availableControls = allControls.filter(c => 
-    c.id !== controlId && 
-    !formData.compensating_control_ids?.includes(c.id)
-  );
+  const compensatingControlIds = formData.compensating_control_ids || [];
 
   const allObjectives = companies.flatMap(company => 
     (company.objectives || []).map(obj => ({ ...obj, companyName: company.name, companyId: company.id }))
@@ -771,72 +768,23 @@ export default function ControlDetail() {
             {!isNew && (
               <Card className="border-none shadow-lg">
                 <CardHeader className="border-b border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Compensating Controls</CardTitle>
-                    <Dialog open={isAddingCompensating} onOpenChange={setIsAddingCompensating}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Compensating Control
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                          <DialogTitle>Add Compensating Control</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                          {availableControls.map(control => {
-                            const fw = frameworks.find(f => f.id === control.framework_id);
-                            return (
-                              <div
-                                key={control.id}
-                                className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
-                                onClick={() => addCompensatingControl(control.id)}
-                              >
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-medium text-slate-900">{control.control_id}</span>
-                                  <Badge variant="outline">{fw?.name}</Badge>
-                                </div>
-                                <p className="text-sm text-slate-600">{control.title}</p>
-                              </div>
-                            );
-                          })}
-                          {availableControls.length === 0 && (
-                            <p className="text-center text-slate-500 py-8">No available controls to add</p>
-                          )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
+                  <CardTitle className="flex items-center gap-2">
+                    Compensating Controls
+                    {formData.key_control && compensatingControlIds.length > 0 && (
+                      <Badge variant="secondary">{compensatingControlIds.length}</Badge>
+                    )}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
-                  {compensatingControls.length > 0 ? (
-                    <div className="space-y-2">
-                      {compensatingControls.map(control => {
-                        const fw = frameworks.find(f => f.id === control.framework_id);
-                        return (
-                          <div key={control.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-slate-900">{control.control_id}</span>
-                                <Badge variant="outline">{fw?.name}</Badge>
-                              </div>
-                              <p className="text-sm text-slate-600">{control.title}</p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeCompensatingControl(control.id)}
-                            >
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-slate-500 text-center py-4">No compensating controls defined</p>
-                  )}
+                  <CompensatingControlPicker
+                    keyControlId={controlId}
+                    isKeyControl={!!formData.key_control}
+                    assignedIds={compensatingControlIds}
+                    allControls={allControls}
+                    frameworks={frameworks}
+                    onAdd={addCompensatingControl}
+                    onRemove={removeCompensatingControl}
+                  />
                 </CardContent>
               </Card>
             )}
