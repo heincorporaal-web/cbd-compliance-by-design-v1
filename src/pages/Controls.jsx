@@ -97,32 +97,34 @@ export default function Controls() {
           <p className="text-slate-600">Browse and manage security controls across frameworks</p>
         </div>
         <div className="flex gap-2">
-          <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Upload className="w-4 h-4 mr-2" />
-                Import Library
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Import Control Library</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <p className="text-sm text-slate-600">
-                  Upload an Excel file containing control library data. Controls will be added to the master library.
-                </p>
-                <FileUpload
-                  accept=".xlsx,.xls"
-                  onUpload={(file) => importControlLibrary.mutate(file)}
-                  disabled={importing}
-                />
-                {importing && (
-                  <p className="text-sm text-slate-500">Importing controls...</p>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+          {activeTab === "company" && (
+            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import Controls
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Import Company Controls</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-600">
+                    Upload an Excel file containing controls to import into the company controls register.
+                  </p>
+                  <FileUpload
+                    accept=".xlsx,.xls"
+                    onUpload={(file) => importControlLibrary.mutate(file)}
+                    disabled={importing}
+                  />
+                  {importing && (
+                    <p className="text-sm text-slate-500">Importing controls...</p>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
           <Link to={createPageUrl("ControlDetail?new=true")}>
             <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
