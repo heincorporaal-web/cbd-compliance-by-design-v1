@@ -594,236 +594,6 @@ export default function ControlDetail() {
               </CardContent>
             </Card>
 
-            <TabsContent value="library" className="space-y-6">
-              <Card className="border-none shadow-lg">
-                <CardHeader className="border-b border-slate-100">
-                  <CardTitle>Control Library Fields</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>Control Criticality</Label>
-                      <Select value={formData.control_criticality} onValueChange={(v) => setFormData({...formData, control_criticality: v})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Must Have">Must Have</SelectItem>
-                          <SelectItem value="Should Have">Should Have</SelectItem>
-                          <SelectItem value="Nice to Have">Nice to Have</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Control Execution Type</Label>
-                      <Select value={formData.control_execution_type} onValueChange={(v) => setFormData({...formData, control_execution_type: v})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Manual">Manual</SelectItem>
-                          <SelectItem value="Automated">Automated</SelectItem>
-                          <SelectItem value="Semi-Automated">Semi-Automated</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Control Type</Label>
-                      <Select value={formData.control_type} onValueChange={(v) => setFormData({...formData, control_type: v})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Preventive">Preventive</SelectItem>
-                          <SelectItem value="Detective">Detective</SelectItem>
-                          <SelectItem value="Corrective">Corrective</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Control Frequency</Label>
-                      <Select value={formData.control_frequency} onValueChange={(v) => setFormData({...formData, control_frequency: v})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Daily">Daily</SelectItem>
-                          <SelectItem value="Weekly">Weekly</SelectItem>
-                          <SelectItem value="Monthly">Monthly</SelectItem>
-                          <SelectItem value="Quarterly">Quarterly</SelectItem>
-                          <SelectItem value="Annually">Annually</SelectItem>
-                          <SelectItem value="Continuous">Continuous</SelectItem>
-                          <SelectItem value="Ad-hoc">Ad-hoc</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Process Phase</Label>
-                      <Select value={formData.process_phase} onValueChange={(v) => setFormData({...formData, process_phase: v})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Pre-Input">Pre-Input</SelectItem>
-                          <SelectItem value="Process - Input">Process - Input</SelectItem>
-                          <SelectItem value="Process - Output">Process - Output</SelectItem>
-                          <SelectItem value="Post-Output">Post-Output</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Control Owner</Label>
-                      <Input
-                        value={formData.control_owner}
-                        onChange={(e) => setFormData({...formData, control_owner: e.target.value})}
-                        placeholder="e.g., OpCo - Treasury Analyst"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.global}
-                          onChange={(e) => setFormData({...formData, global: e.target.checked})}
-                          className="rounded border-slate-300"
-                        />
-                        Global Control
-                      </Label>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.control_ccm}
-                          onChange={(e) => setFormData({...formData, control_ccm: e.target.checked})}
-                          className="rounded border-slate-300"
-                        />
-                        Control CCM
-                      </Label>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.self_assessment}
-                          onChange={(e) => setFormData({...formData, self_assessment: e.target.checked})}
-                          className="rounded border-slate-300"
-                        />
-                        Self Assessment
-                      </Label>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.key_control}
-                          onChange={(e) => setFormData({...formData, key_control: e.target.checked})}
-                          className="rounded border-slate-300"
-                        />
-                        Key Control
-                      </Label>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.finance_control_consideration}
-                          onChange={(e) => setFormData({...formData, finance_control_consideration: e.target.checked})}
-                          className="rounded border-slate-300"
-                        />
-                        Finance Control
-                      </Label>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.compensating_control}
-                          onChange={(e) => setFormData({...formData, compensating_control: e.target.checked})}
-                          className="rounded border-slate-300"
-                        />
-                        Compensating Control
-                      </Label>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Compensating Control Risk</Label>
-                      <Input
-                        value={formData.compensating_control_risk}
-                        onChange={(e) => setFormData({...formData, compensating_control_risk: e.target.value})}
-                        placeholder="Risk description"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Control Narrative URL</Label>
-                      <Input
-                        value={formData.control_narrative_url}
-                        onChange={(e) => setFormData({...formData, control_narrative_url: e.target.value})}
-                        placeholder="https://..."
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Upload Document</Label>
-                      <Input
-                        value={formData.upload_document}
-                        onChange={(e) => setFormData({...formData, upload_document: e.target.value})}
-                        placeholder="Document reference"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Control Objective ID</Label>
-                      <Input
-                        value={formData.control_objective_id}
-                        onChange={(e) => setFormData({...formData, control_objective_id: e.target.value})}
-                        placeholder="Objective ID"
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>Linked Risk (Reference Library)</Label>
-                      {/* Show auto-match suggestion if nothing linked yet */}
-                      {!formData.risk_id && suggestedRisk && (
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex items-center justify-between gap-3">
-                          <div>
-                            <p className="text-xs text-blue-500 font-medium mb-0.5">Auto-matched risk</p>
-                            <p className="font-medium text-slate-900 text-sm">{suggestedRisk.risk_reference_nr}</p>
-                            <p className="text-xs text-slate-600">{suggestedRisk.title}</p>
-                          </div>
-                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700 shrink-0" onClick={() => setFormData({...formData, risk_id: suggestedRisk.id})}>
-                            Link Risk
-                          </Button>
-                        </div>
-                      )}
-                      {/* Show linked risk */}
-                      {linkedRisk && (
-                        <div className="p-3 bg-green-50 rounded-lg border border-green-200 flex items-center justify-between gap-3">
-                          <div>
-                            <p className="text-xs text-green-600 font-medium mb-0.5">Linked risk</p>
-                            <p className="font-medium text-slate-900 text-sm">{linkedRisk.risk_reference_nr}</p>
-                            <p className="text-xs text-slate-600">{linkedRisk.title}</p>
-                          </div>
-                          <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 shrink-0" onClick={() => setFormData({...formData, risk_id: ''})}>
-                            Unlink
-                          </Button>
-                        </div>
-                      )}
-                      {/* Manual select */}
-                      <Select
-                        value={formData.risk_id || "none"}
-                        onValueChange={(v) => setFormData({...formData, risk_id: v === 'none' ? '' : v})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Search and select a risk from the library…" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-72">
-                          <SelectItem value="none">— None —</SelectItem>
-                          {libraryRisks.map(r => (
-                            <SelectItem key={r.id} value={r.id}>
-                              {r.risk_reference_nr} — {r.title?.slice(0, 60)}{r.title?.length > 60 ? '…' : ''}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
             {!isNew && (
               <Card className="border-none shadow-lg">
                 <CardHeader className="border-b border-slate-100">
@@ -876,6 +646,168 @@ export default function ControlDetail() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="library" className="space-y-6">
+            <Card className="border-none shadow-lg">
+              <CardHeader className="border-b border-slate-100">
+                <CardTitle>Control Library Fields</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Control Criticality</Label>
+                    <Select value={formData.control_criticality} onValueChange={(v) => setFormData({...formData, control_criticality: v})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Must Have">Must Have</SelectItem>
+                        <SelectItem value="Should Have">Should Have</SelectItem>
+                        <SelectItem value="Nice to Have">Nice to Have</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Control Execution Type</Label>
+                    <Select value={formData.control_execution_type} onValueChange={(v) => setFormData({...formData, control_execution_type: v})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Manual">Manual</SelectItem>
+                        <SelectItem value="Automated">Automated</SelectItem>
+                        <SelectItem value="Semi-Automated">Semi-Automated</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Control Type</Label>
+                    <Select value={formData.control_type} onValueChange={(v) => setFormData({...formData, control_type: v})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Preventive">Preventive</SelectItem>
+                        <SelectItem value="Detective">Detective</SelectItem>
+                        <SelectItem value="Corrective">Corrective</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Control Frequency</Label>
+                    <Select value={formData.control_frequency} onValueChange={(v) => setFormData({...formData, control_frequency: v})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Daily">Daily</SelectItem>
+                        <SelectItem value="Weekly">Weekly</SelectItem>
+                        <SelectItem value="Monthly">Monthly</SelectItem>
+                        <SelectItem value="Quarterly">Quarterly</SelectItem>
+                        <SelectItem value="Annually">Annually</SelectItem>
+                        <SelectItem value="Continuous">Continuous</SelectItem>
+                        <SelectItem value="Ad-hoc">Ad-hoc</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Process Phase</Label>
+                    <Select value={formData.process_phase} onValueChange={(v) => setFormData({...formData, process_phase: v})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pre-Input">Pre-Input</SelectItem>
+                        <SelectItem value="Process - Input">Process - Input</SelectItem>
+                        <SelectItem value="Process - Output">Process - Output</SelectItem>
+                        <SelectItem value="Post-Output">Post-Output</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Control Owner (Role)</Label>
+                    <Input value={formData.control_owner} onChange={(e) => setFormData({...formData, control_owner: e.target.value})} placeholder="e.g., OpCo - Treasury Analyst" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Label className="flex items-center gap-2">
+                    <input type="checkbox" checked={formData.global} onChange={(e) => setFormData({...formData, global: e.target.checked})} className="rounded border-slate-300" />
+                    Global Control
+                  </Label>
+                  <Label className="flex items-center gap-2">
+                    <input type="checkbox" checked={formData.control_ccm} onChange={(e) => setFormData({...formData, control_ccm: e.target.checked})} className="rounded border-slate-300" />
+                    Control CCM
+                  </Label>
+                  <Label className="flex items-center gap-2">
+                    <input type="checkbox" checked={formData.self_assessment} onChange={(e) => setFormData({...formData, self_assessment: e.target.checked})} className="rounded border-slate-300" />
+                    Self Assessment
+                  </Label>
+                  <Label className="flex items-center gap-2">
+                    <input type="checkbox" checked={formData.key_control} onChange={(e) => setFormData({...formData, key_control: e.target.checked})} className="rounded border-slate-300" />
+                    Key Control
+                  </Label>
+                  <Label className="flex items-center gap-2">
+                    <input type="checkbox" checked={formData.finance_control_consideration} onChange={(e) => setFormData({...formData, finance_control_consideration: e.target.checked})} className="rounded border-slate-300" />
+                    Finance Control
+                  </Label>
+                  <Label className="flex items-center gap-2">
+                    <input type="checkbox" checked={formData.compensating_control} onChange={(e) => setFormData({...formData, compensating_control: e.target.checked})} className="rounded border-slate-300" />
+                    Compensating Control
+                  </Label>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Compensating Control Risk</Label>
+                    <Input value={formData.compensating_control_risk} onChange={(e) => setFormData({...formData, compensating_control_risk: e.target.value})} placeholder="Risk description" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Control Narrative URL</Label>
+                    <Input value={formData.control_narrative_url} onChange={(e) => setFormData({...formData, control_narrative_url: e.target.value})} placeholder="https://..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Upload Document</Label>
+                    <Input value={formData.upload_document} onChange={(e) => setFormData({...formData, upload_document: e.target.value})} placeholder="Document reference" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Control Objective ID</Label>
+                    <Input value={formData.control_objective_id} onChange={(e) => setFormData({...formData, control_objective_id: e.target.value})} placeholder="Objective ID" />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Linked Risk (Reference Library)</Label>
+                    {!formData.risk_id && suggestedRisk && (
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs text-blue-500 font-medium mb-0.5">Auto-matched risk</p>
+                          <p className="font-medium text-slate-900 text-sm">{suggestedRisk.risk_reference_nr}</p>
+                          <p className="text-xs text-slate-600">{suggestedRisk.title}</p>
+                        </div>
+                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 shrink-0" onClick={() => setFormData({...formData, risk_id: suggestedRisk.id})}>
+                          Link Risk
+                        </Button>
+                      </div>
+                    )}
+                    {linkedRisk && (
+                      <div className="p-3 bg-green-50 rounded-lg border border-green-200 flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs text-green-600 font-medium mb-0.5">Linked risk</p>
+                          <p className="font-medium text-slate-900 text-sm">{linkedRisk.risk_reference_nr}</p>
+                          <p className="text-xs text-slate-600">{linkedRisk.title}</p>
+                        </div>
+                        <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 shrink-0" onClick={() => setFormData({...formData, risk_id: ''})}>
+                          Unlink
+                        </Button>
+                      </div>
+                    )}
+                    <Select value={formData.risk_id || "none"} onValueChange={(v) => setFormData({...formData, risk_id: v === 'none' ? '' : v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a risk from the library…" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        <SelectItem value="none">— None —</SelectItem>
+                        {libraryRisks.map(r => (
+                          <SelectItem key={r.id} value={r.id}>
+                            {r.risk_reference_nr} — {r.title?.slice(0, 60)}{r.title?.length > 60 ? '…' : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {!isNew && controlId && (
