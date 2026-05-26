@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, CheckCircle, AlertCircle, Loader2, BookOpen, Server, Puzzle, FileSpreadsheet } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Loader2, BookOpen, Puzzle, FileSpreadsheet, GitMerge, Building2 } from "lucide-react";
 import { toast } from "sonner";
+import StuckWorkflowPanel from "@/components/admin/StuckWorkflowPanel";
+import CompanyPreferencesPanel from "@/components/admin/CompanyPreferencesPanel";
 
 function UploadSection({ title, description, icon: Icon, iconColor, onUpload, accept = ".xlsx,.xls,.csv", isLoading, result }) {
   const fileRef = useRef(null);
@@ -99,7 +101,6 @@ export default function Configuration() {
     setIctModulesResult(null);
     try {
       const file_url = await uploadFile(file);
-      // Extract data from file and bulk-create ICTModule records
       const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({
         file_url,
         json_schema: {
@@ -196,12 +197,26 @@ export default function Configuration() {
         <p className="text-slate-500 text-sm mt-1">Bulk imports, reference data management and system configuration.</p>
       </div>
 
-      <Tabs defaultValue="imports">
+      <Tabs defaultValue="company_prefs">
         <TabsList>
+          <TabsTrigger value="company_prefs" className="gap-2">
+            <Building2 className="w-4 h-4" /> Company Preferences
+          </TabsTrigger>
+          <TabsTrigger value="workflow_admin" className="gap-2">
+            <GitMerge className="w-4 h-4" /> Workflow Admin
+          </TabsTrigger>
           <TabsTrigger value="imports" className="gap-2">
             <Upload className="w-4 h-4" /> Bulk Imports
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="company_prefs" className="mt-4">
+          <CompanyPreferencesPanel />
+        </TabsContent>
+
+        <TabsContent value="workflow_admin" className="mt-4">
+          <StuckWorkflowPanel />
+        </TabsContent>
 
         <TabsContent value="imports" className="mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

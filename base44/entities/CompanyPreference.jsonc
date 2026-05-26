@@ -1,0 +1,110 @@
+{
+  "name": "CompanyPreference",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (one record per company)"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name (denormalized)"
+    },
+    "default_assessment_model_id": {
+      "type": "string",
+      "description": "Default Assessment Model ID"
+    },
+    "default_assessment_model_name": {
+      "type": "string",
+      "description": "Default Assessment Model name (denormalized)"
+    },
+    "default_workflow_approver_email": {
+      "type": "string",
+      "description": "Default workflow router / approver email"
+    },
+    "default_issue_approver_email": {
+      "type": "string",
+      "description": "Default Issue Approver email"
+    },
+    "risk_mailbox": {
+      "type": "string",
+      "description": "Risk management notification mailbox"
+    },
+    "compliance_mailbox": {
+      "type": "string",
+      "description": "Compliance team notification mailbox"
+    },
+    "audit_mailbox": {
+      "type": "string",
+      "description": "Audit team notification mailbox"
+    },
+    "governance_mailbox": {
+      "type": "string",
+      "description": "Governance team notification mailbox"
+    },
+    "notification_from_name": {
+      "type": "string",
+      "description": "Display name used in outgoing notifications (e.g. 'CBD GRC Platform')"
+    },
+    "default_currency": {
+      "type": "string",
+      "description": "Default currency code (e.g. USD, EUR, ZAR)",
+      "default": "USD"
+    },
+    "fiscal_year_start_month": {
+      "type": "number",
+      "description": "Fiscal year start month (1=Jan \u2026 12=Dec)",
+      "default": 1
+    },
+    "risk_review_frequency_days": {
+      "type": "number",
+      "description": "Default days between risk reviews",
+      "default": 90
+    },
+    "issue_escalation_days": {
+      "type": "number",
+      "description": "Days before an unresolved issue is auto-escalated",
+      "default": 14
+    },
+    "require_evidence_on_assessment": {
+      "type": "boolean",
+      "default": false,
+      "description": "Require at least one evidence file before submitting a control assessment"
+    },
+    "enable_workflow_email_notifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "Send email notifications for workflow events"
+    },
+    "enable_risk_auto_scoring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Automatically calculate risk scores based on likelihood \u00d7 impact"
+    },
+    "default_risk_appetite": {
+      "type": "string",
+      "enum": [
+        "Very Low",
+        "Low",
+        "Medium",
+        "High",
+        "Very High"
+      ],
+      "default": "Medium",
+      "description": "Organisation default risk appetite level"
+    },
+    "control_assessment_reminder_days": {
+      "type": "number",
+      "description": "Days before cycle end-date to send assessor reminders",
+      "default": 7
+    },
+    "max_resubmissions": {
+      "type": "number",
+      "description": "Maximum number of times an item can be resubmitted through a workflow",
+      "default": 3
+    }
+  },
+  "required": [
+    "company_id"
+  ]
+}
