@@ -25,6 +25,8 @@ export default function Assessments() {
   const [formData, setFormData] = useState({
     company_id: "",
     framework_id: "",
+    assessment_model_id: "",
+    assessment_model_name: "",
     name: "",
     assessment_date: new Date().toISOString().split('T')[0],
     due_date: "",
@@ -61,6 +63,11 @@ export default function Assessments() {
     queryFn: () => base44.entities.Framework.list(),
   });
 
+  const { data: assessmentModels = [] } = useQuery({
+    queryKey: ['assessment-models-active'],
+    queryFn: () => base44.entities.AssessmentModel.filter({ status: 'active' }),
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Assessment.create(data),
     onSuccess: () => {
@@ -83,6 +90,8 @@ export default function Assessments() {
     setFormData({
       company_id: "",
       framework_id: "",
+      assessment_model_id: "",
+      assessment_model_name: "",
       name: "",
       assessment_date: new Date().toISOString().split('T')[0],
       due_date: "",
@@ -183,6 +192,24 @@ export default function Assessments() {
                     <SelectContent>
                       {frameworks.map(framework => (
                         <SelectItem key={framework.id} value={framework.id}>{framework.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="assessment_model_id">Assessment Model <span className="text-slate-400 font-normal">(optional)</span></Label>
+                  <Select value={formData.assessment_model_id} onValueChange={(value) => {
+                    const model = assessmentModels.find(m => m.id === value);
+                    setFormData({...formData, assessment_model_id: value, assessment_model_name: model?.name || ""});
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select assessment model…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {assessmentModels.length === 0 ? (
+                        <SelectItem value="_none" disabled>No active models available</SelectItem>
+                      ) : assessmentModels.map(m => (
+                        <SelectItem key={m.id} value={m.id}>{m.name} <span className="text-slate-400 text-xs ml-1">({m.analysis_type})</span></SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

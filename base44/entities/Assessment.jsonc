@@ -1,0 +1,114 @@
+{
+  "name": "Assessment",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "framework_id": {
+      "type": "string",
+      "description": "Reference to Framework entity"
+    },
+    "assessment_model_id": {
+      "type": "string",
+      "description": "Reference to AssessmentModel entity"
+    },
+    "assessment_model_name": {
+      "type": "string",
+      "description": "Assessment model name (denormalized)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Assessment name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_progress",
+        "pending_review",
+        "returned",
+        "approved",
+        "completed",
+        "overdue",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "assessment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "completion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "assessor": {
+      "type": "string"
+    },
+    "assessor_email": {
+      "type": "string",
+      "format": "email"
+    },
+    "reviewer": {
+      "type": "string"
+    },
+    "reviewer_email": {
+      "type": "string",
+      "format": "email"
+    },
+    "approver": {
+      "type": "string"
+    },
+    "approval_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "return_comments": {
+      "type": "string"
+    },
+    "lifecycle_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workflow_instance_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_id",
+    "framework_id",
+    "name"
+  ]
+}

@@ -7,8 +7,7 @@
       "description": "Model name (e.g. IT Governance ISO27001)"
     },
     "description": {
-      "type": "string",
-      "description": "Description of this assessment model"
+      "type": "string"
     },
     "analysis_type": {
       "type": "string",
@@ -16,11 +15,11 @@
         "Qualitative",
         "Quantitative",
         "Semi-Quantitative",
+        "Maturity Assessment",
         "Supplier Services",
         "Criticality"
       ],
-      "default": "Qualitative",
-      "description": "Type of analysis this model performs"
+      "default": "Qualitative"
     },
     "status": {
       "type": "string",
@@ -33,23 +32,19 @@
       "default": "draft"
     },
     "company_id": {
-      "type": "string",
-      "description": "Reference to Company (null = global model)"
+      "type": "string"
     },
     "is_global": {
       "type": "boolean",
-      "default": false,
-      "description": "True if this model is available to all companies"
+      "default": false
     },
     "revision": {
       "type": "number",
-      "default": 1,
-      "description": "Revision number"
+      "default": 1
     },
     "revision_date": {
       "type": "string",
-      "format": "date",
-      "description": "Current revision date"
+      "format": "date"
     },
     "start_date": {
       "type": "string",
@@ -59,18 +54,19 @@
       "type": "string",
       "format": "date"
     },
-    "risk_formula": {
+    "ratings_formula": {
       "type": "string",
       "enum": [
         "product",
-        "weighted_product"
+        "weighted_product",
+        "hybrid_maturity"
       ],
       "default": "product",
-      "description": "Formula used to calculate risk: Product (L x I) or Weighted Product"
+      "description": "Formula / scoring method: Product (L\u00d7I), Weighted Product, or Hybrid Maturity (qualitative + quantitative combined)"
     },
     "impact_levels": {
       "type": "array",
-      "description": "Impact scoring bands",
+      "description": "Impact scoring bands (Qualitative/Quantitative/Semi-Quantitative models)",
       "items": {
         "type": "object",
         "properties": {
@@ -84,12 +80,10 @@
             "type": "number"
           },
           "weight_pct": {
-            "type": "number",
-            "description": "Weight percentage for weighted product formula"
+            "type": "number"
           },
           "color_hex": {
-            "type": "string",
-            "description": "Hex colour code (e.g. #ff0000)"
+            "type": "string"
           },
           "label": {
             "type": "string"
@@ -99,7 +93,7 @@
     },
     "likelihood_levels": {
       "type": "array",
-      "description": "Likelihood scoring bands",
+      "description": "Likelihood scoring bands (Qualitative/Quantitative/Semi-Quantitative models)",
       "items": {
         "type": "object",
         "properties": {
@@ -113,6 +107,44 @@
             "type": "number"
           },
           "label": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "maturity_levels": {
+      "type": "array",
+      "description": "Maturity levels for Hybrid Maturity models \u2014 each level combines a qualitative label with a quantitative score range",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "level_number": {
+            "type": "number",
+            "description": "Maturity level number (e.g. 1\u20135)"
+          },
+          "qualitative_label": {
+            "type": "string",
+            "description": "Qualitative label (e.g. Initial, Managed, Optimizing)"
+          },
+          "quantitative_label": {
+            "type": "string",
+            "description": "Optional quantitative descriptor (e.g. Ad-hoc)"
+          },
+          "score_low": {
+            "type": "number",
+            "description": "Lower bound of quantitative score range"
+          },
+          "score_high": {
+            "type": "number",
+            "description": "Upper bound of quantitative score range"
+          },
+          "description": {
+            "type": "string"
+          },
+          "color_hex": {
             "type": "string"
           }
         }

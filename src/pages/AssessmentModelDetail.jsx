@@ -17,6 +17,14 @@ const urlParams = new URLSearchParams(window.location.search);
 const modelId = urlParams.get("id");
 const isNew = urlParams.get("mode") === "new";
 
+const MATURITY_DEFAULTS = [
+  { id: "m1", level_number: 1, qualitative_label: "Initial", quantitative_label: "Ad-hoc", score_low: 0, score_high: 20, description: "Processes are unpredictable, poorly controlled and reactive", color_hex: "#ef4444" },
+  { id: "m2", level_number: 2, qualitative_label: "Developing", quantitative_label: "Repeatable", score_low: 21, score_high: 40, description: "Processes are characterised for the project and are often reactive", color_hex: "#f97316" },
+  { id: "m3", level_number: 3, qualitative_label: "Defined", quantitative_label: "Defined", score_low: 41, score_high: 60, description: "Processes are characterised for the organisation and are proactive", color_hex: "#f59e0b" },
+  { id: "m4", level_number: 4, qualitative_label: "Managed", quantitative_label: "Quantitatively Managed", score_low: 61, score_high: 80, description: "Processes are measured and controlled using quantitative data", color_hex: "#22c55e" },
+  { id: "m5", level_number: 5, qualitative_label: "Optimizing", quantitative_label: "Optimizing", score_low: 81, score_high: 100, description: "Focus on continuous process improvement and innovation", color_hex: "#16a34a" },
+];
+
 const SUPPLIER_DEFAULTS = [
   { id: "s1", value: "meets_none", label: "Meets No Requirements", description: "Supplier fails to meet contract requirements", color_hex: "#ef4444", sort_order: 1 },
   { id: "s2", value: "meets_some", label: "Meets Some Requirements", description: "Supplier partially meets requirements", color_hex: "#f97316", sort_order: 2 },
@@ -42,15 +50,15 @@ const STATUS_OPTIONS = [
   { value: "archived", label: "Archived" },
 ];
 
-const TYPE_OPTIONS = ["Qualitative", "Quantitative", "Semi-Quantitative", "Supplier Services", "Criticality"];
+const TYPE_OPTIONS = ["Qualitative", "Quantitative", "Semi-Quantitative", "Maturity Assessment", "Supplier Services", "Criticality"];
 
 export default function AssessmentModelDetail() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
     name: "", description: "", analysis_type: "Qualitative", status: "draft",
     revision: 1, revision_date: "", start_date: "", end_date: "",
-    risk_formula: "product", is_global: false, notes: "",
-    impact_levels: [], likelihood_levels: [], rating_options: [],
+    ratings_formula: "product", is_global: false, notes: "",
+    impact_levels: [], likelihood_levels: [], rating_options: [], maturity_levels: [],
   });
   const [dirty, setDirty] = useState(false);
 
@@ -71,25 +79,29 @@ export default function AssessmentModelDetail() {
         revision_date: model.revision_date || "",
         start_date: model.start_date || "",
         end_date: model.end_date || "",
-        risk_formula: model.risk_formula || "product",
+        ratings_formula: model.ratings_formula || model.risk_formula || "product",
         is_global: model.is_global || false,
         notes: model.notes || "",
         impact_levels: model.impact_levels || [],
         likelihood_levels: model.likelihood_levels || [],
         rating_options: model.rating_options || [],
+        maturity_levels: model.maturity_levels || [],
       });
     }
   }, [model]);
 
   const set = (field, value) => { setForm(p => ({ ...p, [field]: value })); setDirty(true); };
 
-  // Auto-seed rating options when switching type
+  // Auto-seed defaults when switching type
   const handleTypeChange = (type) => {
-    set("analysis_type", type);
-    if (type === "Supplier Services" && form.rating_options.length === 0) {
-      setForm(p => ({ ...p, analysis_type: type, rating_options: SUPPLIER_DEFAULTS }));
-    } else if (type === "Criticality" && form.rating_options.length === 0) {
-      setForm(p => ({ ...p, analysis_type: type, rating_options: CRITICALITY_DEFAULTS }));
+    if (type === "Supplier Services") {
+      setForm(p => ({ ...p, analysis_type: type, rating_options: p.rating_options.length === 0 ? SUPPLIER_DEFAULTS : p.rating_options }));
+    } else if (type === "Criticality") {
+      setForm(p => ({ ...p, analysis_type: type, rating_options: p.rating_options.length === 0 ? CRITICALITY_DEFAULTS : p.rating_options }));
+    } else if (type === "Maturity Assessment") {
+      setForm(p => ({ ...p, analysis_type: type, ratings_formula: "hybrid_maturity", maturity_levels: p.maturity_levels.length === 0 ? MATURITY_DEFAULTS : p.maturity_levels }));
+    } else {
+      setForm(p => ({ ...p, analysis_type: type, ratings_formula: p.ratings_formula === "hybrid_maturity" ? "product" : p.ratings_formula }));
     }
     setDirty(true);
   };
@@ -111,7 +123,14 @@ export default function AssessmentModelDetail() {
   });
 
   const isRiskModel = ["Qualitative", "Quantitative", "Semi-Quantitative"].includes(form.analysis_type);
+  const isMaturityModel = form.analysis_type === "Maturity Assessment";
   const isRatingModel = ["Supplier Services", "Criticality"].includes(form.analysis_type);
+
+  const updateMaturity = (idx, field, value) => {
+    const levels = [...form.maturity_levels];
+    levels[idx] = { ...levels[idx], [field]: ["level_number","score_low","score_high"].includes(field) ? Number(value) : value };
+    set("maturity_levels", levels);
+  };
 
   // Impact table helpers
   const updateImpact = (idx, field, value) => {
@@ -217,32 +236,117 @@ export default function AssessmentModelDetail() {
         </CardContent>
       </Card>
 
-      {/* Risk formula (Qualitative / Quantitative / Semi-Quantitative) */}
-      {isRiskModel && (
+      {/* Ratings Formula */}
+      {(isRiskModel || isMaturityModel) && (
         <Card className="border-none shadow-sm">
-          <CardHeader className="pb-2"><CardTitle className="text-base">Risk Formula</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-base">Ratings Formula</CardTitle></CardHeader>
           <CardContent className="p-5 space-y-3">
             <div className="flex flex-col gap-3">
-              {[
-                { value: "product", label: "Product", formula: "Risk Level = Likelihood × Impact" },
-                { value: "weighted_product", label: "Weighted Product", formula: "Risk Level = Exp((Impact × Weighting Factor), X) × Exp(Likelihood, Y)" },
-              ].map(opt => (
-                <label key={opt.value} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${form.risk_formula === opt.value ? "border-primary bg-primary/5" : "border-slate-200 hover:border-slate-300"}`}>
+              {(isMaturityModel
+                ? [
+                    { value: "hybrid_maturity", label: "Hybrid Maturity", formula: "Combines qualitative labels (e.g. Initial → Optimizing) with a quantitative score range per level — enabling both descriptive and numeric reporting" },
+                  ]
+                : [
+                    { value: "product", label: "Product", formula: "Risk Level = Likelihood × Impact" },
+                    { value: "weighted_product", label: "Weighted Product", formula: "Risk Level = Exp((Impact × Weighting Factor), X) × Exp(Likelihood, Y)" },
+                  ]
+              ).map(opt => (
+                <label key={opt.value} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${form.ratings_formula === opt.value ? "border-primary bg-primary/5" : "border-slate-200 hover:border-slate-300"}`}>
                   <input
                     type="radio"
-                    name="risk_formula"
+                    name="ratings_formula"
                     value={opt.value}
-                    checked={form.risk_formula === opt.value}
-                    onChange={() => set("risk_formula", opt.value)}
+                    checked={form.ratings_formula === opt.value}
+                    onChange={() => set("ratings_formula", opt.value)}
                     className="mt-0.5"
                   />
                   <div>
                     <p className="font-medium text-sm text-slate-800">{opt.label}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Formula: {opt.formula}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{opt.formula}</p>
                   </div>
                 </label>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Maturity Levels (Hybrid Maturity) */}
+      {isMaturityModel && (
+        <Card className="border-none shadow-sm">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Maturity Levels</CardTitle>
+              <p className="text-xs text-slate-500 mt-0.5">Each level combines a qualitative label with a quantitative score range.</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => set("maturity_levels", [...form.maturity_levels, { id: crypto.randomUUID(), level_number: form.maturity_levels.length + 1, qualitative_label: "", quantitative_label: "", score_low: 0, score_high: 0, description: "", color_hex: "#94a3b8" }])}>
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add Level
+            </Button>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 w-12">#</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Qualitative Label</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Quantitative Label</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Score Low</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Score High</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Description</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Colour</th>
+                    <th className="w-10" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {form.maturity_levels.length === 0 ? (
+                    <tr><td colSpan={8} className="px-4 py-6 text-center text-xs text-slate-400 italic">No levels defined.</td></tr>
+                  ) : form.maturity_levels.map((row, idx) => (
+                    <tr key={row.id} className="hover:bg-slate-50">
+                      <td className="px-3 py-2"><Input type="number" value={row.level_number} onChange={e => updateMaturity(idx, "level_number", e.target.value)} className="h-8 text-sm w-14" /></td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          {row.color_hex && <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: row.color_hex }} />}
+                          <Input value={row.qualitative_label} onChange={e => updateMaturity(idx, "qualitative_label", e.target.value)} className="h-8 text-sm" placeholder="e.g. Managed" />
+                        </div>
+                      </td>
+                      <td className="px-3 py-2"><Input value={row.quantitative_label} onChange={e => updateMaturity(idx, "quantitative_label", e.target.value)} className="h-8 text-sm" placeholder="e.g. Quantitatively Managed" /></td>
+                      <td className="px-3 py-2"><Input type="number" value={row.score_low} onChange={e => updateMaturity(idx, "score_low", e.target.value)} className="h-8 text-sm w-20" /></td>
+                      <td className="px-3 py-2"><Input type="number" value={row.score_high} onChange={e => updateMaturity(idx, "score_high", e.target.value)} className="h-8 text-sm w-20" /></td>
+                      <td className="px-3 py-2"><Input value={row.description} onChange={e => updateMaturity(idx, "description", e.target.value)} className="h-8 text-sm" placeholder="Brief description" /></td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-1">
+                          <input type="color" value={row.color_hex || "#94a3b8"} onChange={e => updateMaturity(idx, "color_hex", e.target.value)} className="w-8 h-8 rounded cursor-pointer border border-slate-200" />
+                        </div>
+                      </td>
+                      <td className="px-2 py-2">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => set("maturity_levels", form.maturity_levels.filter((_, i) => i !== idx))}>
+                          <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Preview */}
+            {form.maturity_levels.length > 0 && (
+              <div className="p-4 border-t border-slate-100">
+                <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Preview</p>
+                <div className="flex gap-2 flex-wrap">
+                  {[...form.maturity_levels].sort((a,b) => a.level_number - b.level_number).map(lvl => (
+                    <div key={lvl.id} className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs" style={{ borderColor: lvl.color_hex || "#94a3b8", backgroundColor: (lvl.color_hex || "#94a3b8") + "18" }}>
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ backgroundColor: lvl.color_hex || "#94a3b8" }}>{lvl.level_number}</span>
+                      <div>
+                        <div className="font-semibold text-slate-800">{lvl.qualitative_label || "—"}</div>
+                        {lvl.quantitative_label && <div className="text-slate-500">{lvl.quantitative_label}</div>}
+                        <div className="text-slate-400">{lvl.score_low}–{lvl.score_high}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
