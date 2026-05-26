@@ -1,0 +1,108 @@
+{
+  "name": "Evidence",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Evidence file name / title"
+    },
+    "description": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL of the uploaded file"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original file name"
+    },
+    "file_type": {
+      "type": "string",
+      "enum": [
+        "document",
+        "image",
+        "screenshot",
+        "spreadsheet",
+        "presentation",
+        "other"
+      ],
+      "default": "document"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Policy",
+        "Procedure",
+        "Test Evidence",
+        "Interview Notes",
+        "System Output",
+        "Report",
+        "Walkthrough",
+        "Data Extract",
+        "Observation",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Free-form tags"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Controls this evidence supports"
+    },
+    "linked_cycle_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "ControlAssessmentCycle IDs"
+    },
+    "linked_control_assessment_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "ControlAssessment workpaper IDs"
+    },
+    "uploaded_by_name": {
+      "type": "string"
+    },
+    "uploaded_by_email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "superseded",
+        "archived"
+      ],
+      "default": "active"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date after which evidence is considered stale"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "company_id"
+  ]
+}
