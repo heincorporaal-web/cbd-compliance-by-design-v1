@@ -1,0 +1,665 @@
+{
+  "name": "UserRole",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Role name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Role description"
+    },
+    "is_system_role": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a system role (cannot be deleted)"
+    },
+    "active_from": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this role is active"
+    },
+    "active_to": {
+      "type": "string",
+      "format": "date",
+      "description": "Date until which this role is active (expiry). Leave blank for no expiry."
+    },
+    "permissions": {
+      "type": "object",
+      "properties": {
+        "companies": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "frameworks": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "objectives": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "doa": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "risks": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "risk_cycles": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "incidents": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "issues": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "controls": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "control_cycles": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "workpapers": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "test_plans": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "assessments": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "assessment_models": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "processes": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "ict_systems": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "third_parties": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "surveys": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "stakeholders": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "sign_offs": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "grc_goals": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "workflows": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "users": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "reports": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "configuration": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        },
+        "audit_logs": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "restricted_company_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "If specified, users can only access these companies"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

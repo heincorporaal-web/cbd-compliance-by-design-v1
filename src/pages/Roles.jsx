@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Plus, Edit2, Trash2, Copy, ChevronDown, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Shield, Plus, Edit2, Trash2, ChevronDown, ChevronRight, CheckCircle2, CalendarRange } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -59,10 +59,10 @@ const MODULE_GROUPS = [
     label: "Processes & Systems",
     color: "text-cyan-700 bg-cyan-50",
     modules: [
-      { key: "processes",    label: "Processes & Value Chains" },
-      { key: "ict_systems",  label: "ICT Systems" },
-      { key: "third_parties",label: "Third Parties" },
-      { key: "surveys",      label: "Surveys" },
+      { key: "processes",     label: "Processes & Value Chains" },
+      { key: "ict_systems",   label: "ICT Systems" },
+      { key: "third_parties", label: "Third Parties" },
+      { key: "surveys",       label: "Surveys" },
     ],
   },
   {
@@ -78,11 +78,11 @@ const MODULE_GROUPS = [
     label: "Administration",
     color: "text-slate-700 bg-slate-100",
     modules: [
-      { key: "workflows",      label: "Workflows" },
-      { key: "users",          label: "User Management" },
-      { key: "reports",        label: "Reports & Exports" },
-      { key: "configuration",  label: "Configuration & Imports" },
-      { key: "audit_logs",     label: "Audit Logs" },
+      { key: "workflows",     label: "Workflows" },
+      { key: "users",         label: "User Management" },
+      { key: "reports",       label: "Reports & Exports" },
+      { key: "configuration", label: "Configuration & Imports" },
+      { key: "audit_logs",    label: "Audit Logs" },
     ],
   },
 ];
@@ -100,6 +100,20 @@ const ALL_MODULE_KEYS = MODULE_GROUPS.flatMap(g => g.modules.map(m => m.key));
 
 const buildEmptyPermissions = () =>
   Object.fromEntries(ALL_MODULE_KEYS.map(k => [k, Object.fromEntries(ACTIONS.map(a => [a.key, false]))]));
+
+// ─── Computed Status (never manually set) ────────────────────────────────────
+function computeRoleStatus(role) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (role.active_from && today < role.active_from) return "scheduled";
+  if (role.active_to && today > role.active_to) return "expired";
+  return "active";
+}
+
+const STATUS_STYLE = {
+  active:    "bg-green-100 text-green-700",
+  scheduled: "bg-blue-100 text-blue-700",
+  expired:   "bg-slate-100 text-slate-500",
+};
 
 // ─── Role Templates ───────────────────────────────────────────────────────────
 const TEMPLATES = [
@@ -172,11 +186,7 @@ function PermissionMatrix({ permissions, onChange, readOnly = false }) {
   const [collapsed, setCollapsed] = useState({});
 
   const toggleGroup = (label) => setCollapsed(p => ({ ...p, [label]: !p[label] }));
-
-  const toggleAll = (moduleKey, checked) => {
-    ACTIONS.forEach(a => onChange(moduleKey, a.key, checked));
-  };
-
+  const toggleAll = (moduleKey, checked) => ACTIONS.forEach(a => onChange(moduleKey, a.key, checked));
   const isRowFull = (moduleKey) => ACTIONS.every(a => permissions[moduleKey]?.[a.key]);
 
   return (
@@ -236,7 +246,8 @@ function PermissionMatrix({ permissions, onChange, readOnly = false }) {
 
 function RoleDialog({ open, onOpenChange, editingRole, companies }) {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({ name: "", description: "", permissions: buildEmptyPermissions(), restricted_company_ids: [], status: "active" });
+  const emptyForm = { name: "", description: "", permissions: buildEmptyPermissions(), restricted_company_ids: [], active_from: "", active_to: "" };
+  const [form, setForm] = useState(emptyForm);
   const [selectedTemplate, setSelectedTemplate] = useState("");
 
   useEffect(() => {
@@ -246,10 +257,11 @@ function RoleDialog({ open, onOpenChange, editingRole, companies }) {
         description: editingRole.description || "",
         permissions: editingRole.permissions || buildEmptyPermissions(),
         restricted_company_ids: editingRole.restricted_company_ids || [],
-        status: editingRole.status || "active",
+        active_from: editingRole.active_from || "",
+        active_to: editingRole.active_to || "",
       });
     } else {
-      setForm({ name: "", description: "", permissions: buildEmptyPermissions(), restricted_company_ids: [], status: "active" });
+      setForm(emptyForm);
       setSelectedTemplate("");
     }
   }, [editingRole, open]);
@@ -295,6 +307,7 @@ function RoleDialog({ open, onOpenChange, editingRole, companies }) {
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
+  const previewStatus = computeRoleStatus(form);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -310,7 +323,6 @@ function RoleDialog({ open, onOpenChange, editingRole, companies }) {
           </TabsList>
 
           <TabsContent value="details" className="space-y-4">
-            {/* Template picker */}
             {!editingRole && (
               <div className="space-y-2">
                 <Label>Start from a template <span className="text-slate-400 text-xs">(optional)</span></Label>
@@ -340,15 +352,32 @@ function RoleDialog({ open, onOpenChange, editingRole, companies }) {
               <Label>Description</Label>
               <Textarea rows={3} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Describe what this role is responsible for…" />
             </div>
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <Select value={form.status} onValueChange={v => setForm(p => ({ ...p, status: v }))}>
-                <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {/* Active period — status is computed, never manual */}
+            <div className="space-y-3 p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <CalendarRange className="w-4 h-4" />
+                Active Period
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Active From <span className="text-slate-400">(optional)</span></Label>
+                  <Input type="date" value={form.active_from} onChange={e => setForm(p => ({ ...p, active_from: e.target.value }))} />
+                  <p className="text-xs text-slate-400">Leave blank to activate immediately</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Active To <span className="text-slate-400">(optional)</span></Label>
+                  <Input type="date" value={form.active_to} onChange={e => setForm(p => ({ ...p, active_to: e.target.value }))} />
+                  <p className="text-xs text-slate-400">Leave blank for no expiry</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-600 pt-1 border-t border-slate-200">
+                <span className="text-slate-400">Computed status:</span>
+                <span className={`px-2 py-0.5 rounded-full font-semibold capitalize ${STATUS_STYLE[previewStatus]}`}>{previewStatus}</span>
+                {form.active_from && <span className="text-slate-400 ml-2">From {form.active_from}</span>}
+                {form.active_to && <span className="text-slate-400">{form.active_from ? " · " : ""}Expires {form.active_to}</span>}
+                {!form.active_from && !form.active_to && <span className="text-slate-400">No date restrictions — always active</span>}
+              </div>
             </div>
           </TabsContent>
 
@@ -376,8 +405,8 @@ function RoleDialog({ open, onOpenChange, editingRole, companies }) {
               </div>
             )}
             {form.restricted_company_ids.length > 0 && (
-              <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
-                ⚠ This role is scoped to {form.restricted_company_ids.length} company(ies). Users will only see data for those companies.
+              <p className="text-xs text-amber-600 mt-2">
+                This role is scoped to {form.restricted_company_ids.length} company(ies). Users will only see data for those companies.
               </p>
             )}
           </TabsContent>
@@ -446,10 +475,10 @@ export default function Roles() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Roles", value: roles.length },
-          { label: "Active Roles", value: roles.filter(r => r.status === "active").length },
-          { label: "System Roles", value: roles.filter(r => r.is_system_role).length },
-          { label: "Users Assigned", value: users.filter(u => u.custom_role_id).length },
+          { label: "Total Roles",         value: roles.length },
+          { label: "Active",              value: roles.filter(r => computeRoleStatus(r) === "active").length },
+          { label: "Scheduled / Expired", value: roles.filter(r => computeRoleStatus(r) !== "active").length },
+          { label: "Users Assigned",      value: users.filter(u => u.custom_role_id).length },
         ].map(s => (
           <Card key={s.label} className="border-none shadow-sm">
             <CardContent className="p-4">
@@ -475,6 +504,7 @@ export default function Roles() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filteredRoles.map(role => {
+            const status = computeRoleStatus(role);
             const count = permissionCount(role.permissions);
             const userCount = getUsersWithRole(role.id);
             const scopedCount = role.restricted_company_ids?.length || 0;
@@ -486,7 +516,7 @@ export default function Roles() {
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <h3 className="font-bold text-slate-900 text-base">{role.name}</h3>
                         {role.is_system_role && <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">System</Badge>}
-                        <Badge className={role.status === "active" ? "bg-green-100 text-green-700 border-0" : "bg-slate-100 text-slate-500 border-0"}>{role.status}</Badge>
+                        <Badge className={`border-0 capitalize ${STATUS_STYLE[status]}`}>{status}</Badge>
                       </div>
                       {role.description && <p className="text-sm text-slate-500 line-clamp-2">{role.description}</p>}
                     </div>
@@ -522,13 +552,15 @@ export default function Roles() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-4 text-xs text-slate-400 pt-2 border-t border-slate-50">
+                  <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400 pt-2 border-t border-slate-50">
                     <span><span className="font-semibold text-slate-600">{count}</span> permissions</span>
                     <span><span className="font-semibold text-slate-600">{userCount}</span> user{userCount !== 1 ? "s" : ""}</span>
                     {scopedCount > 0
                       ? <span className="text-amber-600"><span className="font-semibold">{scopedCount}</span> companies scoped</span>
                       : <span className="text-green-600">All companies</span>
                     }
+                    {role.active_from && <span className="flex items-center gap-1"><CalendarRange className="w-3 h-3" />From {role.active_from}</span>}
+                    {role.active_to && <span className="text-slate-400">Expires {role.active_to}</span>}
                   </div>
                 </CardContent>
               </Card>
