@@ -10,6 +10,8 @@ import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import GettingStarted from './pages/GettingStarted';
 import HelpCentre from './pages/HelpCentre';
+import AssessmentModels from './pages/AssessmentModels';
+import AssessmentModelDetail from './pages/AssessmentModelDetail';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -56,6 +58,8 @@ const AuthenticatedApp = () => {
         ))}
         <Route path="/GettingStarted" element={<LayoutWrapper currentPageName="GettingStarted"><GettingStarted /></LayoutWrapper>} />
         <Route path="/HelpCentre" element={<LayoutWrapper currentPageName="HelpCentre"><HelpCentre /></LayoutWrapper>} />
+        <Route path="/AssessmentModels" element={<LayoutWrapper currentPageName="AssessmentModels"><AssessmentModels /></LayoutWrapper>} />
+        <Route path="/AssessmentModelDetail" element={<LayoutWrapper currentPageName="AssessmentModelDetail"><AssessmentModelDetail /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>

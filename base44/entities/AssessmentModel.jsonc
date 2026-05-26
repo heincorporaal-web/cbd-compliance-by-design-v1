@@ -1,0 +1,156 @@
+{
+  "name": "AssessmentModel",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Model name (e.g. IT Governance ISO27001)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of this assessment model"
+    },
+    "analysis_type": {
+      "type": "string",
+      "enum": [
+        "Qualitative",
+        "Quantitative",
+        "Semi-Quantitative",
+        "Supplier Services",
+        "Criticality"
+      ],
+      "default": "Qualitative",
+      "description": "Type of analysis this model performs"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_edit",
+        "active",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company (null = global model)"
+    },
+    "is_global": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this model is available to all companies"
+    },
+    "revision": {
+      "type": "number",
+      "default": 1,
+      "description": "Revision number"
+    },
+    "revision_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Current revision date"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "risk_formula": {
+      "type": "string",
+      "enum": [
+        "product",
+        "weighted_product"
+      ],
+      "default": "product",
+      "description": "Formula used to calculate risk: Product (L x I) or Weighted Product"
+    },
+    "impact_levels": {
+      "type": "array",
+      "description": "Impact scoring bands",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "low_value": {
+            "type": "number"
+          },
+          "high_value": {
+            "type": "number"
+          },
+          "weight_pct": {
+            "type": "number",
+            "description": "Weight percentage for weighted product formula"
+          },
+          "color_hex": {
+            "type": "string",
+            "description": "Hex colour code (e.g. #ff0000)"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "likelihood_levels": {
+      "type": "array",
+      "description": "Likelihood scoring bands",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "low_value": {
+            "type": "number"
+          },
+          "high_value": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rating_options": {
+      "type": "array",
+      "description": "Rating options for Supplier Services or Criticality models",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "color_hex": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "analysis_type"
+  ]
+}

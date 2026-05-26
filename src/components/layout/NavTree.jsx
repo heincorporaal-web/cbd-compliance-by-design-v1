@@ -6,7 +6,7 @@ import {
   AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert,
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
-  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle
+  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -104,6 +104,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "workflows", title: "Workflows", url: createPageUrl("Workflows"), icon: GitBranch },
       { id: "configuration", title: "Configuration & Imports", url: createPageUrl("Configuration"), icon: Settings },
+      { id: "assessment_models", title: "Assessment Models", url: createPageUrl("AssessmentModels"), icon: SlidersHorizontal },
     ],
   },
 ];
