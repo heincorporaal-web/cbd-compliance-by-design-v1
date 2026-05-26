@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import GettingStarted from './pages/GettingStarted';
+import HelpCentre from './pages/HelpCentre';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
           <Route key={path} path={`/${path}`} element={<Page />} />
         ))}
         <Route path="/GettingStarted" element={<LayoutWrapper currentPageName="GettingStarted"><GettingStarted /></LayoutWrapper>} />
+        <Route path="/HelpCentre" element={<LayoutWrapper currentPageName="HelpCentre"><HelpCentre /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
