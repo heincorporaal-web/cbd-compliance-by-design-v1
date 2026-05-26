@@ -46,6 +46,26 @@
       },
       "description": "IDs of controls included in this assessment cycle"
     },
+    "assessor_group_id": {
+      "type": "string",
+      "description": "Reference to StakeholderGroup \u2014 members of this group can claim and perform assessments"
+    },
+    "assessor_group_name": {
+      "type": "string",
+      "description": "Assessor group name (denormalized)"
+    },
+    "reviewer_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder \u2014 named reviewer who reviews submitted workpapers"
+    },
+    "reviewer_name": {
+      "type": "string",
+      "description": "Reviewer name (denormalized)"
+    },
+    "reviewer_email": {
+      "type": "string",
+      "description": "Reviewer email (denormalized)"
+    },
     "amendment_history": {
       "type": "array",
       "items": {

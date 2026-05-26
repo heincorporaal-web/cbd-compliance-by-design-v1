@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Save, Send, CheckCircle, Clock, AlertTriangle, Trash2, Pencil, History } from "lucide-react";
+import { ArrowLeft, Save, Send, CheckCircle, Clock, AlertTriangle, Trash2, Pencil, History, Users, UserCheck } from "lucide-react";
+import CycleControlWorkpaper from "@/components/controls/CycleControlWorkpaper";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
@@ -39,14 +40,19 @@ export default function ControlAssessmentCycleDetail() {
   const [iamComment, setIamComment] = useState("");
   const [formData, setFormData] = useState({
     name: "", description: "", cycle_year: new Date().getFullYear(), start_date: "", end_date: "",
+    assessor_group_id: "", assessor_group_name: "", reviewer_stakeholder_id: "", reviewer_name: "", reviewer_email: "",
   });
   const [selectedControlIds, setSelectedControlIds] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Amendment state
   const [isAmending, setIsAmending] = useState(false);
   const [amendmentReason, setAmendmentReason] = useState("");
   const [amendOriginalEndDate, setAmendOriginalEndDate] = useState("");
   const [amendOriginalControlIds, setAmendOriginalControlIds] = useState([]);
+
+  // Fetch current user once
+  React.useEffect(() => { base44.auth.me().then(setCurrentUser).catch(() => {}); }, []);
 
   const { data: cycle, isLoading } = useQuery({
     queryKey: ["control-assessment-cycle", cycleId],
@@ -69,11 +75,40 @@ export default function ControlAssessmentCycleDetail() {
     queryFn: () => base44.entities.Company.list(),
   });
 
+  const { data: stakeholderGroups = [] } = useQuery({
+    queryKey: ["stakeholder-groups"],
+    queryFn: () => base44.entities.StakeholderGroup.list(),
+  });
+
+  const { data: stakeholders = [] } = useQuery({
+    queryKey: ["stakeholders-all"],
+    queryFn: () => base44.entities.Stakeholder.list(),
+  });
+
+  const { data: testPlans = [] } = useQuery({
+    queryKey: ["control-test-plans"],
+    queryFn: () => base44.entities.ControlTestPlan.list(),
+    enabled: selectedControlIds.length > 0,
+  });
+
+  const { data: controlAssessments = [], refetch: refetchAssessments } = useQuery({
+    queryKey: ["cycle-assessments", cycleId],
+    queryFn: () => base44.entities.ControlAssessment.filter({ cycle_id: cycleId }),
+    enabled: !!cycleId,
+  });
+
   const { data: workflowInstance } = useQuery({
     queryKey: ["workflow-instance", cycle?.workflow_instance_id],
     queryFn: () => base44.entities.WorkflowInstance.get(cycle.workflow_instance_id),
     enabled: !!cycle?.workflow_instance_id,
   });
+
+  // Determine if current user is in assessor group or is reviewer
+  const assessorGroupMembers = stakeholders.filter(s =>
+    cycle?.assessor_group_id && (s.group_ids || []).includes(cycle.assessor_group_id)
+  );
+  const isInAssessorGroup = assessorGroupMembers.some(s => s.email === currentUser?.email);
+  const isReviewer = !!cycle?.reviewer_email && cycle.reviewer_email === currentUser?.email;
 
   useEffect(() => {
     if (cycle) {
@@ -83,6 +118,11 @@ export default function ControlAssessmentCycleDetail() {
         cycle_year: cycle.cycle_year || new Date().getFullYear(),
         start_date: cycle.start_date || "",
         end_date: cycle.end_date || "",
+        assessor_group_id: cycle.assessor_group_id || "",
+        assessor_group_name: cycle.assessor_group_name || "",
+        reviewer_stakeholder_id: cycle.reviewer_stakeholder_id || "",
+        reviewer_name: cycle.reviewer_name || "",
+        reviewer_email: cycle.reviewer_email || "",
       });
       setSelectedControlIds(cycle.control_ids || []);
     }
@@ -96,8 +136,8 @@ export default function ControlAssessmentCycleDetail() {
     },
   });
 
-  const handleSave = () => {
-    updateMutation.mutate({ ...formData, control_ids: selectedControlIds });
+  const handleSave = (extra = {}) => {
+    updateMutation.mutate({ ...formData, control_ids: selectedControlIds, ...extra });
   };
 
   const startAmendment = () => {
@@ -233,6 +273,8 @@ export default function ControlAssessmentCycleDetail() {
   if (!cycle) return <div className="p-8 text-center text-slate-500">Cycle not found.</div>;
 
   const company = companies.find(c => c.id === cycle.company_id);
+  const assessorGroup = stakeholderGroups.find(g => g.id === cycle.assessor_group_id);
+  const reviewerStakeholder = stakeholders.find(s => s.id === cycle.reviewer_stakeholder_id);
   const selectedControls = controls.filter(c => selectedControlIds.includes(c.id));
   const isEditable = cycle.status === "planning";
   const canAmend = cycle.status === "approved" && !isAmending;
@@ -357,6 +399,7 @@ export default function ControlAssessmentCycleDetail() {
         <TabsList>
           <TabsTrigger value="details">Cycle Details</TabsTrigger>
           <TabsTrigger value="controls">Controls ({selectedControlIds.length})</TabsTrigger>
+          {cycle.status !== "planning" && <TabsTrigger value="workpaper">Assessment Workpaper</TabsTrigger>}
           {isEditable && <TabsTrigger value="add">Add Controls</TabsTrigger>}
           {isAmendMode && <TabsTrigger value="add">Edit Controls</TabsTrigger>}
         </TabsList>
@@ -386,9 +429,53 @@ export default function ControlAssessmentCycleDetail() {
                   <Input type="date" value={formData.end_date} onChange={e => setFormData(p => ({ ...p, end_date: e.target.value }))} disabled={!isEditable && !isAmendMode} />
                 </div>
               </div>
+              {/* Assessor group + reviewer */}
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="space-y-1">
+                  <Label className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> Assessor Group</Label>
+                  {isEditable ? (
+                    <select
+                      className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+                      value={formData.assessor_group_id || ""}
+                      onChange={e => {
+                        const g = stakeholderGroups.find(sg => sg.id === e.target.value);
+                        setFormData(p => ({ ...p, assessor_group_id: e.target.value, assessor_group_name: g?.name || "" }));
+                      }}
+                    >
+                      <option value="">— select group —</option>
+                      {stakeholderGroups.filter(g => g.status !== "inactive").map(g => (
+                        <option key={g.id} value={g.id}>{g.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="px-3 py-2 bg-muted rounded-md text-sm">{assessorGroup?.name || <span className="text-slate-400">Not set</span>}</div>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label className="flex items-center gap-1"><UserCheck className="w-3.5 h-3.5" /> Reviewer</Label>
+                  {isEditable ? (
+                    <select
+                      className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
+                      value={formData.reviewer_stakeholder_id || ""}
+                      onChange={e => {
+                        const s = stakeholders.find(st => st.id === e.target.value);
+                        setFormData(p => ({ ...p, reviewer_stakeholder_id: e.target.value, reviewer_name: s?.full_name || "", reviewer_email: s?.email || "" }));
+                      }}
+                    >
+                      <option value="">— select reviewer —</option>
+                      {stakeholders.filter(s => s.status !== "inactive").map(s => (
+                        <option key={s.id} value={s.id}>{s.full_name} {s.email ? `(${s.email})` : ""}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="px-3 py-2 bg-muted rounded-md text-sm">{reviewerStakeholder?.full_name || <span className="text-slate-400">Not set</span>}</div>
+                  )}
+                </div>
+              </div>
+
               {isEditable && (
                 <div className="flex justify-end pt-2">
-                  <Button onClick={handleSave} disabled={updateMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
+                  <Button onClick={() => handleSave({ assessor_group_id: formData.assessor_group_id, assessor_group_name: formData.assessor_group_name, reviewer_stakeholder_id: formData.reviewer_stakeholder_id, reviewer_name: formData.reviewer_name, reviewer_email: formData.reviewer_email })} disabled={updateMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
                     <Save className="w-4 h-4 mr-2" /> Save Details
                   </Button>
                 </div>
@@ -443,6 +530,64 @@ export default function ControlAssessmentCycleDetail() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {cycle.status !== "planning" && (
+          <TabsContent value="workpaper">
+            <Card className="border-none shadow-sm">
+              <CardHeader className="border-b border-slate-100 pb-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <CardTitle className="text-base">Assessment Workpaper</CardTitle>
+                  <div className="flex items-center gap-3 text-sm text-slate-500">
+                    {assessorGroup && <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {assessorGroup.name}</span>}
+                    {cycle.reviewer_name && <span className="flex items-center gap-1"><UserCheck className="w-3.5 h-3.5" /> Reviewer: {cycle.reviewer_name}</span>}
+                  </div>
+                </div>
+                {!cycle.assessor_group_id && (
+                  <p className="text-xs text-amber-600 mt-1">⚠ No assessor group assigned — go to Cycle Details to set one before assessors can claim work.</p>
+                )}
+                {/* Summary badges */}
+                <div className="flex gap-2 flex-wrap mt-2">
+                  {["unassigned","assigned","in_progress","submitted","reviewed"].map(s => {
+                    const count = controlAssessments.filter(a => (a.assessment_status || "unassigned") === s).length;
+                    const unassignedCount = s === "unassigned" ? selectedControlIds.length - controlAssessments.length : 0;
+                    const total = s === "unassigned" ? count + unassignedCount : count;
+                    if (total === 0) return null;
+                    const colors = { unassigned: "bg-slate-100 text-slate-500", assigned: "bg-blue-100 text-blue-700", in_progress: "bg-orange-100 text-orange-700", submitted: "bg-purple-100 text-purple-700", reviewed: "bg-green-100 text-green-700" };
+                    const labels = { unassigned: "Unassigned", assigned: "Assigned", in_progress: "In Progress", submitted: "Submitted", reviewed: "Reviewed" };
+                    return <Badge key={s} className={`${colors[s]} border-0 text-xs`}>{total} {labels[s]}</Badge>;
+                  })}
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {selectedControls.length === 0 ? (
+                  <div className="p-8 text-center text-slate-400 text-sm">No controls in this cycle.</div>
+                ) : (
+                  <div>
+                    {selectedControls.map(control => {
+                      const testPlan = testPlans.find(tp => tp.control_id === control.id);
+                      const assessment = controlAssessments.find(a => a.control_id === control.id);
+                      return (
+                        <CycleControlWorkpaper
+                          key={control.id}
+                          control={control}
+                          assessment={assessment}
+                          testPlan={testPlan}
+                          cycleId={cycleId}
+                          currentUserEmail={currentUser?.email}
+                          isInAssessorGroup={isInAssessorGroup}
+                          isReviewer={isReviewer}
+                          cycleStatus={cycle.status}
+                          reviewerEmail={cycle.reviewer_email}
+                          queryKey="cycle-assessments"
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         {(isEditable || isAmendMode) && (
           <TabsContent value="add">

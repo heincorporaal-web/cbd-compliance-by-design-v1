@@ -1,0 +1,171 @@
+{
+  "name": "ControlAssessment",
+  "type": "object",
+  "properties": {
+    "assessment_id": {
+      "type": "string",
+      "description": "Reference to Assessment entity (legacy)"
+    },
+    "cycle_id": {
+      "type": "string",
+      "description": "Reference to ControlAssessmentCycle entity"
+    },
+    "control_id": {
+      "type": "string",
+      "description": "Reference to Control entity"
+    },
+    "assessment_status": {
+      "type": "string",
+      "enum": [
+        "unassigned",
+        "assigned",
+        "in_progress",
+        "submitted",
+        "reviewed"
+      ],
+      "default": "unassigned",
+      "description": "Lifecycle status of this individual control assessment workpaper"
+    },
+    "assigned_to_email": {
+      "type": "string",
+      "description": "Email of the assessor who claimed this workpaper"
+    },
+    "assigned_to_name": {
+      "type": "string",
+      "description": "Full name of the assessor (denormalized)"
+    },
+    "assigned_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this workpaper was assigned"
+    },
+    "test_plan_steps": {
+      "type": "array",
+      "description": "Results for each test plan step \u2014 mirrors the steps from ControlTestPlan",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_id": {
+            "type": "string"
+          },
+          "step_title": {
+            "type": "string"
+          },
+          "step_type": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "pass",
+              "fail",
+              "not_applicable"
+            ],
+            "default": "pending"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "evidence_url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "overall_result": {
+      "type": "string",
+      "enum": [
+        "not_assessed",
+        "effective",
+        "partially_effective",
+        "ineffective",
+        "not_applicable"
+      ],
+      "default": "not_assessed"
+    },
+    "assessor_notes": {
+      "type": "string",
+      "description": "Assessor's overall conclusion / notes"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reviewer_email": {
+      "type": "string",
+      "description": "Email of the reviewer"
+    },
+    "review_result": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "returned"
+      ],
+      "default": "pending"
+    },
+    "review_notes": {
+      "type": "string"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_assessed",
+        "compliant",
+        "partial",
+        "non_compliant",
+        "not_applicable"
+      ],
+      "default": "not_assessed"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Assessment notes for this control"
+    },
+    "evidence_url": {
+      "type": "string",
+      "description": "URL to evidence documentation"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Evidence files and documentation"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "none"
+    },
+    "remediation_plan": {
+      "type": "string"
+    },
+    "remediation_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "control_id"
+  ]
+}
