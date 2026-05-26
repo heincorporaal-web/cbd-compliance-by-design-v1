@@ -149,12 +149,46 @@ const TEMPLATES = [
   },
   {
     name: "Control Owner",
-    description: "View and update controls and workpapers assigned to them; read-only elsewhere",
+    description: "Full ownership of controls, workpapers and test plans; read-only elsewhere",
     color: "bg-green-100 text-green-800",
     build: () => {
       const p = buildEmptyPermissions();
-      ["controls","workpapers","test_plans","evidence"].forEach(k => { p[k].view = true; p[k].edit = true; p[k].create = true; });
-      ["companies","frameworks","risks","assessments","processes","ict_systems"].forEach(k => { p[k].view = true; });
+      ["controls","workpapers","test_plans","evidence"].forEach(k => ACTIONS.forEach(a => { p[k][a.key] = true; }));
+      ["companies","frameworks","risks","assessments","processes","ict_systems","stakeholders"].forEach(k => { p[k].view = true; });
+      return p;
+    },
+  },
+  {
+    name: "Risk Owner",
+    description: "Full ownership of risks, risk cycles, incidents and issues; read-only elsewhere",
+    color: "bg-red-100 text-red-800",
+    build: () => {
+      const p = buildEmptyPermissions();
+      ["risks","risk_cycles","incidents","issues"].forEach(k => ACTIONS.forEach(a => { p[k][a.key] = true; }));
+      ["companies","frameworks","controls","assessments","processes","stakeholders"].forEach(k => { p[k].view = true; });
+      return p;
+    },
+  },
+  {
+    name: "Process Owner",
+    description: "Full ownership of processes, ICT systems and value chains; read-only on risks and controls",
+    color: "bg-teal-100 text-teal-800",
+    build: () => {
+      const p = buildEmptyPermissions();
+      ["processes","ict_systems","third_parties","surveys"].forEach(k => ACTIONS.forEach(a => { p[k][a.key] = true; }));
+      ["companies","frameworks","risks","controls","stakeholders","grc_goals"].forEach(k => { p[k].view = true; });
+      return p;
+    },
+  },
+  {
+    name: "Audit Manager",
+    description: "Manage and approve all audit, control assessment, and evidence activities",
+    color: "bg-indigo-100 text-indigo-800",
+    build: () => {
+      const p = buildEmptyPermissions();
+      ["assessments","assessment_models","evidence","workpapers","test_plans","control_cycles","issues"].forEach(k => ACTIONS.forEach(a => { p[k][a.key] = true; }));
+      ["controls","risks","frameworks","companies","stakeholders","reports","audit_logs"].forEach(k => { p[k].view = true; p[k].export = true; });
+      ["controls","risks"].forEach(k => { p[k].approve = true; });
       return p;
     },
   },
@@ -166,6 +200,65 @@ const TEMPLATES = [
       const p = buildEmptyPermissions();
       ["workpapers","evidence","assessments","issues"].forEach(k => { p[k].view = true; p[k].create = true; p[k].edit = true; });
       ["controls","control_cycles","risks","risk_cycles","processes","stakeholders","reports"].forEach(k => { p[k].view = true; p[k].export = true; });
+      return p;
+    },
+  },
+  {
+    name: "Compliance View Only",
+    description: "Read-only access to all compliance and GRC modules",
+    color: "bg-sky-100 text-sky-800",
+    build: () => Object.fromEntries(ALL_MODULE_KEYS.map(k => [k, { ...Object.fromEntries(ACTIONS.map(a => [a.key, false])), view: true }])),
+  },
+  {
+    name: "Governance View Only",
+    description: "Read-only access to governance modules: companies, frameworks, objectives and DOA",
+    color: "bg-blue-100 text-blue-800",
+    build: () => {
+      const p = buildEmptyPermissions();
+      ["companies","frameworks","objectives","doa","grc_goals"].forEach(k => { p[k].view = true; });
+      return p;
+    },
+  },
+  {
+    name: "Process Management View Only",
+    description: "Read-only access to processes, ICT systems, third parties and surveys",
+    color: "bg-teal-100 text-teal-800",
+    build: () => {
+      const p = buildEmptyPermissions();
+      ["processes","ict_systems","third_parties","surveys"].forEach(k => { p[k].view = true; });
+      return p;
+    },
+  },
+  {
+    name: "Compliance View and Approve",
+    description: "View and approve controls, assessments, frameworks and evidence",
+    color: "bg-violet-100 text-violet-800",
+    build: () => {
+      const p = buildEmptyPermissions();
+      ["controls","control_cycles","workpapers","test_plans","assessments","assessment_models","evidence","frameworks","objectives"].forEach(k => { p[k].view = true; p[k].approve = true; p[k].export = true; });
+      ["companies","risks","processes","stakeholders","reports","audit_logs"].forEach(k => { p[k].view = true; });
+      return p;
+    },
+  },
+  {
+    name: "Risk Management View and Approve",
+    description: "View and approve risks, risk cycles, incidents and issues",
+    color: "bg-orange-100 text-orange-800",
+    build: () => {
+      const p = buildEmptyPermissions();
+      ["risks","risk_cycles","incidents","issues"].forEach(k => { p[k].view = true; p[k].approve = true; p[k].export = true; });
+      ["companies","frameworks","controls","assessments","processes","stakeholders","reports"].forEach(k => { p[k].view = true; });
+      return p;
+    },
+  },
+  {
+    name: "Process CI View and Approve",
+    description: "View and approve process continuous improvement, ICT systems, third parties and surveys",
+    color: "bg-emerald-100 text-emerald-800",
+    build: () => {
+      const p = buildEmptyPermissions();
+      ["processes","ict_systems","third_parties","surveys"].forEach(k => { p[k].view = true; p[k].approve = true; p[k].export = true; });
+      ["companies","frameworks","risks","controls","stakeholders","grc_goals"].forEach(k => { p[k].view = true; });
       return p;
     },
   },
@@ -190,9 +283,9 @@ function PermissionMatrix({ permissions, onChange, readOnly = false }) {
   const isRowFull = (moduleKey) => ACTIONS.every(a => permissions[moduleKey]?.[a.key]);
 
   return (
-    <div className="border border-slate-200 rounded-lg overflow-hidden">
+    <div className="border border-slate-200 rounded-lg overflow-auto max-h-[55vh]">
       <table className="w-full text-sm">
-        <thead className="bg-slate-50 border-b border-slate-200">
+        <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
           <tr>
             <th className="text-left px-4 py-2.5 font-semibold text-slate-600 w-56">Module</th>
             {ACTIONS.map(a => (
