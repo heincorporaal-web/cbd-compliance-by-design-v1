@@ -179,7 +179,7 @@ const TEMPLATES = [
 
 function permissionCount(permissions) {
   if (!permissions) return 0;
-  return Object.values(permissions).reduce((sum, mod) => sum + Object.values(mod).filter(Boolean).length, 0);
+  return Object.values(permissions).reduce((sum, mod) => sum + (mod ? Object.values(mod).filter(Boolean).length : 0), 0);
 }
 
 function PermissionMatrix({ permissions, onChange, readOnly = false }) {
