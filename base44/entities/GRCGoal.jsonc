@@ -1,0 +1,122 @@
+{
+  "name": "GRCGoal",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Goal title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Goal description"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "governance",
+        "risk_management",
+        "compliance",
+        "security",
+        "operational",
+        "strategic"
+      ],
+      "description": "Goal category"
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of entity-level risks this goal addresses"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of control objectives supporting this goal"
+    },
+    "current_maturity": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "description": "Current maturity level (1-5)"
+    },
+    "target_maturity": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "description": "Target/ultimate maturity level (1-5)"
+    },
+    "maturity_gap": {
+      "type": "number",
+      "description": "Gap between current and target maturity"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "on_track",
+        "at_risk",
+        "achieved"
+      ],
+      "default": "not_started",
+      "description": "Goal status"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Goal owner"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Target completion date"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "maturity_assessments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "level": {
+            "type": "number"
+          },
+          "assessor": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "History of maturity assessments"
+    }
+  },
+  "required": [
+    "title",
+    "company_id",
+    "category"
+  ]
+}

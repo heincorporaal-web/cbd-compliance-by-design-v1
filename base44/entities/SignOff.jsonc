@@ -1,0 +1,132 @@
+{
+  "name": "SignOff",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Sign-off title"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "period_type": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "semi_annual",
+        "annual",
+        "custom"
+      ],
+      "description": "Sign-off period type"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Period start date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date",
+      "description": "Period end date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_review",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Sign-off status"
+    },
+    "controls_reviewed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "control_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Controls included in this sign-off"
+    },
+    "narratives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Period narratives and commentary"
+    },
+    "open_issues_snapshot": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "issue_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Snapshot of open issues at sign-off"
+    },
+    "sign_off_by": {
+      "type": "string",
+      "description": "Person who signed off"
+    },
+    "sign_off_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When sign-off was completed"
+    },
+    "reviewer": {
+      "type": "string",
+      "description": "Person who reviewed"
+    },
+    "review_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When review was completed"
+    },
+    "comments": {
+      "type": "string",
+      "description": "Additional comments"
+    }
+  },
+  "required": [
+    "title",
+    "company_id",
+    "period_type",
+    "period_start",
+    "period_end"
+  ]
+}

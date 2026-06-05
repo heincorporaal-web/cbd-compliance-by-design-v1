@@ -1,0 +1,140 @@
+{
+  "name": "ProcessAssessment",
+  "type": "object",
+  "properties": {
+    "process_id": {
+      "type": "string",
+      "description": "Reference to BusinessProcess entity"
+    },
+    "assessment_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of assessment"
+    },
+    "assessor": {
+      "type": "string",
+      "description": "Person who conducted the assessment"
+    },
+    "assessment_type": {
+      "type": "string",
+      "enum": [
+        "initial",
+        "annual",
+        "ad_hoc",
+        "remediation",
+        "maturity"
+      ],
+      "default": "annual",
+      "description": "Type of assessment"
+    },
+    "scope": {
+      "type": "string",
+      "description": "Assessment scope and objectives"
+    },
+    "findings": {
+      "type": "string",
+      "description": "Key findings from the assessment"
+    },
+    "outcomes": {
+      "type": "string",
+      "description": "Assessment outcomes and conclusions"
+    },
+    "overall_rating": {
+      "type": "string",
+      "enum": [
+        "excellent",
+        "satisfactory",
+        "needs_improvement",
+        "unsatisfactory"
+      ],
+      "description": "Overall assessment rating"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "in_progress",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "responsible": {
+            "type": "string"
+          },
+          "accountable": {
+            "type": "string"
+          },
+          "consulted": {
+            "type": "string"
+          },
+          "informed": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Action items with RACI"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "completed",
+        "approved"
+      ],
+      "default": "draft",
+      "description": "Assessment status"
+    },
+    "next_assessment_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Next scheduled assessment"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Supporting documents"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "process_id",
+    "assessment_date"
+  ]
+}

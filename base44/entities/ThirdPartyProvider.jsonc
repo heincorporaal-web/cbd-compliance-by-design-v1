@@ -1,0 +1,104 @@
+{
+  "name": "ThirdPartyProvider",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Provider name"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity using this provider"
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "cloud_hosting",
+        "software_as_service",
+        "managed_security",
+        "data_center",
+        "payment_processing",
+        "it_support",
+        "consulting",
+        "other"
+      ],
+      "description": "Type of service provided"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "important",
+        "supporting"
+      ],
+      "default": "supporting",
+      "description": "Criticality to business operations"
+    },
+    "contract_start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Contract start date"
+    },
+    "contract_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Contract end date"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Primary contact at provider"
+    },
+    "contact_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Contact email"
+    },
+    "last_audit_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last audit or assessment date"
+    },
+    "next_audit_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Next scheduled audit"
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Provider certifications (ISO 27001, SOC 2, etc.)"
+    },
+    "risk_rating": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "under_review",
+        "terminated",
+        "onboarding"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "name",
+    "company_id",
+    "service_type",
+    "criticality"
+  ]
+}

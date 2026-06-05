@@ -1,0 +1,115 @@
+{
+  "name": "ThirdPartyAssessment",
+  "type": "object",
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "description": "Reference to ThirdPartyProvider entity"
+    },
+    "assessment_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of assessment"
+    },
+    "assessment_type": {
+      "type": "string",
+      "enum": [
+        "initial_assessment",
+        "annual_review",
+        "security_audit",
+        "compliance_audit",
+        "risk_assessment",
+        "due_diligence",
+        "contract_renewal",
+        "incident_review"
+      ],
+      "description": "Type of assessment conducted"
+    },
+    "assessor": {
+      "type": "string",
+      "description": "Person who conducted the assessment"
+    },
+    "overall_rating": {
+      "type": "string",
+      "enum": [
+        "satisfactory",
+        "acceptable",
+        "needs_improvement",
+        "unsatisfactory"
+      ],
+      "description": "Overall assessment rating"
+    },
+    "risk_rating": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Risk rating assigned after assessment"
+    },
+    "findings": {
+      "type": "string",
+      "description": "Key findings from the assessment"
+    },
+    "recommendations": {
+      "type": "string",
+      "description": "Recommendations for improvement"
+    },
+    "action_items": {
+      "type": "string",
+      "description": "Required action items"
+    },
+    "compliance_status": {
+      "type": "string",
+      "enum": [
+        "compliant",
+        "partially_compliant",
+        "non_compliant",
+        "not_applicable"
+      ],
+      "default": "compliant",
+      "description": "Compliance status"
+    },
+    "next_assessment_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Next scheduled assessment date"
+    },
+    "documents_reviewed": {
+      "type": "string",
+      "description": "List of documents reviewed during assessment"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Audit reports and supporting documents"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "in_progress",
+        "scheduled"
+      ],
+      "default": "completed",
+      "description": "Assessment status"
+    }
+  },
+  "required": [
+    "provider_id",
+    "assessment_date",
+    "assessment_type"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "name": "ProposedRiskControl",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "framework",
+        "process"
+      ],
+      "description": "Source of the proposal"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ID of the framework or process"
+    },
+    "source_name": {
+      "type": "string",
+      "description": "Name of the source for display"
+    },
+    "control_id": {
+      "type": "string",
+      "description": "Reference to Control entity"
+    },
+    "control_name": {
+      "type": "string",
+      "description": "Control name for display"
+    },
+    "suggested_risk_title": {
+      "type": "string",
+      "description": "Suggested risk title based on control"
+    },
+    "suggested_risk_description": {
+      "type": "string",
+      "description": "Suggested risk description"
+    },
+    "suggested_risk_category": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "financial",
+        "strategic",
+        "compliance",
+        "cyber_security",
+        "third_party",
+        "reputational",
+        "technology"
+      ],
+      "default": "compliance",
+      "description": "Suggested risk category"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Proposal status"
+    },
+    "created_risk_id": {
+      "type": "string",
+      "description": "ID of risk created when accepted"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "User who reviewed"
+    },
+    "reviewed_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When reviewed"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Reason for rejection"
+    }
+  },
+  "required": [
+    "company_id",
+    "source_type",
+    "source_id",
+    "control_id"
+  ]
+}

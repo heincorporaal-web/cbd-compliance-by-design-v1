@@ -1,0 +1,97 @@
+{
+  "name": "KnowledgeArticle",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Article title"
+    },
+    "framework_id": {
+      "type": "string",
+      "description": "Optional reference to Framework entity"
+    },
+    "chapter": {
+      "type": "string",
+      "description": "Framework chapter or domain (e.g., Access Control, Cryptography)"
+    },
+    "key_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Key implementation steps"
+    },
+    "description": {
+      "type": "string",
+      "description": "Article description"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full article content"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags for categorization"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "implementation_guide",
+        "best_practice",
+        "policy_template",
+        "procedure",
+        "checklist"
+      ],
+      "description": "Article category"
+    },
+    "pdf_url": {
+      "type": "string",
+      "description": "URL to attached PDF documentation"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Additional attachments"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft",
+      "description": "Article status"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

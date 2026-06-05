@@ -1,0 +1,61 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "custom_role_id": {
+      "type": "string",
+      "description": "Reference to UserRole entity"
+    },
+    "assigned_workflow_tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "workflow_instance_id": {
+            "type": "string"
+          },
+          "workflow_name": {
+            "type": "string"
+          },
+          "task_name": {
+            "type": "string"
+          },
+          "assigned_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "completed"
+            ]
+          }
+        }
+      },
+      "description": "Workflow tasks assigned to this user"
+    },
+    "department": {
+      "type": "string",
+      "description": "User department"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "custom_role_id",
+    "assigned_workflow_tasks",
+    "department",
+    "phone"
+  ]
+}

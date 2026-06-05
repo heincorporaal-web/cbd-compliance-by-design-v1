@@ -58,6 +58,7 @@
       "enum": [
         "draft",
         "identified",
+        "auto_assigned",
         "pending_review",
         "returned",
         "approved",
@@ -199,6 +200,10 @@
       "type": "boolean",
       "default": false,
       "description": "True if this is a master library risk not yet assigned to a company"
+    },
+    "library_risk_id": {
+      "type": "string",
+      "description": "Source library risk ID if this risk was assigned from the master library"
     }
   },
   "required": [

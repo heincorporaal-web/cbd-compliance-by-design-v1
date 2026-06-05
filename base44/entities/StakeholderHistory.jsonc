@@ -1,0 +1,68 @@
+{
+  "name": "StakeholderHistory",
+  "type": "object",
+  "properties": {
+    "stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity"
+    },
+    "stakeholder_name": {
+      "type": "string",
+      "description": "Snapshot of stakeholder name at time of change"
+    },
+    "employee_number": {
+      "type": "string",
+      "description": "Employee number at time of change"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "change_type": {
+      "type": "string",
+      "enum": [
+        "new_hire",
+        "job_change",
+        "group_change",
+        "termination",
+        "reactivation",
+        "other"
+      ],
+      "description": "Type of change recorded"
+    },
+    "field_changed": {
+      "type": "string",
+      "description": "Which field changed (e.g. job_title, department, group_ids, status)"
+    },
+    "from_value": {
+      "type": "string",
+      "description": "Previous value"
+    },
+    "to_value": {
+      "type": "string",
+      "description": "New value"
+    },
+    "from_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the previous role/status started (effective from)"
+    },
+    "to_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the previous role/status ended (effective to)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional context for this change"
+    },
+    "changed_by": {
+      "type": "string",
+      "description": "Email of the user who made the change"
+    }
+  },
+  "required": [
+    "stakeholder_id",
+    "change_type"
+  ]
+}

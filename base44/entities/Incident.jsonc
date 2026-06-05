@@ -1,0 +1,99 @@
+{
+  "name": "Incident",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Incident title"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "ict_system_id": {
+      "type": "string",
+      "description": "Reference to ICTSystem entity"
+    },
+    "incident_type": {
+      "type": "string",
+      "enum": [
+        "cyber_attack",
+        "system_outage",
+        "data_breach",
+        "operational_disruption",
+        "third_party_failure",
+        "natural_disaster",
+        "human_error",
+        "other"
+      ],
+      "description": "Type of incident"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "major",
+        "moderate",
+        "minor"
+      ],
+      "default": "moderate",
+      "description": "Incident severity"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "investigating",
+        "resolved",
+        "closed"
+      ],
+      "default": "open"
+    },
+    "detected_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When incident was detected"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When incident was resolved"
+    },
+    "description": {
+      "type": "string",
+      "description": "Incident description"
+    },
+    "impact": {
+      "type": "string",
+      "description": "Business impact description"
+    },
+    "root_cause": {
+      "type": "string",
+      "description": "Root cause analysis"
+    },
+    "remediation_actions": {
+      "type": "string",
+      "description": "Actions taken to resolve"
+    },
+    "lessons_learned": {
+      "type": "string",
+      "description": "Lessons learned and improvements"
+    },
+    "reported_to_regulator": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether incident was reported to regulatory authority"
+    },
+    "regulator_reference": {
+      "type": "string",
+      "description": "Regulator case reference number"
+    }
+  },
+  "required": [
+    "title",
+    "company_id",
+    "incident_type",
+    "severity",
+    "detected_date"
+  ]
+}

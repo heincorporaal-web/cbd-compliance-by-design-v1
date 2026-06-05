@@ -69,6 +69,10 @@
     "workstream_name": {
       "type": "string",
       "description": "Workstream name (denormalized)"
+    },
+    "value_chain_id": {
+      "type": "string",
+      "description": "Reference to ValueChain entity"
     }
   },
   "required": [

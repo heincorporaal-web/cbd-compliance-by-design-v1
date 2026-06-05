@@ -1,0 +1,88 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "recipient_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Notification recipient"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "workflow_approval",
+        "task_due",
+        "task_overdue",
+        "workflow_completed",
+        "general"
+      ],
+      "description": "Notification type"
+    },
+    "title": {
+      "type": "string",
+      "description": "Notification title"
+    },
+    "message": {
+      "type": "string",
+      "description": "Notification message"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Related entity type"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "Related entity ID"
+    },
+    "workflow_instance_id": {
+      "type": "string",
+      "description": "Related workflow instance"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "unread",
+        "read",
+        "archived"
+      ],
+      "default": "unread",
+      "description": "Notification status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium",
+      "description": "Priority level"
+    },
+    "email_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether email notification was sent"
+    },
+    "email_sent_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When email was sent"
+    },
+    "action_url": {
+      "type": "string",
+      "description": "URL for action button"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Task due date if applicable"
+    }
+  },
+  "required": [
+    "recipient_email",
+    "type",
+    "title",
+    "message"
+  ]
+}
