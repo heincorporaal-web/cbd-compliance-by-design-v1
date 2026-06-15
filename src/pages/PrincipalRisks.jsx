@@ -237,7 +237,7 @@ export default function PrincipalRisks() {
 
       {/* New button at bottom */}
       <div className="flex justify-center pt-2">
-        <Button onClick={() => setDialogOpen(true)} className="bg-red-600 hover:bg-red-700 gap-2">
+        <Button onClick={() => { setForm(EMPTY_FORM); setEditId(null); setDialogOpen(true); }} className="bg-red-600 hover:bg-red-700 gap-2">
           <Plus className="w-4 h-4" /> New Principal Risk
         </Button>
       </div>
@@ -266,10 +266,14 @@ export default function PrincipalRisks() {
                 </div>
                 <div>
                   <Label>Company *</Label>
-                  <Select value={form.company_id} onValueChange={v => set("company_id", v)}>
-                    <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
-                    <SelectContent>{companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-                  </Select>
+                  {editId ? (
+                    <Input value={companies.find(c => c.id === form.company_id)?.name || form.company_id} disabled className="bg-slate-50 text-slate-500" />
+                  ) : (
+                    <Select value={form.company_id} onValueChange={v => set("company_id", v)}>
+                      <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
+                      <SelectContent>{companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="col-span-2">
                   <Label>Risk Title *</Label>
