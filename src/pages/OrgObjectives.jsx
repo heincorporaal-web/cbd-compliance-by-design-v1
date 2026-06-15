@@ -1,48 +1,21 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Target, Plus, Search, Building2, Calendar, User,
-  Pencil, Trash2, Link2, ChevronDown, ChevronUp
+  Target, Plus, Search, Building2, Calendar, User, Trash2
 } from "lucide-react";
+import ObjectiveFormDialog from "@/components/objectives/ObjectiveFormDialog";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
 
 const CATEGORIES = ["Compliance", "IT Compliance", "Operational", "Financial", "Client Relations", "Resilience", "Data", "Fundamentals"];
-const OBJ_TYPES = ["Strategic", "Tactical", "Regulatory", "Operational"];
-const TIME_HORIZONS = ["Annual", "3 Year", "5 Year", "Continuous"];
 const STATUSES = ["Draft", "Approved", "Active", "Under Review", "Retired"];
-const APPROVAL_STATUSES = ["Pending", "Approved", "Rejected"];
-const CRITICALITIES = ["Must Have", "Should Have", "Could Have", "Won't Have"];
-const PRIORITY_LABELS = ["Low", "Medium", "High", "Critical", "Imperative"];
-const KPI_TYPES = ["Numeric", "Judgemental", "Logic"];
-
-const EMPTY_KPI = () => ({ id: crypto.randomUUID(), measurement_name: "", measurement_type: "Numeric", measurement_description: "", calculation_method: "", data_source_link: "" });
-
-const EMPTY_FORM = {
-  title: "", description: "", company_id: "", category: "Operational",
-  strategic_theme: "", objective_type: "Strategic",
-  priority_rating_numeric: "", priority_rating_label: "Medium",
-  criticality: "Must Have", time_horizon: "Annual",
-  valid_from: "", valid_to: "", status: "Draft",
-  approval_status: "Pending", rejection_reason: "", approved_by: "",
-  next_review_date: "", objective_owner: "", performance_owner: "",
-  compliance_owner: "", it_owner: "", notes: "",
-  parent_objective_id: "", linked_framework_ids: [], linked_risk_ids: [],
-  linked_control_ids: [], linked_process_ids: [], linked_ihpom_ids: [],
-  linked_capability_ids: [], linked_value_chain_ids: [], linked_business_unit_ids: [],
-  kpis: [], progress_pct: 0, key_results: [],
-};
 
 const STATUS_COLORS = {
   Draft: "bg-slate-100 text-slate-600",
@@ -70,8 +43,7 @@ export default function OrgObjectives() {
   const [catFilter, setCatFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [editId, setEditId] = useState(null);
+  const [editObj, setEditObj] = useState(null);
 
   const { data: objectives = [], isLoading } = useQuery({
     queryKey: ["orgObjectives"],
@@ -83,69 +55,16 @@ export default function OrgObjectives() {
     queryFn: () => base44.entities.Company.list(),
   });
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ["frameworks"],
-    queryFn: () => base44.entities.Framework.list(),
-  });
-
-  const { data: businessUnits = [] } = useQuery({
-    queryKey: ["businessUnits"],
-    queryFn: () => base44.entities.BusinessUnit.list(),
-  });
-
-  const { data: valueChains = [] } = useQuery({
-    queryKey: ["valueChains"],
-    queryFn: () => base44.entities.ValueChain.list(),
-  });
-
-  const { data: capabilities = [] } = useQuery({
-    queryKey: ["capabilities"],
-    queryFn: () => base44.entities.ITCapability.list(),
-  });
-
-  const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.OrgObjective.create(data),
-    onSuccess: () => { queryClient.invalidateQueries(["orgObjectives"]); closeDialog(); toast.success("Objective created"); },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.OrgObjective.update(id, data),
-    onSuccess: () => { queryClient.invalidateQueries(["orgObjectives"]); closeDialog(); toast.success("Objective updated"); },
-  });
-
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.OrgObjective.delete(id),
     onSuccess: () => { queryClient.invalidateQueries(["orgObjectives"]); toast.success("Objective deleted"); },
   });
 
-  const closeDialog = () => { setDialogOpen(false); setEditId(null); setForm(EMPTY_FORM); };
+  const closeDialog = () => { setDialogOpen(false); setEditObj(null); };
 
   const openEdit = (obj) => {
-    setForm({ ...EMPTY_FORM, ...obj });
-    setEditId(obj.id);
+    setEditObj(obj);
     setDialogOpen(true);
-  };
-
-  const set = (field, value) => setForm(f => ({ ...f, [field]: value }));
-
-  const handleSave = () => {
-    if (!form.title || !form.company_id) { toast.error("Title and company are required"); return; }
-    if (editId) updateMutation.mutate({ id: editId, data: form });
-    else createMutation.mutate(form);
-  };
-
-  const toggleId = (field, id) => {
-    const current = form[field] || [];
-    const next = current.includes(id) ? current.filter(x => x !== id) : [...current, id];
-    set(field, next);
-  };
-
-  const addKpi = () => set("kpis", [...(form.kpis || []), EMPTY_KPI()]);
-  const removeKpi = (idx) => set("kpis", form.kpis.filter((_, i) => i !== idx));
-  const updateKpi = (idx, field, value) => {
-    const updated = [...form.kpis];
-    updated[idx] = { ...updated[idx], [field]: value };
-    set("kpis", updated);
   };
 
   const filtered = objectives.filter(o => {
@@ -231,7 +150,7 @@ export default function OrgObjectives() {
           {filtered.map(obj => {
             const company = companies.find(c => c.id === obj.company_id);
             return (
-              <Card key={obj.id} className="border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <Card key={obj.id} className="border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => openEdit(obj)}>
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -256,10 +175,7 @@ export default function OrgObjectives() {
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(obj)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
+                    <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => deleteMutation.mutate(obj.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -274,281 +190,18 @@ export default function OrgObjectives() {
 
       {/* Add New button at bottom */}
       <div className="flex justify-center pt-2">
-        <Button onClick={() => setDialogOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+        <Button onClick={() => { setEditObj(null); setDialogOpen(true); }} className="bg-indigo-600 hover:bg-indigo-700 gap-2">
           <Plus className="w-4 h-4" /> New Objective
         </Button>
       </div>
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={v => { if (!v) closeDialog(); }}>
-        <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editId ? "Edit Objective" : "New Organisational Objective"}</DialogTitle>
-          </DialogHeader>
-
-          <Tabs defaultValue="details" className="w-full">
-            <TabsList className="w-full flex flex-wrap h-auto gap-1">
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="governance">Governance</TabsTrigger>
-              <TabsTrigger value="owners">Owners</TabsTrigger>
-              <TabsTrigger value="linkages">Linkages</TabsTrigger>
-              <TabsTrigger value="kpis">KPIs</TabsTrigger>
-            </TabsList>
-
-            {/* ── Details Tab ── */}
-            <TabsContent value="details" className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <Label>Title *</Label>
-                  <Input value={form.title} onChange={e => set("title", e.target.value)} placeholder="Objective title" />
-                </div>
-                <div>
-                  <Label>Company *</Label>
-                  <Select value={form.company_id} onValueChange={v => set("company_id", v)}>
-                    <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
-                    <SelectContent>{companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Reference Number</Label>
-                  <Input value={form.reference_number || ""} onChange={e => set("reference_number", e.target.value)} placeholder="e.g. OBJ-001" />
-                </div>
-                <div className="col-span-2">
-                  <Label>Description</Label>
-                  <Textarea value={form.description} onChange={e => set("description", e.target.value)} rows={3} />
-                </div>
-                <div>
-                  <Label>Category</Label>
-                  <Select value={form.category} onValueChange={v => set("category", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Strategic Theme</Label>
-                  <Input value={form.strategic_theme} onChange={e => set("strategic_theme", e.target.value)} placeholder="Free text strategic theme" />
-                </div>
-                <div>
-                  <Label>Objective Type</Label>
-                  <Select value={form.objective_type} onValueChange={v => set("objective_type", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{OBJ_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Time Horizon</Label>
-                  <Select value={form.time_horizon} onValueChange={v => set("time_horizon", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{TIME_HORIZONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Priority Rating (1–5)</Label>
-                  <Select value={String(form.priority_rating_numeric || "")} onValueChange={v => set("priority_rating_numeric", Number(v))}>
-                    <SelectTrigger><SelectValue placeholder="Select 1-5" /></SelectTrigger>
-                    <SelectContent>{[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Priority Rating Scale</Label>
-                  <Select value={form.priority_rating_label} onValueChange={v => set("priority_rating_label", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{PRIORITY_LABELS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Criticality (MoSCoW)</Label>
-                  <Select value={form.criticality} onValueChange={v => set("criticality", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{CRITICALITIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Valid From</Label>
-                  <Input type="date" value={form.valid_from} onChange={e => set("valid_from", e.target.value)} />
-                </div>
-                <div>
-                  <Label>Valid To</Label>
-                  <Input type="date" value={form.valid_to} onChange={e => set("valid_to", e.target.value)} />
-                </div>
-                <div className="col-span-2">
-                  <Label>Notes</Label>
-                  <Textarea value={form.notes} onChange={e => set("notes", e.target.value)} rows={2} />
-                </div>
-                <div>
-                  <Label>Progress %</Label>
-                  <Input type="number" min={0} max={100} value={form.progress_pct || 0} onChange={e => set("progress_pct", parseInt(e.target.value) || 0)} />
-                </div>
-                <div>
-                  <Label>Parent Objective</Label>
-                  <Select value={form.parent_objective_id || ""} onValueChange={v => set("parent_objective_id", v)}>
-                    <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={null}>None</SelectItem>
-                      {objectives.filter(o => o.id !== editId).map(o => <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* ── Governance Tab ── */}
-            <TabsContent value="governance" className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Status</Label>
-                  <Select value={form.status} onValueChange={v => set("status", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Approval Status</Label>
-                  <Select value={form.approval_status} onValueChange={v => set("approval_status", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{APPROVAL_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                {form.approval_status === "Rejected" && (
-                  <div className="col-span-2">
-                    <Label>Rejection Reason</Label>
-                    <Textarea value={form.rejection_reason} onChange={e => set("rejection_reason", e.target.value)} rows={2} placeholder="Reason for rejection…" />
-                  </div>
-                )}
-                <div>
-                  <Label>Approved By</Label>
-                  <Input value={form.approved_by} onChange={e => set("approved_by", e.target.value)} placeholder="Approver name" />
-                </div>
-                <div>
-                  <Label>Next Review Date</Label>
-                  <Input type="date" value={form.next_review_date} onChange={e => set("next_review_date", e.target.value)} />
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* ── Owners Tab ── */}
-            <TabsContent value="owners" className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Objective Owner</Label>
-                  <Input value={form.objective_owner} onChange={e => set("objective_owner", e.target.value)} placeholder="Objective owner" />
-                </div>
-                <div>
-                  <Label>Performance Owner</Label>
-                  <Input value={form.performance_owner} onChange={e => set("performance_owner", e.target.value)} placeholder="Performance owner" />
-                </div>
-                <div>
-                  <Label>Compliance Owner (Optional)</Label>
-                  <Input value={form.compliance_owner} onChange={e => set("compliance_owner", e.target.value)} placeholder="Compliance owner" />
-                </div>
-                <div>
-                  <Label>IT Owner (Optional)</Label>
-                  <Input value={form.it_owner} onChange={e => set("it_owner", e.target.value)} placeholder="IT owner" />
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* ── Linkages Tab ── */}
-            <TabsContent value="linkages" className="space-y-5 pt-4">
-              <LinkMultiSelect label="Frameworks" items={frameworks} field="linked_framework_ids" form={form} toggleId={toggleId} labelKey="name" />
-              <LinkMultiSelect label="Business Units" items={businessUnits} field="linked_business_unit_ids" form={form} toggleId={toggleId} labelKey="name" />
-              <LinkMultiSelect label="Value Chains" items={valueChains} field="linked_value_chain_ids" form={form} toggleId={toggleId} labelKey="name" />
-              <LinkMultiSelect label="IT Capabilities" items={capabilities} field="linked_capability_ids" form={form} toggleId={toggleId} labelKey="name" />
-            </TabsContent>
-
-            {/* ── KPIs Tab ── */}
-            <TabsContent value="kpis" className="space-y-4 pt-4">
-              {(form.kpis || []).map((kpi, idx) => (
-                <Card key={kpi.id} className="border border-slate-200">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <p className="font-semibold text-slate-700 text-sm">KPI #{idx + 1}</p>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400" onClick={() => removeKpi(idx)}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs">Measurement Name</Label>
-                        <Input value={kpi.measurement_name} onChange={e => updateKpi(idx, "measurement_name", e.target.value)} className="h-8 text-sm" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Measurement Type</Label>
-                        <Select value={kpi.measurement_type} onValueChange={v => updateKpi(idx, "measurement_type", v)}>
-                          <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-                          <SelectContent>{KPI_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                        </Select>
-                      </div>
-                      <div className="col-span-2">
-                        <Label className="text-xs">Measurement Description</Label>
-                        <Textarea value={kpi.measurement_description} onChange={e => updateKpi(idx, "measurement_description", e.target.value)} rows={2} className="text-sm" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Calculation Method</Label>
-                        <Input value={kpi.calculation_method} onChange={e => updateKpi(idx, "calculation_method", e.target.value)} className="h-8 text-sm" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Data Source Link (blank if manual)</Label>
-                        <Input value={kpi.data_source_link} onChange={e => updateKpi(idx, "data_source_link", e.target.value)} className="h-8 text-sm" placeholder="https://…" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              <Button variant="outline" onClick={addKpi} className="gap-2 w-full">
-                <Plus className="w-4 h-4" /> Add KPI / Measurement
-              </Button>
-            </TabsContent>
-          </Tabs>
-
-          {/* Save / Cancel at bottom */}
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
-            <Button variant="outline" onClick={closeDialog}>Cancel</Button>
-            <Button onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending} className="bg-indigo-600 hover:bg-indigo-700">
-              {editId ? "Save Changes" : "Create Objective"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-function LinkMultiSelect({ label, items, field, form, toggleId, labelKey = "name" }) {
-  const [open, setOpen] = useState(false);
-  const selected = form[field] || [];
-  const selectedItems = items.filter(i => selected.includes(i.id));
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <Label className="text-sm font-medium text-slate-700">{label}</Label>
-        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => setOpen(v => !v)}>
-          {open ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          {open ? "Hide" : "Select"}
-        </Button>
-      </div>
-      {selectedItems.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-2">
-          {selectedItems.map(i => (
-            <Badge key={i.id} className="bg-indigo-100 text-indigo-700 gap-1 cursor-pointer" onClick={() => toggleId(field, i.id)}>
-              {i[labelKey]} ×
-            </Badge>
-          ))}
-        </div>
-      )}
-      {open && (
-        <div className="border border-slate-200 rounded-lg max-h-48 overflow-y-auto divide-y divide-slate-50">
-          {items.length === 0 ? (
-            <p className="text-xs text-slate-400 italic p-3">No items available.</p>
-          ) : items.map(i => (
-            <label key={i.id} className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer">
-              <input type="checkbox" checked={selected.includes(i.id)} onChange={() => toggleId(field, i.id)} className="rounded" />
-              <span className="text-sm text-slate-700">{i[labelKey]}</span>
-            </label>
-          ))}
-        </div>
-      )}
+      <ObjectiveFormDialog
+        open={dialogOpen}
+        onClose={closeDialog}
+        editObj={editObj}
+        companies={companies}
+        objectives={objectives}
+      />
     </div>
   );
 }

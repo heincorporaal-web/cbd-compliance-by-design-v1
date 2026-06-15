@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle, Upload, Palette, RefreshCw, Image, FileText, Eye, CalendarDays, BookOpen, CalendarOff } from "lucide-react";
+import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle, Upload, Palette, RefreshCw, Image, FileText, Eye, CalendarDays, BookOpen, CalendarOff, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import EndDateBadge, { isExpired } from "@/components/ui/EndDateBadge";
 import CompanyCalendarTab from "@/components/companies/CompanyCalendarTab";
 import FrameworkAssignmentTab from "@/components/companies/FrameworkAssignmentTab";
@@ -326,13 +327,7 @@ export default function Companies() {
                 </TabsContent>
 
                 <TabsContent value="objectives" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-slate-600">Define strategic objectives for this company</p>
-                    <Button type="button" onClick={addObjective} variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Objective
-                    </Button>
-                  </div>
+                  <p className="text-sm text-slate-600">Define strategic objectives for this company. For full detail management, use the <Link to="/OrgObjectives" className="text-blue-600 underline">Organisational Objectives</Link> page.</p>
                   {formData.objectives?.length > 0 ? (
                     <div className="space-y-3">
                       {formData.objectives.map((obj, idx) => (
@@ -342,28 +337,87 @@ export default function Companies() {
                               <Target className="w-4 h-4 text-blue-600" />
                               <span className="font-medium text-sm">Objective #{idx + 1}</span>
                             </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => removeObjective(obj.id)}
-                            >
+                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeObjective(obj.id)}>
                               <Trash2 className="w-4 h-4 text-red-500" />
                             </Button>
                           </div>
                           <div className="space-y-3">
-                            <Input
-                              placeholder="Objective title"
-                              value={obj.title}
-                              onChange={(e) => updateObjective(obj.id, 'title', e.target.value)}
-                            />
-                            <Textarea
-                              placeholder="Objective description"
-                              value={obj.description}
-                              onChange={(e) => updateObjective(obj.id, 'description', e.target.value)}
-                              rows={2}
-                            />
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs">Reference</Label>
+                                <Input placeholder="e.g. OBJ-001" value={obj.reference_number || ""} onChange={(e) => updateObjective(obj.id, 'reference_number', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Title *</Label>
+                                <Input placeholder="Objective title" value={obj.title} onChange={(e) => updateObjective(obj.id, 'title', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Category</Label>
+                                <Select value={obj.category || "Operational"} onValueChange={v => updateObjective(obj.id, 'category', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["Compliance","IT Compliance","Operational","Financial","Client Relations","Resilience","Data","Fundamentals"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Objective Type</Label>
+                                <Select value={obj.objective_type || "Strategic"} onValueChange={v => updateObjective(obj.id, 'objective_type', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["Strategic","Tactical","Regulatory","Operational"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Status</Label>
+                                <Select value={obj.status || "Draft"} onValueChange={v => updateObjective(obj.id, 'status', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["Draft","Approved","Active","Under Review","Retired"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Criticality (MoSCoW)</Label>
+                                <Select value={obj.criticality || "Must Have"} onValueChange={v => updateObjective(obj.id, 'criticality', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["Must Have","Should Have","Could Have","Won't Have"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Time Horizon</Label>
+                                <Select value={obj.time_horizon || "Annual"} onValueChange={v => updateObjective(obj.id, 'time_horizon', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["Annual","3 Year","5 Year","Continuous"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Strategic Theme</Label>
+                                <Input placeholder="Free text theme" value={obj.strategic_theme || ""} onChange={(e) => updateObjective(obj.id, 'strategic_theme', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Objective Owner</Label>
+                                <Input placeholder="Owner name" value={obj.objective_owner || ""} onChange={(e) => updateObjective(obj.id, 'objective_owner', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Performance Owner</Label>
+                                <Input placeholder="Performance owner" value={obj.performance_owner || ""} onChange={(e) => updateObjective(obj.id, 'performance_owner', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Valid From</Label>
+                                <Input type="date" value={obj.valid_from || ""} onChange={(e) => updateObjective(obj.id, 'valid_from', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Valid To</Label>
+                                <Input type="date" value={obj.valid_to || ""} onChange={(e) => updateObjective(obj.id, 'valid_to', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                            </div>
+                            <Textarea placeholder="Objective description" value={obj.description || ""} onChange={(e) => updateObjective(obj.id, 'description', e.target.value)} rows={2} className="text-sm" />
                           </div>
                         </Card>
                       ))}
@@ -374,10 +428,15 @@ export default function Companies() {
                       <p className="text-sm text-slate-500">No objectives defined yet</p>
                     </div>
                   )}
+                  <div className="flex justify-center pt-1">
+                    <Button type="button" onClick={addObjective} variant="outline" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />Add Objective
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="risks" className="space-y-4 mt-4">
-                  <p className="text-sm text-slate-600">Define principal risks for this company</p>
+                  <p className="text-sm text-slate-600">Define principal risks for this company. For full detail management, use the <Link to="/PrincipalRisks" className="text-blue-600 underline">Principal Risks</Link> page.</p>
                   {formData.principle_risks?.length > 0 ? (
                     <div className="space-y-3">
                       {formData.principle_risks.map((risk, idx) => (
@@ -387,28 +446,86 @@ export default function Companies() {
                               <AlertTriangle className="w-4 h-4 text-orange-600" />
                               <span className="font-medium text-sm">Principal Risk #{idx + 1}</span>
                             </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => removePrincipleRisk(risk.id)}
-                            >
+                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removePrincipleRisk(risk.id)}>
                               <Trash2 className="w-4 h-4 text-red-500" />
                             </Button>
                           </div>
                           <div className="space-y-3">
-                            <Input
-                              placeholder="Principal risk title"
-                              value={risk.title}
-                              onChange={(e) => updatePrincipleRisk(risk.id, 'title', e.target.value)}
-                            />
-                            <Textarea
-                              placeholder="Principal risk description"
-                              value={risk.description}
-                              onChange={(e) => updatePrincipleRisk(risk.id, 'description', e.target.value)}
-                              rows={2}
-                            />
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs">Reference</Label>
+                                <Input placeholder="e.g. PR-001" value={risk.risk_reference || ""} onChange={(e) => updatePrincipleRisk(risk.id, 'risk_reference', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Risk Title *</Label>
+                                <Input placeholder='e.g. "IT Compliance & Control Risk"' value={risk.risk_title || risk.title || ""} onChange={(e) => updatePrincipleRisk(risk.id, 'risk_title', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Risk Category</Label>
+                                <Select value={risk.risk_category || "Operational"} onValueChange={v => updatePrincipleRisk(risk.id, 'risk_category', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["Strategic","Compliance","IT","Operational","Cyber","Data","Third Party","Financial Crime"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Sub-Category</Label>
+                                <Input placeholder="More granular classification" value={risk.risk_sub_category || ""} onChange={(e) => updatePrincipleRisk(risk.id, 'risk_sub_category', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Status</Label>
+                                <Select value={risk.status || "Draft"} onValueChange={v => updatePrincipleRisk(risk.id, 'status', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["Draft","Active","Under Review","Retired"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Priority</Label>
+                                <Select value={risk.priority || "Medium"} onValueChange={v => updatePrincipleRisk(risk.id, 'priority', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["High","Medium","Low"].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Criticality</Label>
+                                <Select value={risk.criticality || "Medium"} onValueChange={v => updatePrincipleRisk(risk.id, 'criticality', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["Critical","High","Medium","Low"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Review Frequency</Label>
+                                <Select value={risk.review_frequency || "Quarterly"} onValueChange={v => updatePrincipleRisk(risk.id, 'review_frequency', v)}>
+                                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    {["Monthly","Quarterly","Annually"].map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Valid From</Label>
+                                <Input type="date" value={risk.valid_from || ""} onChange={(e) => updatePrincipleRisk(risk.id, 'valid_from', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Next Review Date</Label>
+                                <Input type="date" value={risk.next_review_date || ""} onChange={(e) => updatePrincipleRisk(risk.id, 'next_review_date', e.target.value)} className="h-8 text-sm" />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs">Risk Statement</Label>
+                              <Textarea placeholder="Full cause-event-impact statement…" value={risk.risk_statement || ""} onChange={(e) => updatePrincipleRisk(risk.id, 'risk_statement', e.target.value)} rows={2} className="text-sm" />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Risk Description</Label>
+                              <Textarea placeholder="Longer explanation of the risk…" value={risk.risk_description || risk.description || ""} onChange={(e) => updatePrincipleRisk(risk.id, 'risk_description', e.target.value)} rows={2} className="text-sm" />
+                            </div>
                           </div>
                         </Card>
                       ))}
@@ -421,8 +538,7 @@ export default function Companies() {
                   )}
                   <div className="flex justify-center pt-1">
                     <Button type="button" onClick={addPrincipleRisk} variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Principal Risk
+                      <Plus className="w-4 h-4 mr-2" />Add Principal Risk
                     </Button>
                   </div>
                 </TabsContent>

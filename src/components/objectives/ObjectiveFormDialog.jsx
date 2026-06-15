@@ -52,9 +52,26 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
   const set = (field, val) => setForm(f => ({ ...f, [field]: val }));
 
   const saveMutation = useMutation({
-    mutationFn: () => editObj
-      ? base44.entities.OrgObjective.update(editObj.id, form)
-      : base44.entities.OrgObjective.create(form),
+    mutationFn: async () => {
+      const result = editObj
+        ? await base44.entities.OrgObjective.update(editObj.id, form)
+        : await base44.entities.OrgObjective.create(form);
+      // If next_review_date is set, push a calendar event
+      if (form.next_review_date && form.company_id) {
+        const prevDate = editObj?.next_review_date;
+        if (form.next_review_date !== prevDate) {
+          await base44.functions.invoke("pushCalendarEvent", {
+            title: `Objective Review: ${form.title}`,
+            description: `Review of organisational objective: ${form.reference_number ? `[${form.reference_number}] ` : ""}${form.title}`,
+            date: form.next_review_date,
+            company_id: form.company_id,
+            entity_type: "OrgObjective",
+            entity_id: result?.id || editObj?.id,
+          });
+        }
+      }
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(["orgObjectives"]);
       toast.success(editObj ? "Objective updated" : "Objective created");
