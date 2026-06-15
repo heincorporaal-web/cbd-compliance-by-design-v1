@@ -68,6 +68,8 @@ const AuthenticatedApp = () => {
         <Route path="/PrincipalRisks" element={<LayoutWrapper currentPageName="PrincipalRisks"><PrincipalRisks /></LayoutWrapper>} />
         <Route path="/ObjectivesSummary" element={<LayoutWrapper currentPageName="ObjectivesSummary"><ObjectivesSummary /></LayoutWrapper>} />
         <Route path="/PrincipalRisksSummary" element={<LayoutWrapper currentPageName="PrincipalRisksSummary"><PrincipalRisksSummary /></LayoutWrapper>} />
+        <Route path="/ObjectivesSummary" element={<LayoutWrapper currentPageName="ObjectivesSummary"><ObjectivesSummary /></LayoutWrapper>} />
+        <Route path="/PrincipalRisksSummary" element={<LayoutWrapper currentPageName="PrincipalRisksSummary"><PrincipalRisksSummary /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
