@@ -10,6 +10,8 @@ import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import GettingStarted from './pages/GettingStarted';
 import PrincipalRisks from './pages/PrincipalRisks';
+import ObjectivesSummary from './pages/ObjectivesSummary';
+import PrincipalRisksSummary from './pages/PrincipalRisksSummary';
 import HelpCentre from './pages/HelpCentre';
 import AssessmentModels from './pages/AssessmentModels';
 import AssessmentModelDetail from './pages/AssessmentModelDetail';
@@ -64,6 +66,8 @@ const AuthenticatedApp = () => {
         <Route path="/AssessmentModelDetail" element={<LayoutWrapper currentPageName="AssessmentModelDetail"><AssessmentModelDetail /></LayoutWrapper>} />
         <Route path="/EvidenceLibrary" element={<LayoutWrapper currentPageName="EvidenceLibrary"><EvidenceLibrary /></LayoutWrapper>} />
         <Route path="/PrincipalRisks" element={<LayoutWrapper currentPageName="PrincipalRisks"><PrincipalRisks /></LayoutWrapper>} />
+        <Route path="/ObjectivesSummary" element={<LayoutWrapper currentPageName="ObjectivesSummary"><ObjectivesSummary /></LayoutWrapper>} />
+        <Route path="/PrincipalRisksSummary" element={<LayoutWrapper currentPageName="PrincipalRisksSummary"><PrincipalRisksSummary /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
