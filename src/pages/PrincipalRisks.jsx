@@ -131,14 +131,19 @@ export default function PrincipalRisks() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-          <ShieldAlert className="w-7 h-7 text-white" />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+            <ShieldAlert className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Principal Risks</h1>
+            <p className="text-slate-600">Enterprise-level principal risk register</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Principal Risks</h1>
-          <p className="text-slate-600">Enterprise-level principal risk register</p>
-        </div>
+        <Button onClick={openNew} className="bg-red-600 hover:bg-red-700 gap-2 shrink-0">
+          <Plus className="w-4 h-4" /> New Principal Risk
+        </Button>
       </div>
 
       {/* Stats */}
@@ -230,12 +235,7 @@ export default function PrincipalRisks() {
         </div>
       )}
 
-      {/* New button at bottom */}
-      <div className="flex justify-center pt-2">
-        <Button onClick={openNew} className="bg-red-600 hover:bg-red-700 gap-2">
-          <Plus className="w-4 h-4" /> New Principal Risk
-        </Button>
-      </div>
+
 
       {/* Dialog — single scrollable form, no tabs */}
       <Dialog open={dialogOpen} onOpenChange={v => { if (!v) closeDialog(); }}>
