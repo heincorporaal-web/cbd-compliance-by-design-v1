@@ -232,7 +232,7 @@ export default function Companies() {
                     )}
                   </TabsTrigger>
                   <TabsTrigger value="risks">
-                    Principle Risks
+                    Principal Risks
                     {formData.principle_risks?.length > 0 && (
                       <Badge variant="secondary" className="ml-2">{formData.principle_risks.length}</Badge>
                     )}
@@ -378,10 +378,10 @@ export default function Companies() {
 
                 <TabsContent value="risks" className="space-y-4 mt-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm text-slate-600">Define principle risks for this company</p>
+                    <p className="text-sm text-slate-600">Define principal risks for this company</p>
                     <Button type="button" onClick={addPrincipleRisk} variant="outline" size="sm">
                       <Plus className="w-4 h-4 mr-2" />
-                      Add Principle Risk
+                      Add Principal Risk
                     </Button>
                   </div>
                   {formData.principle_risks?.length > 0 ? (
@@ -391,7 +391,7 @@ export default function Companies() {
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-2">
                               <AlertTriangle className="w-4 h-4 text-orange-600" />
-                              <span className="font-medium text-sm">Principle Risk #{idx + 1}</span>
+                              <span className="font-medium text-sm">Principal Risk #{idx + 1}</span>
                             </div>
                             <Button
                               type="button"
@@ -405,12 +405,12 @@ export default function Companies() {
                           </div>
                           <div className="space-y-3">
                             <Input
-                              placeholder="Principle risk title"
+                              placeholder="Principal risk title"
                               value={risk.title}
                               onChange={(e) => updatePrincipleRisk(risk.id, 'title', e.target.value)}
                             />
                             <Textarea
-                              placeholder="Principle risk description"
+                              placeholder="Principal risk description"
                               value={risk.description}
                               onChange={(e) => updatePrincipleRisk(risk.id, 'description', e.target.value)}
                               rows={2}
@@ -422,7 +422,7 @@ export default function Companies() {
                   ) : (
                     <div className="text-center py-8 border-2 border-dashed rounded-lg">
                       <AlertTriangle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                      <p className="text-sm text-slate-500">No principle risks defined yet</p>
+                      <p className="text-sm text-slate-500">No principal risks defined yet</p>
                     </div>
                   )}
                 </TabsContent>
