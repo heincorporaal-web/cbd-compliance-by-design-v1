@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShieldAlert, Plus, Search, Building2, User, Pencil, Trash2, Calendar } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
@@ -104,18 +103,14 @@ export default function PrincipalRisks() {
     setDialogOpen(true);
   };
 
+  const openNew = () => { setForm(EMPTY_FORM); setEditId(null); setDialogOpen(true); };
+
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }));
 
   const handleSave = () => {
     if (!form.risk_title || !form.company_id) { toast.error("Risk Title and Company are required"); return; }
     if (editId) updateMutation.mutate({ id: editId, data: form });
     else createMutation.mutate(form);
-  };
-
-  // Resolve stakeholder picker
-  const pickStakeholder = (stk, nameField, idField) => {
-    set(idField, stk.id);
-    set(nameField, stk.full_name);
   };
 
   const filtered = principalRisks.filter(r => {
@@ -237,29 +232,23 @@ export default function PrincipalRisks() {
 
       {/* New button at bottom */}
       <div className="flex justify-center pt-2">
-        <Button onClick={() => { setForm(EMPTY_FORM); setEditId(null); setDialogOpen(true); }} className="bg-red-600 hover:bg-red-700 gap-2">
+        <Button onClick={openNew} className="bg-red-600 hover:bg-red-700 gap-2">
           <Plus className="w-4 h-4" /> New Principal Risk
         </Button>
       </div>
 
-      {/* Dialog */}
+      {/* Dialog — single scrollable form, no tabs */}
       <Dialog open={dialogOpen} onOpenChange={v => { if (!v) closeDialog(); }}>
-        <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editId ? "Edit Principal Risk" : "New Principal Risk"}</DialogTitle>
           </DialogHeader>
 
-          <Tabs defaultValue="core" className="w-full">
-            <TabsList className="w-full flex flex-wrap h-auto gap-1">
-              <TabsTrigger value="core">Core Details</TabsTrigger>
-              <TabsTrigger value="classification">Classification</TabsTrigger>
-              <TabsTrigger value="ownership">Ownership</TabsTrigger>
-              <TabsTrigger value="lifecycle">Lifecycle</TabsTrigger>
-            </TabsList>
-
+          <div className="space-y-5 py-2">
             {/* Core Details */}
-            <TabsContent value="core" className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Core Details</p>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Risk Reference</Label>
                   <Input value={form.risk_reference} onChange={e => set("risk_reference", e.target.value)} placeholder="e.g. PR-001" />
@@ -275,28 +264,25 @@ export default function PrincipalRisks() {
                     </Select>
                   )}
                 </div>
-                <div className="col-span-2">
-                  <Label>Risk Title *</Label>
-                  <Input value={form.risk_title} onChange={e => set("risk_title", e.target.value)} placeholder='e.g. "IT Compliance & Control Risk"' />
-                </div>
-                <div className="col-span-2">
-                  <Label>Risk Statement</Label>
-                  <Textarea value={form.risk_statement} onChange={e => set("risk_statement", e.target.value)} rows={3} placeholder="Full cause-event-impact statement…" />
-                </div>
-                <div className="col-span-2">
-                  <Label>Risk Description</Label>
-                  <Textarea value={form.risk_description} onChange={e => set("risk_description", e.target.value)} rows={3} placeholder="Longer explanation of the risk…" />
-                </div>
-                <div className="col-span-2">
-                  <Label>Notes</Label>
-                  <Textarea value={form.notes} onChange={e => set("notes", e.target.value)} rows={2} />
-                </div>
               </div>
-            </TabsContent>
+              <div>
+                <Label>Risk Title *</Label>
+                <Input value={form.risk_title} onChange={e => set("risk_title", e.target.value)} placeholder='e.g. "IT Compliance & Control Risk"' />
+              </div>
+              <div>
+                <Label>Risk Statement</Label>
+                <Textarea value={form.risk_statement} onChange={e => set("risk_statement", e.target.value)} rows={2} placeholder="Full cause-event-impact statement…" />
+              </div>
+              <div>
+                <Label>Risk Description</Label>
+                <Textarea value={form.risk_description} onChange={e => set("risk_description", e.target.value)} rows={2} placeholder="Longer explanation of the risk…" />
+              </div>
+            </div>
 
             {/* Classification */}
-            <TabsContent value="classification" className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3 border-t pt-4">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Classification</p>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Risk Category</Label>
                   <Select value={form.risk_category} onValueChange={v => set("risk_category", v)}>
@@ -344,11 +330,12 @@ export default function PrincipalRisks() {
                   </Select>
                 </div>
               </div>
-            </TabsContent>
+            </div>
 
             {/* Ownership */}
-            <TabsContent value="ownership" className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3 border-t pt-4">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Ownership</p>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Risk Owner (Executive)</Label>
                   <Select value={form.risk_owner_id || ""} onValueChange={v => {
@@ -392,11 +379,12 @@ export default function PrincipalRisks() {
                   </Select>
                 </div>
               </div>
-            </TabsContent>
+            </div>
 
             {/* Lifecycle */}
-            <TabsContent value="lifecycle" className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3 border-t pt-4">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Lifecycle</p>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Valid From</Label>
                   <Input type="date" value={form.valid_from} onChange={e => set("valid_from", e.target.value)} />
@@ -421,10 +409,17 @@ export default function PrincipalRisks() {
                   <Input type="date" value={form.next_review_date} onChange={e => set("next_review_date", e.target.value)} />
                 </div>
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+            {/* Notes */}
+            <div className="border-t pt-4">
+              <Label>Notes</Label>
+              <Textarea value={form.notes} onChange={e => set("notes", e.target.value)} rows={2} className="mt-1" />
+            </div>
+          </div>
+
+          {/* Save actions at bottom */}
+          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 sticky bottom-0 bg-white">
             <Button variant="outline" onClick={closeDialog}>Cancel</Button>
             <Button onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending} className="bg-red-600 hover:bg-red-700">
               {editId ? "Save Changes" : "Create Principal Risk"}
