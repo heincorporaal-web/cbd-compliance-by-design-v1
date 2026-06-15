@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Target, Plus, Search, Building2, Calendar, User, Trash2
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import ObjectiveFormDialog from "@/components/objectives/ObjectiveFormDialog";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ export default function OrgObjectives() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editObj, setEditObj] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const { data: objectives = [], isLoading } = useQuery({
     queryKey: ["orgObjectives"],
@@ -176,7 +178,7 @@ export default function OrgObjectives() {
                       )}
                     </div>
                     <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => deleteMutation.mutate(obj.id)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => setConfirmDeleteId(obj.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -194,6 +196,19 @@ export default function OrgObjectives() {
           <Plus className="w-4 h-4" /> New Objective
         </Button>
       </div>
+
+      <Dialog open={!!confirmDeleteId} onOpenChange={v => { if (!v) setConfirmDeleteId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Objective?</DialogTitle>
+            <DialogDescription>This action cannot be undone. The objective will be permanently deleted.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setConfirmDeleteId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => { deleteMutation.mutate(confirmDeleteId); setConfirmDeleteId(null); }}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ObjectiveFormDialog
         open={dialogOpen}

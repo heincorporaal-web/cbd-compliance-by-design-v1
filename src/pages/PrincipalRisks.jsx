@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ShieldAlert, Plus, Search, Building2, User, Pencil, Trash2, Calendar } from "lucide-react";
@@ -59,6 +59,7 @@ export default function PrincipalRisks() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const { data: principalRisks = [], isLoading } = useQuery({
     queryKey: ["principalRisks"],
@@ -218,7 +219,7 @@ export default function PrincipalRisks() {
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(r)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => deleteMutation.mutate(r.id)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600" onClick={() => setConfirmDeleteId(r.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -236,6 +237,20 @@ export default function PrincipalRisks() {
           <Plus className="w-4 h-4" /> New Principal Risk
         </Button>
       </div>
+
+      {/* Confirm delete */}
+      <Dialog open={!!confirmDeleteId} onOpenChange={v => { if (!v) setConfirmDeleteId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Principal Risk?</DialogTitle>
+            <DialogDescription>This action cannot be undone. The principal risk will be permanently deleted.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setConfirmDeleteId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => { deleteMutation.mutate(confirmDeleteId); setConfirmDeleteId(null); }}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog — single scrollable form, no tabs */}
       <Dialog open={dialogOpen} onOpenChange={v => { if (!v) closeDialog(); }}>
