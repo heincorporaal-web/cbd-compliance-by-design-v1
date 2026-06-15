@@ -33,7 +33,7 @@ const EMPTY_KPI = () => ({
   measurement_description: "", calculation_method: "", data_source_link: ""
 });
 
-export default function ObjectiveFormDialog({ open, onClose, editObj, companies, objectives }) {
+export default function ObjectiveFormDialog({ open, onClose, editObj, companies, objectives, defaultCompanyId }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(EMPTY_FORM);
 
@@ -46,8 +46,8 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
 
   useEffect(() => {
     if (editObj) setForm({ ...EMPTY_FORM, ...editObj });
-    else setForm(EMPTY_FORM);
-  }, [editObj]);
+    else setForm({ ...EMPTY_FORM, company_id: defaultCompanyId || "" });
+  }, [editObj, defaultCompanyId]);
 
   const set = (field, val) => setForm(f => ({ ...f, [field]: val }));
 

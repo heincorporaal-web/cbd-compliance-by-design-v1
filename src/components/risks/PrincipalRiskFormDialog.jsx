@@ -21,14 +21,14 @@ const EMPTY_FORM = {
   last_review_date: "", next_review_date: "", notes: "",
 };
 
-export default function PrincipalRiskFormDialog({ open, onClose, editRisk, companies, stakeholders, businessUnits }) {
+export default function PrincipalRiskFormDialog({ open, onClose, editRisk, companies, stakeholders, businessUnits, defaultCompanyId }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(EMPTY_FORM);
 
   useEffect(() => {
     if (editRisk) setForm({ ...EMPTY_FORM, ...editRisk });
-    else setForm(EMPTY_FORM);
-  }, [editRisk]);
+    else setForm({ ...EMPTY_FORM, company_id: defaultCompanyId || "" });
+  }, [editRisk, defaultCompanyId]);
 
   const set = (field, val) => setForm(f => ({ ...f, [field]: val }));
 
