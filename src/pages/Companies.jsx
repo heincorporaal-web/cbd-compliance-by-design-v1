@@ -8,13 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, Plus, Search, Edit2, Trash2, Target, AlertTriangle, Upload, Palette, RefreshCw, Image, FileText, Eye, CalendarDays, BookOpen, CalendarOff, ExternalLink } from "lucide-react";
-import { Link } from "react-router-dom";
-import ObjectiveFormDialog from "@/components/objectives/ObjectiveFormDialog";
-import PrincipalRiskFormDialog from "@/components/risks/PrincipalRiskFormDialog";
+import { Building2, Plus, Search, Edit2, Trash2, Upload, Palette, RefreshCw, Image, FileText, Eye, CalendarDays, CalendarOff } from "lucide-react";
 import EndDateBadge, { isExpired } from "@/components/ui/EndDateBadge";
 import CompanyCalendarTab from "@/components/companies/CompanyCalendarTab";
-import FrameworkAssignmentTab from "@/components/companies/FrameworkAssignmentTab";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -59,35 +55,7 @@ export default function Companies() {
   });
 
   // Fetch frameworks for assignment
-  const [objDialogOpen, setObjDialogOpen] = useState(false);
-  const [editObj, setEditObj] = useState(null);
-  const [riskDialogOpen, setRiskDialogOpen] = useState(false);
-  const [editRisk, setEditRisk] = useState(null);
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ['frameworks'],
-    queryFn: () => base44.entities.Framework.list('-created_date'),
-  });
-
-  const { data: allObjectives = [] } = useQuery({
-    queryKey: ['orgObjectives'],
-    queryFn: () => base44.entities.OrgObjective.list('-created_date'),
-  });
-
-  const { data: allPrincipalRisks = [] } = useQuery({
-    queryKey: ['principalRisks'],
-    queryFn: () => base44.entities.PrincipalRisk.list('-created_date'),
-  });
-
-  const { data: stakeholders = [] } = useQuery({
-    queryKey: ['stakeholders'],
-    queryFn: () => base44.entities.Stakeholder.list(),
-  });
-
-  const { data: businessUnits = [] } = useQuery({
-    queryKey: ['businessUnits'],
-    queryFn: () => base44.entities.BusinessUnit.list(),
-  });
 
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ['companies'],
@@ -128,9 +96,6 @@ export default function Companies() {
       status: "active",
       end_date: "",
       description: "",
-      objectives: [],
-      principle_risks: [],
-      framework_assignments: [],
       logo_url: "",
       brand_colors: { ...DEFAULT_COLORS },
       include_logo_in_reports: true,
@@ -140,11 +105,6 @@ export default function Companies() {
     setEditingCompany(null);
   };
 
-  // Handle framework assignments update
-  const handleFrameworkAssignmentsChange = (assignments) => {
-    setFormData(prev => ({ ...prev, framework_assignments: assignments }));
-  };
-
   const handleLogoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -152,38 +112,6 @@ export default function Companies() {
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setFormData(prev => ({ ...prev, logo_url: file_url }));
     setUploadingLogo(false);
-  };
-
-  const addObjective = () => {
-    const newObjective = { id: Date.now().toString(), title: "", description: "" };
-    setFormData({ ...formData, objectives: [...(formData.objectives || []), newObjective] });
-  };
-
-  const updateObjective = (id, field, value) => {
-    setFormData({
-      ...formData,
-      objectives: formData.objectives.map(obj => obj.id === id ? { ...obj, [field]: value } : obj)
-    });
-  };
-
-  const removeObjective = (id) => {
-    setFormData({ ...formData, objectives: formData.objectives.filter(obj => obj.id !== id) });
-  };
-
-  const addPrincipleRisk = () => {
-    const newRisk = { id: Date.now().toString(), title: "", description: "" };
-    setFormData({ ...formData, principle_risks: [...(formData.principle_risks || []), newRisk] });
-  };
-
-  const updatePrincipleRisk = (id, field, value) => {
-    setFormData({
-      ...formData,
-      principle_risks: formData.principle_risks.map(risk => risk.id === id ? { ...risk, [field]: value } : risk)
-    });
-  };
-
-  const removePrincipleRisk = (id) => {
-    setFormData({ ...formData, principle_risks: formData.principle_risks.filter(risk => risk.id !== id) });
   };
 
   const handleSubmit = (e) => {
@@ -251,34 +179,15 @@ export default function Companies() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Tabs defaultValue="details">
-                <TabsList className="flex flex-wrap h-auto gap-1">
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="objectives">
-                    Objectives
-                    {formData.objectives?.length > 0 && (
-                      <Badge variant="secondary" className="ml-2">{formData.objectives.length}</Badge>
-                    )}
+              <TabsList className="flex flex-wrap h-auto gap-1">
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="branding">Branding</TabsTrigger>
+                {editingCompany && (
+                  <TabsTrigger value="calendar" className="gap-1.5">
+                    <CalendarDays className="w-3.5 h-3.5" /> Calendar
                   </TabsTrigger>
-                  <TabsTrigger value="risks">
-                    Principal Risks
-                    {formData.principle_risks?.length > 0 && (
-                      <Badge variant="secondary" className="ml-2">{formData.principle_risks.length}</Badge>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="branding">Branding</TabsTrigger>
-                  <TabsTrigger value="frameworks">
-                    <BookOpen className="w-3.5 h-3.5 mr-1" />
-                    Frameworks
-                    {formData.framework_assignments?.length > 0 && (
-                      <Badge variant="secondary" className="ml-2">{formData.framework_assignments.length}</Badge>
-                    )}
-                  </TabsTrigger>
-                  {editingCompany && (
-                    <TabsTrigger value="calendar" className="gap-1.5">
-                      <CalendarDays className="w-3.5 h-3.5" /> Calendar
-                    </TabsTrigger>
-                  )}
-                </TabsList>
+                )}
+              </TabsList>
 
                 <TabsContent value="details" className="space-y-4 mt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -351,93 +260,6 @@ export default function Companies() {
                   rows={3}
                 />
               </div>
-                </TabsContent>
-
-                <TabsContent value="objectives" className="space-y-4 mt-4">
-                  {(() => {
-                    const companyObjectives = editingCompany
-                      ? allObjectives.filter(o => o.company_id === editingCompany.id)
-                      : [];
-                    return (
-                      <>
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm text-slate-500">{companyObjectives.length} objective{companyObjectives.length !== 1 ? "s" : ""} for this company</p>
-                          <Button type="button" size="sm" variant="outline" className="gap-1.5" onClick={() => { setEditObj(null); setObjDialogOpen(true); }}>
-                            <Plus className="w-3.5 h-3.5" /> Add Objective
-                          </Button>
-                        </div>
-                        {companyObjectives.length > 0 ? (
-                          <div className="space-y-2">
-                            {companyObjectives.map(obj => (
-                              <div key={obj.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-medium text-sm text-slate-800 truncate">{obj.title}</span>
-                                    {obj.reference_number && <span className="text-xs font-mono text-slate-400">{obj.reference_number}</span>}
-                                    {obj.status && <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">{obj.status}</span>}
-                                    {obj.category && <span className="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-600">{obj.category}</span>}
-                                  </div>
-                                  {obj.objective_owner && <p className="text-xs text-slate-400 mt-0.5">Owner: {obj.objective_owner}</p>}
-                                </div>
-                                <Button type="button" variant="ghost" size="sm" className="shrink-0 ml-2" onClick={() => { setEditObj(obj); setObjDialogOpen(true); }}>
-                                  <Edit2 className="w-3.5 h-3.5" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-8 border-2 border-dashed rounded-lg">
-                            <Target className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                            <p className="text-sm text-slate-500">{editingCompany ? "No objectives yet — click Add Objective to create one." : "Save the company first to add objectives."}</p>
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-                </TabsContent>
-
-                <TabsContent value="risks" className="space-y-4 mt-4">
-                  {(() => {
-                    const companyRisks = editingCompany
-                      ? allPrincipalRisks.filter(r => r.company_id === editingCompany.id)
-                      : [];
-                    return (
-                      <>
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm text-slate-500">{companyRisks.length} principal risk{companyRisks.length !== 1 ? "s" : ""} for this company</p>
-                          <Button type="button" size="sm" variant="outline" className="gap-1.5" onClick={() => { setEditRisk(null); setRiskDialogOpen(true); }}>
-                            <Plus className="w-3.5 h-3.5" /> Add Principal Risk
-                          </Button>
-                        </div>
-                        {companyRisks.length > 0 ? (
-                          <div className="space-y-2">
-                            {companyRisks.map(risk => (
-                              <div key={risk.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-medium text-sm text-slate-800 truncate">{risk.risk_title}</span>
-                                    {risk.risk_reference && <span className="text-xs font-mono text-slate-400">{risk.risk_reference}</span>}
-                                    {risk.status && <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">{risk.status}</span>}
-                                    {risk.priority && <span className="text-xs px-1.5 py-0.5 rounded bg-orange-50 text-orange-600">{risk.priority}</span>}
-                                    {risk.risk_category && <span className="text-xs px-1.5 py-0.5 rounded bg-red-50 text-red-600">{risk.risk_category}</span>}
-                                  </div>
-                                  {risk.risk_owner_name && <p className="text-xs text-slate-400 mt-0.5">Owner: {risk.risk_owner_name}</p>}
-                                </div>
-                                <Button type="button" variant="ghost" size="sm" className="shrink-0 ml-2" onClick={() => { setEditRisk(risk); setRiskDialogOpen(true); }}>
-                                  <Edit2 className="w-3.5 h-3.5" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-8 border-2 border-dashed rounded-lg">
-                            <AlertTriangle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                            <p className="text-sm text-slate-500">{editingCompany ? "No principal risks yet — click Add Principal Risk to create one." : "Save the company first to add principal risks."}</p>
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
                 </TabsContent>
 
                 <TabsContent value="branding" className="space-y-5 mt-4">
@@ -568,15 +390,6 @@ export default function Companies() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="frameworks" className="space-y-4 mt-4">
-                  <FrameworkAssignmentTab
-                    companyId={editingCompany?.id}
-                    existingAssignments={formData.framework_assignments || []}
-                    frameworks={frameworks}
-                    onAssignmentsChange={handleFrameworkAssignmentsChange}
-                  />
-                </TabsContent>
-
                 {editingCompany && (
                   <TabsContent value="calendar" className="mt-4">
                     <CompanyCalendarTab companyId={editingCompany.id} />
@@ -651,14 +464,7 @@ export default function Companies() {
                         {company.description && (
                           <p className="text-sm text-slate-500 mt-2">{company.description}</p>
                         )}
-                        {company.framework_assignments?.length > 0 && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-                            <span className="text-xs text-slate-500">
-                              {company.framework_assignments.length} framework{company.framework_assignments.length !== 1 ? 's' : ''} assigned
-                            </span>
-                          </div>
-                        )}
+
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -685,26 +491,6 @@ export default function Companies() {
         </CardContent>
       </Card>
 
-      {/* Objective dialog — pre-fills company_id */}
-      <ObjectiveFormDialog
-        open={objDialogOpen}
-        onClose={() => { setObjDialogOpen(false); setEditObj(null); }}
-        editObj={editObj}
-        companies={companies}
-        objectives={allObjectives}
-        defaultCompanyId={editingCompany?.id}
-      />
-
-      {/* Principal Risk dialog — pre-fills company_id */}
-      <PrincipalRiskFormDialog
-        open={riskDialogOpen}
-        onClose={() => { setRiskDialogOpen(false); setEditRisk(null); }}
-        editRisk={editRisk}
-        companies={companies}
-        stakeholders={stakeholders}
-        businessUnits={businessUnits}
-        defaultCompanyId={editingCompany?.id}
-      />
     </div>
   );
 }
