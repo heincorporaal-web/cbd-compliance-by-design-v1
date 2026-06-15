@@ -377,13 +377,7 @@ export default function Companies() {
                 </TabsContent>
 
                 <TabsContent value="risks" className="space-y-4 mt-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-slate-600">Define principal risks for this company</p>
-                    <Button type="button" onClick={addPrincipleRisk} variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Principal Risk
-                    </Button>
-                  </div>
+                  <p className="text-sm text-slate-600">Define principal risks for this company</p>
                   {formData.principle_risks?.length > 0 ? (
                     <div className="space-y-3">
                       {formData.principle_risks.map((risk, idx) => (
@@ -425,6 +419,12 @@ export default function Companies() {
                       <p className="text-sm text-slate-500">No principal risks defined yet</p>
                     </div>
                   )}
+                  <div className="flex justify-center pt-1">
+                    <Button type="button" onClick={addPrincipleRisk} variant="outline" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Principal Risk
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="branding" className="space-y-5 mt-4">
