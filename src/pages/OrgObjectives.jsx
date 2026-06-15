@@ -68,7 +68,7 @@ export default function OrgObjectives() {
   };
 
   const filtered = objectives.filter(o => {
-    const matchCompany = !selectedCompany || o.company_id === selectedCompany;
+    const matchCompany = !selectedCompany || selectedCompany === "all" || o.company_id === selectedCompany;
     const matchSearch = !search || o.title?.toLowerCase().includes(search.toLowerCase());
     const matchCat = catFilter === "all" || o.category === catFilter;
     const matchStatus = statusFilter === "all" || o.status === statusFilter;
