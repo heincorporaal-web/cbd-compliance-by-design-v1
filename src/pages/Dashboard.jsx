@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Settings, LayoutDashboard } from "lucide-react";
+import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Settings, LayoutDashboard, ShieldAlert } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -115,6 +115,11 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Risk.list(),
   });
 
+  const { data: principalRisks = [] } = useQuery({
+    queryKey: ['principalRisks'],
+    queryFn: () => base44.entities.PrincipalRisk.list(),
+  });
+
   // Apply company filter
   const gc = globalCompany;
   const filteredAssessments = gc === "all" ? assessments : assessments.filter(a => a.company_id === gc);
@@ -124,6 +129,7 @@ export default function Dashboard() {
   const filteredProcesses = gc === "all" ? processes : processes.filter(p => p.company_id === gc);
   const filteredGoals = gc === "all" ? goals : goals.filter(g => g.company_id === gc);
   const filteredRisks = gc === "all" ? risks : risks.filter(r => r.company_id === gc);
+  const filteredPrincipalRisks = gc === "all" ? principalRisks : principalRisks.filter(r => r.company_id === gc);
   const filteredProcessAssessments = gc === "all" ? processAssessments : processAssessments.filter(pa => {
     const proc = processes.find(p => p.id === pa.process_id);
     return proc?.company_id === gc;
@@ -175,6 +181,11 @@ export default function Dashboard() {
   ).length;
   const openRisks = filteredRisks.filter(r => r.status === 'identified' || r.status === 'assessed').length;
   const mitigatedRisks = filteredRisks.filter(r => r.status === 'mitigated').length;
+
+  // Principal Risks
+  const activePrincipalRisks = filteredPrincipalRisks.filter(r => r.status === 'Active').length;
+  const highPrincipalRisks = filteredPrincipalRisks.filter(r => r.priority === 'High').length;
+  const criticalPrincipalRisks = filteredPrincipalRisks.filter(r => r.criticality === 'Critical').length;
 
   const recentIncidents = filteredIncidents.slice(0, 5);
 
@@ -501,6 +512,73 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
+        </div>
+      )}
+
+      {filteredPrincipalRisks.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-red-600" /> Principal Risks
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <Card className="border-none shadow-lg">
+              <CardContent className="pt-5 pb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm text-slate-500">Total</p>
+                  <ShieldAlert className="w-4 h-4 text-slate-400" />
+                </div>
+                <p className="text-3xl font-bold text-slate-900">{filteredPrincipalRisks.length}</p>
+                <p className="text-xs text-green-600 mt-1">{activePrincipalRisks} active</p>
+              </CardContent>
+            </Card>
+            <Card className="border-none shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
+              <CardContent className="pt-5 pb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm text-slate-500">High Priority</p>
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                </div>
+                <p className="text-3xl font-bold text-red-600">{highPrincipalRisks}</p>
+                <p className="text-xs text-slate-500 mt-1">{criticalPrincipalRisks} critical</p>
+              </CardContent>
+            </Card>
+            <Card className="border-none shadow-lg">
+              <CardContent className="pt-5 pb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm text-slate-500">Under Review</p>
+                  <AlertCircle className="w-4 h-4 text-amber-500" />
+                </div>
+                <p className="text-3xl font-bold text-slate-900">{filteredPrincipalRisks.filter(r => r.status === 'Under Review').length}</p>
+                <p className="text-xs text-slate-500 mt-1">Awaiting action</p>
+              </CardContent>
+            </Card>
+          </div>
+          <Card className="border-none shadow-lg">
+            <CardContent className="p-0">
+              <div className="divide-y divide-slate-100">
+                {filteredPrincipalRisks.slice(0, 5).map(r => (
+                  <div key={r.id} className="p-4 flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {r.risk_reference && <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{r.risk_reference}</span>}
+                        <span className="font-medium text-slate-900 text-sm">{r.risk_title}</span>
+                      </div>
+                      {r.risk_statement && <p className="text-xs text-slate-500 mt-0.5 line-clamp-1 italic">"{r.risk_statement}"</p>}
+                    </div>
+                    <div className="flex gap-1.5 shrink-0 flex-wrap justify-end">
+                      <Badge className="bg-blue-100 text-blue-700 text-xs">{r.risk_category}</Badge>
+                      <Badge className={`text-xs ${{ High: "bg-red-100 text-red-700", Medium: "bg-yellow-100 text-yellow-700", Low: "bg-slate-100 text-slate-600" }[r.priority] || ""}`}>{r.priority}</Badge>
+                      <Badge className={`text-xs ${{ Draft: "bg-slate-100 text-slate-600", Active: "bg-green-100 text-green-700", "Under Review": "bg-yellow-100 text-yellow-700", Retired: "bg-red-100 text-red-700" }[r.status] || ""}`}>{r.status}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {filteredPrincipalRisks.length > 5 && (
+                <div className="p-3 text-center border-t">
+                  <Link to="/PrincipalRisks"><Button variant="ghost" size="sm">View all {filteredPrincipalRisks.length} principal risks</Button></Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 
