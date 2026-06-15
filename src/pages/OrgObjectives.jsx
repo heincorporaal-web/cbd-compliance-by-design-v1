@@ -38,7 +38,7 @@ const CAT_COLORS = {
 
 export default function OrgObjectives() {
   const queryClient = useQueryClient();
-  const { selectedCompany } = useCompanyFilter();
+  const [selectedCompany] = useCompanyFilter();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -201,6 +201,7 @@ export default function OrgObjectives() {
         editObj={editObj}
         companies={companies}
         objectives={objectives}
+        defaultCompanyId={selectedCompany !== "all" ? selectedCompany : ""}
       />
     </div>
   );
