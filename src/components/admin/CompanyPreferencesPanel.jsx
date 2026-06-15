@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Save, Building2, Mail, Settings2, Shield, BarChart2, CheckSquare } from "lucide-react";
+import NumberingConfigSection from "@/components/admin/NumberingConfigSection";
 import { toast } from "sonner";
 
 const MONTHS = [
@@ -18,6 +19,7 @@ const MONTHS = [
 const RISK_APPETITE_OPTIONS = ["Very Low","Low","Medium","High","Very High"];
 
 const emptyPrefs = {
+  numbering_config: {},
   default_assessment_model_id: "",
   default_assessment_model_name: "",
   default_workflow_approver_email: "",
@@ -278,6 +280,11 @@ export default function CompanyPreferencesPanel() {
               />
             </div>
           </Section>
+
+          <NumberingConfigSection
+            numbering={form.numbering_config || {}}
+            onChange={(cfg) => setForm(p => ({ ...p, numbering_config: cfg }))}
+          />
 
           <div className="flex justify-end pt-2">
             <Button

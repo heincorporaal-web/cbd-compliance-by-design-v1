@@ -9,11 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, Plus, Search, Edit2, Calendar, CheckCircle2, Clock, AlertTriangle, FileText } from "lucide-react";
+import { AlertCircle, Plus, Search, Edit2, Calendar, CheckCircle2, Clock, AlertTriangle, FileText, Hash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import FileUpload from "../components/FileUpload";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import ActionItemsPanel, { applyActionItemNumbers } from "@/components/issues/ActionItemsPanel";
+import { getEntityNumConfig, buildIssueRefNumber, getNextSequence } from "@/lib/autoNumbering";
 
 export default function Issues() {
   const [globalCompany] = useCompanyFilter();
@@ -23,10 +25,10 @@ export default function Issues() {
   const [editingIssue, setEditingIssue] = useState(null);
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState({
+  const emptyForm = () => ({
     title: "",
     description: "",
-    company_id: "",
+    company_id: globalCompany !== "all" ? globalCompany : "",
     issue_type: "action_item",
     status: "open",
     priority: "medium",
@@ -35,10 +37,13 @@ export default function Issues() {
     linked_entity_name: "",
     assigned_to: "",
     due_date: "",
+    action_items: [],
     attachments: [],
     resolution_notes: "",
     resolved_date: ""
   });
+
+  const [formData, setFormData] = useState(emptyForm());
 
   const { data: issues = [] } = useQuery({
     queryKey: ['issues'],
@@ -50,8 +55,32 @@ export default function Issues() {
     queryFn: () => base44.entities.Company.list(),
   });
 
+  const { data: companyPrefs = [] } = useQuery({
+    queryKey: ['companyPrefs'],
+    queryFn: () => base44.entities.CompanyPreference.list(),
+  });
+
+  const getPrefForCompany = (companyId) =>
+    companyPrefs.find(p => p.company_id === companyId) || null;
+
+  const generateRefNumber = (companyId, linkedEntityType) => {
+    const pref = getPrefForCompany(companyId);
+    const cfg  = getEntityNumConfig(pref, "issue");
+    const companyIssues = issues.filter(i => i.company_id === companyId);
+    const seq  = getNextSequence(companyIssues, cfg);
+    return buildIssueRefNumber(cfg, linkedEntityType, seq);
+  };
+
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Issue.create(data),
+    mutationFn: async (data) => {
+      const refNum = generateRefNumber(data.company_id, data.linked_entity_type);
+      const withRef = {
+        ...data,
+        reference_number: refNum,
+        action_items: applyActionItemNumbers(data.action_items || [], refNum),
+      };
+      return base44.entities.Issue.create(withRef);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['issues']);
       setIsDialogOpen(false);
@@ -60,7 +89,13 @@ export default function Issues() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Issue.update(id, data),
+    mutationFn: ({ id, data }) => {
+      const withRef = {
+        ...data,
+        action_items: applyActionItemNumbers(data.action_items || [], data.reference_number || ""),
+      };
+      return base44.entities.Issue.update(id, withRef);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['issues']);
       setIsDialogOpen(false);
@@ -69,22 +104,7 @@ export default function Issues() {
   });
 
   const resetForm = () => {
-    setFormData({
-      title: "",
-      description: "",
-      company_id: "",
-      issue_type: "action_item",
-      status: "open",
-      priority: "medium",
-      linked_entity_type: "Assessment",
-      linked_entity_id: "",
-      linked_entity_name: "",
-      assigned_to: "",
-      due_date: "",
-      attachments: [],
-      resolution_notes: "",
-      resolved_date: ""
-    });
+    setFormData(emptyForm());
     setEditingIssue(null);
   };
 
@@ -113,7 +133,7 @@ export default function Issues() {
 
   const handleEdit = (issue) => {
     setEditingIssue(issue);
-    setFormData(issue);
+    setFormData({ ...emptyForm(), ...issue });
     setIsDialogOpen(true);
   };
 
@@ -182,7 +202,13 @@ export default function Issues() {
             <DialogHeader>
               <DialogTitle>{editingIssue ? 'Update Issue' : 'Create New Issue'}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 max-h-[80vh] overflow-y-auto pr-1">
+              {editingIssue?.reference_number && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 rounded-lg border border-primary/20">
+                  <Hash className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-mono font-medium text-primary">{editingIssue.reference_number}</span>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="title">Title *</Label>
@@ -257,6 +283,9 @@ export default function Issues() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Assessment">Assessment</SelectItem>
+                      <SelectItem value="Control">Control</SelectItem>
+                      <SelectItem value="Risk">Risk</SelectItem>
+                      <SelectItem value="OrgProcess">Process</SelectItem>
                       <SelectItem value="Company">Company</SelectItem>
                       <SelectItem value="ThirdPartyProvider">Third Party Provider</SelectItem>
                       <SelectItem value="ICTSystem">ICT System</SelectItem>
@@ -311,6 +340,11 @@ export default function Issues() {
                   rows={3}
                 />
               </div>
+              <ActionItemsPanel
+                actionItems={formData.action_items || []}
+                onChange={(items) => setFormData({ ...formData, action_items: items })}
+                issueRef={editingIssue?.reference_number || ""}
+              />
               <div className="space-y-2">
                 <Label>Supporting Documents</Label>
                 <FileUpload
@@ -435,7 +469,10 @@ export default function Issues() {
                 <div key={issue.id} className="p-4 hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        {issue.reference_number && (
+                          <span className="font-mono text-xs text-primary bg-primary/5 px-1.5 py-0.5 rounded border border-primary/20">{issue.reference_number}</span>
+                        )}
                         <h3 className="font-semibold text-slate-900">{issue.title}</h3>
                         <Badge className={getPriorityColor(issue.priority)}>
                           {issue.priority}

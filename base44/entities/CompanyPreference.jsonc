@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Company name (denormalized)"
     },
+    "numbering_config": {
+      "type": "object",
+      "description": "Auto-numbering configuration keyed by entity type (risk, control, process, issue, evidence). Each entry: { alpha_prefix, divider, start_number, zero_pad }. For 'issue' also includes linked_prefixes map."
+    },
     "default_assessment_model_id": {
       "type": "string",
       "description": "Default Assessment Model ID"
@@ -44,7 +48,7 @@
     },
     "notification_from_name": {
       "type": "string",
-      "description": "Display name used in outgoing notifications (e.g. 'CBD GRC Platform')"
+      "description": "Display name used in outgoing notifications"
     },
     "default_currency": {
       "type": "string",

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { format, isPast, isWithinInterval, addDays } from "date-fns";
+import { getEntityNumConfig, buildRefNumber, getNextSequence } from "@/lib/autoNumbering";
 
 const FILE_TYPE_ICONS = {
   document: FileText,
@@ -73,6 +74,11 @@ export default function EvidenceLibrary() {
     queryFn: () => base44.entities.Company.list(),
   });
 
+  const { data: companyPrefs = [] } = useQuery({
+    queryKey: ["companyPrefs"],
+    queryFn: () => base44.entities.CompanyPreference.list(),
+  });
+
   const { data: controls = [] } = useQuery({
     queryKey: ["controls-active"],
     queryFn: () => base44.entities.Control.filter({ status: "active" }),
@@ -89,7 +95,14 @@ export default function EvidenceLibrary() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Evidence.create(data),
+    mutationFn: (data) => {
+      const pref = companyPrefs.find(p => p.company_id === data.company_id) || null;
+      const cfg  = getEntityNumConfig(pref, "evidence");
+      const companyEvidence = evidenceList.filter(e => e.company_id === data.company_id);
+      const seq  = getNextSequence(companyEvidence, cfg);
+      const refNum = buildRefNumber(cfg, seq);
+      return base44.entities.Evidence.create({ ...data, reference_number: refNum });
+    },
     onSuccess: () => { queryClient.invalidateQueries(["evidence"]); setIsUploadOpen(false); },
   });
 
@@ -262,6 +275,9 @@ export default function EvidenceLibrary() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-slate-800 text-sm truncate">{ev.name}</p>
+                          {ev.reference_number && (
+                            <p className="text-xs font-mono text-primary">{ev.reference_number}</p>
+                          )}
                           <p className="text-xs text-slate-400 truncate">{ev.file_name}</p>
                         </div>
                         <Badge className={`text-xs shrink-0 border-0 ${CATEGORY_COLORS[ev.category] || ""}`}>{ev.category}</Badge>

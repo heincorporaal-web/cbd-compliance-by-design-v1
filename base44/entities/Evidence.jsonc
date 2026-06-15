@@ -2,6 +2,10 @@
   "name": "Evidence",
   "type": "object",
   "properties": {
+    "reference_number": {
+      "type": "string",
+      "description": "Auto-generated unique reference number (e.g. EVD-0001)"
+    },
     "name": {
       "type": "string",
       "description": "Evidence file name / title"
