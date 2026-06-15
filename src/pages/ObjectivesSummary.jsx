@@ -41,7 +41,7 @@ function SortIcon({ col, sortCol, sortDir }) {
 
 export default function ObjectivesSummary() {
   const queryClient = useQueryClient();
-  const { selectedCompany } = useCompanyFilter();
+  const [selectedCompany] = useCompanyFilter();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -71,7 +71,7 @@ export default function ObjectivesSummary() {
 
   const filtered = useMemo(() => {
     let rows = objectives.filter(o => {
-      const matchCompany = !selectedCompany || o.company_id === selectedCompany;
+      const matchCompany = !selectedCompany || selectedCompany === "all" || o.company_id === selectedCompany;
       const matchSearch = !search || o.title?.toLowerCase().includes(search.toLowerCase()) || o.reference_number?.toLowerCase().includes(search.toLowerCase());
       const matchCat = catFilter === "all" || o.category === catFilter;
       const matchStatus = statusFilter === "all" || o.status === statusFilter;
@@ -199,6 +199,7 @@ export default function ObjectivesSummary() {
         editObj={editObj}
         companies={companies}
         objectives={objectives}
+        defaultCompanyId={selectedCompany && selectedCompany !== "all" ? selectedCompany : ""}
       />
     </div>
   );
