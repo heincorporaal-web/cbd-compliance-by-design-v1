@@ -9,11 +9,11 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import GettingStarted from './pages/GettingStarted';
+import PrincipalRisks from './pages/PrincipalRisks';
 import HelpCentre from './pages/HelpCentre';
 import AssessmentModels from './pages/AssessmentModels';
 import AssessmentModelDetail from './pages/AssessmentModelDetail';
 import EvidenceLibrary from './pages/EvidenceLibrary';
-import PrincipalRisks from './pages/PrincipalRisks';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 

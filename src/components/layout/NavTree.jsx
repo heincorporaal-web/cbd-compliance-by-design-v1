@@ -45,11 +45,11 @@ export const NAV_GROUPS = [
     label: "Risk Management",
     icon: TriangleAlert,
     items: [
-      { id: "principal_risks", title: "Principal Risks", url: createPageUrl("PrincipalRisks"), icon: ShieldAlert },
       { id: "risk_register", title: "Risk Register", url: createPageUrl("RiskRegister"), icon: TriangleAlert },
       { id: "risk_assessment_cycles", title: "Assessment Cycles", url: createPageUrl("RiskAssessmentCycles"), icon: ClipboardList },
       { id: "risk_engine", title: "Risk Engine", url: createPageUrl("RiskControlEngine"), icon: Cog },
       { id: "raci_matrix", title: "RACI Matrix", url: createPageUrl("RACIMatrix"), icon: Layers },
+      { id: "principal_risks", title: "Principal Risks", url: createPageUrl("PrincipalRisks"), icon: ShieldAlert },
       { id: "issues", title: "Issues", url: createPageUrl("Issues"), icon: AlertCircle },
       { id: "incidents", title: "Incidents", url: createPageUrl("Incidents"), icon: AlertTriangle },
     ],
