@@ -13,9 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Save, Plus, Trash2, Info } from "lucide-react";
 import { toast } from "sonner";
 
-const urlParams = new URLSearchParams(window.location.search);
-const modelId = urlParams.get("id");
-const isNew = urlParams.get("mode") === "new";
+
 
 const MATURITY_DEFAULTS = [
   { id: "m1", level_number: 1, qualitative_label: "Initial", quantitative_label: "Ad-hoc", score_low: 0, score_high: 20, description: "Processes are unpredictable, poorly controlled and reactive", color_hex: "#ef4444" },
@@ -53,6 +51,10 @@ const STATUS_OPTIONS = [
 const TYPE_OPTIONS = ["Qualitative", "Quantitative", "Semi-Quantitative", "Maturity Assessment", "Supplier Services", "Criticality"];
 
 export default function AssessmentModelDetail() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const modelId = urlParams.get("id");
+  const isNew = urlParams.get("mode") === "new";
+
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
     name: "", description: "", analysis_type: "Qualitative", status: "draft",
