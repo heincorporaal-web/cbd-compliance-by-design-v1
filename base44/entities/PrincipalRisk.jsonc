@@ -1,0 +1,138 @@
+{
+  "name": "PrincipalRisk",
+  "type": "object",
+  "properties": {
+    "risk_reference": {
+      "type": "string",
+      "description": "Reference e.g. PR-001"
+    },
+    "risk_title": {
+      "type": "string",
+      "description": "Short name e.g. IT Compliance & Control Risk"
+    },
+    "risk_statement": {
+      "type": "string",
+      "description": "Full cause-event-impact statement"
+    },
+    "risk_description": {
+      "type": "string",
+      "description": "Longer explanation of the risk"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "risk_category": {
+      "type": "string",
+      "enum": [
+        "Strategic",
+        "Compliance",
+        "IT",
+        "Operational",
+        "Cyber",
+        "Data",
+        "Third Party",
+        "Financial Crime"
+      ],
+      "default": "Operational"
+    },
+    "risk_sub_category": {
+      "type": "string",
+      "description": "More granular classification"
+    },
+    "risk_owner_id": {
+      "type": "string",
+      "description": "Stakeholder ID - executive accountable owner"
+    },
+    "risk_owner_name": {
+      "type": "string",
+      "description": "Risk owner name (denormalized)"
+    },
+    "risk_manager_id": {
+      "type": "string",
+      "description": "Stakeholder ID - day-to-day risk manager"
+    },
+    "risk_manager_name": {
+      "type": "string",
+      "description": "Risk manager name (denormalized)"
+    },
+    "risk_function_owner_id": {
+      "type": "string",
+      "description": "Stakeholder ID - 2LoD owner"
+    },
+    "risk_function_owner_name": {
+      "type": "string",
+      "description": "Risk function owner name (denormalized)"
+    },
+    "business_area_id": {
+      "type": "string",
+      "description": "BusinessUnit ID most exposed to the risk"
+    },
+    "business_area_name": {
+      "type": "string",
+      "description": "Business area name (denormalized)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Active",
+        "Under Review",
+        "Retired"
+      ],
+      "default": "Draft"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "High",
+        "Medium",
+        "Low"
+      ],
+      "default": "Medium"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "Critical",
+        "High",
+        "Medium",
+        "Low"
+      ],
+      "default": "Medium"
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date"
+    },
+    "valid_to": {
+      "type": "string",
+      "format": "date"
+    },
+    "review_frequency": {
+      "type": "string",
+      "enum": [
+        "Monthly",
+        "Quarterly",
+        "Annually"
+      ],
+      "default": "Quarterly"
+    },
+    "last_review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "risk_title",
+    "company_id",
+    "risk_category"
+  ]
+}

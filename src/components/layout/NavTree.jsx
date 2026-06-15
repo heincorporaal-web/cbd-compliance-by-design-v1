@@ -6,7 +6,7 @@ import {
   AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert,
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
-  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder
+  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -45,6 +45,7 @@ export const NAV_GROUPS = [
     label: "Risk Management",
     icon: TriangleAlert,
     items: [
+      { id: "principal_risks", title: "Principal Risks", url: createPageUrl("PrincipalRisks"), icon: ShieldAlert },
       { id: "risk_register", title: "Risk Register", url: createPageUrl("RiskRegister"), icon: TriangleAlert },
       { id: "risk_assessment_cycles", title: "Assessment Cycles", url: createPageUrl("RiskAssessmentCycles"), icon: ClipboardList },
       { id: "risk_engine", title: "Risk Engine", url: createPageUrl("RiskControlEngine"), icon: Cog },

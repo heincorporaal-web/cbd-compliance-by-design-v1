@@ -13,6 +13,7 @@ import HelpCentre from './pages/HelpCentre';
 import AssessmentModels from './pages/AssessmentModels';
 import AssessmentModelDetail from './pages/AssessmentModelDetail';
 import EvidenceLibrary from './pages/EvidenceLibrary';
+import PrincipalRisks from './pages/PrincipalRisks';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -62,6 +63,7 @@ const AuthenticatedApp = () => {
         <Route path="/AssessmentModels" element={<LayoutWrapper currentPageName="AssessmentModels"><AssessmentModels /></LayoutWrapper>} />
         <Route path="/AssessmentModelDetail" element={<LayoutWrapper currentPageName="AssessmentModelDetail"><AssessmentModelDetail /></LayoutWrapper>} />
         <Route path="/EvidenceLibrary" element={<LayoutWrapper currentPageName="EvidenceLibrary"><EvidenceLibrary /></LayoutWrapper>} />
+        <Route path="/PrincipalRisks" element={<LayoutWrapper currentPageName="PrincipalRisks"><PrincipalRisks /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>

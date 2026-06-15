@@ -2,6 +2,10 @@
   "name": "OrgObjective",
   "type": "object",
   "properties": {
+    "reference_number": {
+      "type": "string",
+      "description": "Auto-generated reference number"
+    },
     "title": {
       "type": "string",
       "description": "Objective title"
@@ -17,78 +21,221 @@
     "category": {
       "type": "string",
       "enum": [
-        "strategic",
-        "operational",
-        "financial",
-        "compliance",
-        "technology",
-        "people"
+        "Compliance",
+        "IT Compliance",
+        "Operational",
+        "Financial",
+        "Client Relations",
+        "Resilience",
+        "Data",
+        "Fundamentals"
       ],
-      "default": "strategic",
+      "default": "Operational",
       "description": "Objective category"
+    },
+    "strategic_theme": {
+      "type": "string",
+      "description": "Free text strategic theme"
+    },
+    "objective_type": {
+      "type": "string",
+      "enum": [
+        "Strategic",
+        "Tactical",
+        "Regulatory",
+        "Operational"
+      ],
+      "default": "Strategic"
+    },
+    "priority_rating_numeric": {
+      "type": "number",
+      "description": "Priority rating 1-5"
+    },
+    "priority_rating_label": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical",
+        "Imperative"
+      ],
+      "description": "Priority rating label scale"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "Must Have",
+        "Should Have",
+        "Could Have",
+        "Won't Have"
+      ],
+      "default": "Must Have",
+      "description": "MoSCoW criticality"
+    },
+    "time_horizon": {
+      "type": "string",
+      "enum": [
+        "Annual",
+        "3 Year",
+        "5 Year",
+        "Continuous"
+      ],
+      "default": "Annual"
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date"
+    },
+    "valid_to": {
+      "type": "string",
+      "format": "date"
     },
     "status": {
       "type": "string",
       "enum": [
-        "draft",
-        "active",
-        "achieved",
-        "on_hold",
-        "cancelled"
+        "Draft",
+        "Approved",
+        "Active",
+        "Under Review",
+        "Retired"
       ],
-      "default": "active",
-      "description": "Current status"
+      "default": "Draft"
     },
-    "priority": {
+    "approval_status": {
       "type": "string",
       "enum": [
-        "low",
-        "medium",
-        "high",
-        "critical"
+        "Pending",
+        "Approved",
+        "Rejected"
       ],
-      "default": "medium"
+      "default": "Pending"
     },
-    "owner": {
+    "rejection_reason": {
       "type": "string",
-      "description": "Objective owner name"
+      "description": "Reason for rejection if approval_status is Rejected"
     },
-    "target_date": {
+    "approved_by": {
+      "type": "string",
+      "description": "Name of approver"
+    },
+    "next_review_date": {
       "type": "string",
       "format": "date",
-      "description": "Target completion date"
+      "description": "Next review date (triggers calendar event)"
     },
-    "progress_pct": {
-      "type": "number",
-      "description": "Progress percentage (0-100)"
+    "objective_owner": {
+      "type": "string",
+      "description": "Objective owner"
     },
-    "linked_process_ids": {
+    "performance_owner": {
+      "type": "string",
+      "description": "Performance owner"
+    },
+    "compliance_owner": {
+      "type": "string",
+      "description": "Compliance owner (optional)"
+    },
+    "it_owner": {
+      "type": "string",
+      "description": "IT owner (optional)"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "parent_objective_id": {
+      "type": "string",
+      "description": "Parent objective ID"
+    },
+    "linked_strategic_theme_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs of linked OrgProcess records"
+      }
     },
-    "linked_ihpom_ids": {
+    "linked_capability_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs of linked BusinessProcess (iHPOM) records"
+      }
+    },
+    "linked_value_chain_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_business_unit_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "linked_risk_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs of linked risks"
+      }
     },
     "linked_control_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs of linked controls"
+      }
+    },
+    "linked_process_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_ihpom_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "kpis": {
+      "type": "array",
+      "description": "KPI measurements for this objective",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "measurement_name": {
+            "type": "string"
+          },
+          "measurement_type": {
+            "type": "string",
+            "enum": [
+              "Numeric",
+              "Judgemental",
+              "Logic"
+            ]
+          },
+          "measurement_description": {
+            "type": "string"
+          },
+          "calculation_method": {
+            "type": "string"
+          },
+          "data_source_link": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "progress_pct": {
+      "type": "number",
+      "description": "Progress percentage (0-100)"
     },
     "key_results": {
       "type": "array",
@@ -111,12 +258,7 @@
             "type": "boolean"
           }
         }
-      },
-      "description": "Key results / milestones for this objective"
-    },
-    "notes": {
-      "type": "string",
-      "description": "Additional notes"
+      }
     }
   },
   "required": [
