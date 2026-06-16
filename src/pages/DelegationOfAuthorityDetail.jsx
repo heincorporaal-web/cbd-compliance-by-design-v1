@@ -12,8 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ArrowLeft, Plus, Copy, CheckCircle, X, Trash2, Save,
-  ShieldCheck, Table2, AlertCircle, Settings
+  ShieldCheck, Table2, AlertCircle, Settings, ShieldAlert
 } from "lucide-react";
+import ToxicCombinationsDOAPanel from "@/components/doa/ToxicCombinationsDOAPanel";
 import { Link, useNavigate } from "react-router-dom";
 
 const ACTIVITY_TYPES = ["Control", "Process", "Approval", "Review", "Authorization", "Other"];
@@ -426,6 +427,9 @@ export default function DelegationOfAuthorityDetail() {
                 <TabsTrigger value="detail" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded px-3 py-1 text-xs">Activity Detail</TabsTrigger>
                 <TabsTrigger value="rules" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded px-3 py-1 text-xs">Rules</TabsTrigger>
                 <TabsTrigger value="approvers" className="data-[state=active]:bg-primary data-[state=active]:text-white rounded px-3 py-1 text-xs">Approver(s)</TabsTrigger>
+                <TabsTrigger value="toxic" className="data-[state=active]:bg-orange-600 data-[state=active]:text-white rounded px-3 py-1 text-xs flex items-center gap-1">
+                  <ShieldAlert className="w-3 h-3" /> Toxic Combinations
+                </TabsTrigger>
               </TabsList>
               <Button size="sm" onClick={saveActivity} disabled={updateActivityMutation.isPending} className="gap-1 h-7 text-xs bg-primary hover:bg-primary/90">
                 <Save className="w-3 h-3" /> Save Activity
@@ -596,6 +600,17 @@ export default function DelegationOfAuthorityDetail() {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            {/* Tab: Toxic Combinations */}
+            <TabsContent value="toxic">
+              <ToxicCombinationsDOAPanel
+                doaId={doaId}
+                doaName={header.title}
+                companyId={header.company_id}
+                activities={activities}
+                stakeholders={stakeholders}
+              />
             </TabsContent>
           </Tabs>
         </div>

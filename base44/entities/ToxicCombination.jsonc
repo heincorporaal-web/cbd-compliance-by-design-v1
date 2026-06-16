@@ -1,0 +1,115 @@
+{
+  "name": "ToxicCombination",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Short descriptive name of the toxic combination rule"
+    },
+    "description": {
+      "type": "string",
+      "description": "Why this combination is toxic / what risk it creates"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "combination_type": {
+      "type": "string",
+      "enum": [
+        "group_conflict",
+        "process_step_conflict",
+        "doa_conflict"
+      ],
+      "description": "group_conflict = two stakeholder groups incompatible; process_step_conflict = two L4/L5 process steps; doa_conflict = process + approve on same DOA activity"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "Critical",
+        "High",
+        "Medium",
+        "Low"
+      ],
+      "default": "High"
+    },
+    "group_a_id": {
+      "type": "string",
+      "description": "First stakeholder group (group_conflict type)"
+    },
+    "group_a_name": {
+      "type": "string"
+    },
+    "group_b_id": {
+      "type": "string",
+      "description": "Second stakeholder group (group_conflict type)"
+    },
+    "group_b_name": {
+      "type": "string"
+    },
+    "conflicting_stakeholder_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Stakeholders currently in violation (members of both groups)"
+    },
+    "process_a_id": {
+      "type": "string",
+      "description": "First process step (L4 Procedure or L5 Task) \u2014 process_step_conflict type"
+    },
+    "process_a_code": {
+      "type": "string"
+    },
+    "process_a_name": {
+      "type": "string"
+    },
+    "process_b_id": {
+      "type": "string",
+      "description": "Second process step (L4 Procedure or L5 Task)"
+    },
+    "process_b_code": {
+      "type": "string"
+    },
+    "process_b_name": {
+      "type": "string"
+    },
+    "doa_id": {
+      "type": "string",
+      "description": "Reference to DelegationOfAuthority entity (doa_conflict type)"
+    },
+    "doa_name": {
+      "type": "string"
+    },
+    "doa_activity_a_id": {
+      "type": "string",
+      "description": "First DOA activity (e.g. process/execute)"
+    },
+    "doa_activity_a_name": {
+      "type": "string"
+    },
+    "doa_activity_b_id": {
+      "type": "string",
+      "description": "Second DOA activity (e.g. approve)"
+    },
+    "doa_activity_b_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "combination_type",
+    "company_id"
+  ]
+}
