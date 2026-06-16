@@ -1,13 +1,16 @@
 import React, { useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, CheckCircle, AlertCircle, Loader2, BookOpen, Puzzle, FileSpreadsheet, GitMerge, Building2 } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Loader2, BookOpen, Puzzle, FileSpreadsheet, GitMerge, Building2, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import StuckWorkflowPanel from "@/components/admin/StuckWorkflowPanel";
 import CompanyPreferencesPanel from "@/components/admin/CompanyPreferencesPanel";
+import ToxicCombinationsPanel from "@/components/stakeholders/ToxicCombinationsPanel";
+import ToxicCombinationsDOASelector from "@/components/doa/ToxicCombinationsDOASelector";
 
 function UploadSection({ title, description, icon: Icon, iconColor, onUpload, accept = ".xlsx,.xls,.csv", isLoading, result }) {
   const fileRef = useRef(null);
@@ -62,6 +65,10 @@ function UploadSection({ title, description, icon: Icon, iconColor, onUpload, ac
 }
 
 export default function Configuration() {
+  const { data: groups = [] } = useQuery({ queryKey: ["stakeholderGroups"], queryFn: () => base44.entities.StakeholderGroup.list() });
+  const { data: stakeholders = [] } = useQuery({ queryKey: ["stakeholders"], queryFn: () => base44.entities.Stakeholder.list() });
+  const { data: companies = [] } = useQuery({ queryKey: ["companies"], queryFn: () => base44.entities.Company.list() });
+
   const [riskLibraryLoading, setRiskLibraryLoading] = useState(false);
   const [riskLibraryResult, setRiskLibraryResult] = useState(null);
 
@@ -208,6 +215,9 @@ export default function Configuration() {
           <TabsTrigger value="imports" className="gap-2">
             <Upload className="w-4 h-4" /> Bulk Imports
           </TabsTrigger>
+          <TabsTrigger value="sod" className="gap-2">
+            <ShieldAlert className="w-4 h-4" /> SOD Rules
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="company_prefs" className="mt-4">
@@ -260,6 +270,19 @@ export default function Configuration() {
               <p>• All dates should be in <strong>YYYY-MM-DD</strong> format.</p>
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="sod" className="mt-4 space-y-6">
+          <div>
+            <h2 className="text-base font-semibold text-slate-800">Segregation of Duties — Group & Process Rules</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Define incompatible stakeholder group pairs and incompatible L4/L5 process step pairs.</p>
+          </div>
+          <ToxicCombinationsPanel groups={groups} stakeholders={stakeholders} companies={companies} />
+
+          <div className="border-t border-slate-200 pt-6">
+            <h2 className="text-base font-semibold text-slate-800">Segregation of Duties — Delegation of Authority Rules</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Define activity pairs within a DOA where the same person must not both execute and approve.</p>
+          </div>
+          <ToxicCombinationsDOASelector />
         </TabsContent>
       </Tabs>
     </div>

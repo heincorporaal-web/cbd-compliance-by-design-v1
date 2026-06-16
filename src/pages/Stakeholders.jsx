@@ -16,7 +16,6 @@ import { Upload } from "lucide-react";
 import { useDefaultStakeholderGroups } from "@/hooks/useDefaultStakeholderGroups";
 import StakeholderGroupReportButton from "@/components/stakeholders/StakeholderGroupReportButton";
 import GroupAssignmentImportButton from "@/components/stakeholders/GroupAssignmentImportButton";
-import ToxicCombinationsPanel from "@/components/stakeholders/ToxicCombinationsPanel";
 
 export default function Stakeholders() {
   const queryClient = useQueryClient();
@@ -232,7 +231,7 @@ export default function Stakeholders() {
           <TabsTrigger value="list"><Users className="w-4 h-4 mr-1.5" />Stakeholders</TabsTrigger>
           <TabsTrigger value="matrix"><Grid3X3 className="w-4 h-4 mr-1.5" />Group Matrix</TabsTrigger>
           <TabsTrigger value="groups">Manage Groups</TabsTrigger>
-          <TabsTrigger value="toxic">Toxic Combinations</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="list" className="mt-4">
@@ -256,9 +255,6 @@ export default function Stakeholders() {
           <StakeholderGroupsPanel groups={groups} companies={companies} />
         </TabsContent>
 
-        <TabsContent value="toxic" className="mt-4">
-          <ToxicCombinationsPanel groups={groups} stakeholders={stakeholders} companies={companies} />
-        </TabsContent>
       </Tabs>
 
       <HRImportDialog open={hrImportOpen} onOpenChange={setHrImportOpen} />
