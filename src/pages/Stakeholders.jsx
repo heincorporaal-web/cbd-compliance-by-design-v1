@@ -73,7 +73,7 @@ export default function Stakeholders() {
       s.full_name?.toLowerCase().includes(search.toLowerCase()) ||
       s.email?.toLowerCase().includes(search.toLowerCase()) ||
       s.department?.toLowerCase().includes(search.toLowerCase()) ||
-      s.employee_number?.toLowerCase().includes(search.toLowerCase());
+      s.job_title?.toLowerCase().includes(search.toLowerCase());
     const matchesGroup = filterGroupId === "all" || s.group_ids?.includes(filterGroupId);
     const matchesCompany = filterCompanyId === "all" || s.company_id === filterCompanyId;
     return matchesSearch && matchesGroup && matchesCompany && s.status !== "inactive";
@@ -181,7 +181,7 @@ export default function Stakeholders() {
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search by name, email, employee number..."
+            placeholder="Search by name, email, job title..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-9"

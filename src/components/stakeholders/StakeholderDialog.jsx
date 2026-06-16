@@ -164,6 +164,7 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
                             value={managerSearch}
                             onChange={e => setManagerSearch(e.target.value)}
                           />
+                          
                         </div>
                         <div className="max-h-52 overflow-y-auto">
                           <button
