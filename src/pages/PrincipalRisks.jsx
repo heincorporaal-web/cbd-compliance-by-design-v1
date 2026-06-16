@@ -13,7 +13,7 @@ import { ShieldAlert, Plus, Search, Building2, User, Pencil, Trash2, Calendar } 
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
 
-const CATEGORIES = ["Strategic", "Compliance", "IT", "Operational", "Cyber", "Data", "Third Party", "Financial Crime"];
+const CATEGORIES = ["Strategic", "Compliance", "IT", "Operational", "Cyber", "Data", "Third Party", "Financial Crime", "Reputational Risk", "Financial Risk", "Compliance / Conduct Risk", "Third-Party / Supplier Risk", "Technology / Information Security Risk"];
 const STATUSES = ["Draft", "Active", "Under Review", "Retired"];
 const PRIORITIES = ["High", "Medium", "Low"];
 const CRITICALITIES = ["Critical", "High", "Medium", "Low"];

@@ -32,7 +32,12 @@
         "Cyber",
         "Data",
         "Third Party",
-        "Financial Crime"
+        "Financial Crime",
+        "Reputational Risk",
+        "Financial Risk",
+        "Compliance / Conduct Risk",
+        "Third-Party / Supplier Risk",
+        "Technology / Information Security Risk"
       ],
       "default": "Operational"
     },
