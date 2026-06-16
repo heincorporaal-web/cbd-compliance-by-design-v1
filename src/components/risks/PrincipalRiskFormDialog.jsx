@@ -119,7 +119,7 @@ export default function PrincipalRiskFormDialog({ open, onClose, editRisk, compa
               <Select value={form.risk_category} onValueChange={v => set("risk_category", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {["Strategic","Compliance","IT","Operational","Cyber","Data","Third Party","Financial Crime"].map(c => (
+                  {["Strategic","Compliance","IT","Operational","Cyber","Data","Third Party","Financial Crime","Reputational Risk","Financial Risk","Compliance / Conduct Risk","Third-Party / Supplier Risk","Technology / Information Security Risk"].map(c => (
                     <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
                 </SelectContent>

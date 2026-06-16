@@ -30,7 +30,7 @@ const CRITICALITY_COLORS = {
   Low: "bg-slate-100 text-slate-600",
 };
 
-const CATEGORIES = ["Strategic", "Compliance", "IT", "Operational", "Cyber", "Data", "Third Party", "Financial Crime"];
+const CATEGORIES = ["Strategic", "Compliance", "IT", "Operational", "Cyber", "Data", "Third Party", "Financial Crime", "Reputational Risk", "Financial Risk", "Compliance / Conduct Risk", "Third-Party / Supplier Risk", "Technology / Information Security Risk"];
 const STATUSES = ["Draft", "Active", "Under Review", "Retired"];
 const PRIORITIES = ["High", "Medium", "Low"];
 
