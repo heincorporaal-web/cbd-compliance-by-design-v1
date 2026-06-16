@@ -24,9 +24,18 @@ Deno.serve(async (req) => {
     assignmentMap[empNum].add(groupName);
   }
 
-  // --- 2. Load all stakeholders and groups ---
-  const allStakeholders = await base44.asServiceRole.entities.Stakeholder.list();
-  const allGroups = await base44.asServiceRole.entities.StakeholderGroup.list();
+  // --- 2. Load all stakeholders and groups (paginated) ---
+  let allStakeholders = [];
+  let skip = 0;
+  while (true) {
+    const page = await base44.asServiceRole.entities.Stakeholder.list(undefined, 200, skip);
+    allStakeholders = allStakeholders.concat(page);
+    if (page.length < 200) break;
+    skip += 200;
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  const allGroups = await base44.asServiceRole.entities.StakeholderGroup.list(undefined, 200);
 
   // Build group name -> id map (case-insensitive)
   const groupByName = {};
@@ -42,11 +51,12 @@ Deno.serve(async (req) => {
     }
   }
 
-  // --- 3. Apply assignments ---
+  // --- 3. Build update queue ---
   let updated = 0;
   let skippedNoStakeholder = 0;
-  let skippedNoGroup = [];
+  const skippedNoGroup = [];
   const notFound = [];
+  const updateQueue = []; // { id, group_ids }
 
   for (const [empNum, groupNames] of Object.entries(assignmentMap)) {
     const stakeholder = stakeholderByEmpNum[empNum];
@@ -72,10 +82,22 @@ Deno.serve(async (req) => {
     }
 
     if (changed) {
-      await base44.asServiceRole.entities.Stakeholder.update(stakeholder.id, {
-        group_ids: Array.from(existingIds),
-      });
-      updated++;
+      updateQueue.push({ id: stakeholder.id, group_ids: Array.from(existingIds) });
+    }
+  }
+
+  // --- 4. Apply updates in small batches to avoid rate limits ---
+  const BATCH_SIZE = 5;
+  const DELAY_MS = 300;
+
+  for (let i = 0; i < updateQueue.length; i += BATCH_SIZE) {
+    const batch = updateQueue.slice(i, i + BATCH_SIZE);
+    await Promise.all(batch.map(item =>
+      base44.asServiceRole.entities.Stakeholder.update(item.id, { group_ids: item.group_ids })
+    ));
+    updated += batch.length;
+    if (i + BATCH_SIZE < updateQueue.length) {
+      await new Promise(r => setTimeout(r, DELAY_MS));
     }
   }
 
