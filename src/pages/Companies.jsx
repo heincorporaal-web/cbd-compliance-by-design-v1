@@ -62,8 +62,38 @@ export default function Companies() {
     queryFn: () => base44.entities.Company.list('-created_date'),
   });
 
+  const DEFAULT_STAKEHOLDER_GROUPS = [
+    { name: "Risk Owner",             color: "#EF4444", description: "Accountable for risks assigned to them" },
+    { name: "Control Owner",          color: "#3B82F6", description: "Accountable for the design and operation of controls" },
+    { name: "Process Owner",          color: "#8B5CF6", description: "Accountable for the execution and performance of business processes" },
+    { name: "ICT System Owners",      color: "#6366F1", description: "Accountable for ICT systems and their lifecycle" },
+    { name: "IT Capability Owner",    color: "#6B7280", description: "Accountable for the management of an IT Capability" },
+    { name: "Policy Owner",           color: "#2563EB", description: "Responsible for owning and maintaining policies" },
+    { name: "Digital asset owner",    color: "#D97706", description: "Accountable for digital assets assigned to them" },
+    { name: "Leadership",             color: "#10B981", description: "Executive, board members and non-executive directors" },
+    { name: "Objective Owner",        color: "#0EA5E9", description: "Accountable for the achievement of organisational objectives" },
+    { name: "Performance Owner",      color: "#F59E0B", description: "Accountable for monitoring and reporting performance against objectives" },
+    { name: "Compliance Owner",       color: "#7C3AED", description: "Accountable for compliance obligations linked to objectives" },
+    { name: "IT / Capability Owner",  color: "#059669", description: "Accountable for IT capabilities supporting objectives" },
+  ];
+
+  const seedStakeholderGroups = async (companyId) => {
+    for (const group of DEFAULT_STAKEHOLDER_GROUPS) {
+      await base44.entities.StakeholderGroup.create({
+        ...group,
+        company_id: companyId,
+        status: "active",
+        is_default: true,
+      });
+    }
+  };
+
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Company.create(data),
+    mutationFn: async (data) => {
+      const company = await base44.entities.Company.create(data);
+      await seedStakeholderGroups(company.id);
+      return company;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['companies']);
       setIsDialogOpen(false);

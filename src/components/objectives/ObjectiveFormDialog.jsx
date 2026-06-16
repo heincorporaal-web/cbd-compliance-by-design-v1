@@ -43,6 +43,16 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
   const { data: valueChains = [] } = useQuery({ queryKey: ["valueChains"], queryFn: () => base44.entities.ValueChain.list() });
   const { data: businessUnits = [] } = useQuery({ queryKey: ["businessUnits"], queryFn: () => base44.entities.BusinessUnit.list() });
   const { data: capabilities = [] } = useQuery({ queryKey: ["itCapabilities"], queryFn: () => base44.entities.ITCapability.list() });
+  const { data: stakeholders = [] } = useQuery({ queryKey: ["stakeholders"], queryFn: () => base44.entities.Stakeholder.list() });
+  const { data: stakeholderGroups = [] } = useQuery({ queryKey: ["stakeholderGroups"], queryFn: () => base44.entities.StakeholderGroup.list() });
+
+  // Returns stakeholders belonging to a named group, filtered by current company
+  const getStakeholdersByGroup = (groupName) => {
+    const companyId = form.company_id;
+    const group = stakeholderGroups.find(g => g.name === groupName && (!g.company_id || g.company_id === companyId));
+    if (!group) return stakeholders.filter(s => !companyId || s.company_id === companyId);
+    return stakeholders.filter(s => (s.group_ids || []).includes(group.id) && (!companyId || s.company_id === companyId));
+  };
 
   useEffect(() => {
     if (editObj) setForm({ ...EMPTY_FORM, ...editObj });
@@ -277,22 +287,28 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
             <div className="border-t pt-4">
               <p className="text-sm font-semibold text-slate-700 mb-3">Ownership</p>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Objective Owner</Label>
-                  <Input value={form.objective_owner} onChange={e => set("objective_owner", e.target.value)} />
-                </div>
-                <div>
-                  <Label>Performance Owner</Label>
-                  <Input value={form.performance_owner} onChange={e => set("performance_owner", e.target.value)} />
-                </div>
-                <div>
-                  <Label>Compliance Owner (Optional)</Label>
-                  <Input value={form.compliance_owner} onChange={e => set("compliance_owner", e.target.value)} />
-                </div>
-                <div>
-                  <Label>IT Owner (Optional)</Label>
-                  <Input value={form.it_owner} onChange={e => set("it_owner", e.target.value)} />
-                </div>
+                {[
+                  { label: "Objective Owner", field: "objective_owner", group: "Objective Owner" },
+                  { label: "Performance Owner", field: "performance_owner", group: "Performance Owner" },
+                  { label: "Compliance Owner (Optional)", field: "compliance_owner", group: "Compliance Owner" },
+                  { label: "IT / Capability Owner (Optional)", field: "it_owner", group: "IT / Capability Owner" },
+                ].map(({ label, field, group }) => {
+                  const options = getStakeholdersByGroup(group);
+                  return (
+                    <div key={field}>
+                      <Label>{label}</Label>
+                      <Select value={form[field] || ""} onValueChange={v => set(field, v === "__none__" ? "" : v)}>
+                        <SelectTrigger><SelectValue placeholder="Select stakeholder" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">— None —</SelectItem>
+                          {options.map(s => (
+                            <SelectItem key={s.id} value={s.full_name}>{s.full_name}{s.job_title ? ` — ${s.job_title}` : ""}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
