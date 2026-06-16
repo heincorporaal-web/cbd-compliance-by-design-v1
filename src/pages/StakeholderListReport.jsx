@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Download, FileText, Users } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, Download, FileText, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ReportFieldSelector from "@/components/reports/ReportFieldSelector";
@@ -26,10 +27,61 @@ const ALL_FIELDS = [
 
 const DEFAULT_FIELDS = ["full_name", "email", "job_title", "department", "company_name", "status"];
 
+function MultiValueFilter({ label, options, selected, onChange }) {
+  const [open, setOpen] = useState(false);
+  const allSelected = selected.length === 0;
+
+  const toggle = (val) => {
+    if (selected.includes(val)) {
+      onChange(selected.filter(v => v !== val));
+    } else {
+      onChange([...selected, val]);
+    }
+  };
+
+  return (
+    <div>
+      <label className="text-sm font-medium text-slate-700 block mb-1">{label}</label>
+      <button
+        type="button"
+        className="w-full flex items-center justify-between px-3 py-2 border border-slate-200 rounded-md bg-white text-sm text-slate-700 hover:bg-slate-50"
+        onClick={() => setOpen(o => !o)}
+      >
+        <span className="truncate">{allSelected ? "All" : `${selected.length} selected`}</span>
+        {open ? <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
+      </button>
+      {open && (
+        <div className="mt-1 border border-slate-200 rounded-md bg-white shadow-sm max-h-48 overflow-y-auto">
+          <div
+            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-100"
+            onClick={() => onChange([])}
+          >
+            <Checkbox checked={allSelected} onCheckedChange={() => onChange([])} />
+            <span className="text-sm text-slate-600">All</span>
+          </div>
+          {options.map(opt => (
+            <div
+              key={opt}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer"
+              onClick={() => toggle(opt)}
+            >
+              <Checkbox checked={selected.includes(opt)} onCheckedChange={() => toggle(opt)} />
+              <span className="text-sm text-slate-700">{opt || "(blank)"}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function StakeholderListReport() {
   const [selectedFields, setSelectedFields] = useState(DEFAULT_FIELDS);
   const [filterCompanyId, setFilterCompanyId] = useState("all");
   const [filterStatus, setFilterStatus] = useState("active");
+  const [filterDepartments, setFilterDepartments] = useState([]);
+  const [filterJobTitles, setFilterJobTitles] = useState([]);
+  const [filterGroups, setFilterGroups] = useState([]);
 
   const { data: stakeholders = [] } = useQuery({
     queryKey: ["stakeholders"],
@@ -55,10 +107,18 @@ export default function StakeholderListReport() {
     group_names: (s.group_ids || []).map(id => groupMap[id] || id).join(", "),
   }));
 
+  // Derive unique filter options from ALL enriched data
+  const allDepartments = useMemo(() => [...new Set(enriched.map(s => s.department || "").filter(Boolean))].sort(), [enriched]);
+  const allJobTitles = useMemo(() => [...new Set(enriched.map(s => s.job_title || "").filter(Boolean))].sort(), [enriched]);
+  const allGroupNames = useMemo(() => [...new Set(enriched.flatMap(s => (s.group_ids || []).map(id => groupMap[id]).filter(Boolean)))].sort(), [enriched, groupMap]);
+
   const filtered = enriched.filter(s => {
     const matchesCompany = filterCompanyId === "all" || s.company_id === filterCompanyId;
     const matchesStatus = filterStatus === "all" || s.status === filterStatus;
-    return matchesCompany && matchesStatus;
+    const matchesDept = filterDepartments.length === 0 || filterDepartments.includes(s.department || "");
+    const matchesTitle = filterJobTitles.length === 0 || filterJobTitles.includes(s.job_title || "");
+    const matchesGroup = filterGroups.length === 0 || (s.group_ids || []).some(id => filterGroups.includes(groupMap[id]));
+    return matchesCompany && matchesStatus && matchesDept && matchesTitle && matchesGroup;
   });
 
   const activeFields = ALL_FIELDS.filter(f => selectedFields.includes(f.key));
@@ -131,6 +191,24 @@ export default function StakeholderListReport() {
                   </SelectContent>
                 </Select>
               </div>
+              <MultiValueFilter
+                label="Department"
+                options={allDepartments}
+                selected={filterDepartments}
+                onChange={setFilterDepartments}
+              />
+              <MultiValueFilter
+                label="Job Title"
+                options={allJobTitles}
+                selected={filterJobTitles}
+                onChange={setFilterJobTitles}
+              />
+              <MultiValueFilter
+                label="Group"
+                options={allGroupNames}
+                selected={filterGroups}
+                onChange={setFilterGroups}
+              />
             </CardContent>
           </Card>
         </div>
