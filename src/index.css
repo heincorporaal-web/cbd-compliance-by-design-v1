@@ -155,7 +155,23 @@ button:focus-visible {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
+  html, body {
+    overscroll-behavior: none;
     @apply bg-background text-foreground font-sigou;
+  }
+}
+
+@layer utilities {
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+  svg {
+    -webkit-user-select: none;
+    user-select: none;
   }
 }

@@ -1,5 +1,7 @@
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
+import ThemeProvider from '@/lib/ThemeProvider'
+import MobileSettings from './pages/MobileSettings'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import VisualEditAgent from '@/lib/VisualEditAgent'
@@ -70,6 +72,7 @@ const AuthenticatedApp = () => {
         <Route path="/PrincipalRisksSummary" element={<LayoutWrapper currentPageName="PrincipalRisksSummary"><PrincipalRisksSummary /></LayoutWrapper>} />
         <Route path="/ObjectivesSummary" element={<LayoutWrapper currentPageName="ObjectivesSummary"><ObjectivesSummary /></LayoutWrapper>} />
         <Route path="/PrincipalRisksSummary" element={<LayoutWrapper currentPageName="PrincipalRisksSummary"><PrincipalRisksSummary /></LayoutWrapper>} />
+        <Route path="/MobileSettings" element={<LayoutWrapper currentPageName="MobileSettings"><MobileSettings /></LayoutWrapper>} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
@@ -80,16 +83,18 @@ const AuthenticatedApp = () => {
 function App() {
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-        <VisualEditAgent />
-      </QueryClientProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <NavigationTracker />
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+          <VisualEditAgent />
+        </QueryClientProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import NavTree from "@/components/layout/NavTree";
 import CompanyFilterBar from "@/components/CompanyFilterBar";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +13,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { base44 } from "@/api/base44Client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function UserFooter() {
   const [user, setUser] = React.useState(null);
@@ -59,54 +61,71 @@ function CBDLogo() {
 }
 
 export default function Layout({ children }) {
+  const isMobile = useIsMobile();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-slate-100">
-        <Sidebar className="border-r border-slate-200">
-          <SidebarHeader className="border-b border-slate-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg bg-white flex items-center justify-center">
-                <CBDLogo />
+        {!isMobile && (
+          <Sidebar className="border-r border-slate-200">
+            <SidebarHeader
+              className="border-b border-slate-200 p-4"
+              style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg bg-white flex items-center justify-center">
+                  <CBDLogo />
+                </div>
+                <div>
+                  <h2 className="font-bold text-slate-900 text-lg">CBD</h2>
+                  <p className="text-xs text-primary/70">Compliance by Design</p>
+                </div>
               </div>
-              <div>
-                <h2 className="font-bold text-slate-900 text-lg">CBD</h2>
-                <p className="text-xs text-primary/70">Compliance by Design</p>
-              </div>
-            </div>
-          </SidebarHeader>
+            </SidebarHeader>
 
-          <SidebarContent className="px-2 overflow-y-auto">
-            <NavTree />
-          </SidebarContent>
+            <SidebarContent className="px-2 overflow-y-auto">
+              <NavTree />
+            </SidebarContent>
 
-          <SidebarFooter className="border-t border-slate-200 p-4">
-            <UserFooter />
-          </SidebarFooter>
-        </Sidebar>
+            <SidebarFooter className="border-t border-slate-200 p-4">
+              <UserFooter />
+            </SidebarFooter>
+          </Sidebar>
+        )}
 
-        <main className="flex-1 flex flex-col">
-          <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
+        <main className="flex-1 flex flex-col min-w-0">
+          <header
+            className="bg-white/80 backdrop-blur-sm border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 sticky top-0 z-10"
+            style={{ paddingTop: isMobile ? "max(0.75rem, env(safe-area-inset-top))" : undefined }}
+          >
             <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <SidebarTrigger className="lg:hidden hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200" />
-                <div className="flex items-center gap-2 lg:hidden">
+              <div className="flex items-center gap-3">
+                {!isMobile && (
+                  <SidebarTrigger className="lg:hidden hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200" />
+                )}
+                <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shadow flex items-center justify-center">
                     <CBDLogo />
                   </div>
                   <h1 className="text-xl font-bold text-slate-900">CBD</h1>
                 </div>
               </div>
-              <div className="ml-auto flex items-center gap-4">
+              <div className="ml-auto flex items-center gap-3">
                 <CompanyFilterBar />
                 <NotificationCenter />
               </div>
             </div>
           </header>
 
-          <div className="flex-1 overflow-auto">
+          <div
+            className="flex-1 overflow-auto"
+            style={{ paddingBottom: isMobile ? "calc(4rem + env(safe-area-inset-bottom))" : undefined }}
+          >
             {children}
           </div>
         </main>
+
+        <MobileBottomNav />
       </div>
     </SidebarProvider>
   );
