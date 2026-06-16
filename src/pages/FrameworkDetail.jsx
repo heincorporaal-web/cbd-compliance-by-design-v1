@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +21,7 @@ export default function FrameworkDetail() {
   const isNew = urlParams.get('new') === 'true';
 
   const [isObjectiveDialogOpen, setIsObjectiveDialogOpen] = useState(false);
-  const [isPrincipleRiskDialogOpen, setIsPrincipleRiskDialogOpen] = useState(false);
+  const [isPrincipalRiskDialogOpen, setIsPrincipalRiskDialogOpen] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
 
   const [formData, setFormData] = useState({
@@ -46,7 +46,17 @@ export default function FrameworkDetail() {
     queryFn: () => base44.entities.Company.list(),
   });
 
-  React.useEffect(() => {
+  const { data: allObjectives = [] } = useQuery({
+    queryKey: ['orgObjectives'],
+    queryFn: () => base44.entities.OrgObjective.list(),
+  });
+
+  const { data: allPrincipalRisks = [] } = useQuery({
+    queryKey: ['principalRisks'],
+    queryFn: () => base44.entities.PrincipalRisk.list(),
+  });
+
+  useEffect(() => {
     if (existingFramework?.[0]) {
       setFormData(existingFramework[0]);
     }
@@ -77,19 +87,20 @@ export default function FrameworkDetail() {
     }
   };
 
-  const selectedCompany = companies.find(c => c.id === selectedCompanyId);
-  const availableObjectives = selectedCompany?.objectives || [];
-  const availablePrincipleRisks = selectedCompany?.principle_risks || [];
+  // Filter by selected company for the picker dialogs
+  const companyObjectives = selectedCompanyId
+    ? allObjectives.filter(o => o.company_id === selectedCompanyId)
+    : allObjectives;
 
-  const linkedObjectives = companies.flatMap(c => 
-    (c.objectives || []).filter(obj => formData.linked_objective_ids?.includes(obj.id))
-      .map(obj => ({ ...obj, companyName: c.name }))
-  );
+  const companyPrincipalRisks = selectedCompanyId
+    ? allPrincipalRisks.filter(r => r.company_id === selectedCompanyId)
+    : allPrincipalRisks;
 
-  const linkedPrincipleRisks = companies.flatMap(c => 
-    (c.principle_risks || []).filter(risk => formData.linked_principle_risk_ids?.includes(risk.id))
-      .map(risk => ({ ...risk, companyName: c.name }))
-  );
+  const companyMap = Object.fromEntries(companies.map(c => [c.id, c.name]));
+
+  // Resolve linked items from the proper entities
+  const linkedObjectives = allObjectives.filter(o => formData.linked_objective_ids?.includes(o.id));
+  const linkedPrincipalRisks = allPrincipalRisks.filter(r => formData.linked_principle_risk_ids?.includes(r.id));
 
   const addObjective = (objectiveId) => {
     if (!formData.linked_objective_ids?.includes(objectiveId)) {
@@ -106,16 +117,16 @@ export default function FrameworkDetail() {
     if (frameworkId) updateMutation.mutate({ ...formData, linked_objective_ids: updated });
   };
 
-  const addPrincipleRisk = (riskId) => {
+  const addPrincipalRisk = (riskId) => {
     if (!formData.linked_principle_risk_ids?.includes(riskId)) {
       const updated = [...(formData.linked_principle_risk_ids || []), riskId];
       setFormData({ ...formData, linked_principle_risk_ids: updated });
       if (frameworkId) updateMutation.mutate({ ...formData, linked_principle_risk_ids: updated });
     }
-    setIsPrincipleRiskDialogOpen(false);
+    setIsPrincipalRiskDialogOpen(false);
   };
 
-  const removePrincipleRisk = (riskId) => {
+  const removePrincipalRisk = (riskId) => {
     const updated = formData.linked_principle_risk_ids.filter(id => id !== riskId);
     setFormData({ ...formData, linked_principle_risk_ids: updated });
     if (frameworkId) updateMutation.mutate({ ...formData, linked_principle_risk_ids: updated });
@@ -227,12 +238,13 @@ export default function FrameworkDetail() {
         </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Org Objectives */}
           <Card className="border-none shadow-lg">
             <CardHeader className="border-b border-slate-100">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Target className="w-5 h-5 text-blue-600" />
-                  Company Objectives
+                  Org Objectives
                 </CardTitle>
                 <Dialog open={isObjectiveDialogOpen} onOpenChange={setIsObjectiveDialogOpen}>
                   <DialogTrigger asChild>
@@ -243,35 +255,36 @@ export default function FrameworkDetail() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Link Company Objective</DialogTitle>
+                      <DialogTitle>Link Org Objective</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select company" />
+                          <SelectValue placeholder="Filter by company (optional)" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value={null}>All Companies</SelectItem>
                           {companies.map(c => (
                             <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {availableObjectives.filter(obj => !formData.linked_objective_ids?.includes(obj.id)).map(obj => (
-                          <div
-                            key={obj.id}
-                            className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
-                            onClick={() => addObjective(obj.id)}
-                          >
-                            <p className="font-medium text-sm">{obj.title}</p>
-                            {obj.description && <p className="text-xs text-slate-600 mt-1">{obj.description}</p>}
-                          </div>
-                        ))}
-                        {selectedCompanyId && availableObjectives.filter(obj => !formData.linked_objective_ids?.includes(obj.id)).length === 0 && (
+                        {companyObjectives
+                          .filter(obj => !formData.linked_objective_ids?.includes(obj.id))
+                          .map(obj => (
+                            <div
+                              key={obj.id}
+                              className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
+                              onClick={() => addObjective(obj.id)}
+                            >
+                              <p className="font-medium text-sm">{obj.title}</p>
+                              <p className="text-xs text-slate-500 mt-0.5">{companyMap[obj.company_id] || ""}</p>
+                              {obj.description && <p className="text-xs text-slate-600 mt-1 line-clamp-2">{obj.description}</p>}
+                            </div>
+                          ))}
+                        {companyObjectives.filter(obj => !formData.linked_objective_ids?.includes(obj.id)).length === 0 && (
                           <p className="text-sm text-slate-500 text-center py-4">No objectives available</p>
-                        )}
-                        {!selectedCompanyId && (
-                          <p className="text-sm text-slate-500 text-center py-4">Select a company first</p>
                         )}
                       </div>
                     </div>
@@ -286,7 +299,7 @@ export default function FrameworkDetail() {
                     <div key={obj.id} className="flex items-start justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="flex-1">
                         <p className="font-medium text-sm text-slate-900">{obj.title}</p>
-                        <p className="text-xs text-slate-500 mt-1">{obj.companyName}</p>
+                        <p className="text-xs text-slate-500 mt-1">{companyMap[obj.company_id] || ""}</p>
                         {obj.description && <p className="text-xs text-slate-600 mt-1">{obj.description}</p>}
                       </div>
                       <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeObjective(obj.id)}>
@@ -301,14 +314,15 @@ export default function FrameworkDetail() {
             </CardContent>
           </Card>
 
+          {/* Principal Risks */}
           <Card className="border-none shadow-lg">
             <CardHeader className="border-b border-slate-100">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-orange-600" />
-                  Principle Risks
+                  Principal Risks
                 </CardTitle>
-                <Dialog open={isPrincipleRiskDialogOpen} onOpenChange={setIsPrincipleRiskDialogOpen}>
+                <Dialog open={isPrincipalRiskDialogOpen} onOpenChange={setIsPrincipalRiskDialogOpen}>
                   <DialogTrigger asChild>
                     <Button type="button" variant="outline" size="sm">
                       <Plus className="w-4 h-4 mr-2" />
@@ -317,35 +331,36 @@ export default function FrameworkDetail() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Link Principle Risk</DialogTitle>
+                      <DialogTitle>Link Principal Risk</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select company" />
+                          <SelectValue placeholder="Filter by company (optional)" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value={null}>All Companies</SelectItem>
                           {companies.map(c => (
                             <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {availablePrincipleRisks.filter(risk => !formData.linked_principle_risk_ids?.includes(risk.id)).map(risk => (
-                          <div
-                            key={risk.id}
-                            className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
-                            onClick={() => addPrincipleRisk(risk.id)}
-                          >
-                            <p className="font-medium text-sm">{risk.title}</p>
-                            {risk.description && <p className="text-xs text-slate-600 mt-1">{risk.description}</p>}
-                          </div>
-                        ))}
-                        {selectedCompanyId && availablePrincipleRisks.filter(risk => !formData.linked_principle_risk_ids?.includes(risk.id)).length === 0 && (
-                          <p className="text-sm text-slate-500 text-center py-4">No principle risks available</p>
-                        )}
-                        {!selectedCompanyId && (
-                          <p className="text-sm text-slate-500 text-center py-4">Select a company first</p>
+                        {companyPrincipalRisks
+                          .filter(risk => !formData.linked_principle_risk_ids?.includes(risk.id))
+                          .map(risk => (
+                            <div
+                              key={risk.id}
+                              className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
+                              onClick={() => addPrincipalRisk(risk.id)}
+                            >
+                              <p className="font-medium text-sm">{risk.risk_title}</p>
+                              <p className="text-xs text-slate-500 mt-0.5">{companyMap[risk.company_id] || ""}</p>
+                              {risk.risk_description && <p className="text-xs text-slate-600 mt-1 line-clamp-2">{risk.risk_description}</p>}
+                            </div>
+                          ))}
+                        {companyPrincipalRisks.filter(risk => !formData.linked_principle_risk_ids?.includes(risk.id)).length === 0 && (
+                          <p className="text-sm text-slate-500 text-center py-4">No principal risks available</p>
                         )}
                       </div>
                     </div>
@@ -354,23 +369,23 @@ export default function FrameworkDetail() {
               </div>
             </CardHeader>
             <CardContent className="pt-4">
-              {linkedPrincipleRisks.length > 0 ? (
+              {linkedPrincipalRisks.length > 0 ? (
                 <div className="space-y-2">
-                  {linkedPrincipleRisks.map(risk => (
+                  {linkedPrincipalRisks.map(risk => (
                     <div key={risk.id} className="flex items-start justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
                       <div className="flex-1">
-                        <p className="font-medium text-sm text-slate-900">{risk.title}</p>
-                        <p className="text-xs text-slate-500 mt-1">{risk.companyName}</p>
-                        {risk.description && <p className="text-xs text-slate-600 mt-1">{risk.description}</p>}
+                        <p className="font-medium text-sm text-slate-900">{risk.risk_title}</p>
+                        <p className="text-xs text-slate-500 mt-1">{companyMap[risk.company_id] || ""}</p>
+                        {risk.risk_description && <p className="text-xs text-slate-600 mt-1">{risk.risk_description}</p>}
                       </div>
-                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removePrincipleRisk(risk.id)}>
+                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removePrincipalRisk(risk.id)}>
                         <X className="w-3 h-3 text-slate-500" />
                       </Button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500 text-center py-4">No principle risks linked</p>
+                <p className="text-sm text-slate-500 text-center py-4">No principal risks linked</p>
               )}
             </CardContent>
           </Card>
