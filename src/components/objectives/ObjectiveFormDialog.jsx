@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import SearchableMultiPicker from "./SearchableMultiPicker";
 
 const EMPTY_FORM = {
   reference_number: "", title: "", description: "", company_id: "", category: "Operational",
@@ -107,25 +108,6 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
     const arr = form[field] || [];
     set(field, arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id]);
   };
-
-  const MultiPicker = ({ label, items, field, labelKey = "name" }) => (
-    <div>
-      <Label className="text-xs font-medium text-slate-600 uppercase tracking-wide">{label}</Label>
-      <div className="max-h-36 overflow-y-auto border rounded-lg mt-1 divide-y divide-slate-100">
-        {items.length === 0 ? (
-          <p className="p-3 text-xs text-slate-400 italic">No items available</p>
-        ) : items.map(item => {
-          const linked = (form[field] || []).includes(item.id);
-          return (
-            <label key={item.id} className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50 text-sm ${linked ? "bg-indigo-50" : ""}`}>
-              <input type="checkbox" checked={linked} onChange={() => toggleLink(field, item.id)} className="rounded" />
-              <span className={linked ? "text-indigo-700 font-medium" : "text-slate-700"}>{item[labelKey] || item.title || item.name}</span>
-            </label>
-          );
-        })}
-      </div>
-    </div>
-  );
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
@@ -333,12 +315,48 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
 
           {/* ── LINKAGES TAB ── */}
           <TabsContent value="linkages" className="space-y-5 pt-4">
-            <MultiPicker label="Frameworks" items={frameworks} field="linked_framework_ids" />
-            <MultiPicker label="Risks" items={risks} field="linked_risk_ids" labelKey="title" />
-            <MultiPicker label="Controls" items={controls} field="linked_control_ids" labelKey="title" />
-            <MultiPicker label="Value Chains" items={valueChains} field="linked_value_chain_ids" />
-            <MultiPicker label="Business Units" items={businessUnits} field="linked_business_unit_ids" />
-            <MultiPicker label="IT Capabilities" items={capabilities} field="linked_capability_ids" />
+            <SearchableMultiPicker
+              label="Frameworks"
+              items={frameworks}
+              selectedIds={form.linked_framework_ids || []}
+              onToggle={id => toggleLink("linked_framework_ids", id)}
+              getLabel={i => i.name}
+            />
+            <SearchableMultiPicker
+              label="Risks"
+              items={risks}
+              selectedIds={form.linked_risk_ids || []}
+              onToggle={id => toggleLink("linked_risk_ids", id)}
+              getLabel={i => [i.risk_id || i.reference_number, i.title].filter(Boolean).join(" — ")}
+            />
+            <SearchableMultiPicker
+              label="Controls"
+              items={controls}
+              selectedIds={form.linked_control_ids || []}
+              onToggle={id => toggleLink("linked_control_ids", id)}
+              getLabel={i => [i.control_id || i.reference_number, i.title].filter(Boolean).join(" — ")}
+            />
+            <SearchableMultiPicker
+              label="Value Chains"
+              items={valueChains}
+              selectedIds={form.linked_value_chain_ids || []}
+              onToggle={id => toggleLink("linked_value_chain_ids", id)}
+              getLabel={i => i.name}
+            />
+            <SearchableMultiPicker
+              label="Business Units"
+              items={businessUnits}
+              selectedIds={form.linked_business_unit_ids || []}
+              onToggle={id => toggleLink("linked_business_unit_ids", id)}
+              getLabel={i => i.name}
+            />
+            <SearchableMultiPicker
+              label="IT Capabilities"
+              items={capabilities}
+              selectedIds={form.linked_capability_ids || []}
+              onToggle={id => toggleLink("linked_capability_ids", id)}
+              getLabel={i => i.name}
+            />
           </TabsContent>
 
           {/* ── KPIs TAB ── */}
