@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Check, AlertCircle, CalendarOff } from "lucide-react";
+import { X, Check, AlertCircle, CalendarOff, Search, ChevronDown } from "lucide-react";
 import EndDateBadge from "@/components/ui/EndDateBadge";
 
 const empty = {
@@ -40,6 +40,20 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
     setForm({ ...form, employee_number: val });
     validateEmpNumber(val);
   };
+
+  const [managerSearch, setManagerSearch] = useState("");
+  const [managerOpen, setManagerOpen] = useState(false);
+  const managerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (managerRef.current && !managerRef.current.contains(e.target)) {
+        setManagerOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const activeGroups = groups.filter(g => g.status !== "inactive");
   const canSave = form.full_name && form.email && form.company_id && !empNumError;
@@ -116,21 +130,68 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
               <Label>Phone</Label>
               <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
             </div>
-            <div className="space-y-1.5 col-span-2">
+            <div className="space-y-1.5 col-span-2" ref={managerRef}>
               <Label>Reporting Manager</Label>
-              <Select value={form.manager_id || "none"} onValueChange={v => setForm({ ...form, manager_id: v === "none" ? "" : v })}>
-                <SelectTrigger><SelectValue placeholder="No manager" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No manager</SelectItem>
-                  {allStakeholders
-                    .filter(s => s.id !== stakeholder?.id && s.status !== "inactive" && (!form.company_id || s.company_id === form.company_id))
-                    .map(s => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.full_name}{s.job_title ? ` — ${s.job_title}` : ""}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+              {(() => {
+                const managerOptions = allStakeholders.filter(
+                  s => s.id !== stakeholder?.id && s.status !== "inactive" && (!form.company_id || s.company_id === form.company_id)
+                );
+                const selectedManager = managerOptions.find(s => s.id === form.manager_id);
+                const filtered = managerOptions.filter(s =>
+                  !managerSearch || s.full_name.toLowerCase().includes(managerSearch.toLowerCase()) ||
+                  (s.job_title && s.job_title.toLowerCase().includes(managerSearch.toLowerCase()))
+                );
+                return (
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => { setManagerOpen(o => !o); setManagerSearch(""); }}
+                      className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <span className={selectedManager ? "text-foreground" : "text-muted-foreground"}>
+                        {selectedManager ? `${selectedManager.full_name}${selectedManager.job_title ? ` — ${selectedManager.job_title}` : ""}` : "No manager"}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                    {managerOpen && (
+                      <div className="absolute z-50 mt-1 w-full rounded-md border border-slate-200 bg-white shadow-lg">
+                        <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
+                          <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <input
+                            autoFocus
+                            className="flex-1 text-sm outline-none placeholder:text-muted-foreground"
+                            placeholder="Search by name or job title…"
+                            value={managerSearch}
+                            onChange={e => setManagerSearch(e.target.value)}
+                          />
+                        </div>
+                        <div className="max-h-52 overflow-y-auto">
+                          <button
+                            type="button"
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 text-slate-500"
+                            onClick={() => { setForm({ ...form, manager_id: "" }); setManagerOpen(false); }}
+                          >
+                            No manager
+                          </button>
+                          {filtered.length === 0 ? (
+                            <p className="px-3 py-2 text-xs text-slate-400">No results</p>
+                          ) : filtered.map(s => (
+                            <button
+                              key={s.id}
+                              type="button"
+                              className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 flex items-center justify-between ${form.manager_id === s.id ? "bg-blue-50 text-blue-700" : ""}`}
+                              onClick={() => { setForm({ ...form, manager_id: s.id }); setManagerOpen(false); setManagerSearch(""); }}
+                            >
+                              <span>{s.full_name}{s.job_title ? <span className="text-slate-400"> — {s.job_title}</span> : ""}</span>
+                              {form.manager_id === s.id && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
