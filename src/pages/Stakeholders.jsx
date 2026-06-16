@@ -244,7 +244,10 @@ export default function Stakeholders() {
         </TabsContent>
 
         <TabsContent value="matrix" className="mt-4">
-          <StakeholderMatrixPanel stakeholders={stakeholders} groups={groups} />
+          <StakeholderMatrixPanel
+            stakeholders={filteredStakeholders}
+            groups={filterGroupId === "all" ? groups : groups.filter(g => g.id === filterGroupId)}
+          />
         </TabsContent>
 
         <TabsContent value="groups" className="mt-4">
