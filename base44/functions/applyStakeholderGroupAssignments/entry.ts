@@ -24,17 +24,20 @@ Deno.serve(async (req) => {
     assignmentMap[empNum].add(groupName);
   }
 
-  // --- 2. Load all stakeholders and groups (paginated) ---
+  const delay = (ms) => new Promise(r => setTimeout(r, ms));
+
+  // --- 2. Load all stakeholders and groups (paginated, sequential) ---
   let allStakeholders = [];
   let skip = 0;
   while (true) {
-    const page = await base44.asServiceRole.entities.Stakeholder.list(undefined, 200, skip);
+    const page = await base44.asServiceRole.entities.Stakeholder.list(undefined, 100, skip);
     allStakeholders = allStakeholders.concat(page);
-    if (page.length < 200) break;
-    skip += 200;
-    await new Promise(r => setTimeout(r, 200));
+    if (page.length < 100) break;
+    skip += 100;
+    await delay(500);
   }
 
+  await delay(500);
   const allGroups = await base44.asServiceRole.entities.StakeholderGroup.list(undefined, 200);
 
   // Build group name -> id map (case-insensitive)
@@ -86,19 +89,11 @@ Deno.serve(async (req) => {
     }
   }
 
-  // --- 4. Apply updates in small batches to avoid rate limits ---
-  const BATCH_SIZE = 5;
-  const DELAY_MS = 300;
-
-  for (let i = 0; i < updateQueue.length; i += BATCH_SIZE) {
-    const batch = updateQueue.slice(i, i + BATCH_SIZE);
-    await Promise.all(batch.map(item =>
-      base44.asServiceRole.entities.Stakeholder.update(item.id, { group_ids: item.group_ids })
-    ));
-    updated += batch.length;
-    if (i + BATCH_SIZE < updateQueue.length) {
-      await new Promise(r => setTimeout(r, DELAY_MS));
-    }
+  // --- 4. Apply updates sequentially to avoid rate limits ---
+  for (const item of updateQueue) {
+    await base44.asServiceRole.entities.Stakeholder.update(item.id, { group_ids: item.group_ids });
+    updated++;
+    await delay(400);
   }
 
   return Response.json({
