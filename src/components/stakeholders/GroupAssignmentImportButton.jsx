@@ -2,7 +2,23 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Upload, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Loader2, Download } from "lucide-react";
+
+const TEMPLATE_ROWS = [
+  "EmployeeNumber;FullName;Email;JobTitle;Department;Company;ExistingGroups;RecommendedStakeholderGroup;AssignmentBasis",
+  "12345;Jane Smith;jane.smith@example.com;Risk Manager;Finance;Acme Ltd;Control Owner;Risk Owner;Role alignment",
+  "67890;John Doe;john.doe@example.com;IT Lead;Technology;Acme Ltd;;IT / Capability Owner;IT skill match",
+];
+
+function downloadTemplate() {
+  const blob = new Blob([TEMPLATE_ROWS.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "group_assignment_template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 import { toast } from "sonner";
 
 export default function GroupAssignmentImportButton({ onDone }) {
@@ -40,12 +56,17 @@ export default function GroupAssignmentImportButton({ onDone }) {
           <DialogHeader>
             <DialogTitle>Import Stakeholder Group Assignments</DialogTitle>
             <DialogDescription>
-              Upload a semicolon-delimited CSV with columns: EmployeeNumber, FullName, Email, JobTitle, Department, Company, ExistingGroups, RecommendedStakeholderGroup, AssignmentBasis.
-              Groups will be merged (not replaced) with existing assignments.
+              Upload a semicolon-delimited CSV to assign stakeholders to groups. Download the template to get started.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-slate-500">Semicolon-delimited CSV. Groups are merged, not replaced.</p>
+              <Button variant="outline" size="sm" onClick={downloadTemplate} className="gap-1 text-xs">
+                <Download className="w-3 h-3" /> Template
+              </Button>
+            </div>
             <input
               type="file"
               accept=".csv,.txt"
