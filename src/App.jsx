@@ -15,6 +15,14 @@ import PrincipalRisks from './pages/PrincipalRisks';
 import ObjectivesSummary from './pages/ObjectivesSummary';
 import PrincipalRisksSummary from './pages/PrincipalRisksSummary';
 import StakeholderListReport from './pages/StakeholderListReport';
+import RisksReport from './pages/RisksReport';
+import ControlsReport from './pages/ControlsReport';
+import PrincipalRisksReport from './pages/PrincipalRisksReport';
+import IssuesReport from './pages/IssuesReport';
+import IncidentsReport from './pages/IncidentsReport';
+import AssessmentsReport from './pages/AssessmentsReport';
+import ThirdPartiesReport from './pages/ThirdPartiesReport';
+import ITCapabilitiesReport from './pages/ITCapabilitiesReport';
 import HelpCentre from './pages/HelpCentre';
 import AssessmentModels from './pages/AssessmentModels';
 import AssessmentModelDetail from './pages/AssessmentModelDetail';
@@ -72,6 +80,14 @@ const AuthenticatedApp = () => {
         <Route path="/ObjectivesSummary" element={<ObjectivesSummary />} />
         <Route path="/PrincipalRisksSummary" element={<PrincipalRisksSummary />} />
         <Route path="/StakeholderListReport" element={<StakeholderListReport />} />
+        <Route path="/RisksReport" element={<RisksReport />} />
+        <Route path="/ControlsReport" element={<ControlsReport />} />
+        <Route path="/PrincipalRisksReport" element={<PrincipalRisksReport />} />
+        <Route path="/IssuesReport" element={<IssuesReport />} />
+        <Route path="/IncidentsReport" element={<IncidentsReport />} />
+        <Route path="/AssessmentsReport" element={<AssessmentsReport />} />
+        <Route path="/ThirdPartiesReport" element={<ThirdPartiesReport />} />
+        <Route path="/ITCapabilitiesReport" element={<ITCapabilitiesReport />} />
         <Route path="/MobileSettings" element={<MobileSettings />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>

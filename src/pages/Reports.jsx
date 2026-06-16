@@ -1,10 +1,13 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { FileText, Building2, BarChart3, Network, Users, FileSpreadsheet, Presentation } from "lucide-react";
+import {
+  FileText, Building2, BarChart3, Network, Users, FileSpreadsheet, Presentation,
+  ShieldAlert, CheckSquare, AlertTriangle, MessageSquareWarning, Siren,
+  ClipboardList, Building, Cpu
+} from "lucide-react";
 
 const PERFORMANCE_REPORTS = [
   {
@@ -40,15 +43,87 @@ const DATA_REPORTS = [
   {
     id: "stakeholder-list",
     title: "Stakeholder List",
-    description: "Export a configurable list of stakeholders. Select which fields to include and filter by company or status. Export to PDF or CSV.",
+    description: "Export a configurable list of stakeholders. Filter by company, status, department, job title, or group.",
     icon: Users,
     color: "from-orange-500 to-amber-500",
     url: createPageUrl("StakeholderListReport"),
     exports: ["CSV", "PDF"],
   },
+  {
+    id: "risks",
+    title: "Risks",
+    description: "All risks with configurable fields. Filter by company, status, category, risk type, and owner.",
+    icon: ShieldAlert,
+    color: "from-red-500 to-rose-600",
+    url: createPageUrl("RisksReport"),
+    exports: ["CSV", "PDF"],
+  },
+  {
+    id: "controls",
+    title: "Controls",
+    description: "All controls with configurable fields. Filter by status, category, type, owner, and framework.",
+    icon: CheckSquare,
+    color: "from-green-500 to-emerald-600",
+    url: createPageUrl("ControlsReport"),
+    exports: ["CSV", "PDF"],
+  },
+  {
+    id: "principal-risks",
+    title: "Principal Risks",
+    description: "Principal risks with configurable fields. Filter by company, status, category, priority, and criticality.",
+    icon: AlertTriangle,
+    color: "from-orange-600 to-red-600",
+    url: createPageUrl("PrincipalRisksReport"),
+    exports: ["CSV", "PDF"],
+  },
+  {
+    id: "issues",
+    title: "Issues",
+    description: "All issues and action items. Filter by company, status, type, priority, and assignee.",
+    icon: MessageSquareWarning,
+    color: "from-yellow-500 to-orange-500",
+    url: createPageUrl("IssuesReport"),
+    exports: ["CSV", "PDF"],
+  },
+  {
+    id: "incidents",
+    title: "Incidents",
+    description: "All incidents with configurable fields. Filter by company, status, type, and severity.",
+    icon: Siren,
+    color: "from-rose-600 to-pink-600",
+    url: createPageUrl("IncidentsReport"),
+    exports: ["CSV", "PDF"],
+  },
+  {
+    id: "assessments",
+    title: "Assessments",
+    description: "All assessments with configurable fields. Filter by company, status, model, framework, and assessor.",
+    icon: ClipboardList,
+    color: "from-cyan-500 to-blue-600",
+    url: createPageUrl("AssessmentsReport"),
+    exports: ["CSV", "PDF"],
+  },
+  {
+    id: "third-parties",
+    title: "Third Parties",
+    description: "All third-party providers. Filter by company, status, service type, criticality, and risk rating.",
+    icon: Building,
+    color: "from-violet-500 to-purple-600",
+    url: createPageUrl("ThirdPartiesReport"),
+    exports: ["CSV", "PDF"],
+  },
+  {
+    id: "it-capabilities",
+    title: "IT Capabilities",
+    description: "All IT capabilities with configurable fields. Filter by company, status, category, maturity level, and owner.",
+    icon: Cpu,
+    color: "from-slate-500 to-slate-700",
+    url: createPageUrl("ITCapabilitiesReport"),
+    exports: ["CSV", "PDF"],
+  },
 ];
 
-function ReportCard({ report, type }) {
+function ReportCard({ report }) {
   const exportBadgeColor = (label) => {
     if (label === "CSV") return "bg-green-100 text-green-700 border-green-200";
     if (label === "PDF") return "bg-red-100 text-red-700 border-red-200";
@@ -101,7 +176,7 @@ export default function Reports() {
           <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Exportable to Word / PowerPoint / Print</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {PERFORMANCE_REPORTS.map(r => <ReportCard key={r.id} report={r} type="performance" />)}
+          {PERFORMANCE_REPORTS.map(r => <ReportCard key={r.id} report={r} />)}
         </div>
       </div>
 
@@ -112,10 +187,10 @@ export default function Reports() {
             <FileSpreadsheet className="w-5 h-5 text-slate-600" />
             <h2 className="text-lg font-semibold text-slate-800">Data &amp; List Reports</h2>
           </div>
-          <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Configure fields · Export to CSV or PDF</span>
+          <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Configure fields · Filter records · Export to CSV or PDF</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {DATA_REPORTS.map(r => <ReportCard key={r.id} report={r} type="data" />)}
+          {DATA_REPORTS.map(r => <ReportCard key={r.id} report={r} />)}
         </div>
       </div>
     </div>
