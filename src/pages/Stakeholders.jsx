@@ -15,6 +15,7 @@ import StakeholderHistoryDialog from "@/components/stakeholders/StakeholderHisto
 import { Upload } from "lucide-react";
 import { useDefaultStakeholderGroups } from "@/hooks/useDefaultStakeholderGroups";
 import StakeholderGroupReportButton from "@/components/stakeholders/StakeholderGroupReportButton";
+import GroupAssignmentImportButton from "@/components/stakeholders/GroupAssignmentImportButton";
 
 export default function Stakeholders() {
   const queryClient = useQueryClient();
@@ -140,6 +141,7 @@ export default function Stakeholders() {
           <p className="text-slate-500 mt-1">Manage stakeholders, groups and matrix assignments</p>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <GroupAssignmentImportButton onDone={() => queryClient.invalidateQueries(["stakeholders"])} />
           <StakeholderGroupReportButton stakeholders={stakeholders} groups={groups} companies={companies} />
           <Button variant="outline" onClick={() => setHrImportOpen(true)}>
             <Upload className="w-4 h-4 mr-2" /> Import HR Data
