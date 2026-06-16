@@ -4,9 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Download, Building2, Shield, Network, Target, AlertTriangle, TrendingUp } from "lucide-react";
+import { ArrowLeft, Building2, Shield, Network, Target, AlertTriangle, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import PerformanceExportMenu from "@/components/reports/PerformanceExportMenu";
 
 export default function CompanyOverviewReport() {
   const [selectedCompanyId, setSelectedCompanyId] = useState("all");
@@ -49,10 +50,6 @@ export default function CompanyOverviewReport() {
   const filteredCompanies = selectedCompanyId === "all" 
     ? companies 
     : companies.filter(c => c.id === selectedCompanyId);
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   const getCompanyStats = (companyId) => {
     const companyProcesses = processes.filter(p => p.company_id === companyId);
@@ -110,10 +107,7 @@ export default function CompanyOverviewReport() {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
-              <Download className="w-4 h-4 mr-2" />
-              Export/Print
-            </Button>
+            <PerformanceExportMenu title="Company Overview Report" />
           </div>
         </div>
       </div>

@@ -14,6 +14,7 @@ import GettingStarted from './pages/GettingStarted';
 import PrincipalRisks from './pages/PrincipalRisks';
 import ObjectivesSummary from './pages/ObjectivesSummary';
 import PrincipalRisksSummary from './pages/PrincipalRisksSummary';
+import StakeholderListReport from './pages/StakeholderListReport';
 import HelpCentre from './pages/HelpCentre';
 import AssessmentModels from './pages/AssessmentModels';
 import AssessmentModelDetail from './pages/AssessmentModelDetail';
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
         <Route path="/PrincipalRisks" element={<PrincipalRisks />} />
         <Route path="/ObjectivesSummary" element={<ObjectivesSummary />} />
         <Route path="/PrincipalRisksSummary" element={<PrincipalRisksSummary />} />
+        <Route path="/StakeholderListReport" element={<StakeholderListReport />} />
         <Route path="/MobileSettings" element={<MobileSettings />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
