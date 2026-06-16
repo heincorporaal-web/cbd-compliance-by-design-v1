@@ -227,6 +227,7 @@ export default function PrincipalRisksSummary() {
         companies={companies}
         stakeholders={stakeholders}
         businessUnits={businessUnits}
+        defaultCompanyId={selectedCompany || ""}
       />
     </div>
   );

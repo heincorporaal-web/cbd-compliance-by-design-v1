@@ -26,9 +26,10 @@ export default function PrincipalRiskFormDialog({ open, onClose, editRisk, compa
   const [form, setForm] = useState(EMPTY_FORM);
 
   useEffect(() => {
+    if (!open) return;
     if (editRisk) setForm({ ...EMPTY_FORM, ...editRisk });
     else setForm({ ...EMPTY_FORM, company_id: defaultCompanyId || "" });
-  }, [editRisk, defaultCompanyId]);
+  }, [open, editRisk, defaultCompanyId]);
 
   const set = (field, val) => setForm(f => ({ ...f, [field]: val }));
 
