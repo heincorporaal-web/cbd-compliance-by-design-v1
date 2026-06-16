@@ -62,17 +62,15 @@ const AuthenticatedApp = () => {
         {Object.entries(Pages).map(([path, Page]) => (
           <Route key={path} path={`/${path}`} element={<Page />} />
         ))}
-        <Route path="/GettingStarted" element={<LayoutWrapper currentPageName="GettingStarted"><GettingStarted /></LayoutWrapper>} />
-        <Route path="/HelpCentre" element={<LayoutWrapper currentPageName="HelpCentre"><HelpCentre /></LayoutWrapper>} />
-        <Route path="/AssessmentModels" element={<LayoutWrapper currentPageName="AssessmentModels"><AssessmentModels /></LayoutWrapper>} />
-        <Route path="/AssessmentModelDetail" element={<LayoutWrapper currentPageName="AssessmentModelDetail"><AssessmentModelDetail /></LayoutWrapper>} />
-        <Route path="/EvidenceLibrary" element={<LayoutWrapper currentPageName="EvidenceLibrary"><EvidenceLibrary /></LayoutWrapper>} />
-        <Route path="/PrincipalRisks" element={<LayoutWrapper currentPageName="PrincipalRisks"><PrincipalRisks /></LayoutWrapper>} />
-        <Route path="/ObjectivesSummary" element={<LayoutWrapper currentPageName="ObjectivesSummary"><ObjectivesSummary /></LayoutWrapper>} />
-        <Route path="/PrincipalRisksSummary" element={<LayoutWrapper currentPageName="PrincipalRisksSummary"><PrincipalRisksSummary /></LayoutWrapper>} />
-        <Route path="/ObjectivesSummary" element={<LayoutWrapper currentPageName="ObjectivesSummary"><ObjectivesSummary /></LayoutWrapper>} />
-        <Route path="/PrincipalRisksSummary" element={<LayoutWrapper currentPageName="PrincipalRisksSummary"><PrincipalRisksSummary /></LayoutWrapper>} />
-        <Route path="/MobileSettings" element={<LayoutWrapper currentPageName="MobileSettings"><MobileSettings /></LayoutWrapper>} />
+        <Route path="/GettingStarted" element={<GettingStarted />} />
+        <Route path="/HelpCentre" element={<HelpCentre />} />
+        <Route path="/AssessmentModels" element={<AssessmentModels />} />
+        <Route path="/AssessmentModelDetail" element={<AssessmentModelDetail />} />
+        <Route path="/EvidenceLibrary" element={<EvidenceLibrary />} />
+        <Route path="/PrincipalRisks" element={<PrincipalRisks />} />
+        <Route path="/ObjectivesSummary" element={<ObjectivesSummary />} />
+        <Route path="/PrincipalRisksSummary" element={<PrincipalRisksSummary />} />
+        <Route path="/MobileSettings" element={<MobileSettings />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </LayoutWrapper>
