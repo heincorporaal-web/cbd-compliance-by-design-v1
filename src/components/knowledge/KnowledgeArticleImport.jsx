@@ -32,6 +32,27 @@ const TEMPLATE_EXAMPLE = [
   "",
 ];
 
+// Checklist template: same base columns + step columns (up to 10 steps)
+const CHECKLIST_STEP_COUNT = 10;
+const CHECKLIST_HEADERS = [
+  ...TEMPLATE_HEADERS,
+  ...Array.from({ length: CHECKLIST_STEP_COUNT }, (_, i) => [`step_${i + 1}_title`, `step_${i + 1}_description`]).flat(),
+];
+const CHECKLIST_EXAMPLE = [
+  "GDPR Compliance Checklist",
+  "Data Privacy",
+  "Step-by-step GDPR compliance checklist",
+  "Use this checklist to verify GDPR compliance",
+  "checklist",
+  "draft",
+  "gdpr;privacy;compliance",
+  "",
+  "Appoint a DPO", "Designate a Data Protection Officer if required",
+  "Map data flows", "Document all personal data processing activities",
+  "Update privacy notice", "Ensure your privacy notice is clear and up to date",
+  ...Array(CHECKLIST_STEP_COUNT * 2 - 6).fill(""),
+];
+
 const CATEGORY_OPTIONS = [
   "implementation_guide",
   "best_practice",
@@ -40,16 +61,26 @@ const CATEGORY_OPTIONS = [
   "checklist",
 ];
 
-function downloadTemplate() {
-  const rows = [TEMPLATE_HEADERS, TEMPLATE_EXAMPLE];
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+function triggerDownload(csv, filename) {
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "knowledge_articles_template.csv";
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function downloadTemplate() {
+  const rows = [TEMPLATE_HEADERS, TEMPLATE_EXAMPLE];
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+  triggerDownload(csv, "knowledge_articles_template.csv");
+}
+
+function downloadChecklistTemplate() {
+  const rows = [CHECKLIST_HEADERS, CHECKLIST_EXAMPLE];
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+  triggerDownload(csv, "knowledge_checklist_template.csv");
 }
 
 function parseCSV(text) {
@@ -85,16 +116,33 @@ function parseCSV(text) {
 }
 
 function rowToArticle(row) {
+  const category = CATEGORY_OPTIONS.includes(row.category) ? row.category : "implementation_guide";
+
+  // Parse step columns for checklist articles
+  const key_steps = [];
+  if (category === "checklist") {
+    for (let i = 1; i <= CHECKLIST_STEP_COUNT; i++) {
+      const stepTitle = (row[`step_${i}_title`] || "").trim();
+      if (stepTitle) {
+        key_steps.push({
+          step: stepTitle,
+          description: (row[`step_${i}_description`] || "").trim(),
+          order: i,
+        });
+      }
+    }
+  }
+
   return {
     title: row.title || "",
     chapter: row.chapter || "",
     description: row.description || "",
     content: row.content || "",
-    category: CATEGORY_OPTIONS.includes(row.category) ? row.category : "implementation_guide",
+    category,
     status: ["draft", "published", "archived"].includes(row.status) ? row.status : "draft",
     tags: row.tags ? row.tags.split(";").map(t => t.trim()).filter(Boolean) : [],
     framework_id: row.framework_id || "",
-    key_steps: [],
+    key_steps,
     attachments: [],
     pdf_url: "",
   };
@@ -175,9 +223,14 @@ export default function KnowledgeArticleImport() {
                 Fill in the CSV with your articles. Tags should be separated by semicolons (;).
                 Category must be one of: <span className="font-mono">{CATEGORY_OPTIONS.join(", ")}</span>.
               </p>
-              <Button variant="outline" size="sm" onClick={downloadTemplate} className="gap-2">
-                <Download className="w-4 h-4" /> Download Template
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={downloadTemplate} className="gap-2">
+                  <Download className="w-4 h-4" /> General Template
+                </Button>
+                <Button variant="outline" size="sm" onClick={downloadChecklistTemplate} className="gap-2">
+                  <Download className="w-4 h-4" /> Checklist Template (with steps)
+                </Button>
+              </div>
             </div>
 
             {/* Step 2: Upload */}
