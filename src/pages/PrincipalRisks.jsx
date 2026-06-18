@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ShieldAlert, Plus, Search, Building2, User, Pencil, Trash2, Calendar } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
+import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
 
 const CATEGORIES = ["Strategic", "Compliance", "IT", "Operational", "Cyber", "Data", "Third Party", "Financial Crime", "Reputational Risk", "Financial Risk", "Compliance / Conduct Risk", "Third-Party / Supplier Risk", "Technology / Information Security Risk"];
 const STATUSES = ["Draft", "Active", "Under Review", "Retired"];
@@ -79,6 +80,11 @@ export default function PrincipalRisks() {
   const { data: businessUnits = [] } = useQuery({
     queryKey: ["businessUnits"],
     queryFn: () => base44.entities.BusinessUnit.list(),
+  });
+
+  const { data: stakeholderGroups = [] } = useQuery({
+    queryKey: ["stakeholderGroups"],
+    queryFn: () => base44.entities.StakeholderGroup.list(),
   });
 
   const createMutation = useMutation({
@@ -349,51 +355,69 @@ export default function PrincipalRisks() {
 
             {/* Ownership */}
             <div className="space-y-3 border-t pt-4">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Ownership</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Risk Owner (Executive)</Label>
-                  <Select value={form.risk_owner_id || ""} onValueChange={v => {
-                    const s = stakeholders.find(x => x.id === v);
-                    set("risk_owner_id", v);
-                    set("risk_owner_name", s?.full_name || "");
-                  }}>
-                    <SelectTrigger><SelectValue placeholder="Select stakeholder" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={null}>None</SelectItem>
-                      {stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Risk Manager (Day-to-day)</Label>
-                  <Select value={form.risk_manager_id || ""} onValueChange={v => {
-                    const s = stakeholders.find(x => x.id === v);
-                    set("risk_manager_id", v);
-                    set("risk_manager_name", s?.full_name || "");
-                  }}>
-                    <SelectTrigger><SelectValue placeholder="Select stakeholder" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={null}>None</SelectItem>
-                      {stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Risk Function Owner (2LoD)</Label>
-                  <Select value={form.risk_function_owner_id || ""} onValueChange={v => {
-                    const s = stakeholders.find(x => x.id === v);
-                    set("risk_function_owner_id", v);
-                    set("risk_function_owner_name", s?.full_name || "");
-                  }}>
-                    <SelectTrigger><SelectValue placeholder="Select stakeholder" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={null}>None</SelectItem>
-                      {stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              {(() => {
+                const companyStakeholders = form.company_id
+                  ? stakeholders.filter(s => s.company_id === form.company_id && s.status !== "inactive")
+                  : stakeholders.filter(s => s.status !== "inactive");
+
+                // Risk Owner: only stakeholders in a group named "Risk Owners"
+                const riskOwnerGroupIds = stakeholderGroups
+                  .filter(g => g.name?.toLowerCase() === "risk owners")
+                  .map(g => g.id);
+                const riskOwnerStakeholders = riskOwnerGroupIds.length > 0
+                  ? companyStakeholders.filter(s => (s.group_ids || []).some(gid => riskOwnerGroupIds.includes(gid)))
+                  : companyStakeholders;
+
+                return (
+                  <>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Ownership</p>
+                    {riskOwnerGroupIds.length > 0 && (
+                      <p className="text-xs text-slate-400 -mt-1">Risk Owner list is filtered to members of the <span className="font-medium text-slate-500">Risk Owners</span> group.</p>
+                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Risk Owner (Executive)</Label>
+                        <SearchableStakeholderSelect
+                          value={form.risk_owner_id}
+                          stakeholders={riskOwnerStakeholders}
+                          placeholder="Select stakeholder"
+                          onValueChange={v => {
+                            const s = stakeholders.find(x => x.id === v);
+                            set("risk_owner_id", v);
+                            set("risk_owner_name", s?.full_name || "");
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label>Risk Manager (Day-to-day)</Label>
+                        <SearchableStakeholderSelect
+                          value={form.risk_manager_id}
+                          stakeholders={companyStakeholders}
+                          placeholder="Select stakeholder"
+                          onValueChange={v => {
+                            const s = stakeholders.find(x => x.id === v);
+                            set("risk_manager_id", v);
+                            set("risk_manager_name", s?.full_name || "");
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label>Risk Function Owner (2LoD)</Label>
+                        <SearchableStakeholderSelect
+                          value={form.risk_function_owner_id}
+                          stakeholders={companyStakeholders}
+                          placeholder="Select stakeholder"
+                          onValueChange={v => {
+                            const s = stakeholders.find(x => x.id === v);
+                            set("risk_function_owner_id", v);
+                            set("risk_function_owner_name", s?.full_name || "");
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Lifecycle */}
