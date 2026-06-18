@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import NavTree from "@/components/layout/NavTree";
+import QuickActionsPane from "@/components/layout/QuickActionsPane";
 import CompanyFilterBar from "@/components/CompanyFilterBar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import {
@@ -118,12 +119,14 @@ export default function Layout({ children }) {
           </header>
 
           <div
-            className="flex-1 overflow-auto"
+            className="flex-1 overflow-auto min-w-0"
             style={{ paddingBottom: isMobile ? "calc(4rem + env(safe-area-inset-bottom))" : undefined }}
           >
             {children}
           </div>
         </main>
+
+        {!isMobile && <QuickActionsPane />}
 
         <MobileBottomNav />
       </div>

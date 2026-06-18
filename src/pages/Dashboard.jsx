@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Settings, LayoutDashboard, ShieldAlert, Star, PanelRightClose, PanelRightOpen, CalendarClock, Scale } from "lucide-react";
+import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Settings, LayoutDashboard, ShieldAlert } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
-import { ALL_NAV_ITEMS } from "@/components/layout/NavTree";
 
 const WIDGET_LABELS = {
   compliance: "Compliance Overview",
@@ -21,25 +20,21 @@ const WIDGET_LABELS = {
   processHealth: "Process Health",
   goals: "Goal Achievement",
   recentIncidents: "Recent Incidents",
-  quickActions: "Quick Actions",
 };
 
 const CATEGORY_VIEWS = [
-  { id: "all", label: "All", widgets: ["compliance", "riskPosture", "resilience", "processHealth", "goals", "recentIncidents", "quickActions"] },
-  { id: "compliance", label: "Compliance", widgets: ["compliance", "recentIncidents", "quickActions"] },
-  { id: "risk", label: "Risk", widgets: ["riskPosture", "recentIncidents", "quickActions"] },
-  { id: "resilience", label: "Resilience", widgets: ["resilience", "recentIncidents", "quickActions"] },
-  { id: "process", label: "Process", widgets: ["processHealth", "goals", "quickActions"] },
+  { id: "all", label: "All", widgets: ["compliance", "riskPosture", "resilience", "processHealth", "goals", "recentIncidents"] },
+  { id: "compliance", label: "Compliance", widgets: ["compliance", "recentIncidents"] },
+  { id: "risk", label: "Risk", widgets: ["riskPosture", "recentIncidents"] },
+  { id: "resilience", label: "Resilience", widgets: ["resilience", "recentIncidents"] },
+  { id: "process", label: "Process", widgets: ["processHealth", "goals"] },
 ];
 
-const DEFAULT_WIDGETS = { compliance: true, resilience: true, processHealth: true, goals: true, riskPosture: true, recentIncidents: true, quickActions: true };
+const DEFAULT_WIDGETS = { compliance: true, resilience: true, processHealth: true, goals: true, riskPosture: true, recentIncidents: true };
 
 export default function Dashboard() {
   const [globalCompany, setSelectedCompany] = useCompanyFilter();
   const [activeView, setActiveView] = useState("all");
-  const [quickActionsVisible, setQuickActionsVisible] = useState(() => {
-    try { return localStorage.getItem("dashboard_qa_visible") !== "false"; } catch { return true; }
-  });
   const [visibleWidgets, setVisibleWidgets] = useState(() => {
     try {
       const saved = localStorage.getItem("dashboard_widgets");
@@ -50,32 +45,6 @@ export default function Dashboard() {
   useEffect(() => {
     try { localStorage.setItem("dashboard_widgets", JSON.stringify(visibleWidgets)); } catch {}
   }, [visibleWidgets]);
-
-  const toggleQuickActions = () => {
-    setQuickActionsVisible(v => {
-      try { localStorage.setItem("dashboard_qa_visible", String(!v)); } catch {}
-      return !v;
-    });
-  };
-
-  // Load favorites from localStorage (same key as NavTree)
-  const [favorites, setFavorites] = useState([]);
-  useEffect(() => {
-    import("@/api/base44Client").then(({ base44 }) => {
-      base44.auth.me().then(user => {
-        try {
-          const key = `cbd_favorites_${user?.id || "guest"}`;
-          const favIds = JSON.parse(localStorage.getItem(key) || "[]");
-          setFavorites(favIds);
-        } catch {}
-      }).catch(() => {
-        try {
-          const favIds = JSON.parse(localStorage.getItem("cbd_favorites_guest") || "[]");
-          setFavorites(favIds);
-        } catch {}
-      });
-    });
-  }, []);
 
   const applyView = (viewId) => {
     setActiveView(viewId);
@@ -684,9 +653,9 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {visibleWidgets.recentIncidents && (
-          <Card className="lg:col-span-2 border-none shadow-lg">
+          <Card className="border-none shadow-lg">
           <CardHeader className="border-b border-slate-100">
             <div className="flex items-center justify-between">
               <CardTitle>Recent Incidents</CardTitle>
@@ -730,123 +699,7 @@ export default function Dashboard() {
         </Card>
         )}
 
-        {visibleWidgets.quickActions && (
-          <Card className="border-none shadow-lg">
-          <CardHeader className="border-b border-slate-100">
-            <div className="flex items-center justify-between">
-              <CardTitle>Quick Actions</CardTitle>
-              <button
-                onClick={toggleQuickActions}
-                title={quickActionsVisible ? "Hide quick actions" : "Show quick actions"}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-              >
-                {quickActionsVisible
-                  ? <PanelRightClose className="w-4 h-4" />
-                  : <PanelRightOpen className="w-4 h-4" />}
-              </button>
-            </div>
-          </CardHeader>
-          {quickActionsVisible && (
-            <CardContent className="p-4 space-y-2">
-              {/* Favorites section */}
-              {favorites.length > 0 && (() => {
-                const favItems = ALL_NAV_ITEMS.filter(i => favorites.includes(i.id));
-                return favItems.length > 0 ? (
-                  <div className="mb-2">
-                    <p className="text-xs font-semibold text-amber-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-amber-400" /> Favorites
-                    </p>
-                    {favItems.map(item => (
-                      <Link key={item.id} to={item.url}>
-                        <Button className="w-full justify-start mb-1" variant="ghost" size="sm">
-                          <item.icon className="w-3.5 h-3.5 mr-2 text-amber-500" />
-                          {item.title}
-                        </Button>
-                      </Link>
-                    ))}
-                    <div className="border-t border-slate-100 my-2" />
-                  </div>
-                ) : null;
-              })()}
 
-              {/* Standard quick actions */}
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Actions</p>
-              <Link to="/MyActions">
-                <Button className="w-full justify-start bg-amber-500 hover:bg-amber-600 text-white mb-1" size="sm">
-                  <CalendarClock className="w-3.5 h-3.5 mr-2" />
-                  My Actions
-                </Button>
-              </Link>
-              <Link to={createPageUrl("Assessments")}>
-                <Button className="w-full justify-start bg-primary hover:bg-primary/90 text-white mb-1" size="sm">
-                  <ClipboardCheck className="w-3.5 h-3.5 mr-2" />
-                  New Assessment
-                </Button>
-              </Link>
-              <Link to={createPageUrl("Issues")}>
-                <Button className="w-full justify-start mb-1" variant="outline" size="sm">
-                  <AlertCircle className="w-3.5 h-3.5 mr-2" />
-                  Manage Issues
-                </Button>
-              </Link>
-              <Link to={createPageUrl("Incidents")}>
-                <Button className="w-full justify-start mb-1" variant="outline" size="sm">
-                  <AlertTriangle className="w-3.5 h-3.5 mr-2" />
-                  Report Incident
-                </Button>
-              </Link>
-              <Link to={createPageUrl("PrincipalRisks")}>
-                <Button className="w-full justify-start mb-1" variant="outline" size="sm">
-                  <ShieldAlert className="w-3.5 h-3.5 mr-2" />
-                  Principal Risks
-                </Button>
-              </Link>
-              <Link to={createPageUrl("ObjectivesSummary")}>
-                <Button className="w-full justify-start mb-1" variant="outline" size="sm">
-                  <Target className="w-3.5 h-3.5 mr-2" />
-                  Objectives
-                </Button>
-              </Link>
-              <Link to={createPageUrl("RiskRegister")}>
-                <Button className="w-full justify-start mb-1" variant="outline" size="sm">
-                  <AlertTriangle className="w-3.5 h-3.5 mr-2" />
-                  Risk Register
-                </Button>
-              </Link>
-              <Link to={createPageUrl("ThirdParties")}>
-                <Button className="w-full justify-start mb-1" variant="outline" size="sm">
-                  <Users className="w-3.5 h-3.5 mr-2" />
-                  Third Parties
-                </Button>
-              </Link>
-              <Link to={createPageUrl("DelegationOfAuthority")}>
-                <Button className="w-full justify-start mb-1" variant="outline" size="sm">
-                  <Scale className="w-3.5 h-3.5 mr-2" />
-                  Delegation of Authority
-                </Button>
-              </Link>
-              <Link to={createPageUrl("ICTSystems")}>
-                <Button className="w-full justify-start mb-1" variant="outline" size="sm">
-                  <Server className="w-3.5 h-3.5 mr-2" />
-                  ICT Systems
-                </Button>
-              </Link>
-              <Link to={createPageUrl("iHPOM")}>
-                <Button className="w-full justify-start mb-1" variant="outline" size="sm">
-                  <Network className="w-3.5 h-3.5 mr-2" />
-                  Process Management
-                </Button>
-              </Link>
-              <Link to={createPageUrl("GRCGoals")}>
-                <Button className="w-full justify-start" variant="outline" size="sm">
-                  <Target className="w-3.5 h-3.5 mr-2" />
-                  GRC Goals
-                </Button>
-              </Link>
-            </CardContent>
-          )}
-        </Card>
-        )}
       </div>
     </div>
   );
