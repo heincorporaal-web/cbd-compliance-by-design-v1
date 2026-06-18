@@ -13,6 +13,7 @@ import { ShieldAlert, Plus, Search, Building2, User, Pencil, Trash2, Calendar } 
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
 import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
+import CalendarPromptDialog from "@/components/risks/CalendarPromptDialog";
 
 const CATEGORIES = ["Strategic", "Compliance", "IT", "Operational", "Cyber", "Data", "Third Party", "Financial Crime", "Reputational Risk", "Financial Risk", "Compliance / Conduct Risk", "Third-Party / Supplier Risk", "Technology / Information Security Risk"];
 const STATUSES = ["Draft", "Active", "Under Review", "Retired"];
@@ -61,6 +62,7 @@ export default function PrincipalRisks() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [calendarPromptRisk, setCalendarPromptRisk] = useState(null);
 
   const { data: principalRisks = [], isLoading } = useQuery({
     queryKey: ["principalRisks"],
@@ -89,12 +91,25 @@ export default function PrincipalRisks() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.PrincipalRisk.create(data),
-    onSuccess: () => { queryClient.invalidateQueries(["principalRisks"]); closeDialog(); toast.success("Principal Risk created"); },
+    onSuccess: (saved) => {
+      queryClient.invalidateQueries(["principalRisks"]);
+      closeDialog();
+      toast.success("Principal Risk created");
+      if (saved?.next_review_date) setCalendarPromptRisk(saved);
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.PrincipalRisk.update(id, data),
-    onSuccess: () => { queryClient.invalidateQueries(["principalRisks"]); closeDialog(); toast.success("Principal Risk updated"); },
+    onSuccess: (saved, { data, prevNextReviewDate }) => {
+      queryClient.invalidateQueries(["principalRisks"]);
+      closeDialog();
+      toast.success("Principal Risk updated");
+      // Prompt if next_review_date was set or changed
+      if (data?.next_review_date && data.next_review_date !== prevNextReviewDate) {
+        setCalendarPromptRisk({ ...data, id: saved?.id });
+      }
+    },
   });
 
   const deleteMutation = useMutation({
@@ -116,8 +131,12 @@ export default function PrincipalRisks() {
 
   const handleSave = () => {
     if (!form.risk_title || !form.company_id) { toast.error("Risk Title and Company are required"); return; }
-    if (editId) updateMutation.mutate({ id: editId, data: form });
-    else createMutation.mutate(form);
+    if (editId) {
+      const existing = principalRisks.find(r => r.id === editId);
+      updateMutation.mutate({ id: editId, data: form, prevNextReviewDate: existing?.next_review_date });
+    } else {
+      createMutation.mutate(form);
+    }
   };
 
   const filtered = principalRisks.filter(r => {
@@ -257,6 +276,13 @@ export default function PrincipalRisks() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Calendar prompt after save */}
+      <CalendarPromptDialog
+        open={!!calendarPromptRisk}
+        onClose={() => setCalendarPromptRisk(null)}
+        risk={calendarPromptRisk}
+      />
 
       {/* Dialog — single scrollable form, no tabs */}
       <Dialog open={dialogOpen} onOpenChange={v => { if (!v) closeDialog(); }}>
