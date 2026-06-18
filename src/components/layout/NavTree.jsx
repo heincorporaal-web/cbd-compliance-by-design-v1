@@ -6,7 +6,7 @@ import {
   AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert,
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
-  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert
+  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert, CalendarClock
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -20,6 +20,7 @@ export const NAV_GROUPS = [
       { id: "getting_started", title: "Getting Started", url: createPageUrl("GettingStarted"), icon: HelpCircle },
       { id: "help_centre", title: "Help Centre", url: createPageUrl("HelpCentre"), icon: MessageCircle },
       { id: "dashboard", title: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard },
+      { id: "my_actions", title: "My Actions", url: createPageUrl("MyActions"), icon: CalendarClock },
       { id: "companies", title: "Companies", url: createPageUrl("Companies"), icon: Building2 },
       { id: "business_units", title: "Business Units", url: createPageUrl("BusinessUnits"), icon: Network },
       { id: "knowledge", title: "Knowledge", url: createPageUrl("KnowledgeManagement"), icon: BookOpen },
