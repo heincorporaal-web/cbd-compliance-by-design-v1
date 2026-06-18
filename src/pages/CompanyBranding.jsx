@@ -12,6 +12,7 @@ import {
   Palette, Upload, Image, Save, CheckCircle, Eye,
   FileText, Building2, RefreshCw, Trash2
 } from "lucide-react";
+import ConfidentialityClassificationPanel from "@/components/reports/ConfidentialityClassificationPanel";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 const DEFAULT_COLORS = {
@@ -140,6 +141,8 @@ export default function CompanyBranding() {
   const [includeLogoInReports, setIncludeLogoInReports] = useState(true);
   const [reportHeaderText, setReportHeaderText] = useState("");
   const [reportFooterText, setReportFooterText] = useState("");
+  const [confidentialityLevels, setConfidentialityLevels] = useState([]);
+  const [defaultClassification, setDefaultClassification] = useState("");
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -162,6 +165,8 @@ export default function CompanyBranding() {
       setIncludeLogoInReports(company.include_logo_in_reports !== false);
       setReportHeaderText(company.report_header_text || "");
       setReportFooterText(company.report_footer_text || "");
+      setConfidentialityLevels(company.confidentiality_levels || []);
+      setDefaultClassification(company.default_classification || "");
     }
   }, [company]);
 
@@ -203,6 +208,8 @@ export default function CompanyBranding() {
       include_logo_in_reports: includeLogoInReports,
       report_header_text: reportHeaderText,
       report_footer_text: reportFooterText,
+      confidentiality_levels: confidentialityLevels,
+      default_classification: defaultClassification,
     });
   };
 
@@ -408,6 +415,14 @@ export default function CompanyBranding() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Confidentiality classifications */}
+            <ConfidentialityClassificationPanel
+              levels={confidentialityLevels}
+              defaultClassification={defaultClassification}
+              onChange={setConfidentialityLevels}
+              onDefaultChange={setDefaultClassification}
+            />
           </div>
 
           {/* Right: Live preview */}

@@ -1,13 +1,15 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Download, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ReportFieldSelector from "@/components/reports/ReportFieldSelector";
 import { exportCSV, exportPDF } from "@/components/reports/ExportUtils";
+import ConfidentialitySelector from "@/components/reports/ConfidentialitySelector";
+import { base44 } from "@/api/base44Client";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 /**
  * MultiValueFilter — a dropdown with checkboxes for picking specific values.
@@ -61,16 +63,17 @@ export function MultiValueFilter({ label, options, selected, onChange }) {
  * DataListReportPage — generic reusable report page shell.
  *
  * Props:
- *  title         – string, report title
- *  icon          – Lucide icon component
- *  backPage      – string, page name to link back to (default "Reports")
- *  allFields     – array of { key, label, required? }
- *  defaultFields – array of field keys selected by default
- *  rows          – the enriched/filtered source data (all records)
- *  fixedFilters  – JSX rendered above the multi-value filters (e.g. company / status selects)
- *  multiFilters  – array of { label, options, selected, onChange } for MultiValueFilter
- *  filename      – base filename for exports (no extension)
- *  reportTitle   – title used in PDF header
+ *  title           – string, report title
+ *  icon            – Lucide icon component
+ *  backPage        – string, page name to link back to (default "Reports")
+ *  allFields       – array of { key, label, required? }
+ *  defaultFields   – array of field keys selected by default
+ *  rows            – the enriched/filtered source data (all records)
+ *  fixedFilters    – JSX rendered above the multi-value filters
+ *  multiFilters    – array of { label, options, selected, onChange }
+ *  filename        – base filename for exports (no extension)
+ *  reportTitle     – title used in PDF header
+ *  companyId       – optional company ID to load branding / classification levels
  */
 export default function DataListReportPage({
   title,
@@ -83,12 +86,68 @@ export default function DataListReportPage({
   multiFilters = [],
   filename,
   reportTitle,
+  companyId,
 }) {
   const [selectedFields, setSelectedFields] = useState(defaultFields);
+  const [classification, setClassification] = useState("");
+  const [showWarning, setShowWarning] = useState(false);
+  const [companyBranding, setCompanyBranding] = useState(null);
+  const [globalCompany] = useCompanyFilter();
+
+  const effectiveCompanyId = companyId || (globalCompany !== "all" ? globalCompany : null);
+
+  // Load company branding + classification levels
+  useEffect(() => {
+    if (!effectiveCompanyId) return;
+    base44.entities.Company.filter({ id: effectiveCompanyId })
+      .then(results => {
+        const c = results[0];
+        if (!c) return;
+        setCompanyBranding(c);
+        // Pre-fill with default classification if set
+        if (c.default_classification) {
+          setClassification(c.default_classification);
+        }
+      })
+      .catch(() => {});
+  }, [effectiveCompanyId]);
+
+  const classificationLevels = companyBranding?.confidentiality_levels || [];
+
+  // Find the colour for the chosen classification
+  const classificationColor = classificationLevels.find(l => l.label === classification)?.color || "#dc2626";
+
+  const brandingOptions = companyBranding ? {
+    primaryColor: companyBranding.brand_colors?.primary || "#1e3a5f",
+    headerText: companyBranding.report_header_text || companyBranding.name || "",
+    footerText: companyBranding.report_footer_text || "",
+    logoUrl: companyBranding.logo_url || "",
+    includeLogoInReports: companyBranding.include_logo_in_reports !== false,
+  } : {};
+
   const activeFields = allFields.filter(f => selectedFields.includes(f.key));
 
-  const handleCSV = () => exportCSV(rows, activeFields, `${filename}.csv`);
-  const handlePDF = () => exportPDF(rows, activeFields, reportTitle || title);
+  const handleCSV = () => {
+    if (classificationLevels.length > 0 && !classification) {
+      setShowWarning(true);
+      return;
+    }
+    setShowWarning(false);
+    exportCSV(rows, activeFields, `${filename}.csv`, classification);
+  };
+
+  const handlePDF = () => {
+    if (classificationLevels.length > 0 && !classification) {
+      setShowWarning(true);
+      return;
+    }
+    setShowWarning(false);
+    exportPDF(rows, activeFields, reportTitle || title, {
+      classification,
+      classificationColor,
+      branding: brandingOptions,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -106,7 +165,18 @@ export default function DataListReportPage({
               <p className="text-sm text-slate-500">{rows.length} records</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Classification selector inline in toolbar */}
+            {classificationLevels.length > 0 && (
+              <div className="w-56">
+                <ConfidentialitySelector
+                  levels={classificationLevels}
+                  value={classification}
+                  onChange={(v) => { setClassification(v); setShowWarning(false); }}
+                  showWarning={showWarning}
+                />
+              </div>
+            )}
             <Button variant="outline" onClick={handleCSV}>
               <FileText className="w-4 h-4 mr-2" /> Export CSV
             </Button>
@@ -141,7 +211,20 @@ export default function DataListReportPage({
 
         {/* Preview table */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Preview — {rows.length} records</CardTitle></CardHeader>
+          <CardHeader>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <CardTitle className="text-base">Preview — {rows.length} records</CardTitle>
+              {classification && (
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-white"
+                  style={{ backgroundColor: classificationColor }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/60" />
+                  {classification}
+                </span>
+              )}
+            </div>
+          </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

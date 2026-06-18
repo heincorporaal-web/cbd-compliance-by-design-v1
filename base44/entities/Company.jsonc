@@ -141,6 +141,33 @@
     "report_footer_text": {
       "type": "string",
       "description": "Optional custom footer text shown on reports"
+    },
+    "confidentiality_levels": {
+      "type": "array",
+      "description": "Company-defined confidentiality classification levels for reports",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "description": "Classification label e.g. Confidential, Crown Jewels"
+          },
+          "color": {
+            "type": "string",
+            "description": "Hex colour for the badge"
+          },
+          "sort_order": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "default_classification": {
+      "type": "string",
+      "description": "Default confidentiality classification label applied to all exports"
     }
   },
   "required": [
