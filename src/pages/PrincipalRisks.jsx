@@ -91,23 +91,26 @@ export default function PrincipalRisks() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.PrincipalRisk.create(data),
-    onSuccess: (saved) => {
+    onSuccess: (saved, submitted) => {
       queryClient.invalidateQueries(["principalRisks"]);
       closeDialog();
       toast.success("Principal Risk created");
-      if (saved?.next_review_date) setCalendarPromptRisk(saved);
+      const record = saved || submitted;
+      if (record?.next_review_date) setCalendarPromptRisk(record);
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.PrincipalRisk.update(id, data),
-    onSuccess: (saved, { data, prevNextReviewDate }) => {
+    onSuccess: (_saved, { id, data, prevNextReviewDate }) => {
       queryClient.invalidateQueries(["principalRisks"]);
       closeDialog();
       toast.success("Principal Risk updated");
       // Prompt if next_review_date was set or changed
-      if (data?.next_review_date && data.next_review_date !== prevNextReviewDate) {
-        setCalendarPromptRisk({ ...data, id: saved?.id });
+      const newDate = (data?.next_review_date || "").split("T")[0];
+      const oldDate = (prevNextReviewDate || "").split("T")[0];
+      if (newDate && newDate !== oldDate) {
+        setCalendarPromptRisk({ ...data, id });
       }
     },
   });
