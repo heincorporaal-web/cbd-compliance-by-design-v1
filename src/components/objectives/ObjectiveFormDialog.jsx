@@ -34,7 +34,7 @@ const EMPTY_KPI = () => ({
   measurement_description: "", calculation_method: "", data_source_link: ""
 });
 
-export default function ObjectiveFormDialog({ open, onClose, editObj, companies, objectives, defaultCompanyId }) {
+export default function ObjectiveFormDialog({ open, onClose, onSaveSuccess, editObj, companies, objectives, defaultCompanyId }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState(EMPTY_FORM);
 
@@ -84,10 +84,15 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
       }
       return result;
     },
-    onSuccess: (_, { currentEditObj }) => {
+    onSuccess: (result, { currentForm, currentEditObj }) => {
       queryClient.invalidateQueries(["orgObjectives"]);
       toast.success(currentEditObj ? "Objective updated" : "Objective created");
-      onClose();
+      const saved = result || { ...currentForm, id: currentEditObj?.id };
+      if (onSaveSuccess) {
+        onSaveSuccess(saved);
+      } else {
+        onClose();
+      }
     },
     onError: e => toast.error(e.message),
   });

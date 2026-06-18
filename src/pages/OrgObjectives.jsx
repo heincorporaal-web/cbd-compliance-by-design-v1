@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import ObjectiveFormDialog from "@/components/objectives/ObjectiveFormDialog";
+import ObjectiveCalendarPromptDialog from "@/components/objectives/ObjectiveCalendarPromptDialog";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
 
@@ -46,6 +47,7 @@ export default function OrgObjectives() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editObj, setEditObj] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [calendarPromptObjective, setCalendarPromptObjective] = useState(null);
 
   const { data: objectives = [], isLoading } = useQuery({
     queryKey: ["orgObjectives"],
@@ -63,6 +65,13 @@ export default function OrgObjectives() {
   });
 
   const closeDialog = () => { setDialogOpen(false); setEditObj(null); };
+
+  const handleObjectiveSaved = (savedObj) => {
+    closeDialog();
+    if (savedObj?.next_review_date) {
+      setTimeout(() => setCalendarPromptObjective(savedObj), 300);
+    }
+  };
 
   const openEdit = (obj) => {
     setEditObj(obj);
@@ -213,10 +222,17 @@ export default function OrgObjectives() {
       <ObjectiveFormDialog
         open={dialogOpen}
         onClose={closeDialog}
+        onSaveSuccess={handleObjectiveSaved}
         editObj={editObj}
         companies={companies}
         objectives={objectives}
         defaultCompanyId={selectedCompany !== "all" ? selectedCompany : ""}
+      />
+
+      <ObjectiveCalendarPromptDialog
+        open={!!calendarPromptObjective}
+        onClose={() => setCalendarPromptObjective(null)}
+        objective={calendarPromptObjective}
       />
     </div>
   );
