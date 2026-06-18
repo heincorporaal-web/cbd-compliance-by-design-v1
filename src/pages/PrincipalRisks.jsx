@@ -96,19 +96,21 @@ export default function PrincipalRisks() {
       closeDialog();
       toast.success("Principal Risk created");
       const record = saved || submitted;
-      if (record?.next_review_date) setCalendarPromptRisk(record);
+      if (record?.next_review_date) {
+        setTimeout(() => setCalendarPromptRisk(record), 300);
+      }
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.PrincipalRisk.update(id, data),
-    onSuccess: (_saved, { id, data, prevNextReviewDate }) => {
+    onSuccess: (_saved, { id, data }) => {
       queryClient.invalidateQueries(["principalRisks"]);
       closeDialog();
       toast.success("Principal Risk updated");
-      // Prompt if next_review_date is set (always, on every save)
+      // Delay to let the edit dialog fully unmount before opening the prompt
       if (data?.next_review_date) {
-        setCalendarPromptRisk({ ...data, id });
+        setTimeout(() => setCalendarPromptRisk({ ...data, id }), 300);
       }
     },
   });
