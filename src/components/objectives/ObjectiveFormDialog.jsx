@@ -56,9 +56,10 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
   };
 
   useEffect(() => {
+    if (!open) return;
     if (editObj) setForm({ ...EMPTY_FORM, ...editObj });
     else setForm({ ...EMPTY_FORM, company_id: defaultCompanyId || "" });
-  }, [editObj, defaultCompanyId]);
+  }, [open, editObj, defaultCompanyId]);
 
   const set = (field, val) => setForm(f => ({ ...f, [field]: val }));
 
