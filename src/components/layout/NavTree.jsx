@@ -17,14 +17,14 @@ export const NAV_GROUPS = [
     label: "Overview",
     icon: LayoutDashboard,
     items: [
-      { id: "getting_started", title: "Getting Started", url: createPageUrl("GettingStarted"), icon: HelpCircle },
-      { id: "help_centre", title: "Help Centre", url: createPageUrl("HelpCentre"), icon: MessageCircle },
-      { id: "dashboard", title: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard },
       { id: "my_actions", title: "My Actions", url: createPageUrl("MyActions"), icon: CalendarClock },
+      { id: "dashboard", title: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard },
       { id: "companies", title: "Companies", url: createPageUrl("Companies"), icon: Building2 },
       { id: "business_units", title: "Business Units", url: createPageUrl("BusinessUnits"), icon: Network },
-      { id: "knowledge", title: "Knowledge", url: createPageUrl("KnowledgeManagement"), icon: BookOpen },
       { id: "reports", title: "Reports", url: createPageUrl("Reports"), icon: FileText },
+      { id: "knowledge", title: "Knowledge", url: createPageUrl("KnowledgeManagement"), icon: BookOpen },
+      { id: "getting_started", title: "Getting Started", url: createPageUrl("GettingStarted"), icon: HelpCircle },
+      { id: "help_centre", title: "Help Centre", url: createPageUrl("HelpCentre"), icon: MessageCircle },
     ],
   },
   {
