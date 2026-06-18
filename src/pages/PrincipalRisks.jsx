@@ -106,10 +106,8 @@ export default function PrincipalRisks() {
       queryClient.invalidateQueries(["principalRisks"]);
       closeDialog();
       toast.success("Principal Risk updated");
-      // Prompt if next_review_date was set or changed
-      const newDate = (data?.next_review_date || "").split("T")[0];
-      const oldDate = (prevNextReviewDate || "").split("T")[0];
-      if (newDate && newDate !== oldDate) {
+      // Prompt if next_review_date is set (always, on every save)
+      if (data?.next_review_date) {
         setCalendarPromptRisk({ ...data, id });
       }
     },
