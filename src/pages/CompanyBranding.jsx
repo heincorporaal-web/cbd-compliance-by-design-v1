@@ -416,13 +416,13 @@ export default function CompanyBranding() {
               </CardContent>
             </Card>
 
-            {/* Confidentiality classifications */}
             <ConfidentialityClassificationPanel
               levels={confidentialityLevels}
               defaultClassification={defaultClassification}
               onChange={setConfidentialityLevels}
               onDefaultChange={setDefaultClassification}
             />
+
           </div>
 
           {/* Right: Live preview */}
