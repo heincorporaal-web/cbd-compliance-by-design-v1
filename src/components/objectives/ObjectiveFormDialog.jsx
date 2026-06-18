@@ -64,29 +64,29 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
   const set = (field, val) => setForm(f => ({ ...f, [field]: val }));
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
-      const result = editObj
-        ? await base44.entities.OrgObjective.update(editObj.id, form)
-        : await base44.entities.OrgObjective.create(form);
+    mutationFn: async ({ currentForm, currentEditObj }) => {
+      const result = currentEditObj
+        ? await base44.entities.OrgObjective.update(currentEditObj.id, currentForm)
+        : await base44.entities.OrgObjective.create(currentForm);
       // If next_review_date is set, push a calendar event
-      if (form.next_review_date && form.company_id) {
-        const prevDate = editObj?.next_review_date;
-        if (form.next_review_date !== prevDate) {
+      if (currentForm.next_review_date && currentForm.company_id) {
+        const prevDate = currentEditObj?.next_review_date;
+        if (currentForm.next_review_date !== prevDate) {
           await base44.functions.invoke("pushCalendarEvent", {
-            title: `Objective Review: ${form.title}`,
-            description: `Review of organisational objective: ${form.reference_number ? `[${form.reference_number}] ` : ""}${form.title}`,
-            date: form.next_review_date,
-            company_id: form.company_id,
+            title: `Objective Review: ${currentForm.title}`,
+            description: `Review of organisational objective: ${currentForm.reference_number ? `[${currentForm.reference_number}] ` : ""}${currentForm.title}`,
+            date: currentForm.next_review_date,
+            company_id: currentForm.company_id,
             entity_type: "OrgObjective",
-            entity_id: result?.id || editObj?.id,
+            entity_id: result?.id || currentEditObj?.id,
           });
         }
       }
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (_, { currentEditObj }) => {
       queryClient.invalidateQueries(["orgObjectives"]);
-      toast.success(editObj ? "Objective updated" : "Objective created");
+      toast.success(currentEditObj ? "Objective updated" : "Objective created");
       onClose();
     },
     onError: e => toast.error(e.message),
@@ -94,7 +94,7 @@ export default function ObjectiveFormDialog({ open, onClose, editObj, companies,
 
   const handleSave = () => {
     if (!form.title || !form.company_id) { toast.error("Title and company are required"); return; }
-    saveMutation.mutate();
+    saveMutation.mutate({ currentForm: form, currentEditObj: editObj });
   };
 
   const addKpi = () => set("kpis", [...(form.kpis || []), EMPTY_KPI()]);
