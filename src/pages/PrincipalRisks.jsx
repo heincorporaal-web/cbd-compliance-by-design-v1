@@ -108,6 +108,7 @@ export default function PrincipalRisks() {
       queryClient.invalidateQueries(["principalRisks"]);
       closeDialog();
       toast.success("Principal Risk updated");
+      console.log("[PR] onSuccess - next_review_date:", data?.next_review_date, "id:", id);
       // Delay to let the edit dialog fully unmount before opening the prompt
       if (data?.next_review_date) {
         setTimeout(() => setCalendarPromptRisk({ ...data, id }), 300);
