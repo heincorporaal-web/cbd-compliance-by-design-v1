@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,12 +11,18 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import KnowledgeTreeView from "@/components/knowledge/KnowledgeTreeView";
+import KnowledgeArticleImport from "@/components/knowledge/KnowledgeArticleImport";
 
 export default function KnowledgeManagement() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    base44.auth.me().then(u => setIsAdmin(u?.role === "admin")).catch(() => {});
+  }, []);
 
   const { data: articles = [] } = useQuery({
     queryKey: ['knowledgeArticles'],
@@ -81,12 +87,17 @@ export default function KnowledgeManagement() {
             </div>
           </div>
         </div>
-        <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
-          <Button className="bg-indigo-600 hover:bg-indigo-700">
-            <Plus className="w-4 h-4 mr-2" />
-            New Article
-          </Button>
-        </Link>
+        {isAdmin && (
+          <div className="flex items-center gap-2">
+            <KnowledgeArticleImport />
+            <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
+              <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <Plus className="w-4 h-4 mr-2" />
+                New Article
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       <Card className="border-none shadow-lg">
@@ -109,12 +120,14 @@ export default function KnowledgeManagement() {
             <BookOpen className="w-16 h-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 mb-2">No Knowledge Articles</h3>
             <p className="text-slate-600 mb-6">Create your first article to capture framework knowledge</p>
-            <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Article
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Article
+                </Button>
+              </Link>
+            )}
           </CardContent>
         </Card>
       ) : (
