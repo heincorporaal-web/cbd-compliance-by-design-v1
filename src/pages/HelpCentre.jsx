@@ -4,12 +4,48 @@ import { createPageUrl } from "@/utils";
 import {
   Search, BookOpen, Shield, TriangleAlert, Users, ClipboardCheck,
   Network, Server, ChevronDown, ChevronRight, HelpCircle, MessageCircle,
-  FileText, Settings, GitBranch, Building2, Layers, Star, X
+  FileText, Settings, GitBranch, Building2, Layers, Star, X, CalendarClock
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const CATEGORIES = [
+  {
+    id: "my_actions",
+    title: "My Actions & Calendar",
+    icon: CalendarClock,
+    color: "bg-amber-100 text-amber-700",
+    articles: [
+      {
+        q: "What is the My Actions page?",
+        a: "My Actions is your personal dashboard for upcoming and overdue review dates across the platform. It aggregates Next Review Dates from Principal Risks, Org Objectives, Delegation of Authority records, and Framework end dates — all in one place. Items due within 90 days are surfaced automatically, sorted by urgency.",
+      },
+      {
+        q: "How are items classified in My Actions?",
+        a: "Items are colour-coded by urgency: red for Overdue (past the review date), orange for Due in 14 days, amber for Due in 30 days, and grey for anything further out. The summary cards at the top show totals for Overdue, Due in 14 Days, and the full 90-day window.",
+      },
+      {
+        q: "How do I set a Next Review Date on a Principal Risk?",
+        a: "Open a Principal Risk record (Risk Management → Principal Risks), click Edit, and set the 'Next Review Date' field. When you save, you will be prompted to add the review date to the Company Calendar so it appears as a scheduled event.",
+      },
+      {
+        q: "What is the Company Calendar?",
+        a: "The Company Calendar is a shared calendar within each company record that lets you log key dates — risk reviews, compliance deadlines, assessment windows, and other governance milestones. Access it from the Calendar tab inside any Company record.",
+      },
+      {
+        q: "How do I add an event to the Company Calendar?",
+        a: "Open a Company record and click the 'Calendar' tab. Click 'Add Event', fill in the title, date/time, event type and any notes. Events can optionally be pushed to an external calendar (Google Calendar or Outlook) if a calendar integration is configured.",
+      },
+      {
+        q: "Can I sync Company Calendar events to Google Calendar or Outlook?",
+        a: "Yes. After creating a calendar event, click the sync icon on the event card to push it to the connected external calendar. The platform supports Google Calendar and Microsoft Outlook. The sync is triggered manually per event — changes made externally are not automatically pulled back.",
+      },
+      {
+        q: "Why did I get prompted to add a calendar event after saving a risk?",
+        a: "When you save a Principal Risk with a Next Review Date, the platform asks if you want to create a corresponding Company Calendar event for that date. This keeps the calendar in sync with your risk review schedule. You can confirm to add the event or decline (you'll need to provide a reason if you choose not to).",
+      },
+    ],
+  },
   {
     id: "general",
     title: "General & Navigation",
