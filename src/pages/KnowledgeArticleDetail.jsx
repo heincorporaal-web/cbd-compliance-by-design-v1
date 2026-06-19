@@ -71,7 +71,8 @@ export default function KnowledgeArticleDetail() {
   };
 
   const [newTag, setNewTag] = useState("");
-  const [newStep, setNewStep] = useState({ step: "", description: "", order: 1 });
+  const [newStep, setNewStep] = useState({ step: "", description: "", expected_artefacts: [], order: 1 });
+  const [newArtefact, setNewArtefact] = useState("");
   const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
 
   const { data: existingArticle } = useQuery({
@@ -150,6 +151,18 @@ export default function KnowledgeArticleDetail() {
     setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) });
   };
 
+  const addArtefact = () => {
+    const trimmed = newArtefact.trim();
+    if (trimmed && !newStep.expected_artefacts.includes(trimmed)) {
+      setNewStep({ ...newStep, expected_artefacts: [...newStep.expected_artefacts, trimmed] });
+    }
+    setNewArtefact("");
+  };
+
+  const removeArtefact = (val) => {
+    setNewStep({ ...newStep, expected_artefacts: newStep.expected_artefacts.filter(a => a !== val) });
+  };
+
   const addStep = () => {
     if (newStep.step) {
       const stepOrder = formData.key_steps.length + 1;
@@ -158,7 +171,8 @@ export default function KnowledgeArticleDetail() {
         : "";
       const steps = [...formData.key_steps, { ...newStep, order: stepOrder, reference_number: stepRef }];
       setFormData({ ...formData, key_steps: steps });
-      setNewStep({ step: "", description: "", order: formData.key_steps.length + 2 });
+      setNewStep({ step: "", description: "", expected_artefacts: [], order: formData.key_steps.length + 2 });
+      setNewArtefact("");
     }
   };
 
@@ -341,6 +355,16 @@ export default function KnowledgeArticleDetail() {
                   <div className="flex-1">
                     <p className="font-medium text-slate-900">{step.step}</p>
                     {step.description && <p className="text-sm text-slate-600 mt-1">{step.description}</p>}
+                    {step.expected_artefacts?.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs font-medium text-slate-500 mb-1">Expected Artefacts/Evidence:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {step.expected_artefacts.map((a, i) => (
+                            <span key={i} className="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full">{a}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <Button
                     type="button"
@@ -371,6 +395,32 @@ export default function KnowledgeArticleDetail() {
                   rows={2}
                   placeholder="Step description"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label>Expected Artefacts/Evidence <span className="text-slate-400 font-normal text-xs">(optional, press Enter or + to add)</span></Label>
+                {newStep.expected_artefacts.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {newStep.expected_artefacts.map((a, i) => (
+                      <span key={i} className="flex items-center gap-1 text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full">
+                        {a}
+                        <button type="button" onClick={() => removeArtefact(a)} className="hover:text-red-500">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Input
+                    value={newArtefact}
+                    onChange={(e) => setNewArtefact(e.target.value)}
+                    placeholder="e.g. Policy document, Screenshot, Report"
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addArtefact(); } }}
+                  />
+                  <Button type="button" onClick={addArtefact} variant="outline" size="icon">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
               <Button type="button" onClick={addStep} variant="outline" size="sm">
                 <Plus className="w-4 h-4 mr-2" />

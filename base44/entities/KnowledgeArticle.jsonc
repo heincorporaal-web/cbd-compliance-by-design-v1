@@ -39,6 +39,13 @@
           "reference_number": {
             "type": "string",
             "description": "Step reference e.g. EDM-CHL-001"
+          },
+          "expected_artefacts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Expected artefacts or evidence items for this step"
           }
         }
       },
