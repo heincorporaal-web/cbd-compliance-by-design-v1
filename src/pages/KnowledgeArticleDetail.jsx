@@ -127,8 +127,11 @@ export default function KnowledgeArticleDetail() {
   };
 
   const addTag = () => {
-    if (newTag && !formData.tags.includes(newTag)) {
-      setFormData({ ...formData, tags: [...formData.tags, newTag] });
+    if (newTag) {
+      const newTags = newTag.split(";").map(t => t.trim()).filter(t => t && !formData.tags.includes(t));
+      if (newTags.length > 0) {
+        setFormData({ ...formData, tags: [...formData.tags, ...newTags] });
+      }
       setNewTag("");
     }
   };
@@ -394,7 +397,7 @@ export default function KnowledgeArticleDetail() {
               <Input
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Add tag"
+                placeholder="Add tag or multiple tags separated by ;"
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
               />
               <Button type="button" onClick={addTag} variant="outline">
