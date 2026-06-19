@@ -944,7 +944,7 @@ export default function ControlDetail() {
                   <p className="text-sm text-slate-500">Define the testing steps and workpapers assessors must follow to validate this control.</p>
                 </CardHeader>
                 <CardContent className="pt-4">
-                  <TestPlanPanel controlId={controlId} />
+                  <TestPlanPanel controlId={controlId} frameworkId={formData.framework_id} />
                 </CardContent>
               </Card>
             </TabsContent>

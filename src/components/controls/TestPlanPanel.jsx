@@ -10,9 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Plus, Trash2, Pencil, GripVertical, ChevronUp, ChevronDown,
+  Plus, Trash2, Pencil, ChevronUp, ChevronDown,
   ClipboardList, FileText, Database, BarChart2, MessageSquare,
-  Eye, Search, Play, GitBranch, CheckSquare, Package, FlaskConical
+  Eye, Search, Play, GitBranch, CheckSquare, Package, FlaskConical, BookOpen
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,6 +30,7 @@ const STEP_TYPES = [
   { value: "Inspection",     label: "Inspection",     icon: CheckSquare,  color: "bg-green-100 text-green-700",  desc: "Inspection of physical documents or system records" },
   { value: "Re-performance", label: "Re-performance", icon: FlaskConical, color: "bg-rose-100 text-rose-700",    desc: "Independently re-performing the control to verify outcome" },
   { value: "Walkthrough",    label: "Walkthrough",    icon: ClipboardList,color: "bg-violet-100 text-violet-700", desc: "End-to-end walkthrough of the control process" },
+  { value: "Checklist",     label: "Checklist",      icon: BookOpen,     color: "bg-indigo-100 text-indigo-700", desc: "A step imported from a knowledge base checklist article" },
 ];
 
 const stepTypeCfg = (type) => STEP_TYPES.find(t => t.value === type) || STEP_TYPES[0];
@@ -198,11 +199,139 @@ function StepEditDialog({ step, open, onClose, onSave }) {
   );
 }
 
+// ─── KB Step Picker Dialog ────────────────────────────────────────────────────
+function KBStepPickerDialog({ open, onClose, onAdd, frameworkId }) {
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [selectedStepIdx, setSelectedStepIdx] = useState(null);
+
+  const { data: articles = [] } = useQuery({
+    queryKey: ["kbChecklists", frameworkId],
+    queryFn: () => base44.entities.KnowledgeArticle.filter({ category: "checklist" }),
+    enabled: open,
+  });
+
+  // Filter to articles matching the framework (or show all checklists if no framework set)
+  const filtered = frameworkId
+    ? articles.filter(a => !a.framework_id || a.framework_id === frameworkId)
+    : articles;
+
+  const article = filtered.find(a => a.id === selectedArticle);
+  const steps = article?.key_steps || [];
+
+  const handleAdd = () => {
+    if (!article || selectedStepIdx === null) return;
+    const step = steps[selectedStepIdx];
+    onAdd({
+      step_type: "Checklist",
+      title: step.step,
+      description: step.description || "",
+      expected_evidence: step.expected_artefacts?.join(", ") || "",
+      population: "",
+      sample_size: "",
+      mandatory: false,
+      notes: `From knowledge base: ${article.title} (${step.reference_number || ""})`.trim(),
+    });
+    setSelectedArticle(null);
+    setSelectedStepIdx(null);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={v => { if (!v) { setSelectedArticle(null); setSelectedStepIdx(null); onClose(); } }}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-indigo-600" />
+            Add Step from Knowledge Base
+          </DialogTitle>
+        </DialogHeader>
+        <p className="text-xs text-slate-500 -mt-2">Only checklist articles are shown. Steps are filtered by the control's framework.</p>
+
+        {filtered.length === 0 ? (
+          <div className="py-8 text-center text-slate-400 text-sm">
+            No checklist articles found{frameworkId ? " for this framework" : ""}. Add checklist articles in the Knowledge Management section.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Select Checklist Article</Label>
+              <Select value={selectedArticle || ""} onValueChange={v => { setSelectedArticle(v); setSelectedStepIdx(null); }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a checklist article…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filtered.map(a => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.reference_number ? `[${a.reference_number}] ` : ""}{a.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {steps.length > 0 && (
+              <div className="space-y-1.5">
+                <Label>Select Step</Label>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  {steps.map((step, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedStepIdx(idx)}
+                      className={`w-full text-left p-3 rounded-lg border transition-all ${
+                        selectedStepIdx === idx
+                          ? "border-indigo-400 bg-indigo-50"
+                          : "border-slate-200 hover:border-slate-300 bg-white"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="w-5 h-5 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">{step.order || idx + 1}</span>
+                        <span className="font-medium text-slate-900 text-sm">{step.step}</span>
+                        {step.reference_number && (
+                          <span className="text-xs font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">{step.reference_number}</span>
+                        )}
+                      </div>
+                      {step.description && <p className="text-xs text-slate-500 ml-7">{step.description}</p>}
+                      {step.expected_artefacts?.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1 ml-7">
+                          {step.expected_artefacts.map((a, i) => (
+                            <span key={i} className="text-xs px-1.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full">{a}</span>
+                          ))}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedArticle && steps.length === 0 && (
+              <p className="text-sm text-slate-400 italic text-center py-4">This article has no steps defined.</p>
+            )}
+          </div>
+        )}
+
+        <div className="flex justify-end gap-2 pt-2 border-t">
+          <Button variant="outline" onClick={() => { setSelectedArticle(null); setSelectedStepIdx(null); onClose(); }}>Cancel</Button>
+          <Button
+            className="bg-indigo-600 hover:bg-indigo-700"
+            disabled={selectedStepIdx === null}
+            onClick={handleAdd}
+          >
+            <Plus className="w-4 h-4 mr-1" /> Add Step
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ─── Main panel ───────────────────────────────────────────────────────────────
-export default function TestPlanPanel({ controlId }) {
+export default function TestPlanPanel({ controlId, frameworkId }) {
   const queryClient = useQueryClient();
   const [editingStep, setEditingStep] = useState(null); // { index } | null
   const [addingStep, setAddingStep] = useState(false);
+  const [addingKBStep, setAddingKBStep] = useState(false);
 
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ["testPlans", controlId],
@@ -280,6 +409,9 @@ export default function TestPlanPanel({ controlId }) {
               </SelectContent>
             </Select>
           )}
+          <Button size="sm" variant="outline" className="border-indigo-300 text-indigo-700 hover:bg-indigo-50" onClick={() => setAddingKBStep(true)}>
+            <BookOpen className="w-4 h-4 mr-1" /> From Knowledge Base
+          </Button>
           <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => setAddingStep(true)}>
             <Plus className="w-4 h-4 mr-1" /> Add Step
           </Button>
@@ -340,6 +472,14 @@ export default function TestPlanPanel({ controlId }) {
         open={editingStep !== null}
         onClose={() => setEditingStep(null)}
         onSave={(updated) => { handleEditStep(editingStep, updated); setEditingStep(null); }}
+      />
+
+      {/* Knowledge Base step picker */}
+      <KBStepPickerDialog
+        open={addingKBStep}
+        onClose={() => setAddingKBStep(false)}
+        onAdd={handleAddStep}
+        frameworkId={frameworkId}
       />
     </div>
   );
