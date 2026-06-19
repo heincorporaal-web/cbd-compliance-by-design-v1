@@ -14,6 +14,7 @@ import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
 import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
 import CalendarPromptDialog from "@/components/risks/CalendarPromptDialog";
+import PinRecordButton from "@/components/layout/PinRecordButton";
 
 const CATEGORIES = ["Strategic", "Compliance", "IT", "Operational", "Cyber", "Data", "Third Party", "Financial Crime", "Reputational Risk", "Financial Risk", "Compliance / Conduct Risk", "Third-Party / Supplier Risk", "Technology / Information Security Risk"];
 const STATUSES = ["Draft", "Active", "Under Review", "Retired"];
@@ -244,7 +245,13 @@ export default function PrincipalRisks() {
                         {r.next_review_date && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />Review: {r.next_review_date}</span>}
                       </div>
                     </div>
-                    <div className="flex gap-1 shrink-0">
+                    <div className="flex gap-1 shrink-0 items-center">
+                      <PinRecordButton
+                        id={r.id}
+                        label={r.risk_reference ? `${r.risk_reference} – ${r.risk_title}` : r.risk_title}
+                        entityType="PrincipalRisk"
+                        url={`/PrincipalRisks`}
+                      />
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(r)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
