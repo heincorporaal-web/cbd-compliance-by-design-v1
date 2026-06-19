@@ -15,18 +15,38 @@ function useNavFavorites() {
   const [favIds, setFavIds] = useState([]);
   const [userId, setUserId] = useState(null);
 
+  const reload = (uid) => {
+    try {
+      setFavIds(JSON.parse(localStorage.getItem(getFavKey(uid)) || "[]"));
+    } catch { setFavIds([]); }
+  };
+
   useEffect(() => {
     base44.auth.me().then(user => {
       const uid = user?.id || null;
       setUserId(uid);
-      try {
-        setFavIds(JSON.parse(localStorage.getItem(getFavKey(uid)) || "[]"));
-      } catch { setFavIds([]); }
+      reload(uid);
     }).catch(() => {
-      try {
-        setFavIds(JSON.parse(localStorage.getItem(getFavKey(null)) || "[]"));
-      } catch { setFavIds([]); }
+      reload(null);
     });
+  }, []);
+
+  // Re-sync when NavTree updates favorites (same tab via custom event, or cross-tab via storage event)
+  useEffect(() => {
+    const onCustom = (e) => {
+      setFavIds(e.detail?.favs || []);
+    };
+    const onStorage = (e) => {
+      if (e.key && e.key.startsWith("cbd_favorites_")) {
+        try { setFavIds(JSON.parse(e.newValue || "[]")); } catch {}
+      }
+    };
+    window.addEventListener("cbd_favorites_changed", onCustom);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("cbd_favorites_changed", onCustom);
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   const toggleFav = (itemId) => {

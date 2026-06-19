@@ -128,6 +128,8 @@ const loadFavorites = (userId) => {
 
 const saveFavorites = (userId, favs) => {
   localStorage.setItem(getFavKey(userId), JSON.stringify(favs));
+  // Notify same-tab listeners (storage event only fires in other tabs)
+  window.dispatchEvent(new CustomEvent("cbd_favorites_changed", { detail: { userId, favs } }));
 };
 
 // ─── Single nav link ──────────────────────────────────────────────────────────
