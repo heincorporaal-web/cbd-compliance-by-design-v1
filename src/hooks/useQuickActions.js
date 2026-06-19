@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { base44 } from "@/api/base44Client";
 
 const getKey = (userId) => `cbd_quick_actions_${userId || "guest"}`;
@@ -15,26 +15,30 @@ const load = (userId) => {
   }
 };
 
-const save = (userId, state) => {
-  try { localStorage.setItem(getKey(userId), JSON.stringify(state)); } catch {}
+const save = (userId, st) => {
+  try { localStorage.setItem(getKey(userId), JSON.stringify(st)); } catch {}
 };
 
-// Module-level shared state
-const listeners = new Set();
+// ── Module-level store ────────────────────────────────────────────────────────
 let globalUserId = null;
 let globalState = defaultState();
 let initialised = false;
+const subscribers = new Set();
 
-const notify = () => {
-  const copy = { ...globalState };
-  listeners.forEach(fn => fn(copy));
-};
+const emitChange = () => subscribers.forEach(fn => fn());
 
 const mutate = (newState) => {
   globalState = newState;
   save(globalUserId, newState);
-  notify();
+  emitChange();
 };
+
+const subscribe = (fn) => {
+  subscribers.add(fn);
+  return () => subscribers.delete(fn);
+};
+
+const getSnapshot = () => globalState;
 
 const init = async () => {
   try {
@@ -61,26 +65,18 @@ const init = async () => {
     globalState = userState;
   }
 
-  notify();
+  emitChange();
 };
 
+// ── Hook ──────────────────────────────────────────────────────────────────────
 export function useQuickActions() {
-  const [state, setState] = useState(globalState);
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   useEffect(() => {
-    // Start init only once
     if (!initialised) {
       initialised = true;
       init();
     }
-
-    const listener = (newState) => setState(newState);
-    listeners.add(listener);
-    // Sync immediately with current global state
-    setState({ ...globalState });
-    return () => listeners.delete(listener);
   }, []);
 
   const toggleCollapsed = useCallback(() => {
@@ -98,7 +94,7 @@ export function useQuickActions() {
 
   const isPinned = useCallback((id, entityType) => {
     return globalState.pinned.some(p => p.id === id && p.entityType === entityType);
-  }, []);
+  }, [state]);
 
   const reorderPinned = useCallback((from, to) => {
     const next = [...globalState.pinned];
@@ -107,13 +103,5 @@ export function useQuickActions() {
     mutate({ ...globalState, pinned: next });
   }, []);
 
-  return {
-    pinned: state.pinned,
-    collapsed: state.collapsed,
-    toggleCollapsed,
-    pinRecord,
-    unpinRecord,
-    isPinned,
-    reorderPinned,
-  };
+  return { pinned: state.pinned, collapsed: state.collapsed, toggleCollapsed, pinRecord, unpinRecord, isPinned, reorderPinned };
 }
