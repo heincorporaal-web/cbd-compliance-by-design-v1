@@ -169,7 +169,7 @@ export default function KnowledgeManagement() {
                       .map((step, idx) => (
                         <div key={idx} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
                           <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                            <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold text-sm">
+                            <div className="w-4 h-4 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold text-[10px]">
                               {step.order || idx + 1}
                             </div>
                             {step.reference_number && (
