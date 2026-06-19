@@ -108,8 +108,8 @@ export function useQuickActions() {
   }, [persist]);
 
   const isPinned = useCallback((id, entityType) => {
-    return state.pinned.some(p => p.id === id && p.entityType === entityType);
-  }, [state.pinned]);
+    return globalState.pinned.some(p => p.id === id && p.entityType === entityType);
+  }, [state]);
 
   const reorderPinned = useCallback((from, to) => {
     const next = [...globalState.pinned];
