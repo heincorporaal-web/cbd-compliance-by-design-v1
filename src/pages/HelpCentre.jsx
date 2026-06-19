@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import {
   Search, BookOpen, Shield, TriangleAlert, Users, ClipboardCheck,
   Network, Server, ChevronDown, ChevronRight, HelpCircle, MessageCircle,
-  FileText, Settings, GitBranch, Building2, Layers, Star, X, CalendarClock
+  FileText, Settings, GitBranch, Building2, Layers, Star, X, CalendarClock, Library
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -215,6 +215,50 @@ const CATEGORIES = [
       {
         q: "Can I approve items directly from the platform?",
         a: "Yes. Go to the specific record (e.g. a Control) and scroll to the Workflow panel at the bottom. If you are the current approver, you will see Approve / Return buttons. You can also view all pending approvals from the Dashboard.",
+      },
+    ],
+  },
+  {
+    id: "libraries",
+    title: "Libraries & Knowledge Base",
+    icon: Library,
+    color: "bg-emerald-100 text-emerald-700",
+    articles: [
+      {
+        q: "What is the Master Control Library and how is it different from Company Controls?",
+        a: "The Master Control Library is a shared reference catalogue of controls — typically imported from a standard framework (e.g. ISO 27001, DORA). These controls are marked as Library Controls and are not tied to any specific company. Company Controls are copies or adaptations assigned to a particular company and framework. The library is the source of truth; company controls are the operational instances.",
+      },
+      {
+        q: "How do I populate a company's control register from the library?",
+        a: "Go to Governance → Controls and select the 'Master Library' tab. You can view all available library controls. To assign one to a company, open the control and use the 'Assign to Company' action, or create a new Company Control manually and set the Library Control ID reference in the Library Fields tab. Bulk import via Excel is also available from the 'Company Controls' tab using the Import Controls button.",
+      },
+      {
+        q: "What changes can I make to a Library Control vs a Company Control?",
+        a: "Library Controls define the reference standard — you can edit their title, description, category, control type, execution type, frequency, and linked risk. However, library controls should not be company-specific (no owner or reviewer). Company Controls inherit the library definition but can be fully customised: you can change the title, description, assign an owner and reviewer, set a test plan, and link to company-specific objectives. Changes to an approved control require going through an Amendment workflow.",
+      },
+      {
+        q: "What is the Risk Library and how does it relate to Company Risks?",
+        a: "The Risk Library (Risk Register with 'is_library_risk' flag) contains a catalogue of standard risks used as reference definitions. Company Risks are operational risk records tied to a specific company, with owners, ratings, and assessment cycles. When creating a company risk or control, you can link it back to a library risk reference for traceability. The Control Library Fields tab shows the suggested matching library risk auto-matched by reference number prefix.",
+      },
+      {
+        q: "How do I populate risks for a company from the library?",
+        a: "Go to Risk Management → Risk Register. On the 'Library' tab you will find the master risk catalogue. To create a company risk based on a library entry, click the risk and use 'Add to Company' or create a new risk manually, referencing the library risk ID. You can also import risks in bulk via the Import Risks button using the provided Excel template.",
+      },
+      {
+        q: "What is the Knowledge Base and how does it support controls?",
+        a: "The Knowledge Base (Governance → Knowledge Management) is a library of articles — implementation guides, best practices, policy templates, procedures, and checklists. Checklist-type articles contain structured Key Steps with expected artefacts. These steps can be imported directly into a Control's Test Plan: open the control, go to the Test Plan tab, and click 'From Knowledge Base' to browse and add steps from matching checklist articles.",
+      },
+      {
+        q: "Who can edit Knowledge Base articles?",
+        a: "Admin users can create, edit, and delete knowledge articles. Regular users can read and search articles. If you need to add or update an article — for example to add a new implementation guide or update a checklist — you must have admin rights. Articles can be in Draft, Published, or Archived status. Only Published articles are visible to non-admin users in the Knowledge Management view.",
+      },
+      {
+        q: "Can I link a Knowledge Base article to a specific framework?",
+        a: "Yes. When creating or editing a Knowledge Base article, you can set the 'Framework' field to associate the article with a specific framework (e.g. ISO 27001, DORA). When adding steps from the knowledge base into a Control Test Plan, the picker automatically filters articles to those matching the control's framework, making it easy to find relevant content.",
+      },
+      {
+        q: "What are Expected Artefacts on Knowledge Base steps?",
+        a: "Expected Artefacts are the specific evidence items or deliverables that should exist when a key step is completed — for example 'Signed policy document', 'Screenshot of access review', or 'Data extract report'. When you import a knowledge base step into a test plan, the expected artefacts are pre-filled into the 'Expected Evidence' field of the test step, giving assessors clear guidance on what to look for.",
       },
     ],
   },

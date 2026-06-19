@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Search, ArrowRight, Plus, Download, Upload, Library, Building } from "lucide-react";
+import { Shield, Search, ArrowRight, Plus, Download, Upload, Library, Building, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
@@ -195,7 +196,21 @@ export default function Controls() {
                               </div>
                               <p className="text-sm font-medium text-slate-700 mb-1">{control.title}</p>
                               {control.description && (
-                                <p className="text-sm text-slate-600 mb-2">{control.description}</p>
+                                <div className="flex items-start gap-1.5 mb-2">
+                                  <p className="text-sm text-slate-600 line-clamp-2 flex-1">{control.description}</p>
+                                  {control.description.length > 120 && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5 cursor-help" />
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="max-w-xs text-xs">
+                                          {control.description}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                </div>
                               )}
                               <div className="flex items-center gap-3 text-sm text-slate-500">
                                 {framework && <span>{framework.framework_code || framework.name}</span>}
@@ -247,7 +262,21 @@ export default function Controls() {
                               </div>
                               <p className="text-sm font-medium text-slate-700 mb-1">{control.title}</p>
                               {control.description && (
-                                <p className="text-sm text-slate-600 mb-2">{control.description}</p>
+                                <div className="flex items-start gap-1.5 mb-2">
+                                  <p className="text-sm text-slate-600 line-clamp-2 flex-1">{control.description}</p>
+                                  {control.description.length > 120 && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5 cursor-help" />
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="max-w-xs text-xs">
+                                          {control.description}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                </div>
                               )}
                               <div className="flex items-center gap-3 text-sm text-slate-500">
                                 {framework && <span>{framework.framework_code || framework.name}</span>}
