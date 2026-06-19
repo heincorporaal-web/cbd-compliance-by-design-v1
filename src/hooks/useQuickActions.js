@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 
 const getKey = (userId) => `cbd_quick_actions_${userId || "guest"}`;
-
 const defaultState = () => ({ pinned: [], collapsed: false });
 
 const load = (userId) => {
@@ -10,42 +9,45 @@ const load = (userId) => {
     const raw = localStorage.getItem(getKey(userId));
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw);
-    return { pinned: parsed.pinned || [], collapsed: parsed.collapsed || false };
+    return { pinned: Array.isArray(parsed.pinned) ? parsed.pinned : [], collapsed: !!parsed.collapsed };
   } catch {
     return defaultState();
   }
 };
 
 const save = (userId, state) => {
-  try {
-    localStorage.setItem(getKey(userId), JSON.stringify(state));
-  } catch {}
+  try { localStorage.setItem(getKey(userId), JSON.stringify(state)); } catch {}
 };
 
-// Shared state across hook instances via a simple event bus
+// Module-level shared state
 const listeners = new Set();
 let globalUserId = null;
-let globalReady = false; // true once userId has been resolved
 let globalState = defaultState();
+let initialised = false;
 
-const notify = () => listeners.forEach(fn => fn({ ...globalState }));
+const notify = () => {
+  const copy = { ...globalState };
+  listeners.forEach(fn => fn(copy));
+};
 
-const initUser = async () => {
+const mutate = (newState) => {
+  globalState = newState;
+  save(globalUserId, newState);
+  notify();
+};
+
+const init = async () => {
   try {
     const user = await base44.auth.me();
     globalUserId = user?.id || null;
   } catch {
     globalUserId = null;
   }
-  globalReady = true;
 
-  // Load the user-keyed state
   const userState = load(globalUserId);
-
-  // If anything was saved to "guest" before auth resolved, merge it in
   const guestState = load(null);
-  if (guestState.pinned.length > 0 && globalUserId) {
-    // Merge guest pins into user state (avoid duplicates)
+
+  if (globalUserId && guestState.pinned.length > 0) {
     const merged = [...userState.pinned];
     for (const gp of guestState.pinned) {
       if (!merged.some(p => p.id === gp.id && p.entityType === gp.entityType)) {
@@ -54,7 +56,6 @@ const initUser = async () => {
     }
     globalState = { ...userState, pinned: merged };
     save(globalUserId, globalState);
-    // Clear guest state
     try { localStorage.removeItem(getKey(null)); } catch {}
   } else {
     globalState = userState;
@@ -63,60 +64,48 @@ const initUser = async () => {
   notify();
 };
 
-// Initialise once
-let initialised = false;
-const ensureInit = () => {
-  if (!initialised) {
-    initialised = true;
-    initUser();
-  }
-};
-
 export function useQuickActions() {
-  ensureInit();
-  const [state, setState] = useState({ ...globalState });
+  const [state, setState] = useState(globalState);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
-    const listener = (newState) => setState({ ...newState });
+    // Start init only once
+    if (!initialised) {
+      initialised = true;
+      init();
+    }
+
+    const listener = (newState) => setState(newState);
     listeners.add(listener);
-    // Sync immediately in case globalState already loaded
+    // Sync immediately with current global state
     setState({ ...globalState });
     return () => listeners.delete(listener);
   }, []);
 
-  const persist = useCallback((newState) => {
-    globalState = newState;
-    save(globalUserId, newState);
-    notify();
+  const toggleCollapsed = useCallback(() => {
+    mutate({ ...globalState, collapsed: !globalState.collapsed });
   }, []);
 
-  const toggleCollapsed = useCallback(() => {
-    persist({ ...globalState, collapsed: !globalState.collapsed });
-  }, [persist]);
-
   const pinRecord = useCallback((record) => {
-    const current = globalState;
-    if (current.pinned.some(p => p.id === record.id && p.entityType === record.entityType)) return;
-    persist({ ...current, pinned: [...current.pinned, record] });
-  }, [persist]);
+    if (globalState.pinned.some(p => p.id === record.id && p.entityType === record.entityType)) return;
+    mutate({ ...globalState, pinned: [...globalState.pinned, record] });
+  }, []);
 
   const unpinRecord = useCallback((id, entityType) => {
-    persist({
-      ...globalState,
-      pinned: globalState.pinned.filter(p => !(p.id === id && p.entityType === entityType)),
-    });
-  }, [persist]);
+    mutate({ ...globalState, pinned: globalState.pinned.filter(p => !(p.id === id && p.entityType === entityType)) });
+  }, []);
 
   const isPinned = useCallback((id, entityType) => {
     return globalState.pinned.some(p => p.id === id && p.entityType === entityType);
-  }, [state]);
+  }, []);
 
   const reorderPinned = useCallback((from, to) => {
     const next = [...globalState.pinned];
     const [item] = next.splice(from, 1);
     next.splice(to, 0, item);
-    persist({ ...globalState, pinned: next });
-  }, [persist]);
+    mutate({ ...globalState, pinned: next });
+  }, []);
 
   return {
     pinned: state.pinned,
