@@ -1,6 +1,5 @@
 import React from "react";
-import { Pin, PinOff } from "lucide-react";
-import { useQuickActions } from "@/hooks/useQuickActions";
+import { Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -14,33 +13,17 @@ import { Button } from "@/components/ui/button";
  *     url={`/RiskDetail?id=${risk.id}`}
  *   />
  */
-export default function PinRecordButton({ id, label, entityType, url, variant = "ghost", size = "sm", className = "" }) {
-  const { isPinned, pinRecord, unpinRecord } = useQuickActions();
-  const pinned = isPinned(id, entityType);
-
-  const handleClick = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (pinned) {
-      unpinRecord(id, entityType);
-    } else {
-      pinRecord({ id, label, entityType, url });
-    }
-  };
-
+export default function PinRecordButton({ variant = "ghost", size = "sm", className = "" }) {
   return (
     <Button
       variant={variant}
       size={size}
-      onClick={handleClick}
-      title={pinned ? "Remove from Quick Actions" : "Pin to Quick Actions"}
-      className={`gap-1.5 ${pinned ? "text-primary" : "text-slate-400 hover:text-primary"} ${className}`}
+      disabled
+      title="Pinning coming soon"
+      className={`gap-1.5 text-slate-300 cursor-not-allowed opacity-50 ${className}`}
     >
-      {pinned
-        ? <PinOff className="w-3.5 h-3.5" />
-        : <Pin className="w-3.5 h-3.5" />
-      }
-      <span className="text-xs">{pinned ? "Unpin" : "Pin"}</span>
+      <Pin className="w-3.5 h-3.5" />
+      <span className="text-xs">Pin</span>
     </Button>
   );
 }
