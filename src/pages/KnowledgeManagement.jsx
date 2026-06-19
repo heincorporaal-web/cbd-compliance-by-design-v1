@@ -168,8 +168,13 @@ export default function KnowledgeManagement() {
                       .sort((a, b) => (a.order || 0) - (b.order || 0))
                       .map((step, idx) => (
                         <div key={idx} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
-                          <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold flex-shrink-0">
-                            {step.order || idx + 1}
+                          <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                            <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold text-sm">
+                              {step.order || idx + 1}
+                            </div>
+                            {step.reference_number && (
+                              <span className="text-xs font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">{step.reference_number}</span>
+                            )}
                           </div>
                           <div className="flex-1">
                             <p className="font-medium text-slate-900">{step.step}</p>

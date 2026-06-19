@@ -20,7 +20,17 @@ export default function KnowledgeArticleDetail() {
   const articleId = urlParams.get('id');
   const isNew = urlParams.get('new') === 'true';
 
+  const CATEGORY_CODES = {
+    implementation_guide: "IG",
+    best_practice: "BP",
+    policy_template: "POL",
+    procedure: "PROC",
+    checklist: "CHL",
+  };
+
   const [formData, setFormData] = useState({
+    shortcode: "",
+    reference_number: "",
     title: "",
     framework_id: "",
     chapter: "",
@@ -33,6 +43,30 @@ export default function KnowledgeArticleDetail() {
     attachments: [],
     status: "draft"
   });
+
+  const { data: allArticles = [] } = useQuery({
+    queryKey: ['knowledgeArticles'],
+    queryFn: () => base44.entities.KnowledgeArticle.list(),
+  });
+
+  // Compute next sequence number for a given shortcode+category combo
+  const getNextSeqNumber = (shortcode, category) => {
+    if (!shortcode || !category) return 1;
+    const catCode = CATEGORY_CODES[category];
+    const prefix = `${shortcode.toUpperCase()}-${catCode}-`;
+    const existing = allArticles
+      .filter(a => a.reference_number?.startsWith(prefix))
+      .map(a => parseInt(a.reference_number.replace(prefix, ""), 10))
+      .filter(n => !isNaN(n));
+    const max = existing.length > 0 ? Math.max(...existing) : 0;
+    return max + 1;
+  };
+
+  const buildReferenceNumber = (shortcode, category, seq) => {
+    if (!shortcode || !category) return "";
+    const catCode = CATEGORY_CODES[category];
+    return `${shortcode.toUpperCase()}-${catCode}-${String(seq).padStart(3, "0")}`;
+  };
 
   const [newTag, setNewTag] = useState("");
   const [newStep, setNewStep] = useState({ step: "", description: "", order: 1 });
@@ -74,10 +108,21 @@ export default function KnowledgeArticleDetail() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.shortcode || formData.shortcode.trim().length === 0) {
+      toast.error("Shortcode is required");
+      return;
+    }
+    if (formData.shortcode.trim().length > 4) {
+      toast.error("Shortcode must be 4 characters or fewer");
+      return;
+    }
+    let dataToSave = { ...formData, shortcode: formData.shortcode.toUpperCase() };
     if (isNew || !articleId) {
-      createMutation.mutate(formData);
+      const seq = getNextSeqNumber(formData.shortcode, formData.category);
+      dataToSave.reference_number = buildReferenceNumber(formData.shortcode, formData.category, seq);
+      createMutation.mutate(dataToSave);
     } else {
-      updateMutation.mutate(formData);
+      updateMutation.mutate(dataToSave);
     }
   };
 
@@ -94,7 +139,11 @@ export default function KnowledgeArticleDetail() {
 
   const addStep = () => {
     if (newStep.step) {
-      const steps = [...formData.key_steps, { ...newStep, order: formData.key_steps.length + 1 }];
+      const stepOrder = formData.key_steps.length + 1;
+      const stepRef = formData.shortcode && formData.category
+        ? `${formData.shortcode.toUpperCase()}-${CATEGORY_CODES[formData.category]}-${String(stepOrder).padStart(3, "0")}`
+        : "";
+      const steps = [...formData.key_steps, { ...newStep, order: stepOrder, reference_number: stepRef }];
       setFormData({ ...formData, key_steps: steps });
       setNewStep({ step: "", description: "", order: formData.key_steps.length + 2 });
     }
@@ -155,7 +204,28 @@ export default function KnowledgeArticleDetail() {
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
+                <Label htmlFor="shortcode">Shortcode * <span className="text-slate-400 font-normal text-xs">(max 4 chars, e.g. EDM)</span></Label>
+                <Input
+                  id="shortcode"
+                  value={formData.shortcode}
+                  onChange={(e) => setFormData({ ...formData, shortcode: e.target.value.toUpperCase().slice(0, 4) })}
+                  placeholder="e.g. EDM"
+                  maxLength={4}
+                  required
+                />
+              </div>
+
+              {formData.reference_number && (
+                <div className="space-y-2">
+                  <Label>Reference Number</Label>
+                  <div className="h-9 px-3 flex items-center rounded-md border border-slate-200 bg-slate-50 text-sm font-mono text-slate-700">
+                    {formData.reference_number}
+                  </div>
+                </div>
+              )}
+
+              <div className={`space-y-2 ${formData.reference_number ? "md:col-span-2" : ""}`}>
                 <Label htmlFor="title">Title *</Label>
                 <Input
                   id="title"
@@ -251,8 +321,13 @@ export default function KnowledgeArticleDetail() {
             <div className="space-y-3">
               {formData.key_steps.map((step, idx) => (
                 <div key={idx} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
-                  <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold flex-shrink-0">
-                    {step.order || idx + 1}
+                  <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                    <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold text-sm">
+                      {step.order || idx + 1}
+                    </div>
+                    {step.reference_number && (
+                      <span className="text-xs font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">{step.reference_number}</span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-slate-900">{step.step}</p>

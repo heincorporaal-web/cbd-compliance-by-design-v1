@@ -2,6 +2,14 @@
   "name": "KnowledgeArticle",
   "type": "object",
   "properties": {
+    "reference_number": {
+      "type": "string",
+      "description": "Auto-generated reference number e.g. EDM-CHL-001"
+    },
+    "shortcode": {
+      "type": "string",
+      "description": "Unique shortcode (max 4 characters) e.g. EDM"
+    },
     "title": {
       "type": "string",
       "description": "Article title"
@@ -27,6 +35,10 @@
           },
           "order": {
             "type": "number"
+          },
+          "reference_number": {
+            "type": "string",
+            "description": "Step reference e.g. EDM-CHL-001"
           }
         }
       },
@@ -92,6 +104,7 @@
     }
   },
   "required": [
-    "title"
+    "title",
+    "shortcode"
   ]
 }
