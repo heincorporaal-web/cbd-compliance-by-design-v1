@@ -25,6 +25,7 @@ const save = (userId, state) => {
 // Shared state across hook instances via a simple event bus
 const listeners = new Set();
 let globalUserId = null;
+let globalReady = false; // true once userId has been resolved
 let globalState = defaultState();
 
 const notify = () => listeners.forEach(fn => fn({ ...globalState }));
@@ -36,7 +37,29 @@ const initUser = async () => {
   } catch {
     globalUserId = null;
   }
-  globalState = load(globalUserId);
+  globalReady = true;
+
+  // Load the user-keyed state
+  const userState = load(globalUserId);
+
+  // If anything was saved to "guest" before auth resolved, merge it in
+  const guestState = load(null);
+  if (guestState.pinned.length > 0 && globalUserId) {
+    // Merge guest pins into user state (avoid duplicates)
+    const merged = [...userState.pinned];
+    for (const gp of guestState.pinned) {
+      if (!merged.some(p => p.id === gp.id && p.entityType === gp.entityType)) {
+        merged.push(gp);
+      }
+    }
+    globalState = { ...userState, pinned: merged };
+    save(globalUserId, globalState);
+    // Clear guest state
+    try { localStorage.removeItem(getKey(null)); } catch {}
+  } else {
+    globalState = userState;
+  }
+
   notify();
 };
 
@@ -72,9 +95,9 @@ export function useQuickActions() {
   }, [persist]);
 
   const pinRecord = useCallback((record) => {
-    // record: { id, label, entityType, url, icon? }
-    if (globalState.pinned.some(p => p.id === record.id && p.entityType === record.entityType)) return;
-    persist({ ...globalState, pinned: [...globalState.pinned, record] });
+    const current = globalState;
+    if (current.pinned.some(p => p.id === record.id && p.entityType === record.entityType)) return;
+    persist({ ...current, pinned: [...current.pinned, record] });
   }, [persist]);
 
   const unpinRecord = useCallback((id, entityType) => {
@@ -85,8 +108,8 @@ export function useQuickActions() {
   }, [persist]);
 
   const isPinned = useCallback((id, entityType) => {
-    return globalState.pinned.some(p => p.id === id && p.entityType === entityType);
-  }, [state]); // depend on state so it's reactive
+    return state.pinned.some(p => p.id === id && p.entityType === entityType);
+  }, [state.pinned]);
 
   const reorderPinned = useCallback((from, to) => {
     const next = [...globalState.pinned];
