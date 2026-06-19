@@ -288,13 +288,13 @@ export default function ControlDetail() {
     onError: (err) => toast.error(err.message || "Failed to submit amendment"),
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     markClean();
     if (isNew || !controlId) {
-      createMutation.mutate(formData);
+      await createMutation.mutateAsync(formData);
     } else {
-      updateMutation.mutate(formData);
+      await updateMutation.mutateAsync(formData);
     }
   };
 

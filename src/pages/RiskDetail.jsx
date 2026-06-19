@@ -193,15 +193,15 @@ export default function RiskDetail() {
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const riskScore = getRiskLevel(formData.likelihood, formData.impact);
     const dataToSave = { ...formData, inherent_risk_score: riskScore };
     markClean();
     if (isNew || !riskId) {
-      createMutation.mutate(dataToSave);
+      await createMutation.mutateAsync(dataToSave);
     } else {
-      updateMutation.mutate({ id: riskId, data: dataToSave });
+      await updateMutation.mutateAsync({ id: riskId, data: dataToSave });
     }
   };
 

@@ -101,13 +101,13 @@ export default function GRCGoalDetail() {
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     markClean();
     if (goalId) {
-      updateMutation.mutate(formData);
+      await updateMutation.mutateAsync(formData);
     } else {
-      createMutation.mutate(formData);
+      await createMutation.mutateAsync(formData);
     }
   };
 

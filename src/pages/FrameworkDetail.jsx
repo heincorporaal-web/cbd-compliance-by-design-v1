@@ -84,13 +84,13 @@ export default function FrameworkDetail() {
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     markClean();
     if (isNew || !frameworkId) {
-      createMutation.mutate(formData);
+      await createMutation.mutateAsync(formData);
     } else {
-      updateMutation.mutate(formData);
+      await updateMutation.mutateAsync(formData);
     }
   };
 

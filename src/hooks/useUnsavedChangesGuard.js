@@ -48,10 +48,10 @@ export function useUnsavedChangesGuard(navigate) {
     navigate(pendingUrl);
   };
 
-  /** User chose "Save & Leave" — caller must trigger save then call this */
-  const confirmSave = (onSave) => {
+  /** User chose "Save & Leave" — calls onSave and navigates after it resolves (works for sync and async) */
+  const confirmSave = async (onSave) => {
     setShowDialog(false);
-    if (onSave) onSave();
+    if (onSave) await onSave();
     navigate(pendingUrl);
   };
 

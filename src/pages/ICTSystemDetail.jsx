@@ -119,13 +119,13 @@ export default function ICTSystemDetail() {
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     markClean();
     if (isNew || !systemId) {
-      createMutation.mutate(formData);
+      await createMutation.mutateAsync(formData);
     } else {
-      updateMutation.mutate(formData);
+      await updateMutation.mutateAsync(formData);
     }
   };
 

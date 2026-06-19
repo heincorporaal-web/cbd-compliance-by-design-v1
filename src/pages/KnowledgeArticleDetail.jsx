@@ -115,7 +115,7 @@ export default function KnowledgeArticleDetail() {
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.shortcode || formData.shortcode.trim().length === 0) {
       toast.error("Shortcode is required");
@@ -126,14 +126,14 @@ export default function KnowledgeArticleDetail() {
       return;
     }
     let dataToSave = { ...formData, shortcode: formData.shortcode.toUpperCase() };
+    markClean();
     if (isNew || !articleId) {
       const seq = getNextSeqNumber(formData.shortcode, formData.category);
       dataToSave.reference_number = buildReferenceNumber(formData.shortcode, formData.category, seq);
-      createMutation.mutate(dataToSave);
+      await createMutation.mutateAsync(dataToSave);
     } else {
-      updateMutation.mutate(dataToSave);
+      await updateMutation.mutateAsync(dataToSave);
     }
-    markClean();
   };
 
   const addTag = () => {
