@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,6 +74,7 @@ export default function RiskDetail() {
   const [isControlDialogOpen, setIsControlDialogOpen] = useState(false);
   const [isFrameworkDialogOpen, setIsFrameworkDialogOpen] = useState(false);
   const [isObjectiveDialogOpen, setIsObjectiveDialogOpen] = useState(false);
+  const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
 
   const { data: risk } = useQuery({
     queryKey: ['risk', riskId],
@@ -134,7 +138,7 @@ export default function RiskDetail() {
 
   useEffect(() => {
     if (risk) {
-      setFormData({
+      const loaded = {
         title: risk.title || "",
         description: risk.description || "",
         company_id: risk.company_id || "",
@@ -150,7 +154,6 @@ export default function RiskDetail() {
         mitigation_plan: risk.mitigation_plan || "",
         review_date: risk.review_date || "",
         identified_date: risk.identified_date || new Date().toISOString().split('T')[0],
-        // Library fields
         risk_reference_nr: risk.risk_reference_nr || "",
         risk_type: risk.risk_type || "",
         racm_risk_type: risk.racm_risk_type || "",
@@ -166,7 +169,11 @@ export default function RiskDetail() {
         process_activity: risk.process_activity || "",
         framework_reference: risk.framework_reference || "",
         is_library_risk: risk.is_library_risk || false,
-      });
+      };
+      setFormData(loaded);
+      initSnapshot(loaded);
+    } else if (isNew) {
+      initSnapshot(formData);
     }
   }, [risk]);
 
@@ -190,13 +197,16 @@ export default function RiskDetail() {
     e.preventDefault();
     const riskScore = getRiskLevel(formData.likelihood, formData.impact);
     const dataToSave = { ...formData, inherent_risk_score: riskScore };
-    
+    markClean();
     if (isNew || !riskId) {
       createMutation.mutate(dataToSave);
     } else {
       updateMutation.mutate({ id: riskId, data: dataToSave });
     }
   };
+
+  // Track dirty state
+  useEffect(() => { checkDirty(formData); }, [formData]);
 
   const getRiskLevel = (likelihood, impact) => {
     const values = { very_low: 1, low: 2, medium: 3, high: 4, very_high: 5 };
@@ -280,11 +290,9 @@ export default function RiskDetail() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to={createPageUrl("RiskRegister")}>
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
+          <Button variant="ghost" size="icon" onClick={() => guardedNavigate(createPageUrl("RiskRegister"))}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
           <div>
             <h1 className="text-base font-semibold text-slate-900">
               {isNew ? 'Add New Risk' : risk?.title || 'Risk Details'}
@@ -292,9 +300,7 @@ export default function RiskDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link to={createPageUrl("RiskRegister")}>
-            <Button type="button" variant="outline">Cancel</Button>
-          </Link>
+          <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("RiskRegister"))}>Cancel</Button>
           {!isNew && riskId && (
             <Button
               type="button"
@@ -915,6 +921,13 @@ export default function RiskDetail() {
       {riskId && !isNew && (
         <RiskSignOffPanel risk={risk || { id: riskId, status: formData.status, workflow_status_history: [] }} companyId={formData.company_id} />
       )}
+
+      <UnsavedChangesDialog
+        open={showDialog}
+        onDiscard={confirmDiscard}
+        onSave={() => confirmSave(handleSubmit.bind(null, { preventDefault: () => {} }))}
+        onClose={cancelDialog}
+      />
 
       {riskId && !isNew && (
         <WorkflowPanel

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +46,7 @@ export default function GRCGoalDetail() {
   const [isControlDialogOpen, setIsControlDialogOpen] = useState(false);
   const [isAssessmentDialogOpen, setIsAssessmentDialogOpen] = useState(false);
   const [newAssessment, setNewAssessment] = useState({ level: null, notes: "", assessor: "" });
+  const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
 
   const { data: existingGoal } = useQuery({
     queryKey: ['grcGoal', goalId],
@@ -69,6 +72,9 @@ export default function GRCGoalDetail() {
   useEffect(() => {
     if (existingGoal?.[0]) {
       setFormData(existingGoal[0]);
+      initSnapshot(existingGoal[0]);
+    } else if (!goalId) {
+      initSnapshot(formData);
     }
   }, [existingGoal]);
 
@@ -97,6 +103,7 @@ export default function GRCGoalDetail() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    markClean();
     if (goalId) {
       updateMutation.mutate(formData);
     } else {
@@ -155,6 +162,9 @@ export default function GRCGoalDetail() {
     }
   };
 
+  // Track dirty state
+  useEffect(() => { checkDirty(formData); }, [formData]);
+
   const linkedRisks = risks.filter(r => formData.linked_risk_ids?.includes(r.id));
   const linkedControls = controls.filter(c => formData.linked_control_ids?.includes(c.id));
   const company = companies.find(c => c.id === formData.company_id);
@@ -179,11 +189,9 @@ export default function GRCGoalDetail() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to={createPageUrl("GRCGoals")}>
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
+          <Button variant="ghost" size="icon" onClick={() => guardedNavigate(createPageUrl("GRCGoals"))}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
           <div>
             <h1 className="text-3xl font-bold text-slate-900">
               {goalId ? 'Edit GRC Goal' : 'New GRC Goal'}
@@ -192,9 +200,7 @@ export default function GRCGoalDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link to={createPageUrl("GRCGoals")}>
-            <Button type="button" variant="outline">Cancel</Button>
-          </Link>
+          <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("GRCGoals"))}>Cancel</Button>
           <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
             <Save className="w-4 h-4 mr-2" />
             {goalId ? 'Save Changes' : 'Create Goal'}
@@ -566,6 +572,13 @@ export default function GRCGoalDetail() {
           </div>
         </div>
       </form>
+
+      <UnsavedChangesDialog
+        open={showDialog}
+        onDiscard={confirmDiscard}
+        onSave={() => confirmSave(handleSubmit.bind(null, { preventDefault: () => {} }))}
+        onClose={cancelDialog}
+      />
     </div>
   );
 }

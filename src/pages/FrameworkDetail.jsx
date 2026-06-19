@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +25,7 @@ export default function FrameworkDetail() {
   const [isObjectiveDialogOpen, setIsObjectiveDialogOpen] = useState(false);
   const [isPrincipalRiskDialogOpen, setIsPrincipalRiskDialogOpen] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
+  const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -59,6 +62,9 @@ export default function FrameworkDetail() {
   useEffect(() => {
     if (existingFramework?.[0]) {
       setFormData(existingFramework[0]);
+      initSnapshot(existingFramework[0]);
+    } else if (isNew) {
+      initSnapshot(formData);
     }
   }, [existingFramework]);
 
@@ -80,12 +86,16 @@ export default function FrameworkDetail() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    markClean();
     if (isNew || !frameworkId) {
       createMutation.mutate(formData);
     } else {
       updateMutation.mutate(formData);
     }
   };
+
+  // Track dirty state
+  useEffect(() => { checkDirty(formData); }, [formData]);
 
   // Filter by selected company for the picker dialogs
   const companyObjectives = selectedCompanyId
@@ -136,11 +146,9 @@ export default function FrameworkDetail() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to={createPageUrl("Frameworks")}>
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
+          <Button variant="ghost" size="icon" onClick={() => guardedNavigate(createPageUrl("Frameworks"))}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
           <div>
             <h1 className="text-3xl font-bold text-slate-900">
               {isNew ? 'New Framework' : formData.name || 'Framework Details'}
@@ -148,9 +156,7 @@ export default function FrameworkDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link to={createPageUrl("Frameworks")}>
-            <Button type="button" variant="outline">Cancel</Button>
-          </Link>
+          <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("Frameworks"))}>Cancel</Button>
           <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
             <Save className="w-4 h-4 mr-2" />
             {isNew || !frameworkId ? 'Create Framework' : 'Save Changes'}
@@ -391,6 +397,13 @@ export default function FrameworkDetail() {
           </Card>
         </div>
       </form>
+
+      <UnsavedChangesDialog
+        open={showDialog}
+        onDiscard={confirmDiscard}
+        onSave={() => confirmSave(handleSubmit.bind(null, { preventDefault: () => {} }))}
+        onClose={cancelDialog}
+      />
 
       {frameworkId && !isNew && (
         <WorkflowPanel

@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,6 +66,7 @@ export default function ControlDetail() {
 
   const [isAddingCompensating, setIsAddingCompensating] = useState(false);
   const [isAmending, setIsAmending] = useState(false);
+  const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
   const [amendmentReason, setAmendmentReason] = useState("");
   const [amendOriginalData, setAmendOriginalData] = useState(null);
   const [showAmendSubmitDialog, setShowAmendSubmitDialog] = useState(false);
@@ -113,7 +116,7 @@ export default function ControlDetail() {
 
   useEffect(() => {
     if (existingControl?.[0]) {
-      setFormData({
+      const loaded = {
         ...existingControl[0],
         global: existingControl[0].global ?? false,
         control_ccm: existingControl[0].control_ccm ?? false,
@@ -133,7 +136,11 @@ export default function ControlDetail() {
         process_phase: existingControl[0].process_phase || "Process - Input",
         risk_id: existingControl[0].risk_id || "",
         is_library_control: existingControl[0].is_library_control ?? false,
-      });
+      };
+      setFormData(loaded);
+      initSnapshot(loaded);
+    } else if (isNew) {
+      initSnapshot(formData);
     }
   }, [existingControl]);
 
@@ -283,12 +290,16 @@ export default function ControlDetail() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    markClean();
     if (isNew || !controlId) {
       createMutation.mutate(formData);
     } else {
       updateMutation.mutate(formData);
     }
   };
+
+  // Track dirty state
+  useEffect(() => { checkDirty(formData); }, [formData]);
 
   const getPriorityColor = (priority) => {
     const colors = {
@@ -360,11 +371,9 @@ export default function ControlDetail() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to={createPageUrl("Controls")}>
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
+          <Button variant="ghost" size="icon" onClick={() => guardedNavigate(createPageUrl("Controls"))}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
           <div>
             <h1 className="text-3xl font-bold text-slate-900">
               {isNew ? 'New Control' : formData.title || 'Control Details'}
@@ -400,9 +409,7 @@ export default function ControlDetail() {
               onApprove={approveControl}
             />
           )}
-          <Link to={createPageUrl("Controls")}>
-            <Button type="button" variant="outline">Cancel</Button>
-          </Link>
+          <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("Controls"))}>Cancel</Button>
           <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
             <Save className="w-4 h-4 mr-2" />
             {isNew || !controlId ? 'Create Control' : 'Save Changes'}
@@ -962,6 +969,13 @@ export default function ControlDetail() {
                 onInstanceCreated={() => queryClient.invalidateQueries(['control', controlId])}
               />
             )}
+      <UnsavedChangesDialog
+        open={showDialog}
+        onDiscard={confirmDiscard}
+        onSave={() => confirmSave(handleSubmit.bind(null, { preventDefault: () => {} }))}
+        onClose={cancelDialog}
+      />
+
       <Dialog open={showAmendSubmitDialog} onOpenChange={o => { if (!o) setShowAmendSubmitDialog(false); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>

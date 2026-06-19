@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,8 @@ export default function ICTSystemDetail() {
   const urlParams = new URLSearchParams(window.location.search);
   const systemId = urlParams.get("id");
   const isNew = urlParams.get("new") === "true";
+
+  const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -91,7 +95,12 @@ export default function ICTSystemDetail() {
   });
 
   useEffect(() => {
-    if (existingSystem) setFormData(existingSystem);
+    if (existingSystem) {
+      setFormData(existingSystem);
+      initSnapshot(existingSystem);
+    } else if (isNew) {
+      initSnapshot(formData);
+    }
   }, [existingSystem]);
 
   const createMutation = useMutation({
@@ -112,12 +121,16 @@ export default function ICTSystemDetail() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    markClean();
     if (isNew || !systemId) {
       createMutation.mutate(formData);
     } else {
       updateMutation.mutate(formData);
     }
   };
+
+  // Track dirty state
+  useEffect(() => { checkDirty(formData); }, [formData]);
 
   const getCriticalityColor = (c) => ({
     critical: "bg-red-100 text-red-700 border-red-200",
@@ -133,9 +146,9 @@ export default function ICTSystemDetail() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
-          <Link to={createPageUrl("ICTSystems")}>
-            <Button variant="ghost" size="icon"><ArrowLeft className="w-5 h-5" /></Button>
-          </Link>
+          <Button variant="ghost" size="icon" onClick={() => guardedNavigate(createPageUrl("ICTSystems"))}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-slate-900">
@@ -156,9 +169,7 @@ export default function ICTSystemDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link to={createPageUrl("ICTSystems")}>
-            <Button variant="outline">Cancel</Button>
-          </Link>
+          <Button variant="outline" onClick={() => guardedNavigate(createPageUrl("ICTSystems"))}>Cancel</Button>
           <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
             <Save className="w-4 h-4 mr-2" />
             {isNew ? "Create System" : "Save Changes"}
@@ -360,6 +371,13 @@ export default function ICTSystemDetail() {
           </TabsContent>
         )}
       </Tabs>
+
+      <UnsavedChangesDialog
+        open={showDialog}
+        onDiscard={confirmDiscard}
+        onSave={() => confirmSave(handleSubmit.bind(null, { preventDefault: () => {} }))}
+        onClose={cancelDialog}
+      />
 
       {systemId && !isNew && (
         <WorkflowPanel

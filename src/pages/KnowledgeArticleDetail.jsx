@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
 
 export default function KnowledgeArticleDetail() {
   const navigate = useNavigate();
@@ -71,10 +72,7 @@ export default function KnowledgeArticleDetail() {
 
   const [newTag, setNewTag] = useState("");
   const [newStep, setNewStep] = useState({ step: "", description: "", order: 1 });
-  const [isDirty, setIsDirty] = useState(false);
-  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [pendingNavUrl, setPendingNavUrl] = useState(null);
-  const initialDataRef = useRef(null);
+  const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
 
   const { data: existingArticle } = useQuery({
     queryKey: ['knowledgeArticle', articleId],
@@ -90,19 +88,14 @@ export default function KnowledgeArticleDetail() {
   useEffect(() => {
     if (existingArticle) {
       setFormData(existingArticle);
-      initialDataRef.current = JSON.stringify(existingArticle);
-      setIsDirty(false);
+      initSnapshot(existingArticle);
     } else if (isNew) {
-      initialDataRef.current = JSON.stringify(formData);
+      initSnapshot(formData);
     }
   }, [existingArticle]);
 
-  // Track dirty state whenever formData changes
-  useEffect(() => {
-    if (initialDataRef.current !== null) {
-      setIsDirty(JSON.stringify(formData) !== initialDataRef.current);
-    }
-  }, [formData]);
+  // Track dirty state
+  useEffect(() => { checkDirty(formData); }, [formData]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.KnowledgeArticle.create(data),
@@ -140,29 +133,7 @@ export default function KnowledgeArticleDetail() {
     } else {
       updateMutation.mutate(dataToSave);
     }
-    setIsDirty(false);
-  };
-
-  const handleBackNavigation = (url) => {
-    if (isDirty) {
-      setPendingNavUrl(url);
-      setShowUnsavedDialog(true);
-    } else {
-      navigate(url);
-    }
-  };
-
-  const handleDiscardAndNavigate = () => {
-    setIsDirty(false);
-    setShowUnsavedDialog(false);
-    navigate(pendingNavUrl);
-  };
-
-  const handleSaveAndNavigate = async (e) => {
-    setShowUnsavedDialog(false);
-    handleSubmit(e || { preventDefault: () => {} });
-    // Navigate after save — mutations have onSuccess that could also navigate
-    navigate(pendingNavUrl);
+    markClean();
   };
 
   const addTag = () => {
@@ -219,7 +190,7 @@ export default function KnowledgeArticleDetail() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => handleBackNavigation(createPageUrl("KnowledgeManagement"))}>
+          <Button variant="ghost" size="icon" onClick={() => guardedNavigate(createPageUrl("KnowledgeManagement"))}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-3xl font-bold text-slate-900">
@@ -227,7 +198,7 @@ export default function KnowledgeArticleDetail() {
           </h1>
         </div>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={() => handleBackNavigation(createPageUrl("KnowledgeManagement"))}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("KnowledgeManagement"))}>Cancel</Button>
           <Button onClick={handleSubmit} className="bg-indigo-600 hover:bg-indigo-700">
             <Save className="w-4 h-4 mr-2" />
             {isNew || !articleId ? 'Create Article' : 'Save Changes'}
@@ -470,20 +441,12 @@ export default function KnowledgeArticleDetail() {
         </Card>
       </form>
 
-      <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes. Would you like to save before leaving?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleDiscardAndNavigate}>Discard & Leave</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSaveAndNavigate}>Save & Leave</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <UnsavedChangesDialog
+        open={showDialog}
+        onDiscard={confirmDiscard}
+        onSave={() => confirmSave(handleSubmit.bind(null, { preventDefault: () => {} }))}
+        onClose={cancelDialog}
+      />
     </div>
   );
 }
