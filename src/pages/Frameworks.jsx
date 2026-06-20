@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/collapsible";
 import { CustomOptionIcon } from "@/components/ui/EditableOptionSelect";
 import { useCustomOptions } from "@/hooks/useCustomOptions";
+import { Tag } from "lucide-react";
 
 export default function Frameworks() {
   const queryClient = useQueryClient();
@@ -222,7 +223,7 @@ export default function Frameworks() {
                       <h3 className="font-bold text-slate-900 text-lg mb-1">{framework.name}</h3>
                       <p className="text-sm text-slate-500 mb-2">Version {framework.version}</p>
                       <p className="text-sm text-slate-600 mb-3">{framework.description}</p>
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
                          <Badge variant="outline" className={`${getCategoryColor(framework.category)} border flex items-center gap-1`}>
                           {framework.category?.replace(/_/g, ' ')}
                           {isCategoryCustom(framework.category) && <CustomOptionIcon />}
@@ -232,6 +233,12 @@ export default function Frameworks() {
                           <CheckCircle2 className="w-4 h-4 text-green-600" />
                           {frameworkControls.length} controls
                         </div>
+                        {framework.tags?.length > 0 && framework.tags.map((tag, i) => (
+                          <Badge key={i} variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 flex items-center gap-1">
+                            <Tag className="w-3 h-3" />
+                            {tag}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
                     <div className="flex gap-2">

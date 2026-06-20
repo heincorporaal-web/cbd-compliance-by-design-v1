@@ -26,6 +26,13 @@
       ],
       "description": "Framework category"
     },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags for categorization"
+    },
     "framework_code": {
       "type": "string",
       "description": "Short code / identifier (e.g. COSO, ISO27001, DORA)"

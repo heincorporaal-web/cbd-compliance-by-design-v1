@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Save, Plus, X, Target, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Save, Plus, X, Target, AlertTriangle, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
@@ -44,9 +44,21 @@ export default function FrameworkDetail() {
     category: "information_security",
     status: "active",
     end_date: "",
+    tags: [],
     linked_objective_ids: [],
     linked_principle_risk_ids: []
   });
+
+  const [newTag, setNewTag] = useState("");
+
+  const addTag = () => {
+    if (!newTag.trim()) return;
+    const newTags = newTag.split(";").map(t => t.trim()).filter(t => t && !(formData.tags || []).includes(t));
+    if (newTags.length > 0) setFormData(f => ({ ...f, tags: [...(f.tags || []), ...newTags] }));
+    setNewTag("");
+  };
+
+  const removeTag = (tag) => setFormData(f => ({ ...f, tags: f.tags.filter(t => t !== tag) }));
 
   const { data: existingFramework } = useQuery({
     queryKey: ['framework', frameworkId],
@@ -243,6 +255,39 @@ export default function FrameworkDetail() {
                   rows={3}
                 />
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tags */}
+        <Card className="border-none shadow-lg">
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle>Tags</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {(formData.tags || []).map((tag, idx) => (
+                <div key={idx} className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
+                  <span className="text-sm">{tag}</span>
+                  <button type="button" onClick={() => removeTag(tag)} className="hover:bg-blue-200 rounded-full p-0.5">
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              {(formData.tags || []).length === 0 && (
+                <p className="text-sm text-slate-400">No tags added yet</p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Add tag or multiple tags separated by ;"
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
+              />
+              <Button type="button" onClick={addTag} variant="outline">
+                <Plus className="w-4 h-4" />
+              </Button>
             </div>
           </CardContent>
         </Card>
