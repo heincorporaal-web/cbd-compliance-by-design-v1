@@ -23,6 +23,7 @@ import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPicker";
 import CompensatingControlPicker from "@/components/controls/CompensatingControlPicker";
 import TestPlanPanel from "@/components/controls/TestPlanPanel";
+import ArchivedFrameworkBanner from "@/components/frameworks/ArchivedFrameworkBanner";
 
 export default function ControlDetail() {
   const navigate = useNavigate();
@@ -493,6 +494,7 @@ export default function ControlDetail() {
 
           <TabsContent value="details" className="space-y-6">
             {!isNew && existingControl?.[0] && <LifecycleNotifications entity={existingControl[0]} />}
+              <ArchivedFrameworkBanner frameworkId={formData.framework_id} />
             
             <Card className="border-none shadow-lg">
               <CardHeader className="border-b border-slate-100">

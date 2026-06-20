@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FileUpload from "../components/FileUpload";
 import { toast } from "sonner";
+import ArchivedFrameworkBanner from "@/components/frameworks/ArchivedFrameworkBanner";
 
 export default function AssessmentDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -465,6 +466,8 @@ export default function AssessmentDetail() {
             </div>
           </div>
           
+          <ArchivedFrameworkBanner frameworkId={assessment.framework_id} />
+
           {assessment.return_comments && (
             <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
               <div className="flex items-start gap-2">

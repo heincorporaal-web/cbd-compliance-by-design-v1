@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
 import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
 import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import ArchivedFrameworkBanner from "@/components/frameworks/ArchivedFrameworkBanner";
 
 export default function KnowledgeArticleDetail() {
   const navigate = useNavigate();
@@ -219,6 +220,8 @@ export default function KnowledgeArticleDetail() {
           </Button>
         </div>
       </div>
+
+      <ArchivedFrameworkBanner frameworkId={formData.framework_id} />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card className="border-none shadow-lg">
