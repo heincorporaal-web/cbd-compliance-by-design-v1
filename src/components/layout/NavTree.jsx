@@ -291,36 +291,6 @@ export default function NavTree() {
         </div>
       )}
 
-      {/* Favorites section */}
-      <div className="mb-2">
-        <button
-          onClick={() => setFavOpen(v => !v)}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider text-amber-500 hover:bg-amber-50 transition-colors"
-        >
-          <Star className="w-3.5 h-3.5 fill-amber-400" />
-          <span className="flex-1 text-left">Favorites</span>
-          {favOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-        </button>
-        {favOpen && (
-          <div className="ml-2 mt-0.5 border-l-2 border-amber-200 pl-2 space-y-0.5">
-            {favItems.length > 0 ? favItems.map(item => (
-              <NavLink
-                key={item.id}
-                item={item}
-                isActive={location.pathname === item.url}
-                favorites={favorites}
-                onToggleFav={toggleFav}
-                showFavBtn
-              />
-            )) : (
-              <p className="text-xs text-slate-400 px-3 py-2 italic">
-                Star any item in the menu below to pin it here.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-
       <div className="border-t border-slate-200 my-2" />
 
       {/* Nav groups — hide when searching */}
