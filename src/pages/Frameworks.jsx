@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Plus, Download, CheckCircle2, ChevronRight, Search, Edit2 } from "lucide-react";
+import { Shield, Download, CheckCircle2, ChevronRight, Search, Edit2, Tag, Clock } from "lucide-react";
 import EndDateBadge from "@/components/ui/EndDateBadge";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/collapsible";
 import { CustomOptionIcon } from "@/components/ui/EditableOptionSelect";
 import { useCustomOptions } from "@/hooks/useCustomOptions";
-import { Tag } from "lucide-react";
 
 export default function Frameworks() {
   const queryClient = useQueryClient();
@@ -25,6 +24,9 @@ export default function Frameworks() {
   const [expandedFramework, setExpandedFramework] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [showExpired, setShowExpired] = useState(false);
+
+  const isExpired = (f) => f.end_date && new Date(f.end_date) < new Date();
   const FRAMEWORK_CATEGORY_SEEDED = [
     { value: "information_security", label: "Information Security" },
     { value: "privacy", label: "Privacy" },
@@ -196,16 +198,31 @@ export default function Frameworks() {
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Risk & Control Frameworks</h1>
           <p className="text-slate-600">Manage compliance frameworks and controls</p>
         </div>
-        {frameworks.length === 0 && (
-          <Button 
-            onClick={loadSampleFrameworks} 
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            {loading ? "Loading..." : "Load Sample Frameworks"}
-          </Button>
-        )}
+        <div className="flex items-center gap-3">
+          {frameworks.some(isExpired) && (
+            <button
+              onClick={() => setShowExpired(v => !v)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                showExpired
+                  ? "bg-amber-100 text-amber-800 border-amber-300"
+                  : "bg-white text-slate-600 border-slate-300 hover:border-slate-400"
+              }`}
+            >
+              <Clock className="w-4 h-4" />
+              {showExpired ? "Hide Expired" : `Show Expired (${frameworks.filter(isExpired).length})`}
+            </button>
+          )}
+          {frameworks.length === 0 && (
+            <Button 
+              onClick={loadSampleFrameworks} 
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              {loading ? "Loading..." : "Load Sample Frameworks"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {frameworks.length > 0 && (
@@ -267,6 +284,8 @@ export default function Frameworks() {
       ) : (
         <div className="space-y-6">
           {frameworks.filter(f => {
+            if (!showExpired && isExpired(f)) return false;
+            if (showExpired && !isExpired(f)) return false;
             const matchesSearch = !searchTerm ||
               f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
               f.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
