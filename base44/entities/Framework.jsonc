@@ -142,6 +142,24 @@
           }
         }
       }
+    },
+    "attachments": {
+      "type": "array",
+      "description": "Uploaded documents and files linked to this framework",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "required": [

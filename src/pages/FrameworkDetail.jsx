@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Save, Plus, X, Target, AlertTriangle, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Plus, X, Target, AlertTriangle, Trash2, Paperclip } from "lucide-react";
+import FileUpload from "@/components/FileUpload";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
@@ -310,6 +311,33 @@ export default function FrameworkDetail() {
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Documents */}
+        <Card className="border-none shadow-lg">
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle className="flex items-center gap-2">
+              <Paperclip className="w-5 h-5 text-slate-600" />
+              Documents
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <FileUpload
+              existingFiles={formData.attachments || []}
+              onFileUploaded={(url, name) => {
+                const updated = [...(formData.attachments || []), { url, name }];
+                const newData = { ...formData, attachments: updated };
+                setFormData(newData);
+                if (frameworkId && !isNew) updateMutation.mutate(newData);
+              }}
+              onFileRemoved={(idx) => {
+                const updated = (formData.attachments || []).filter((_, i) => i !== idx);
+                const newData = { ...formData, attachments: updated };
+                setFormData(newData);
+                if (frameworkId && !isNew) updateMutation.mutate(newData);
+              }}
+            />
           </CardContent>
         </Card>
 
