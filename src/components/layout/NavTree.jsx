@@ -291,6 +291,14 @@ export default function NavTree() {
         </div>
       )}
 
+      {/* Hint */}
+      <div className="px-3 py-2 mb-1">
+        <p className="text-xs text-slate-400 italic flex items-center gap-1.5">
+          <Star className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" />
+          Star an item to add it to your Quick Actions toolbar on the right.
+        </p>
+      </div>
+
       <div className="border-t border-slate-200 my-2" />
 
       {/* Nav groups — hide when searching */}
