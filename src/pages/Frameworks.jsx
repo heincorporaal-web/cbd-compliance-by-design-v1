@@ -29,7 +29,20 @@ export default function Frameworks() {
     { value: "privacy", label: "Privacy" },
     { value: "compliance", label: "Compliance" },
     { value: "operational_risk", label: "Operational Risk" },
+    { value: "enterprise_risk", label: "Enterprise Risk" },
     { value: "financial", label: "Financial" },
+    { value: "financial_reporting", label: "Financial Reporting" },
+    { value: "regulatory", label: "Regulatory" },
+    { value: "resilience", label: "Resilience" },
+    { value: "process", label: "Process" },
+    { value: "quality", label: "Quality" },
+    { value: "service_management", label: "Service Management" },
+    { value: "software_development", label: "Software Development" },
+    { value: "cyber_security", label: "Cyber Security" },
+    { value: "3rd_party", label: "3rd Party" },
+    { value: "digital_assets", label: "Digital Assets" },
+    { value: "fraud", label: "Fraud" },
+    { value: "engagement", label: "Engagement" },
     { value: "other", label: "Other" },
   ];
   const { isCustom: isCategoryCustom, getLabel: getCategoryLabelCustom } = useCustomOptions("cbd_framework_categories");
@@ -146,8 +159,21 @@ export default function Frameworks() {
       privacy: 'bg-purple-100 text-purple-700 border-purple-200',
       compliance: 'bg-green-100 text-green-700 border-green-200',
       operational_risk: 'bg-orange-100 text-orange-700 border-orange-200',
+      enterprise_risk: 'bg-red-100 text-red-700 border-red-200',
       financial: 'bg-amber-100 text-amber-700 border-amber-200',
-      other: 'bg-slate-100 text-slate-700 border-slate-200'
+      financial_reporting: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      regulatory: 'bg-teal-100 text-teal-700 border-teal-200',
+      resilience: 'bg-cyan-100 text-cyan-700 border-cyan-200',
+      process: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+      quality: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+      service_management: 'bg-sky-100 text-sky-700 border-sky-200',
+      software_development: 'bg-violet-100 text-violet-700 border-violet-200',
+      cyber_security: 'bg-blue-100 text-blue-700 border-blue-200',
+      '3rd_party': 'bg-pink-100 text-pink-700 border-pink-200',
+      digital_assets: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200',
+      fraud: 'bg-rose-100 text-rose-700 border-rose-200',
+      engagement: 'bg-lime-100 text-lime-700 border-lime-200',
+      other: 'bg-slate-100 text-slate-700 border-slate-200',
     };
     return colors[category] || colors.other;
   };
