@@ -639,7 +639,7 @@ export default function RiskDetail() {
                 ) : (
                   Object.entries(
                     frameworks
-                      .filter(f => f.is_master)
+                      .filter(f => f.is_master && (!f.end_date || new Date(f.end_date) >= new Date()))
                       .reduce((acc, f) => {
                         const grp = f.category || "Other";
                         if (!acc[grp]) acc[grp] = [];
