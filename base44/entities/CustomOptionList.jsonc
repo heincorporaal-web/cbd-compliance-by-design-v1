@@ -1,0 +1,28 @@
+{
+  "name": "CustomOptionList",
+  "type": "object",
+  "properties": {
+    "storage_key": {
+      "type": "string",
+      "description": "Unique key identifying the option list (e.g. cbd_framework_categories)"
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "List of custom options"
+    }
+  },
+  "required": [
+    "storage_key"
+  ]
+}

@@ -1,31 +1,33 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { base44 } from "@/api/base44Client";
 
 /**
- * Reads custom options from localStorage for a given storageKey.
- * Returns { customOptions, isCustom(value) }
+ * Reads custom options from the database for a given storageKey.
+ * Returns { customOptions, isCustom(value), reload }
  */
 export function useCustomOptions(storageKey) {
   const [customOptions, setCustomOptions] = useState([]);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored) setCustomOptions(JSON.parse(stored));
+      const records = await base44.entities.CustomOptionList.filter({ storage_key: storageKey });
+      if (records?.[0]?.options) setCustomOptions(records[0].options);
+      else setCustomOptions([]);
     } catch {}
-
-    // Listen for storage changes (e.g. added via EditableOptionSelect in another tab or same page)
-    const onStorage = (e) => {
-      if (e.key === storageKey) {
-        try {
-          setCustomOptions(JSON.parse(e.newValue) || []);
-        } catch {}
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
   }, [storageKey]);
+
+  useEffect(() => {
+    load();
+
+    // Also listen for same-page updates dispatched by EditableOptionSelect
+    const onUpdate = (e) => {
+      if (e.detail?.storageKey === storageKey) setCustomOptions(e.detail.options);
+    };
+    window.addEventListener("customOptionsUpdated", onUpdate);
+    return () => window.removeEventListener("customOptionsUpdated", onUpdate);
+  }, [storageKey, load]);
 
   const isCustom = (value) => customOptions.some(o => o.value === value);
 
-  return { customOptions, isCustom };
+  return { customOptions, isCustom, reload: load };
 }
