@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
 import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
@@ -10,12 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Save, Plus, X, Target, AlertTriangle, Trash2, ExternalLink } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Save, Plus, X, Target, AlertTriangle, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import EditableOptionSelect from "@/components/ui/EditableOptionSelect";
-import { Dialog as AlertDialog, DialogContent as AlertDialogContent, DialogHeader as AlertDialogHeader, DialogTitle as AlertDialogTitle } from "@/components/ui/dialog";
 
 const FRAMEWORK_CATEGORY_SEEDED = [
   { value: "information_security", label: "Information Security" },
@@ -49,8 +48,6 @@ export default function FrameworkDetail() {
   const [isObjectiveDialogOpen, setIsObjectiveDialogOpen] = useState(false);
   const [isPrincipalRiskDialogOpen, setIsPrincipalRiskDialogOpen] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
 
   const [formData, setFormData] = useState({
@@ -97,42 +94,6 @@ export default function FrameworkDetail() {
     queryFn: () => base44.entities.PrincipalRisk.list(),
   });
 
-  // Check usages for safe-delete
-  const { data: linkedControls = [] } = useQuery({
-    queryKey: ['controls-for-framework', frameworkId],
-    queryFn: () => base44.entities.Control.filter({ framework_id: frameworkId }),
-    enabled: !!frameworkId && !isNew,
-  });
-
-  const { data: linkedAssessments = [] } = useQuery({
-    queryKey: ['assessments-for-framework', frameworkId],
-    queryFn: () => base44.entities.Assessment.filter({ framework_id: frameworkId }),
-    enabled: !!frameworkId && !isNew,
-  });
-
-  const { data: linkedArticles = [] } = useQuery({
-    queryKey: ['articles-for-framework', frameworkId],
-    queryFn: () => base44.entities.KnowledgeArticle.filter({ framework_id: frameworkId }),
-    enabled: !!frameworkId && !isNew,
-  });
-
-  const usages = useMemo(() => [
-    ...linkedControls.map(c => ({ type: 'Control', name: `${c.control_id} – ${c.title}`, id: c.id, path: `ControlDetail?id=${c.id}` })),
-    ...linkedAssessments.map(a => ({ type: 'Assessment', name: a.name, id: a.id, path: `AssessmentDetail?id=${a.id}` })),
-    ...linkedArticles.map(a => ({ type: 'Knowledge Article', name: a.title, id: a.id, path: `KnowledgeArticleDetail?id=${a.id}` })),
-  ], [linkedControls, linkedAssessments, linkedArticles]);
-
-  const handleDelete = async () => {
-    if (usages.length > 0) {
-      setShowDeleteDialog(true);
-      return;
-    }
-    setIsDeleting(true);
-    await base44.entities.Framework.delete(frameworkId);
-    queryClient.invalidateQueries(['frameworks']);
-    navigate(createPageUrl("Frameworks"));
-  };
-
   useEffect(() => {
     if (existingFramework?.[0]) {
       setFormData(existingFramework[0]);
@@ -161,10 +122,18 @@ export default function FrameworkDetail() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     markClean();
+    const dataToSave = { ...formData };
+    if (dataToSave.end_date) {
+      dataToSave.status = "archived";
+    }
     if (isNew || !frameworkId) {
-      await createMutation.mutateAsync(formData);
+      await createMutation.mutateAsync(dataToSave);
     } else {
-      await updateMutation.mutateAsync(formData);
+      await updateMutation.mutateAsync(dataToSave);
+      if (dataToSave.status === "archived") {
+        queryClient.invalidateQueries(['frameworks']);
+        navigate(createPageUrl("Frameworks"));
+      }
     }
   };
 
@@ -230,12 +199,6 @@ export default function FrameworkDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          {frameworkId && !isNew && (
-            <Button type="button" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleDelete} disabled={isDeleting}>
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
-          )}
           <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("Frameworks"))}>Cancel</Button>
           <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
             <Save className="w-4 h-4 mr-2" />
@@ -302,7 +265,7 @@ export default function FrameworkDetail() {
                   value={formData.end_date || ""}
                   onChange={(e) => setFormData({...formData, end_date: e.target.value})}
                 />
-                <p className="text-xs text-slate-400">Set to mark this framework as expired on that date</p>
+                <p className="text-xs text-slate-400">Setting an end date will archive this framework and remove it from active views on save</p>
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="description">Description</Label>
@@ -523,42 +486,6 @@ export default function FrameworkDetail() {
         />
       )}
 
-      {/* Delete blocked dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="max-w-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-red-700">
-              <AlertTriangle className="w-5 h-5" />
-              Cannot Delete Framework
-            </AlertDialogTitle>
-          </AlertDialogHeader>
-          <div className="space-y-3">
-            <p className="text-sm text-slate-600">
-              This framework is referenced by <strong>{usages.length} record{usages.length !== 1 ? 's' : ''}</strong>. 
-              Update or reassign those records before deleting this framework.
-            </p>
-            <div className="border rounded-lg divide-y max-h-72 overflow-y-auto">
-              {usages.map((u) => (
-                <div key={u.id} className="flex items-center justify-between px-4 py-3 hover:bg-slate-50">
-                  <div>
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{u.type}</span>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">{u.name}</p>
-                  </div>
-                  <Link to={createPageUrl(u.path)} onClick={() => setShowDeleteDialog(false)}>
-                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                      <ExternalLink className="w-4 h-4 mr-1" />
-                      Open
-                    </Button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end pt-2">
-              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Close</Button>
-            </div>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
