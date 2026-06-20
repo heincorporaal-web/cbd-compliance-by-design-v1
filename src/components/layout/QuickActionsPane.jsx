@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   CalendarClock, Star, ChevronLeft, ChevronRight, X,
-  Pencil, Check, GripVertical, BookmarkX, Pin
+  Pencil, Check, GripVertical, BookmarkX, Pin, ChevronUp, ChevronDown
 } from "lucide-react";
 import { ALL_NAV_ITEMS } from "@/components/layout/NavTree";
 import { base44 } from "@/api/base44Client";
@@ -57,7 +57,20 @@ function useNavFavorites() {
     });
   };
 
-  return { favIds, toggleFav };
+  const moveFav = (itemId, direction) => {
+    setFavIds(prev => {
+      const idx = prev.indexOf(itemId);
+      if (idx === -1) return prev;
+      const next = [...prev];
+      const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= next.length) return prev;
+      [next[idx], next[swapIdx]] = [next[swapIdx], next[idx]];
+      try { localStorage.setItem(getFavKey(userId), JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  return { favIds, toggleFav, moveFav };
 }
 
 // ── Entity type icon/colour map ──────────────────────────────────────────────
@@ -80,7 +93,7 @@ function entityMeta(type) {
 }
 
 // ── Draggable pinned record row ──────────────────────────────────────────────
-function PinnedRow({ item, editing, onUnpin, dragging, onDragStart, onDragOver, onDrop }) {
+function PinnedRow({ item, editing, onUnpin, dragging, onDragStart, onDragOver, onDrop, onMoveUp, onMoveDown, isFirst, isLast }) {
   const meta = entityMeta(item.entityType);
   return (
     <div
@@ -107,16 +120,36 @@ function PinnedRow({ item, editing, onUnpin, dragging, onDragStart, onDragOver, 
           {item.label}
         </Link>
       )}
-      <span className="text-[10px] text-slate-400 shrink-0 hidden group-hover:block">
-        {item.entityType}
-      </span>
+      {!editing && (
+        <span className="text-[10px] text-slate-400 shrink-0 hidden group-hover:block">
+          {item.entityType}
+        </span>
+      )}
       {editing && (
-        <button
-          onClick={() => onUnpin(item.id, item.entityType)}
-          className="p-0.5 rounded text-slate-300 hover:text-red-500 transition-colors shrink-0"
-        >
-          <X className="w-3 h-3" />
-        </button>
+        <div className="flex items-center gap-0.5 shrink-0">
+          <button
+            onClick={onMoveUp}
+            disabled={isFirst}
+            className="p-0.5 rounded text-slate-300 hover:text-primary transition-colors disabled:opacity-30"
+            title="Move up"
+          >
+            <ChevronUp className="w-3 h-3" />
+          </button>
+          <button
+            onClick={onMoveDown}
+            disabled={isLast}
+            className="p-0.5 rounded text-slate-300 hover:text-primary transition-colors disabled:opacity-30"
+            title="Move down"
+          >
+            <ChevronDown className="w-3 h-3" />
+          </button>
+          <button
+            onClick={() => onUnpin(item.id, item.entityType)}
+            className="p-0.5 rounded text-slate-300 hover:text-red-500 transition-colors"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
       )}
     </div>
   );
@@ -126,7 +159,7 @@ function PinnedRow({ item, editing, onUnpin, dragging, onDragStart, onDragOver, 
 export default function QuickActionsPane() {
   const location = useLocation();
   const { pinned, collapsed, toggleCollapsed, unpinRecord, reorderPinned } = useQuickActions();
-  const { favIds, toggleFav } = useNavFavorites();
+  const { favIds, toggleFav, moveFav } = useNavFavorites();
   const [editing, setEditing] = useState(false);
   const [dragIdx, setDragIdx] = useState(null);
   const [overIdx, setOverIdx] = useState(null);
@@ -220,7 +253,7 @@ export default function QuickActionsPane() {
             </p>
           ) : (
             <div className="space-y-0.5">
-              {favItems.map(item => (
+              {favItems.map((item, idx) => (
                 <div key={item.id} className="group flex items-center rounded-lg hover:bg-slate-50 transition-colors">
                   <Link
                     to={item.url}
@@ -232,13 +265,31 @@ export default function QuickActionsPane() {
                     <span className="truncate">{item.title}</span>
                   </Link>
                   {editing && (
-                    <button
-                      onClick={() => toggleFav(item.id)}
-                      className="mr-1 p-0.5 rounded text-slate-300 hover:text-red-500 transition-colors"
-                      title="Remove from favourites"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center gap-0.5 mr-1 shrink-0">
+                      <button
+                        onClick={() => moveFav(item.id, "up")}
+                        disabled={idx === 0}
+                        className="p-0.5 rounded text-slate-300 hover:text-primary transition-colors disabled:opacity-30"
+                        title="Move up"
+                      >
+                        <ChevronUp className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => moveFav(item.id, "down")}
+                        disabled={idx === favItems.length - 1}
+                        className="p-0.5 rounded text-slate-300 hover:text-primary transition-colors disabled:opacity-30"
+                        title="Move down"
+                      >
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => toggleFav(item.id)}
+                        className="p-0.5 rounded text-slate-300 hover:text-red-500 transition-colors"
+                        title="Remove from favourites"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
                   )}
                 </div>
               ))}
@@ -268,6 +319,10 @@ export default function QuickActionsPane() {
                   onDragStart={() => setDragIdx(idx)}
                   onDragOver={() => setOverIdx(idx)}
                   onDrop={() => handleDrop(idx)}
+                  onMoveUp={() => reorderPinned(idx, idx - 1)}
+                  onMoveDown={() => reorderPinned(idx, idx + 1)}
+                  isFirst={idx === 0}
+                  isLast={idx === pinned.length - 1}
                 />
               ))}
             </div>
@@ -278,7 +333,7 @@ export default function QuickActionsPane() {
       {editing && (
         <div className="border-t border-slate-100 px-3 py-2">
           <p className="text-[10px] text-slate-400 italic">
-            Drag to reorder · click × to remove
+            Use ↑↓ or drag to reorder · × to remove
           </p>
         </div>
       )}
