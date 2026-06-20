@@ -4,11 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, Trash2, Settings2, Pencil } from "lucide-react";
-import { readFromStorage, writeToStorage, subscribe } from "@/lib/customOptionsStore";
+import { loadFromDB, writeToDB, subscribe } from "@/lib/customOptionsStore";
 
-/**
- * Icon shown next to custom (non-seeded) option values.
- */
 export function CustomOptionIcon({ className = "" }) {
   return (
     <Pencil
@@ -18,41 +15,35 @@ export function CustomOptionIcon({ className = "" }) {
   );
 }
 
-/**
- * A select dropdown that allows users to add/remove custom options on the fly.
- * Seeded options are protected (cannot be deleted).
- * Custom options are persisted in localStorage and shared across all instances on the page.
- */
 export default function EditableOptionSelect({ storageKey, seededOptions = [], value, onValueChange, placeholder = "Select..." }) {
-  const [customOptions, setCustomOptions] = useState(() => readFromStorage(storageKey));
+  const [customOptions, setCustomOptions] = useState([]);
   const [newLabel, setNewLabel] = useState("");
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Re-read in case storage was populated before mount
-    setCustomOptions(readFromStorage(storageKey));
-    // Subscribe to updates from other instances
+    loadFromDB(storageKey).then(setCustomOptions);
     const unsub = subscribe(storageKey, setCustomOptions);
     return unsub;
   }, [storageKey]);
 
-  const persist = (opts) => {
-    writeToStorage(storageKey, opts);
-    setCustomOptions(opts);
+  const persist = async (opts) => {
+    setSaving(true);
+    await writeToDB(storageKey, opts);
+    setSaving(false);
   };
 
-  const addOption = () => {
+  const addOption = async () => {
     const trimmed = newLabel.trim();
     if (!trimmed) return;
     const val = trimmed.toLowerCase().replace(/\s+/g, "_");
-    const all = [...seededOptions, ...customOptions];
-    if (all.some(o => o.value === val)) return;
-    persist([...customOptions, { value: val, label: trimmed }]);
+    if ([...seededOptions, ...customOptions].some(o => o.value === val)) return;
+    await persist([...customOptions, { value: val, label: trimmed }]);
     setNewLabel("");
   };
 
-  const removeOption = (val) => {
-    persist(customOptions.filter(o => o.value !== val));
+  const removeOption = async (val) => {
+    await persist(customOptions.filter(o => o.value !== val));
     if (value === val) onValueChange("");
   };
 
@@ -111,6 +102,7 @@ export default function EditableOptionSelect({ storageKey, seededOptions = [], v
                     size="icon"
                     className="h-6 w-6 text-red-400 hover:text-red-600"
                     onClick={() => removeOption(opt.value)}
+                    disabled={saving}
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -126,8 +118,9 @@ export default function EditableOptionSelect({ storageKey, seededOptions = [], v
               onChange={e => setNewLabel(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addOption(); } }}
               className="text-sm h-8"
+              disabled={saving}
             />
-            <Button type="button" size="sm" onClick={addOption} className="h-8 px-2">
+            <Button type="button" size="sm" onClick={addOption} className="h-8 px-2" disabled={saving}>
               <Plus className="w-4 h-4" />
             </Button>
           </div>
