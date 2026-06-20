@@ -15,12 +15,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { CustomOptionIcon } from "@/components/ui/EditableOptionSelect";
+import { useCustomOptions } from "@/hooks/useCustomOptions";
 
 export default function Frameworks() {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [expandedFramework, setExpandedFramework] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const { isCustom: isCategoryCustom } = useCustomOptions("cbd_framework_categories");
 
   const { data: frameworks = [] } = useQuery({
     queryKey: ['frameworks'],
@@ -220,8 +223,9 @@ export default function Frameworks() {
                       <p className="text-sm text-slate-500 mb-2">Version {framework.version}</p>
                       <p className="text-sm text-slate-600 mb-3">{framework.description}</p>
                       <div className="flex items-center gap-3">
-                         <Badge variant="outline" className={`${getCategoryColor(framework.category)} border`}>
-                          {framework.category.replace(/_/g, ' ')}
+                         <Badge variant="outline" className={`${getCategoryColor(framework.category)} border flex items-center gap-1`}>
+                          {framework.category?.replace(/_/g, ' ')}
+                          {isCategoryCustom(framework.category) && <CustomOptionIcon />}
                         </Badge>
                         <EndDateBadge endDate={framework.end_date} />
                         <div className="flex items-center gap-2 text-sm text-slate-600">

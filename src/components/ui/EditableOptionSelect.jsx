@@ -3,7 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Trash2, Settings2 } from "lucide-react";
+import { Plus, Trash2, Settings2, Pencil } from "lucide-react";
+
+/**
+ * Icon shown next to custom (non-seeded) option values.
+ * Import and use this on list pages to indicate a custom category.
+ */
+export function CustomOptionIcon({ className = "" }) {
+  return (
+    <Pencil
+      className={`inline-block w-3 h-3 text-violet-500 ${className}`}
+      title="Custom option"
+    />
+  );
+}
 
 /**
  * A select dropdown that allows users to add/remove custom options on the fly.
@@ -30,7 +43,11 @@ export default function EditableOptionSelect({ storageKey, seededOptions = [], v
 
   const persist = (opts) => {
     setCustomOptions(opts);
-    try { localStorage.setItem(storageKey, JSON.stringify(opts)); } catch {}
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(opts));
+      // Notify same-page listeners
+      window.dispatchEvent(new StorageEvent("storage", { key: storageKey, newValue: JSON.stringify(opts) }));
+    } catch {}
   };
 
   const addOption = () => {
@@ -49,6 +66,7 @@ export default function EditableOptionSelect({ storageKey, seededOptions = [], v
     if (value === val) onValueChange("");
   };
 
+  const isCustom = (val) => customOptions.some(o => o.value === val);
   const allOptions = [...seededOptions, ...customOptions];
 
   return (
@@ -59,7 +77,12 @@ export default function EditableOptionSelect({ storageKey, seededOptions = [], v
         </SelectTrigger>
         <SelectContent>
           {allOptions.map(opt => (
-            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+            <SelectItem key={opt.value} value={opt.value}>
+              <span className="flex items-center gap-1.5">
+                {opt.label}
+                {isCustom(opt.value) && <CustomOptionIcon />}
+              </span>
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -87,8 +110,11 @@ export default function EditableOptionSelect({ storageKey, seededOptions = [], v
             <div className="space-y-1">
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Custom</p>
               {customOptions.map(opt => (
-                <div key={opt.value} className="flex items-center justify-between px-2 py-1 rounded bg-blue-50 text-sm text-slate-700">
-                  <span>{opt.label}</span>
+                <div key={opt.value} className="flex items-center justify-between px-2 py-1 rounded bg-violet-50 text-sm text-slate-700">
+                  <span className="flex items-center gap-1.5">
+                    <CustomOptionIcon />
+                    {opt.label}
+                  </span>
                   <Button
                     type="button"
                     variant="ghost"
