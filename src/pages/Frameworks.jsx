@@ -24,7 +24,20 @@ export default function Frameworks() {
   const [loading, setLoading] = useState(false);
   const [expandedFramework, setExpandedFramework] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const { isCustom: isCategoryCustom, getLabel: getCategoryLabel } = useCustomOptions("cbd_framework_categories");
+  const FRAMEWORK_CATEGORY_SEEDED = [
+    { value: "information_security", label: "Information Security" },
+    { value: "privacy", label: "Privacy" },
+    { value: "compliance", label: "Compliance" },
+    { value: "operational_risk", label: "Operational Risk" },
+    { value: "financial", label: "Financial" },
+    { value: "other", label: "Other" },
+  ];
+  const { isCustom: isCategoryCustom, getLabel: getCategoryLabelCustom } = useCustomOptions("cbd_framework_categories");
+  const getCategoryLabel = (val) => {
+    const seeded = FRAMEWORK_CATEGORY_SEEDED.find(o => o.value === val);
+    if (seeded) return seeded.label;
+    return getCategoryLabelCustom(val);
+  };
 
   const { data: frameworks = [] } = useQuery({
     queryKey: ['frameworks'],
@@ -225,9 +238,7 @@ export default function Frameworks() {
                       <p className="text-sm text-slate-600 mb-3">{framework.description}</p>
                       <div className="flex flex-wrap items-center gap-2">
                          <Badge variant="outline" className={`${getCategoryColor(framework.category)} border flex items-center gap-1`}>
-                          {isCategoryCustom(framework.category)
-                            ? getCategoryLabel(framework.category)
-                            : framework.category?.replace(/_/g, ' ')}
+                          {getCategoryLabel(framework.category)}
                           {isCategoryCustom(framework.category) && <CustomOptionIcon />}
                         </Badge>
                         <EndDateBadge endDate={framework.end_date} />
