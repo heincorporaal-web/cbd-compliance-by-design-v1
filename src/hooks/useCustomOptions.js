@@ -28,6 +28,7 @@ export function useCustomOptions(storageKey) {
   }, [storageKey, load]);
 
   const isCustom = (value) => customOptions.some(o => o.value === value);
+  const getLabel = (value) => customOptions.find(o => o.value === value)?.label ?? value;
 
-  return { customOptions, isCustom, reload: load };
+  return { customOptions, isCustom, getLabel, reload: load };
 }

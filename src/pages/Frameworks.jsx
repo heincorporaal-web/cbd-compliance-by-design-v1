@@ -24,7 +24,7 @@ export default function Frameworks() {
   const [loading, setLoading] = useState(false);
   const [expandedFramework, setExpandedFramework] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const { isCustom: isCategoryCustom } = useCustomOptions("cbd_framework_categories");
+  const { isCustom: isCategoryCustom, getLabel: getCategoryLabel } = useCustomOptions("cbd_framework_categories");
 
   const { data: frameworks = [] } = useQuery({
     queryKey: ['frameworks'],
@@ -225,7 +225,9 @@ export default function Frameworks() {
                       <p className="text-sm text-slate-600 mb-3">{framework.description}</p>
                       <div className="flex flex-wrap items-center gap-2">
                          <Badge variant="outline" className={`${getCategoryColor(framework.category)} border flex items-center gap-1`}>
-                          {framework.category?.replace(/_/g, ' ')}
+                          {isCategoryCustom(framework.category)
+                            ? getCategoryLabel(framework.category)
+                            : framework.category?.replace(/_/g, ' ')}
                           {isCategoryCustom(framework.category) && <CustomOptionIcon />}
                         </Badge>
                         <EndDateBadge endDate={framework.end_date} />

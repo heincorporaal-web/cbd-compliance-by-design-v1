@@ -91,7 +91,11 @@ export default function EditableOptionSelect({ storageKey, seededOptions = [], v
   };
 
   const isCustom = (val) => customOptions.some(o => o.value === val);
-  const allOptions = [...seededOptions, ...customOptions];
+  // Include current value even if not yet in loaded options (prevents blank select on initial render)
+  const extraOption = value && !seededOptions.some(o => o.value === value) && !customOptions.some(o => o.value === value)
+    ? [{ value, label: value.replace(/_/g, ' ') }]
+    : [];
+  const allOptions = [...seededOptions, ...customOptions, ...extraOption];
 
   return (
     <div className="flex gap-2">
