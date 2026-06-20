@@ -1,34 +1,44 @@
-import { useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { useState, useEffect } from "react";
+
+// Import the shared in-memory store helpers from EditableOptionSelect
+// We replicate the read/subscribe pattern here to stay in sync
+
+const listeners = {};
+const cache = {};
+
+function readFromStorage(storageKey) {
+  if (cache[storageKey]) return cache[storageKey];
+  try {
+    const stored = localStorage.getItem(storageKey);
+    if (stored) {
+      cache[storageKey] = JSON.parse(stored);
+      return cache[storageKey];
+    }
+  } catch {}
+  return [];
+}
+
+function subscribe(storageKey, fn) {
+  if (!listeners[storageKey]) listeners[storageKey] = [];
+  listeners[storageKey].push(fn);
+  return () => { listeners[storageKey] = listeners[storageKey].filter(f => f !== fn); };
+}
 
 /**
- * Reads custom options from the database for a given storageKey.
- * Returns { customOptions, isCustom(value), reload }
+ * Reads custom options for a given storageKey.
+ * Stays in sync with EditableOptionSelect instances on the same page.
  */
 export function useCustomOptions(storageKey) {
-  const [customOptions, setCustomOptions] = useState([]);
-
-  const load = useCallback(async () => {
-    try {
-      const records = await base44.entities.CustomOptionList.filter({ storage_key: storageKey });
-      if (records?.[0]?.options) setCustomOptions(records[0].options);
-      else setCustomOptions([]);
-    } catch {}
-  }, [storageKey]);
+  const [customOptions, setCustomOptions] = useState(() => readFromStorage(storageKey));
 
   useEffect(() => {
-    load();
-
-    // Also listen for same-page updates dispatched by EditableOptionSelect
-    const onUpdate = (e) => {
-      if (e.detail?.storageKey === storageKey) setCustomOptions(e.detail.options);
-    };
-    window.addEventListener("customOptionsUpdated", onUpdate);
-    return () => window.removeEventListener("customOptionsUpdated", onUpdate);
-  }, [storageKey, load]);
+    setCustomOptions(readFromStorage(storageKey));
+    const unsub = subscribe(storageKey, setCustomOptions);
+    return unsub;
+  }, [storageKey]);
 
   const isCustom = (value) => customOptions.some(o => o.value === value);
-  const getLabel = (value) => customOptions.find(o => o.value === value)?.label ?? value;
+  const getLabel = (value) => customOptions.find(o => o.value === value)?.label ?? value.replace(/_/g, ' ');
 
-  return { customOptions, isCustom, getLabel, reload: load };
+  return { customOptions, isCustom, getLabel };
 }
