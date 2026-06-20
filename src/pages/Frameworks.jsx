@@ -24,6 +24,7 @@ export default function Frameworks() {
   const [loading, setLoading] = useState(false);
   const [expandedFramework, setExpandedFramework] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const FRAMEWORK_CATEGORY_SEEDED = [
     { value: "information_security", label: "Information Security" },
     { value: "privacy", label: "Privacy" },
@@ -192,7 +193,7 @@ export default function Frameworks() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Risk Frameworks</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Risk & Control Frameworks</h1>
           <p className="text-slate-600">Manage compliance frameworks and controls</p>
         </div>
         {frameworks.length === 0 && (
@@ -209,7 +210,7 @@ export default function Frameworks() {
 
       {frameworks.length > 0 && (
         <Card className="border-none shadow-lg">
-          <CardContent className="p-4">
+          <CardContent className="p-4 space-y-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
               <Input
@@ -218,6 +219,32 @@ export default function Frameworks() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
+            </div>
+            {/* Category filter buttons — only show categories that exist in loaded frameworks */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setCategoryFilter("all")}
+                className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                  categoryFilter === "all"
+                    ? "bg-slate-800 text-white border-slate-800"
+                    : "bg-white text-slate-600 border-slate-300 hover:border-slate-500"
+                }`}
+              >
+                All
+              </button>
+              {[...new Set(frameworks.map(f => f.category).filter(Boolean))].sort().map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setCategoryFilter(cat === categoryFilter ? "all" : cat)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                    categoryFilter === cat
+                      ? "bg-slate-800 text-white border-slate-800"
+                      : `${getCategoryColor(cat)} hover:opacity-80`
+                  }`}
+                >
+                  {getCategoryLabel(cat)}
+                </button>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -239,15 +266,18 @@ export default function Frameworks() {
         </Card>
       ) : (
         <div className="space-y-6">
-          {frameworks.filter(f => 
-            f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            f.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            controls.some(c => 
-              c.framework_id === f.id && 
-              (c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               c.control_id?.toLowerCase().includes(searchTerm.toLowerCase()))
-            )
-          ).map((framework) => {
+          {frameworks.filter(f => {
+            const matchesSearch = !searchTerm ||
+              f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              f.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              controls.some(c =>
+                c.framework_id === f.id &&
+                (c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                 c.control_id?.toLowerCase().includes(searchTerm.toLowerCase()))
+              );
+            const matchesCategory = categoryFilter === "all" || f.category === categoryFilter;
+            return matchesSearch && matchesCategory;
+          }).map((framework) => {
             const frameworkControls = controls.filter(c => c.framework_id === framework.id);
             const isExpanded = expandedFramework === framework.id;
             
