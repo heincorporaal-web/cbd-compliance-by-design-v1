@@ -136,6 +136,14 @@ export default function RiskDetail() {
     queryFn: () => base44.entities.RootCauseCategory.list("sort_order"),
   });
 
+  const { data: orgObjectives = [] } = useQuery({
+    queryKey: ['orgObjectives', formData.company_id],
+    queryFn: () => base44.entities.OrgObjective.filter({ company_id: formData.company_id }),
+    enabled: !!formData.company_id,
+  });
+
+  const linkedObjectives = orgObjectives.filter(obj => formData.linked_objective_ids?.includes(obj.id));
+
   useEffect(() => {
     if (risk) {
       const loaded = {
@@ -270,7 +278,6 @@ export default function RiskDetail() {
   const linkedControls = controls.filter(c => formData.control_ids?.includes(c.id));
   const linkedFrameworks = frameworks.filter(f => formData.framework_ids?.includes(f.id));
   const company = companies.find(c => c.id === formData.company_id);
-  const linkedObjectives = company?.objectives?.filter(obj => formData.linked_objective_ids?.includes(obj.id)) || [];
   const riskScore = getRiskLevel(formData.likelihood, formData.impact);
 
   // Group root cause categories for cascading picker
@@ -892,7 +899,7 @@ export default function RiskDetail() {
         </div>
 
         <ObjectiveSelector
-          company={company}
+          company={company || { id: formData.company_id }}
           linkedObjectiveIds={formData.linked_objective_ids}
           onAdd={addObjective}
           onRemove={removeObjective}
