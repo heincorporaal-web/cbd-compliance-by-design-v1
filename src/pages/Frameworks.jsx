@@ -270,6 +270,7 @@ export default function Frameworks() {
             const matchesSearch = !searchTerm ||
               f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
               f.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              f.tags?.some(t => t.toLowerCase().includes(searchTerm.toLowerCase())) ||
               controls.some(c =>
                 c.framework_id === f.id &&
                 (c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
