@@ -14,6 +14,16 @@ import { ArrowLeft, Save, Plus, X, Target, AlertTriangle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
+import EditableOptionSelect from "@/components/ui/EditableOptionSelect";
+
+const FRAMEWORK_CATEGORY_SEEDED = [
+  { value: "information_security", label: "Information Security" },
+  { value: "privacy", label: "Privacy" },
+  { value: "compliance", label: "Compliance" },
+  { value: "operational_risk", label: "Operational Risk" },
+  { value: "financial", label: "Financial" },
+  { value: "other", label: "Other" },
+];
 
 export default function FrameworkDetail() {
   const navigate = useNavigate();
@@ -190,19 +200,13 @@ export default function FrameworkDetail() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="information_security">Information Security</SelectItem>
-                    <SelectItem value="privacy">Privacy</SelectItem>
-                    <SelectItem value="compliance">Compliance</SelectItem>
-                    <SelectItem value="operational_risk">Operational Risk</SelectItem>
-                    <SelectItem value="financial">Financial</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <EditableOptionSelect
+                  storageKey="cbd_framework_categories"
+                  seededOptions={FRAMEWORK_CATEGORY_SEEDED}
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({...formData, category: value})}
+                  placeholder="Select category..."
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
