@@ -4,35 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, Trash2, Settings2, Pencil } from "lucide-react";
-
-// Global in-memory store so all instances on the same page share state
-const listeners = {};
-const cache = {};
-
-function readFromStorage(storageKey) {
-  if (cache[storageKey]) return cache[storageKey];
-  try {
-    const stored = localStorage.getItem(storageKey);
-    if (stored) {
-      cache[storageKey] = JSON.parse(stored);
-      return cache[storageKey];
-    }
-  } catch {}
-  return [];
-}
-
-function writeToStorage(storageKey, opts) {
-  cache[storageKey] = opts;
-  try { localStorage.setItem(storageKey, JSON.stringify(opts)); } catch {}
-  // Notify all subscribers on this page
-  (listeners[storageKey] || []).forEach(fn => fn(opts));
-}
-
-function subscribe(storageKey, fn) {
-  if (!listeners[storageKey]) listeners[storageKey] = [];
-  listeners[storageKey].push(fn);
-  return () => { listeners[storageKey] = listeners[storageKey].filter(f => f !== fn); };
-}
+import { readFromStorage, writeToStorage, subscribe } from "@/lib/customOptionsStore";
 
 /**
  * Icon shown next to custom (non-seeded) option values.
