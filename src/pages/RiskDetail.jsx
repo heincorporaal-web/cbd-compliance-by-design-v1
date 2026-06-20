@@ -641,14 +641,14 @@ export default function RiskDetail() {
                     frameworks
                       .filter(f => f.is_master)
                       .reduce((acc, f) => {
-                        const grp = f.framework_family || "Other";
+                        const grp = f.category || "Other";
                         if (!acc[grp]) acc[grp] = [];
                         acc[grp].push(f);
                         return acc;
                       }, {})
-                  ).map(([family, items]) => (
-                    <div key={family}>
-                      <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100 sticky top-0">{family}</div>
+                  ).map(([category, items]) => (
+                    <div key={category}>
+                      <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100 sticky top-0">{category.replace(/_/g, ' ')}</div>
                       {items.map(f => {
                         const checked = formData.framework_ids?.includes(f.id);
                         return (
@@ -664,17 +664,7 @@ export default function RiskDetail() {
                               }}
                               className="rounded border-slate-300 text-primary"
                             />
-                            <span className="text-xs font-medium text-slate-700">{f.framework_code || f.name}</span>
-                            <TooltipProvider delayDuration={100}>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="w-3 h-3 text-slate-400 hover:text-slate-600 shrink-0" />
-                                </TooltipTrigger>
-                                <TooltipContent side="right" className="max-w-xs text-xs">
-                                  {f.name}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <span className="text-xs font-medium text-slate-700">{f.name}</span>
                           </label>
                         );
                       })}
@@ -687,19 +677,12 @@ export default function RiskDetail() {
                   {formData.framework_ids.map(id => {
                     const f = frameworks.find(fw => fw.id === id);
                     return f ? (
-                      <TooltipProvider key={id} delayDuration={100}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Badge variant="outline" className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200 gap-1 cursor-default">
-                              {f.framework_code || f.name}
-                              <button type="button" onClick={() => setFormData(p => ({ ...p, framework_ids: p.framework_ids.filter(i => i !== id) }))}>
-                                <X className="w-2.5 h-2.5" />
-                              </button>
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs text-xs">{f.name}</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <Badge key={id} variant="outline" className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200 gap-1 cursor-default">
+                        {f.name}
+                        <button type="button" onClick={() => setFormData(p => ({ ...p, framework_ids: p.framework_ids.filter(i => i !== id) }))}>
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </Badge>
                     ) : null;
                   })}
                 </div>
