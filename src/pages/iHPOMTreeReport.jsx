@@ -10,41 +10,33 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 export default function IHPOMTreeReport() {
-  const [selectedCompanyId, setSelectedCompanyId] = useState("all");
   const [expandedNodes, setExpandedNodes] = useState(new Set());
   const [expandLevel, setExpandLevel] = useState(null);
 
-  const { data: companies = [] } = useQuery({
-    queryKey: ['companies'],
-    queryFn: () => base44.entities.Company.list(),
-  });
-
   const { data: processes = [] } = useQuery({
-    queryKey: ['processes'],
-    queryFn: () => base44.entities.BusinessProcess.list('process_code'),
+    queryKey: ['ihpomNodes'],
+    queryFn: () => base44.entities.IHPOMNode.list('node_code'),
   });
 
-  const filteredProcesses = selectedCompanyId === "all" 
-    ? processes 
-    : processes.filter(p => p.company_id === selectedCompanyId);
+  const filteredProcesses = processes;
 
   const levelLabels = {
-    0: "Value Chain",
     1: "Process Group",
     2: "Process",
     3: "Sub-Process",
     4: "Procedure",
-    5: "Task"
+    5: "Task",
+    6: "Activity/Keystroke"
   };
 
   const getLevelColor = (level) => {
     const colors = {
-      0: "bg-purple-500 text-white",
       1: "bg-blue-500 text-white",
       2: "bg-indigo-500 text-white",
       3: "bg-cyan-500 text-white",
       4: "bg-teal-500 text-white",
-      5: "bg-green-500 text-white"
+      5: "bg-green-500 text-white",
+      6: "bg-emerald-500 text-white"
     };
     return colors[level] || "bg-slate-500 text-white";
   };
@@ -108,7 +100,6 @@ export default function IHPOMTreeReport() {
   const renderProcessNode = (process, depth = 0) => {
     const hasChildren = process.children && process.children.length > 0;
     const isExpanded = expandedNodes.has(process.id);
-    const company = companies.find(c => c.id === process.company_id);
 
     return (
       <div key={process.id} className="print-avoid-break">
@@ -133,7 +124,7 @@ export default function IHPOMTreeReport() {
               <Badge className={`${getLevelColor(process.level)} text-xs flex-shrink-0`}>
                 L{process.level}
               </Badge>
-              <span className="font-mono text-xs text-slate-600 flex-shrink-0">{process.process_code}</span>
+              <span className="font-mono text-xs text-slate-600 flex-shrink-0">{process.node_code}</span>
               <span className="font-medium text-slate-900">{process.name}</span>
               {process.criticality && (
                 <Badge variant="outline" className={`${getCriticalityColor(process.criticality)} text-xs`}>
@@ -143,12 +134,8 @@ export default function IHPOMTreeReport() {
             </div>
             
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-              {selectedCompanyId === "all" && company && (
-                <span>• {company.name}</span>
-              )}
+              <span className="text-xs text-slate-400 italic">Company-independent reference node</span>
               {process.process_owner && <span>• Owner: {process.process_owner}</span>}
-              {process.workstream && <span>• {process.workstream}</span>}
-              {process.frequency && <span>• {process.frequency.replace('_', ' ')}</span>}
             </div>
             
             {process.description && (
@@ -156,14 +143,8 @@ export default function IHPOMTreeReport() {
             )}
 
             <div className="flex gap-2 mt-1">
-              {(process.linked_risk_ids?.length || 0) > 0 && (
-                <span className="text-xs text-orange-600">{process.linked_risk_ids.length} risks</span>
-              )}
-              {(process.linked_control_ids?.length || 0) > 0 && (
-                <span className="text-xs text-blue-600">{process.linked_control_ids.length} controls</span>
-              )}
-              {(process.linked_objective_ids?.length || 0) > 0 && (
-                <span className="text-xs text-purple-600">{process.linked_objective_ids.length} objectives</span>
+              {(process.linked_process_ids?.length || 0) > 0 && (
+                <span className="text-xs text-purple-600">{process.linked_process_ids.length} linked company processes</span>
               )}
             </div>
           </div>
@@ -228,17 +209,12 @@ export default function IHPOMTreeReport() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-              <SelectTrigger className="w-64">
-                <SelectValue placeholder="Select company" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
-                {companies.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Link to={createPageUrl("iHPOM")}>
+              <Button variant="outline">
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to iHPOM
+              </Button>
+            </Link>
             <Button onClick={handlePrint} className="bg-purple-600 hover:bg-purple-700">
               <Download className="w-4 h-4 mr-2" />
               Export/Print
@@ -259,7 +235,7 @@ export default function IHPOMTreeReport() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {[0, 1, 2, 3, 4, 5].map(level => (
+              {[1, 2, 3, 4, 5, 6].map(level => (
                 <div key={level} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
                   <Badge className={`${getLevelColor(level)} text-xs mb-2`}>
                     L{level}

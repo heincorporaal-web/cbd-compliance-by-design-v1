@@ -1,0 +1,80 @@
+{
+  "name": "IHPOMNode",
+  "type": "object",
+  "properties": {
+    "node_code": {
+      "type": "string",
+      "description": "Unique node identifier (e.g. N1.2.1)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Node name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed node description"
+    },
+    "level": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "description": "Hierarchy level: 1=Process Group, 2=Process, 3=Sub-Process, 4=Procedure, 5=Task, 6=Activity/Keystroke"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent node ID for hierarchy"
+    },
+    "process_owner": {
+      "type": "string",
+      "description": "Process owner name"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "Business criticality"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "archived",
+        "under_review"
+      ],
+      "default": "active",
+      "description": "Node status"
+    },
+    "documentation_url": {
+      "type": "string",
+      "description": "Link to documentation"
+    },
+    "linked_process_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked company-level process IDs for comparison"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "node_code",
+    "name",
+    "level"
+  ]
+}

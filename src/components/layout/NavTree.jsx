@@ -70,6 +70,7 @@ export const NAV_GROUPS = [
     label: "Process & Systems",
     icon: Network,
     items: [
+      { id: "ihpom", title: "iHPOM Repository", url: createPageUrl("iHPOM"), icon: Network },
       { id: "process_mgmt", title: "Process Management", url: createPageUrl("ProcessManagement"), icon: Network },
       { id: "process_assessments", title: "Process Assessments", url: createPageUrl("ProcessAssessments"), icon: ClipboardCheck },
       { id: "ict_systems", title: "ICT Systems", url: createPageUrl("ICTSystems"), icon: Server },
