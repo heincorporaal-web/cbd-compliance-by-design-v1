@@ -69,9 +69,10 @@ export default function PrincipalRiskFormDialog({ open, onClose, editRisk, compa
     ? stakeholders.filter(s => s.company_id === form.company_id)
     : stakeholders;
 
-  const companyBUs = form.company_id
+  const companyBUs = (form.company_id
     ? businessUnits.filter(b => b.company_id === form.company_id)
-    : businessUnits;
+    : businessUnits
+  ).filter(b => b.type === "Function");
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
