@@ -13,6 +13,8 @@ import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import IHPOMImportDialog from "@/components/ihpom/IHPOMImportDialog";
 import IHPOMNodeDialog from "@/components/ihpom/IHPOMNodeDialog";
+import IHPOMLevel1View from "@/components/ihpom/IHPOMLevel1View";
+import IHPOMPeriodicTable from "@/components/ihpom/IHPOMPeriodicTable";
 
 const levelLabels = {
   1: "Process Group",
@@ -48,6 +50,7 @@ export default function IHPOM() {
   const [levelFilter, setLevelFilter] = useState("all");
   const [expandedNodes, setExpandedNodes] = useState(new Set());
   const [importOpen, setImportOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("tree");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editNode, setEditNode] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
@@ -224,6 +227,7 @@ export default function IHPOM() {
       {/* Filters + Tree */}
       <Card className="border-none shadow-lg">
         <CardHeader className="border-b border-slate-100">
+          {(activeTab === "tree" || activeTab === "list") && (
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -246,12 +250,13 @@ export default function IHPOM() {
               </SelectContent>
             </Select>
           </div>
+          )}
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-12 text-center text-slate-500">Loading iHPOM nodes…</div>
           ) : filteredNodes.length > 0 ? (
-            <Tabs defaultValue="tree" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="border-b px-4">
                 <TabsList>
                   <TabsTrigger value="tree" className="gap-2">
@@ -259,6 +264,12 @@ export default function IHPOM() {
                   </TabsTrigger>
                   <TabsTrigger value="list" className="gap-2">
                     <List className="w-4 h-4" /> List View
+                  </TabsTrigger>
+                  <TabsTrigger value="level1" className="gap-2">
+                    <Layers className="w-4 h-4" /> Level 1
+                  </TabsTrigger>
+                  <TabsTrigger value="periodic" className="gap-2">
+                    <Network className="w-4 h-4" /> Periodic Table
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -273,6 +284,14 @@ export default function IHPOM() {
                 <div className="divide-y divide-slate-100">
                   {hierarchy.map(node => renderNode(node))}
                 </div>
+              </TabsContent>
+
+              <TabsContent value="level1" className="p-6 m-0 bg-slate-50">
+                <IHPOMLevel1View nodes={nodes} />
+              </TabsContent>
+
+              <TabsContent value="periodic" className="p-6 m-0 bg-slate-50">
+                <IHPOMPeriodicTable nodes={nodes} />
               </TabsContent>
             </Tabs>
           ) : (
