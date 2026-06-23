@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Search, Building2, ChevronRight, Network } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
 
 const BU_TYPES = [
   "Profit & Loss Unit", "Department", "Capability", "Center of Excellence",
@@ -370,13 +371,12 @@ export default function BusinessUnits() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Owner</Label>
-                <Select value={form.owner_stakeholder_id || "none"} onValueChange={v => handleChange("owner_stakeholder_id", v === "none" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder="Select owner…" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {stakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}{s.job_title ? ` — ${s.job_title}` : ""}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SearchableStakeholderSelect
+                  value={form.owner_stakeholder_id}
+                  onValueChange={v => handleChange("owner_stakeholder_id", v)}
+                  stakeholders={form.company_id ? stakeholders.filter(s => s.company_id === form.company_id) : stakeholders}
+                  placeholder="Select owner…"
+                />
               </div>
               <div className="space-y-1">
                 <Label>Cost Centre Code</Label>
