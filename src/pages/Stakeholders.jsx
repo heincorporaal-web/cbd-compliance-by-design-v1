@@ -48,6 +48,11 @@ export default function Stakeholders() {
     queryFn: () => base44.entities.User.list(),
   });
 
+  const { data: businessUnits = [] } = useQuery({
+    queryKey: ["businessUnits"],
+    queryFn: () => base44.entities.BusinessUnit.list(),
+  });
+
   // Auto-provision default groups for all companies
   useDefaultStakeholderGroups(companies.map(c => c.id));
 
@@ -273,6 +278,7 @@ export default function Stakeholders() {
         companies={companies}
         users={users}
         allStakeholders={stakeholders}
+        businessUnits={businessUnits}
         onSave={handleSave}
       />
     </div>

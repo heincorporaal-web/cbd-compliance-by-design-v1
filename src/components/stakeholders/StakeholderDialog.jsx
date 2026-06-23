@@ -14,7 +14,7 @@ const empty = {
   phone: "", company_id: "", manager_id: "", user_id: "", group_ids: [], status: "active", end_date: "", notes: ""
 };
 
-export default function StakeholderDialog({ open, onOpenChange, stakeholder, groups, companies, users, allStakeholders = [], onSave }) {
+export default function StakeholderDialog({ open, onOpenChange, stakeholder, groups, companies, users, allStakeholders = [], businessUnits = [], onSave }) {
   const [form, setForm] = useState(empty);
   const [empNumError, setEmpNumError] = useState("");
 
@@ -124,7 +124,16 @@ export default function StakeholderDialog({ open, onOpenChange, stakeholder, gro
             </div>
             <div className="space-y-1.5">
               <Label>Department</Label>
-              <Input value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
+              <Select value={form.department || "__none__"} onValueChange={v => setForm({ ...form, department: v === "__none__" ? "" : v })}>
+                <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {(form.company_id
+                    ? businessUnits.filter(b => b.type === "Department" && b.company_id === form.company_id)
+                    : businessUnits.filter(b => b.type === "Department")
+                  ).map(b => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Phone</Label>
