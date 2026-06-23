@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
 import { toast } from "sonner";
 
 const EMPTY_FORM = {
@@ -138,33 +139,30 @@ export default function PrincipalRiskFormDialog({ open, onClose, editRisk, compa
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Risk Owner (Executive)</Label>
-                <Select value={form.risk_owner_id || "none"} onValueChange={v => v === "none" ? setForm(f => ({ ...f, risk_owner_id: "", risk_owner_name: "" })) : setStakeholder("risk_owner_id", v, "risk_owner_name")}>
-                  <SelectTrigger><SelectValue placeholder="Select stakeholder" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {companyStakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SearchableStakeholderSelect
+                  value={form.risk_owner_id}
+                  onValueChange={v => v ? setStakeholder("risk_owner_id", v, "risk_owner_name") : setForm(f => ({ ...f, risk_owner_id: "", risk_owner_name: "" }))}
+                  stakeholders={companyStakeholders}
+                  placeholder="Select stakeholder"
+                />
               </div>
               <div>
                 <Label>Risk Manager (Day-to-Day)</Label>
-                <Select value={form.risk_manager_id || "none"} onValueChange={v => v === "none" ? setForm(f => ({ ...f, risk_manager_id: "", risk_manager_name: "" })) : setStakeholder("risk_manager_id", v, "risk_manager_name")}>
-                  <SelectTrigger><SelectValue placeholder="Select stakeholder" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {companyStakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SearchableStakeholderSelect
+                  value={form.risk_manager_id}
+                  onValueChange={v => v ? setStakeholder("risk_manager_id", v, "risk_manager_name") : setForm(f => ({ ...f, risk_manager_id: "", risk_manager_name: "" }))}
+                  stakeholders={companyStakeholders}
+                  placeholder="Select stakeholder"
+                />
               </div>
               <div>
                 <Label>Risk Function Owner (2LoD)</Label>
-                <Select value={form.risk_function_owner_id || "none"} onValueChange={v => v === "none" ? setForm(f => ({ ...f, risk_function_owner_id: "", risk_function_owner_name: "" })) : setStakeholder("risk_function_owner_id", v, "risk_function_owner_name")}>
-                  <SelectTrigger><SelectValue placeholder="Select stakeholder" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {companyStakeholders.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SearchableStakeholderSelect
+                  value={form.risk_function_owner_id}
+                  onValueChange={v => v ? setStakeholder("risk_function_owner_id", v, "risk_function_owner_name") : setForm(f => ({ ...f, risk_function_owner_id: "", risk_function_owner_name: "" }))}
+                  stakeholders={companyStakeholders}
+                  placeholder="Select stakeholder"
+                />
               </div>
               <div>
                 <Label>Business Area Most Exposed</Label>
