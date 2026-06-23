@@ -127,6 +127,13 @@
         "type": "string"
       }
     },
+    "linked_ihpom_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked iHPOM repository node IDs"
+    },
     "documentation_url": {
       "type": "string"
     },

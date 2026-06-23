@@ -12,10 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Save, Plus, Trash2, Shield, AlertTriangle, AlertCircle,
-  Target, ClipboardCheck, X, User, Server, Users, GitBranch, Search, ChevronsUpDown, ListChecks
+  Target, ClipboardCheck, X, User, Server, Users, GitBranch, Search, ChevronsUpDown, ListChecks, Network
 } from "lucide-react";
 import ProcessFlowChart from "@/components/processmanagement/ProcessFlowChart";
 import StakeholderPickerDialog from "@/components/processmanagement/StakeholderPickerDialog";
+import IHPOMNodeLinkDialog from "@/components/processmanagement/IHPOMNodeLinkDialog";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -40,6 +41,7 @@ export default function ProcessManagementDetail() {
     linked_system_ids: [], linked_it_capability_ids: [], linked_risk_ids: [], linked_control_ids: [],
     linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
     linked_objective_ids: [], linked_principle_risk_ids: [], linked_org_objective_ids: [],
+    linked_ihpom_ids: [],
     documentation_url: "", frequency: "ad_hoc", estimated_duration: "",
     automation_level: "manual", criticality: "medium",
     inputs: "", outputs: "", key_performance_indicators: "", notes: ""
@@ -91,6 +93,7 @@ export default function ProcessManagementDetail() {
   const { data: orgObjectives = [] } = useQuery({ queryKey: ["orgObjectives"], queryFn: () => base44.entities.OrgObjective.list() });
   const { data: stakeholders = [] } = useQuery({ queryKey: ["stakeholders"], queryFn: () => base44.entities.Stakeholder.list() });
   const { data: stakeholderGroups = [] } = useQuery({ queryKey: ["stakeholderGroups"], queryFn: () => base44.entities.StakeholderGroup.list() });
+  const { data: ihpomNodes = [] } = useQuery({ queryKey: ["ihpomNodes"], queryFn: () => base44.entities.IHPOMNode.list("node_code") });
 
   useEffect(() => {
     if (existingProcess?.[0]) setFormData(existingProcess[0]);
@@ -120,6 +123,7 @@ export default function ProcessManagementDetail() {
     linked_system_ids: [], linked_it_capability_ids: [], linked_risk_ids: [], linked_control_ids: [],
     linked_issue_ids: [], linked_goal_ids: [], linked_assessment_ids: [],
     linked_objective_ids: [], linked_principle_risk_ids: [], linked_org_objective_ids: [],
+    linked_ihpom_ids: [],
     documentation_url: "", frequency: "ad_hoc", estimated_duration: "",
     automation_level: "manual", criticality: "medium",
     inputs: "", outputs: "", key_performance_indicators: "", notes: "",
@@ -204,6 +208,7 @@ export default function ProcessManagementDetail() {
   const companyOrgObjectives = orgObjectives.filter(o => !formData.company_id || o.company_id === formData.company_id);
   const linkedOrgObjectiveIds = formData.linked_org_objective_ids || [];
   const linkedOrgObjectives = orgObjectives.filter(o => linkedOrgObjectiveIds.includes(o.id));
+  const linkedIHPOMNodes = ihpomNodes.filter(n => formData.linked_ihpom_ids?.includes(n.id));
 
   const selectedOwnerUser = users.find(u => u.id === formData.process_owner_id);
   const selectedOwnerStakeholder = stakeholders.find(s => s.id === formData.process_owner_stakeholder_id);
@@ -277,11 +282,13 @@ export default function ProcessManagementDetail() {
               Links
               {(formData.linked_risk_ids?.length || 0) + (formData.linked_control_ids?.length || 0) +
                (formData.linked_issue_ids?.length || 0) + (formData.linked_goal_ids?.length || 0) +
-               (formData.linked_assessment_ids?.length || 0) > 0 && (
+               (formData.linked_assessment_ids?.length || 0) + (formData.linked_org_objective_ids?.length || 0) +
+               (formData.linked_ihpom_ids?.length || 0) > 0 && (
                 <Badge variant="secondary" className="ml-2">
                   {(formData.linked_risk_ids?.length || 0) + (formData.linked_control_ids?.length || 0) +
                    (formData.linked_issue_ids?.length || 0) + (formData.linked_goal_ids?.length || 0) +
-                   (formData.linked_assessment_ids?.length || 0)}
+                   (formData.linked_assessment_ids?.length || 0) + (formData.linked_org_objective_ids?.length || 0) +
+                   (formData.linked_ihpom_ids?.length || 0)}
                 </Badge>
               )}
             </TabsTrigger>
@@ -925,6 +932,37 @@ export default function ProcessManagementDetail() {
                   ) : <p className="text-sm text-slate-500 text-center py-4">No assessments linked</p>}
                 </CardContent>
               </Card>
+
+              {/* iHPOM Nodes */}
+              <Card className="border-none shadow-lg lg:col-span-2">
+                <CardHeader className="border-b border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2"><Network className="w-5 h-5 text-purple-600" />Linked iHPOM Nodes</CardTitle>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setActiveDialog("ihpom")}>
+                      <Plus className="w-4 h-4 mr-1" />Link Node
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {linkedIHPOMNodes.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {linkedIHPOMNodes.map(n => (
+                        <div key={n.id} className="flex items-center justify-between p-2 bg-purple-50 rounded border border-purple-200">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Badge className="bg-purple-100 text-purple-700 shrink-0 text-xs">L{n.level}</Badge>
+                            {n.symbol && <span className="text-xs font-bold text-slate-700 uppercase shrink-0">{n.symbol}</span>}
+                            <span className="font-mono text-xs text-slate-500 shrink-0">{n.node_code}</span>
+                            <span className="text-sm truncate">{n.name}</span>
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => removeLink("linked_ihpom_ids", n.id)}>
+                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : <p className="text-sm text-slate-500 text-center py-4">No iHPOM nodes linked</p>}
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -1085,6 +1123,14 @@ export default function ProcessManagementDetail() {
           )}
         </Tabs>
       </form>
+
+      <IHPOMNodeLinkDialog
+        open={activeDialog === "ihpom"}
+        onOpenChange={open => setActiveDialog(open ? "ihpom" : null)}
+        nodes={ihpomNodes}
+        linkedIds={formData.linked_ihpom_ids || []}
+        onAdd={id => addLink("linked_ihpom_ids", id)}
+      />
 
       {processId && !isNew && (
         <WorkflowPanel
