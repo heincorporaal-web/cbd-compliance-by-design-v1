@@ -4,11 +4,11 @@
   "properties": {
     "node_code": {
       "type": "string",
-      "description": "Unique node identifier (e.g. N1.2.1)"
+      "description": "Unique node reference code (e.g. 1.1.1)"
     },
     "name": {
       "type": "string",
-      "description": "Node name"
+      "description": "Node title / name"
     },
     "description": {
       "type": "string",
@@ -29,6 +29,19 @@
     "parent_id": {
       "type": "string",
       "description": "Parent node ID for hierarchy"
+    },
+    "symbol": {
+      "type": "string",
+      "description": "Short symbol code (e.g. DV, GC, MV)"
+    },
+    "alias": {
+      "type": "string",
+      "description": "Alternative display name / alias"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Display sort order (maps to source SortKey)"
     },
     "process_owner": {
       "type": "string",
