@@ -30,7 +30,7 @@ const DIVIDER_OPTIONS = [
   { value: ".", label: "Period  ( . )" },
   { value: "/", label: "Slash   ( / )" },
   { value: "_", label: "Underscore ( _ )" },
-  { value: "",  label: "None" },
+  { value: "none",  label: "None" },
 ];
 
 export default function NumberingConfigSection({ numbering = {}, onChange }) {
@@ -103,11 +103,11 @@ export default function NumberingConfigSection({ numbering = {}, onChange }) {
                       />
                     </td>
                     <td className="px-3 py-2.5">
-                      <Select value={cfg.divider} onValueChange={v => updateField(key, "divider", v)}>
+                      <Select value={cfg.divider || "none"} onValueChange={v => updateField(key, "divider", v === "none" ? "" : v)}>
                         <SelectTrigger className="w-36 h-8 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {DIVIDER_OPTIONS.map(d => (
-                            <SelectItem key={d.value || "none"} value={d.value}>{d.label}</SelectItem>
+                            <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
