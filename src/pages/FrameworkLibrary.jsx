@@ -202,6 +202,12 @@ export default function FrameworkLibrary() {
                   </div>
                 </div>
 
+                {frameworkPillars.length === 0 && nodes.filter(n => n.framework_id === selectedFw.id).length === 0 && (
+                  <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+                    This framework has no hierarchy yet. {isMaintainer ? "Click “Edit framework” to build its pillars and node hierarchy." : "A Product Owner can build its pillars and node hierarchy."}
+                  </div>
+                )}
+
                 {/* Pillars */}
                 {frameworkPillars.length > 0 && (
                   <div>
@@ -246,13 +252,17 @@ export default function FrameworkLibrary() {
                 <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-2"><BookOpen className="w-4 h-4" />All master library frameworks ({frameworks.length})</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {frameworks.sort((a, b) => a.name.localeCompare(b.name)).map(f => (
-                    <div key={f.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50">
+                    <button
+                      key={f.id}
+                      onClick={() => { setSelectedFwId(f.id); setTypeFilter("all"); setExpanded(new Set()); }}
+                      className="flex items-center gap-2 p-2 rounded-lg border border-transparent hover:bg-slate-50 hover:border-primary/30 text-left transition-colors"
+                    >
                       <Shield className="w-4 h-4 text-slate-400 shrink-0" />
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-slate-800 truncate">{f.name}</p>
-                        <p className="text-xs text-slate-400">{f.legacy_framework_id != null ? "Full hierarchy" : "Reference framework"}</p>
+                        <p className="text-xs text-slate-400">{f.legacy_framework_id != null ? "Full hierarchy" : "Reference framework · click to build hierarchy"}</p>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </CardContent>
