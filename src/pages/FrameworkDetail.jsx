@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Save, Plus, X, Target, AlertTriangle, Trash2, Paperclip } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Paperclip } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -46,9 +46,6 @@ export default function FrameworkDetail() {
   const frameworkId = urlParams.get('id');
   const isNew = urlParams.get('new') === 'true';
 
-  const [isObjectiveDialogOpen, setIsObjectiveDialogOpen] = useState(false);
-  const [isPrincipalRiskDialogOpen, setIsPrincipalRiskDialogOpen] = useState(false);
-  const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
 
   const [formData, setFormData] = useState({
@@ -58,9 +55,7 @@ export default function FrameworkDetail() {
     category: "information_security",
     status: "active",
     end_date: "",
-    tags: [],
-    linked_objective_ids: [],
-    linked_principle_risk_ids: []
+    tags: []
   });
 
   const [newTag, setNewTag] = useState("");
@@ -78,21 +73,6 @@ export default function FrameworkDetail() {
     queryKey: ['framework', frameworkId],
     queryFn: () => base44.entities.Framework.filter({ id: frameworkId }),
     enabled: !!frameworkId && !isNew,
-  });
-
-  const { data: companies = [] } = useQuery({
-    queryKey: ['companies'],
-    queryFn: () => base44.entities.Company.list(),
-  });
-
-  const { data: allObjectives = [] } = useQuery({
-    queryKey: ['orgObjectives'],
-    queryFn: () => base44.entities.OrgObjective.list(),
-  });
-
-  const { data: allPrincipalRisks = [] } = useQuery({
-    queryKey: ['principalRisks'],
-    queryFn: () => base44.entities.PrincipalRisk.list(),
   });
 
   useEffect(() => {
@@ -140,51 +120,6 @@ export default function FrameworkDetail() {
 
   // Track dirty state
   useEffect(() => { checkDirty(formData); }, [formData]);
-
-  // Filter by selected company for the picker dialogs
-  const companyObjectives = selectedCompanyId
-    ? allObjectives.filter(o => o.company_id === selectedCompanyId)
-    : allObjectives;
-
-  const companyPrincipalRisks = selectedCompanyId
-    ? allPrincipalRisks.filter(r => r.company_id === selectedCompanyId)
-    : allPrincipalRisks;
-
-  const companyMap = Object.fromEntries(companies.map(c => [c.id, c.name]));
-
-  // Resolve linked items from the proper entities
-  const linkedObjectives = allObjectives.filter(o => formData.linked_objective_ids?.includes(o.id));
-  const linkedPrincipalRisks = allPrincipalRisks.filter(r => formData.linked_principle_risk_ids?.includes(r.id));
-
-  const addObjective = (objectiveId) => {
-    if (!formData.linked_objective_ids?.includes(objectiveId)) {
-      const updated = [...(formData.linked_objective_ids || []), objectiveId];
-      setFormData({ ...formData, linked_objective_ids: updated });
-      if (frameworkId) updateMutation.mutate({ ...formData, linked_objective_ids: updated });
-    }
-    setIsObjectiveDialogOpen(false);
-  };
-
-  const removeObjective = (objectiveId) => {
-    const updated = formData.linked_objective_ids.filter(id => id !== objectiveId);
-    setFormData({ ...formData, linked_objective_ids: updated });
-    if (frameworkId) updateMutation.mutate({ ...formData, linked_objective_ids: updated });
-  };
-
-  const addPrincipalRisk = (riskId) => {
-    if (!formData.linked_principle_risk_ids?.includes(riskId)) {
-      const updated = [...(formData.linked_principle_risk_ids || []), riskId];
-      setFormData({ ...formData, linked_principle_risk_ids: updated });
-      if (frameworkId) updateMutation.mutate({ ...formData, linked_principle_risk_ids: updated });
-    }
-    setIsPrincipalRiskDialogOpen(false);
-  };
-
-  const removePrincipalRisk = (riskId) => {
-    const updated = formData.linked_principle_risk_ids.filter(id => id !== riskId);
-    setFormData({ ...formData, linked_principle_risk_ids: updated });
-    if (frameworkId) updateMutation.mutate({ ...formData, linked_principle_risk_ids: updated });
-  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -341,159 +276,6 @@ export default function FrameworkDetail() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Org Objectives */}
-          <Card className="border-none shadow-lg">
-            <CardHeader className="border-b border-slate-100">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-blue-600" />
-                  Org Objectives
-                </CardTitle>
-                <Dialog open={isObjectiveDialogOpen} onOpenChange={setIsObjectiveDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button type="button" variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Link
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Link Org Objective</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Filter by company (optional)" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={null}>All Companies</SelectItem>
-                          {companies.map(c => (
-                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {companyObjectives
-                          .filter(obj => !formData.linked_objective_ids?.includes(obj.id))
-                          .map(obj => (
-                            <div
-                              key={obj.id}
-                              className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
-                              onClick={() => addObjective(obj.id)}
-                            >
-                              <p className="font-medium text-sm">{obj.title}</p>
-                              <p className="text-xs text-slate-500 mt-0.5">{companyMap[obj.company_id] || ""}</p>
-                              {obj.description && <p className="text-xs text-slate-600 mt-1 line-clamp-2">{obj.description}</p>}
-                            </div>
-                          ))}
-                        {companyObjectives.filter(obj => !formData.linked_objective_ids?.includes(obj.id)).length === 0 && (
-                          <p className="text-sm text-slate-500 text-center py-4">No objectives available</p>
-                        )}
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4">
-              {linkedObjectives.length > 0 ? (
-                <div className="space-y-2">
-                  {linkedObjectives.map(obj => (
-                    <div key={obj.id} className="flex items-start justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm text-slate-900">{obj.title}</p>
-                        <p className="text-xs text-slate-500 mt-1">{companyMap[obj.company_id] || ""}</p>
-                        {obj.description && <p className="text-xs text-slate-600 mt-1">{obj.description}</p>}
-                      </div>
-                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeObjective(obj.id)}>
-                        <X className="w-3 h-3 text-slate-500" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500 text-center py-4">No objectives linked</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Principal Risks */}
-          <Card className="border-none shadow-lg">
-            <CardHeader className="border-b border-slate-100">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-orange-600" />
-                  Principal Risks
-                </CardTitle>
-                <Dialog open={isPrincipalRiskDialogOpen} onOpenChange={setIsPrincipalRiskDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button type="button" variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Link
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Link Principal Risk</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Filter by company (optional)" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={null}>All Companies</SelectItem>
-                          {companies.map(c => (
-                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {companyPrincipalRisks
-                          .filter(risk => !formData.linked_principle_risk_ids?.includes(risk.id))
-                          .map(risk => (
-                            <div
-                              key={risk.id}
-                              className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer"
-                              onClick={() => addPrincipalRisk(risk.id)}
-                            >
-                              <p className="font-medium text-sm">{risk.risk_title}</p>
-                              <p className="text-xs text-slate-500 mt-0.5">{companyMap[risk.company_id] || ""}</p>
-                              {risk.risk_description && <p className="text-xs text-slate-600 mt-1 line-clamp-2">{risk.risk_description}</p>}
-                            </div>
-                          ))}
-                        {companyPrincipalRisks.filter(risk => !formData.linked_principle_risk_ids?.includes(risk.id)).length === 0 && (
-                          <p className="text-sm text-slate-500 text-center py-4">No principal risks available</p>
-                        )}
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4">
-              {linkedPrincipalRisks.length > 0 ? (
-                <div className="space-y-2">
-                  {linkedPrincipalRisks.map(risk => (
-                    <div key={risk.id} className="flex items-start justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm text-slate-900">{risk.risk_title}</p>
-                        <p className="text-xs text-slate-500 mt-1">{companyMap[risk.company_id] || ""}</p>
-                        {risk.risk_description && <p className="text-xs text-slate-600 mt-1">{risk.risk_description}</p>}
-                      </div>
-                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removePrincipalRisk(risk.id)}>
-                        <X className="w-3 h-3 text-slate-500" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500 text-center py-4">No principal risks linked</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
       </form>
 
       <UnsavedChangesDialog
@@ -508,7 +290,6 @@ export default function FrameworkDetail() {
           entityType="Framework"
           entityId={frameworkId}
           entityName={formData.name || "Framework"}
-          companyId={selectedCompanyId}
           record={existingFramework?.[0]}
           onInstanceCreated={() => queryClient.invalidateQueries(['framework', frameworkId])}
         />

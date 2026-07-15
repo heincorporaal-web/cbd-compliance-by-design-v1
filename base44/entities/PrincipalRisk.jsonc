@@ -133,6 +133,13 @@
     },
     "notes": {
       "type": "string"
+    },
+    "linked_framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Frameworks associated with this principal risk at company level (framework must be assigned to the company first)"
     }
   },
   "required": [

@@ -14,6 +14,7 @@ import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
 import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
 import CalendarPromptDialog from "@/components/risks/CalendarPromptDialog";
+import SearchableMultiPicker from "@/components/objectives/SearchableMultiPicker";
 import PinRecordButton from "@/components/layout/PinRecordButton";
 
 const CATEGORIES = ["Strategic", "Compliance", "IT", "Operational", "Cyber", "Data", "Third Party", "Financial Crime", "Reputational Risk", "Financial Risk", "Compliance / Conduct Risk", "Third-Party / Supplier Risk", "Technology / Information Security Risk"];
@@ -31,6 +32,7 @@ const EMPTY_FORM = {
   status: "Draft", priority: "Medium", criticality: "Medium",
   valid_from: "", valid_to: "", review_frequency: "Quarterly",
   last_review_date: "", next_review_date: "", notes: "",
+  linked_framework_ids: [],
 };
 
 const STATUS_COLORS = {
@@ -90,6 +92,11 @@ export default function PrincipalRisks() {
     queryFn: () => base44.entities.StakeholderGroup.list(),
   });
 
+  const { data: frameworks = [] } = useQuery({
+    queryKey: ["frameworks"],
+    queryFn: () => base44.entities.Framework.list(),
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.PrincipalRisk.create(data),
     onSuccess: (saved, submitted) => {
@@ -133,6 +140,19 @@ export default function PrincipalRisks() {
   const openNew = () => { setForm(EMPTY_FORM); setEditId(null); setDialogOpen(true); };
 
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }));
+
+  const toggleFramework = (id) => {
+    setForm(f => {
+      const arr = f.linked_framework_ids || [];
+      return { ...f, linked_framework_ids: arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id] };
+    });
+  };
+
+  const availableFrameworks = (() => {
+    const company = companies.find(c => c.id === form.company_id);
+    const assignedIds = (company?.framework_assignments || []).map(a => a.framework_id).filter(Boolean);
+    return frameworks.filter(f => assignedIds.includes(f.id) || (form.linked_framework_ids || []).includes(f.id));
+  })();
 
   const handleSave = () => {
     if (!form.risk_title || !form.company_id) { toast.error("Risk Title and Company are required"); return; }
@@ -485,6 +505,19 @@ export default function PrincipalRisks() {
                   <Input type="date" value={form.next_review_date} onChange={e => set("next_review_date", e.target.value)} />
                 </div>
               </div>
+            </div>
+
+            {/* Frameworks */}
+            <div className="space-y-3 border-t pt-4">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Frameworks</p>
+              <p className="text-xs text-slate-400 -mt-1">Only frameworks already assigned to this company are available — assign frameworks to the company on the Company record first.</p>
+              <SearchableMultiPicker
+                label="Frameworks"
+                items={availableFrameworks}
+                selectedIds={form.linked_framework_ids || []}
+                onToggle={toggleFramework}
+                getLabel={i => i.name}
+              />
             </div>
 
             {/* Notes */}
