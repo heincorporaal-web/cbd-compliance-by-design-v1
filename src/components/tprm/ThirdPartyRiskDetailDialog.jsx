@@ -110,7 +110,7 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
   const stakeholderItems = companyId && companyId !== "all"
     ? stakeholders.filter(s => s.company_id === companyId)
     : stakeholders;
-  const stakeholderName = (id) => stakeholderItems.find(s => s.id === id)?.name || "";
+  const stakeholderName = (id) => stakeholderItems.find(s => s.id === id)?.full_name || "";
 
   const toggle = (field) => (id) => setForm(f => {
     const arr = f[field] || [];
@@ -270,7 +270,7 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
                   <Select value={form[idField]} onValueChange={setOwner(idField, nameField)}>
                     <SelectTrigger><SelectValue placeholder="Select stakeholder" /></SelectTrigger>
                     <SelectContent>
-                      {stakeholderItems.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                      {stakeholderItems.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
