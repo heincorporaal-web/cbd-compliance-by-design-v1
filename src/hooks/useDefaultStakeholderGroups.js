@@ -19,6 +19,8 @@ const DEFAULT_GROUPS = [
   { name: "Objective Owner",        color: "#0EA5E9", description: "Accountable for the achievement of organisational objectives" },
   { name: "Performance Owner",      color: "#F59E0B", description: "Accountable for monitoring and reporting performance against objectives" },
   { name: "Compliance Owner",       color: "#7C3AED", description: "Accountable for compliance obligations linked to objectives" },
+  { name: "Relationship Owner",     color: "#0891B2", description: "Accountable for the governance and management of a third-party relationship" },
+  { name: "Procurement Owner",      color: "#14B8A6", description: "Accountable for procurement and contract management of third parties" },
 ];
 
 export function useDefaultStakeholderGroups(companyIds = []) {

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Save, ShieldAlert, Users, Boxes, Cpu, AlertCircle, TriangleAlert, Network, ScrollText, FileCheck } from "lucide-react";
+import { Save, ShieldAlert, Users, Boxes, Cpu, AlertCircle, TriangleAlert, Network, ScrollText, FileCheck, Building2 } from "lucide-react";
 import EntityLinkPicker from "./EntityLinkPicker";
 
 const RATING = [
@@ -21,6 +21,20 @@ const RATING = [
   { value: "medium", label: "Medium" },
   { value: "high", label: "High" },
   { value: "critical", label: "Critical" },
+];
+
+const TP_TYPE = [
+  { value: "supplier", label: "Supplier" },
+  { value: "outsourcing_provider", label: "Outsourcing provider" },
+  { value: "cloud_service_provider", label: "Cloud service provider" },
+  { value: "consultant", label: "Consultant" },
+  { value: "distributor", label: "Distributor" },
+  { value: "agent", label: "Agent" },
+  { value: "data_processor", label: "Data processor" },
+  { value: "managed_service_provider", label: "Managed service provider" },
+  { value: "subcontractor", label: "Subcontractor" },
+  { value: "strategic_partner", label: "Strategic partner" },
+  { value: "fourth_party_provider", label: "Fourth-party provider" },
 ];
 
 function Section({ icon: Icon, title, children }) {
@@ -58,7 +72,24 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
       relationship_owner_id: provider.relationship_owner_id || "",
       risk_owner_id: provider.risk_owner_id || "",
       approver_id: provider.approver_id || "",
+      procurement_owner_id: provider.procurement_owner_id || "",
       business_continuity_critical: provider.business_continuity_critical ?? false,
+      third_party_reference: provider.third_party_reference || "",
+      legal_name: provider.legal_name || "",
+      trading_name: provider.trading_name || "",
+      registration_number: provider.registration_number || "",
+      tax_number: provider.tax_number || "",
+      country_of_registration: provider.country_of_registration || "",
+      headquarters_country: provider.headquarters_country || "",
+      third_party_type: provider.third_party_type || "",
+      parent_company_id: provider.parent_company_id || "",
+      website: provider.website || "",
+      primary_contact_name: provider.primary_contact_name || "",
+      primary_contact_email: provider.primary_contact_email || "",
+      primary_contact_telephone: provider.primary_contact_telephone || "",
+      date_created: provider.date_created || "",
+      date_approved: provider.date_approved || "",
+      is_active: provider.is_active ?? true,
       bcp_recovery_notes: provider.bcp_recovery_notes || "",
       tprm_notes: provider.tprm_notes || "",
     });
@@ -68,6 +99,13 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
     queryKey: ["entityLink", "Stakeholder"],
     queryFn: () => base44.entities.Stakeholder.list("-created_date", 500),
   });
+  const { data: allProviders = [] } = useQuery({
+    queryKey: ["tpParentProviders", companyId],
+    queryFn: () => companyId && companyId !== "all"
+      ? base44.entities.ThirdPartyProvider.filter({ company_id: companyId })
+      : base44.entities.ThirdPartyProvider.list("-created_date", 500),
+  });
+  const parentOptions = allProviders.filter(p => p.id !== provider?.id);
   const stakeholderItems = companyId && companyId !== "all"
     ? stakeholders.filter(s => s.company_id === companyId)
     : stakeholders;
@@ -105,6 +143,88 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
         </DialogHeader>
 
         <div className="space-y-4 py-1">
+          {/* Third Party Master Data */}
+          <Section icon={Building2} title="Third Party Master Data">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <Label className="text-xs">Third Party Reference</Label>
+                <Input value={form.third_party_reference || ""} onChange={e => set("third_party_reference", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Third Party Type</Label>
+                <Select value={form.third_party_type || "__none"} onValueChange={v => set("third_party_type", v === "__none" ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none">—</SelectItem>
+                    {TP_TYPE.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Website</Label>
+                <Input value={form.website || ""} onChange={e => set("website", e.target.value)} placeholder="https://" />
+              </div>
+              <div>
+                <Label className="text-xs">Legal Name</Label>
+                <Input value={form.legal_name || ""} onChange={e => set("legal_name", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Trading Name</Label>
+                <Input value={form.trading_name || ""} onChange={e => set("trading_name", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Parent Company</Label>
+                <Select value={form.parent_company_id || "__none"} onValueChange={v => set("parent_company_id", v === "__none" ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none">None</SelectItem>
+                    {parentOptions.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Registration Number</Label>
+                <Input value={form.registration_number || ""} onChange={e => set("registration_number", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Tax Number</Label>
+                <Input value={form.tax_number || ""} onChange={e => set("tax_number", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Country of Registration</Label>
+                <Input value={form.country_of_registration || ""} onChange={e => set("country_of_registration", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Headquarters Country</Label>
+                <Input value={form.headquarters_country || ""} onChange={e => set("headquarters_country", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Primary Contact Name</Label>
+                <Input value={form.primary_contact_name || ""} onChange={e => set("primary_contact_name", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Primary Contact Email</Label>
+                <Input type="email" value={form.primary_contact_email || ""} onChange={e => set("primary_contact_email", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Primary Contact Telephone</Label>
+                <Input value={form.primary_contact_telephone || ""} onChange={e => set("primary_contact_telephone", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Date Created</Label>
+                <Input type="date" value={form.date_created || ""} onChange={e => set("date_created", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Date Approved</Label>
+                <Input type="date" value={form.date_approved || ""} onChange={e => set("date_approved", e.target.value)} />
+              </div>
+              <div className="flex items-center gap-3 pt-5">
+                <Switch checked={form.is_active} onCheckedChange={v => set("is_active", v)} />
+                <Label className="text-xs">Active</Label>
+              </div>
+            </div>
+          </Section>
+
           {/* Risk ratings & BCP */}
           <Section icon={ShieldAlert} title="Risk Ratings & Business Continuity">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -140,6 +260,7 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
               {[
                 ["service_owner_id", "service_owner_name", "Service Owner"],
                 ["relationship_owner_id", "relationship_owner_name", "Relationship Owner"],
+                ["procurement_owner_id", "procurement_owner_name", "Procurement Owner"],
                 ["risk_owner_id", "risk_owner_name", "Risk Owner"],
                 ["approver_id", "approver_name", "Approver"],
               ].map(([idField, nameField, lbl]) => (
