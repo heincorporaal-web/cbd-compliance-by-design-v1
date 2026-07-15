@@ -103,6 +103,11 @@ export default function RiskDetail() {
     queryFn: () => base44.entities.CompanyPreference.list(),
   });
 
+  const { data: workstreams = [] } = useQuery({
+    queryKey: ['workstreams'],
+    queryFn: () => base44.entities.Workstream.list(),
+  });
+
   const { data: frameworks = [] } = useQuery({
     queryKey: ['frameworks'],
     queryFn: () => base44.entities.Framework.list(),
@@ -200,7 +205,8 @@ export default function RiskDetail() {
     mutationFn: (data) => {
       const pref = companyPrefs.find(p => p.company_id === data.company_id) || null;
       const companyRisks = risks.filter(r => r.company_id === data.company_id);
-      const withAuto = applyAutoNumber("risk", data, pref, companyRisks);
+      const ws = workstreams.find(w => w.workstream_code === data.workstream || w.name === data.workstream || w.id === data.workstream);
+      const withAuto = applyAutoNumber("risk", data, pref, companyRisks, { workstreamCode: ws?.workstream_code || data.workstream || "" });
       return base44.entities.Risk.create(withAuto);
     },
     onSuccess: (data) => {

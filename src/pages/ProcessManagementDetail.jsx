@@ -18,6 +18,7 @@ import ProcessFlowChart from "@/components/processmanagement/ProcessFlowChart";
 import StakeholderPickerDialog from "@/components/processmanagement/StakeholderPickerDialog";
 import IHPOMNodeLinkDialog from "@/components/processmanagement/IHPOMNodeLinkDialog";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
+import { applyAutoNumber } from "@/lib/autoNumbering";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -94,13 +95,20 @@ export default function ProcessManagementDetail() {
   const { data: stakeholders = [] } = useQuery({ queryKey: ["stakeholders"], queryFn: () => base44.entities.Stakeholder.list() });
   const { data: stakeholderGroups = [] } = useQuery({ queryKey: ["stakeholderGroups"], queryFn: () => base44.entities.StakeholderGroup.list() });
   const { data: ihpomNodes = [] } = useQuery({ queryKey: ["ihpomNodes"], queryFn: () => base44.entities.IHPOMNode.list("node_code") });
+  const { data: companyPrefs = [] } = useQuery({ queryKey: ["companyPrefs"], queryFn: () => base44.entities.CompanyPreference.list() });
+  const { data: workstreams = [] } = useQuery({ queryKey: ["workstreams"], queryFn: () => base44.entities.Workstream.list() });
 
   useEffect(() => {
     if (existingProcess?.[0]) setFormData(existingProcess[0]);
   }, [existingProcess]);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.OrgProcess.create(data),
+    mutationFn: (data) => {
+      const pref = companyPrefs.find(p => p.company_id === data.company_id) || null;
+      const ws = workstreams.find(w => w.workstream_code === data.workstream || w.name === data.workstream || w.id === data.workstream);
+      const withAuto = applyAutoNumber("process", data, pref, processes, { workstreamCode: ws?.workstream_code || data.workstream || "" });
+      return base44.entities.OrgProcess.create(withAuto);
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries(["orgProcesses"]);
       navigate(createPageUrl(`ProcessManagementDetail?id=${data.id}`));
