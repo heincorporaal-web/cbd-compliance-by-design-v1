@@ -6,16 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
-import { Info, Pencil, Save, ShieldCheck, Calendar } from "lucide-react";
+import { Info, Pencil, Save, ShieldCheck, Calendar, FileText, ScrollText } from "lucide-react";
 import { toast } from "sonner";
+
+const DEFAULT_TERMS = "Compliance by Design Platform – User Terms\n\nEnter the user terms for the Compliance by Design Platform here.";
+const DEFAULT_AUP = "Acceptable Use Policy\n\nEnter the Acceptable Use Policy here.";
 
 export default function About() {
   const queryClient = useQueryClient();
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
+  const [editTab, setEditTab] = useState("about");
   const [form, setForm] = useState({});
 
   useEffect(() => {
@@ -39,6 +44,8 @@ export default function About() {
         tagline: meta.tagline || "",
         description: meta.description || "",
         release_notes: meta.release_notes || "",
+        user_terms: meta.user_terms || "",
+        acceptable_use_policy: meta.acceptable_use_policy || "",
       });
     }
   }, [meta]);
@@ -52,135 +59,189 @@ export default function About() {
     onSuccess: () => {
       queryClient.invalidateQueries(["appMeta"]);
       setEditing(false);
-      toast.success("About information saved");
+      toast.success("Information saved");
     },
     onError: (e) => toast.error("Failed to save: " + e.message),
   });
 
   const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  const openEdit = (tab) => { setEditTab(tab); setEditing(true); };
+
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-4xl">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-slate-700 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-            <Info className="w-7 h-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">About</h1>
-            <p className="text-slate-500 text-sm">Application information & version</p>
-          </div>
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 bg-gradient-to-br from-slate-700 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+          <Info className="w-7 h-7 text-white" />
         </div>
-        {isAdmin && meta && (
-          <Button onClick={() => setEditing(true)} variant="outline" className="gap-2">
-            <Pencil className="w-4 h-4" /> Edit
-          </Button>
-        )}
-        {isAdmin && !meta && (
-          <Button onClick={() => setEditing(true)} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
-            <Pencil className="w-4 h-4" /> Set Version Info
-          </Button>
-        )}
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">About</h1>
+          <p className="text-slate-500 text-sm">Application information, version & policies</p>
+        </div>
       </div>
 
-      {isLoading ? (
-        <div className="text-center text-slate-400 py-20">Loading…</div>
-      ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          {/* Banner */}
-          <div className="bg-gradient-to-r from-slate-800 to-indigo-700 px-6 py-8 text-white">
-            <div className="flex items-start justify-between flex-wrap gap-3">
-              <div>
-                <h2 className="text-2xl font-bold">{form.app_name || meta?.app_name || "GRC Platform"}</h2>
-                {meta?.tagline && <p className="text-slate-200 text-sm mt-1">{meta.tagline}</p>}
-              </div>
-              {meta?.version && (
-                <Badge className="bg-white/20 text-white border-white/30 text-sm px-3 py-1">
-                  Version {meta.version}
-                </Badge>
-              )}
-            </div>
-          </div>
+      <Tabs defaultValue="about">
+        <TabsList>
+          <TabsTrigger value="about">About</TabsTrigger>
+          <TabsTrigger value="legal">Terms &amp; Policy</TabsTrigger>
+        </TabsList>
 
-          {/* Details */}
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-indigo-600 shrink-0" />
+        {/* ── About tab ─────────────────────────────────────────── */}
+        <TabsContent value="about" className="mt-4">
+          {isLoading ? (
+            <div className="text-center text-slate-400 py-20">Loading…</div>
+          ) : (
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-slate-800 to-indigo-700 px-6 py-8 text-white flex items-start justify-between flex-wrap gap-3">
                 <div>
-                  <p className="text-xs text-slate-400 uppercase tracking-wide">Version</p>
-                  <p className="font-semibold text-slate-800">{meta?.version || "—"}</p>
+                  <h2 className="text-2xl font-bold">{meta?.app_name || "GRC Platform"}</h2>
+                  {meta?.tagline && <p className="text-slate-200 text-sm mt-1">{meta.tagline}</p>}
+                </div>
+                <div className="flex items-center gap-2">
+                  {meta?.version && (
+                    <Badge className="bg-white/20 text-white border-white/30 text-sm px-3 py-1">
+                      Version {meta.version}
+                    </Badge>
+                  )}
+                  {isAdmin && (
+                    <Button size="sm" onClick={() => openEdit("about")} variant="secondary" className="gap-1.5">
+                      <Pencil className="w-3.5 h-3.5" /> Edit
+                    </Button>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-indigo-600 shrink-0" />
-                <div>
-                  <p className="text-xs text-slate-400 uppercase tracking-wide">Release Date</p>
-                  <p className="font-semibold text-slate-800">{meta?.release_date || "—"}</p>
+
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck className="w-5 h-5 text-indigo-600 shrink-0" />
+                    <div>
+                      <p className="text-xs text-slate-400 uppercase tracking-wide">Version</p>
+                      <p className="font-semibold text-slate-800">{meta?.version || "—"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-indigo-600 shrink-0" />
+                    <div>
+                      <p className="text-xs text-slate-400 uppercase tracking-wide">Release Date</p>
+                      <p className="font-semibold text-slate-800">{meta?.release_date || "—"}</p>
+                    </div>
+                  </div>
                 </div>
+                {meta?.description && (
+                  <div>
+                    <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Description</p>
+                    <p className="text-slate-700 text-sm whitespace-pre-wrap">{meta.description}</p>
+                  </div>
+                )}
+                {meta?.release_notes && (
+                  <div>
+                    <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Release Notes</p>
+                    <p className="text-slate-700 text-sm whitespace-pre-wrap">{meta.release_notes}</p>
+                  </div>
+                )}
+                {meta?.last_updated_by && (
+                  <p className="text-xs text-slate-400 pt-2 border-t border-slate-100">
+                    Last updated by {meta.last_updated_by}
+                    {meta.updated_date && ` · ${new Date(meta.updated_date).toLocaleString()}`}
+                  </p>
+                )}
               </div>
             </div>
+          )}
+        </TabsContent>
 
-            {meta?.description && (
-              <div>
-                <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Description</p>
-                <p className="text-slate-700 text-sm whitespace-pre-wrap">{meta.description}</p>
-              </div>
-            )}
+        {/* ── Terms & Policy tab ────────────────────────────────── */}
+        <TabsContent value="legal" className="mt-4 space-y-4">
+          {isLoading ? (
+            <div className="text-center text-slate-400 py-20">Loading…</div>
+          ) : (
+            <>
+              <LegalCard
+                icon={FileText}
+                title="Compliance by Design Platform – User Terms"
+                content={meta?.user_terms}
+                isAdmin={isAdmin}
+                onEdit={() => openEdit("legal")}
+              />
+              <LegalCard
+                icon={ScrollText}
+                title="Acceptable Use Policy"
+                content={meta?.acceptable_use_policy}
+                isAdmin={isAdmin}
+                onEdit={() => openEdit("legal")}
+              />
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
 
-            {meta?.release_notes && (
-              <div>
-                <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Release Notes</p>
-                <p className="text-slate-700 text-sm whitespace-pre-wrap">{meta.release_notes}</p>
-              </div>
-            )}
-
-            {meta?.last_updated_by && (
-              <p className="text-xs text-slate-400 pt-2 border-t border-slate-100">
-                Last updated by {meta.last_updated_by}
-                {meta.updated_date && ` · ${new Date(meta.updated_date).toLocaleString()}`}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Edit dialog */}
+      {/* ── Edit dialog ────────────────────────────────────────── */}
       <Dialog open={editing} onOpenChange={setEditing}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit About / Version Information</DialogTitle>
-            <DialogDescription>Set the version number and application details shown on the About page.</DialogDescription>
+            <DialogTitle>Edit {editTab === "about" ? "About / Version" : "Terms & Policy"}</DialogTitle>
+            <DialogDescription>
+              {editTab === "about"
+                ? "Set the version number and application details."
+                : "Edit the User Terms and Acceptable Use Policy text manually."}
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>App Name</Label>
-                <Input value={form.app_name || ""} onChange={e => setField("app_name", e.target.value)} />
+
+          {editTab === "about" ? (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>App Name</Label>
+                  <Input value={form.app_name || ""} onChange={e => setField("app_name", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Version</Label>
+                  <Input placeholder="v1.2" value={form.version || ""} onChange={e => setField("version", e.target.value)} />
+                </div>
               </div>
               <div>
-                <Label>Version</Label>
-                <Input placeholder="v1.2" value={form.version || ""} onChange={e => setField("version", e.target.value)} />
+                <Label>Release Date</Label>
+                <Input type="date" value={form.release_date || ""} onChange={e => setField("release_date", e.target.value)} />
+              </div>
+              <div>
+                <Label>Tagline</Label>
+                <Input value={form.tagline || ""} onChange={e => setField("tagline", e.target.value)} />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea rows={3} value={form.description || ""} onChange={e => setField("description", e.target.value)} />
+              </div>
+              <div>
+                <Label>Release Notes</Label>
+                <Textarea rows={4} value={form.release_notes || ""} onChange={e => setField("release_notes", e.target.value)} />
               </div>
             </div>
-            <div>
-              <Label>Release Date</Label>
-              <Input type="date" value={form.release_date || ""} onChange={e => setField("release_date", e.target.value)} />
+          ) : (
+            <div className="space-y-4 py-2">
+              <div>
+                <Label>Compliance by Design Platform – User Terms</Label>
+                <Textarea
+                  rows={8}
+                  placeholder={DEFAULT_TERMS}
+                  value={form.user_terms || ""}
+                  onChange={e => setField("user_terms", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Acceptable Use Policy</Label>
+                <Textarea
+                  rows={8}
+                  placeholder={DEFAULT_AUP}
+                  value={form.acceptable_use_policy || ""}
+                  onChange={e => setField("acceptable_use_policy", e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-slate-400">Line breaks are preserved. You can paste full policy text here.</p>
             </div>
-            <div>
-              <Label>Tagline</Label>
-              <Input placeholder="One-line tagline" value={form.tagline || ""} onChange={e => setField("tagline", e.target.value)} />
-            </div>
-            <div>
-              <Label>Description</Label>
-              <Textarea rows={3} value={form.description || ""} onChange={e => setField("description", e.target.value)} />
-            </div>
-            <div>
-              <Label>Release Notes</Label>
-              <Textarea rows={4} placeholder="What changed in this build" value={form.release_notes || ""} onChange={e => setField("release_notes", e.target.value)} />
-            </div>
-          </div>
+          )}
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
             <Button onClick={() => saveMutation.mutate(form)} disabled={saveMutation.isPending} className="gap-2">
@@ -189,6 +250,31 @@ export default function About() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function LegalCard({ icon: Icon, title, content, isAdmin, onEdit }) {
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+        <div className="flex items-center gap-2.5">
+          <Icon className="w-5 h-5 text-indigo-600" />
+          <h3 className="font-semibold text-slate-800">{title}</h3>
+        </div>
+        {isAdmin && (
+          <Button size="sm" variant="outline" onClick={onEdit} className="gap-1.5">
+            <Pencil className="w-3.5 h-3.5" /> Edit
+          </Button>
+        )}
+      </div>
+      <div className="p-6">
+        {content ? (
+          <p className="text-slate-700 text-sm whitespace-pre-wrap leading-relaxed">{content}</p>
+        ) : (
+          <p className="text-slate-400 text-sm italic">No content has been set yet. Click Edit to add this policy.</p>
+        )}
+      </div>
     </div>
   );
 }

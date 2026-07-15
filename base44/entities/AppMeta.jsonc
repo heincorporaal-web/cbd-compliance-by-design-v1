@@ -27,6 +27,14 @@
       "type": "string",
       "description": "Release notes / changelog summary"
     },
+    "user_terms": {
+      "type": "string",
+      "description": "Compliance by Design Platform \u2013 User Terms (editable plain text / markdown)"
+    },
+    "acceptable_use_policy": {
+      "type": "string",
+      "description": "Acceptable Use Policy (editable plain text / markdown)"
+    },
     "last_updated_by": {
       "type": "string",
       "description": "Name of the user who last updated this record"
