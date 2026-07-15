@@ -229,6 +229,10 @@
           },
           "data_source_link": {
             "type": "string"
+          },
+          "linked_scorecard_id": {
+            "type": "string",
+            "description": "Reference to BalancedScorecard this KPI rolls up into"
           }
         }
       }

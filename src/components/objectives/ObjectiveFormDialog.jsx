@@ -32,7 +32,8 @@ const EMPTY_FORM = {
 const EMPTY_KPI = () => ({
   id: crypto.randomUUID(),
   measurement_name: "", measurement_type: "Numeric",
-  measurement_description: "", calculation_method: "", data_source_link: ""
+  measurement_description: "", calculation_method: "", data_source_link: "",
+  linked_scorecard_id: ""
 });
 
 export default function ObjectiveFormDialog({ open, onClose, onSaveSuccess, editObj, companies, objectives, defaultCompanyId }) {
@@ -47,6 +48,7 @@ export default function ObjectiveFormDialog({ open, onClose, onSaveSuccess, edit
   const { data: capabilities = [] } = useQuery({ queryKey: ["itCapabilities"], queryFn: () => base44.entities.ITCapability.list() });
   const { data: stakeholders = [] } = useQuery({ queryKey: ["stakeholders"], queryFn: () => base44.entities.Stakeholder.list() });
   const { data: stakeholderGroups = [] } = useQuery({ queryKey: ["stakeholderGroups"], queryFn: () => base44.entities.StakeholderGroup.list() });
+  const { data: scorecards = [] } = useQuery({ queryKey: ["balancedScorecards"], queryFn: () => base44.entities.BalancedScorecard.list() });
 
   // Returns stakeholders belonging to a named group, filtered by current company
   const getStakeholdersByGroup = (groupName) => {
@@ -390,6 +392,18 @@ export default function ObjectiveFormDialog({ open, onClose, onSaveSuccess, edit
                       <div className="col-span-2">
                         <Label className="text-xs">Data Source Link (leave blank if manual)</Label>
                         <Input value={kpi.data_source_link} onChange={e => updateKpi(idx, "data_source_link", e.target.value)} className="h-8" placeholder="https://…" />
+                      </div>
+                      <div className="col-span-2">
+                        <Label className="text-xs">Linked Balanced Scorecard</Label>
+                        <Select value={kpi.linked_scorecard_id || "none"} onValueChange={v => updateKpi(idx, "linked_scorecard_id", v === "none" ? "" : v)}>
+                          <SelectTrigger className="h-8"><SelectValue placeholder="— None —" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">— None —</SelectItem>
+                            {scorecards.filter(s => !form.company_id || s.company_id === form.company_id).map(s => (
+                              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </div>
