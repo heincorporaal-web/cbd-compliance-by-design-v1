@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Target, Search, Plus, Trash2, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { Target, Search, Plus, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, Download } from "lucide-react";
+import { exportExcel } from "@/components/reports/ExportUtils";
 import ObjectiveFormDialog from "@/components/objectives/ObjectiveFormDialog";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
@@ -58,6 +59,43 @@ export default function ObjectivesSummary() {
     queryKey: ["companies"],
     queryFn: () => base44.entities.Company.list(),
   });
+  const { data: scorecards = [] } = useQuery({
+    queryKey: ["balancedScorecards"],
+    queryFn: () => base44.entities.BalancedScorecard.list(),
+  });
+
+  const EXPORT_COLUMNS = [
+    { key: "reference_number", label: "Reference" },
+    { key: "title", label: "Title" },
+    { key: "category", label: "Category" },
+    { key: "objective_type", label: "Type" },
+    { key: "strategic_theme", label: "Strategic Theme" },
+    { key: "status", label: "Status" },
+    { key: "approval_status", label: "Approval" },
+    { key: "criticality", label: "Criticality" },
+    { key: "priority_rating_label", label: "Priority" },
+    { key: "time_horizon", label: "Time Horizon" },
+    { key: "valid_from", label: "Valid From" },
+    { key: "valid_to", label: "Valid To" },
+    { key: "objective_owner", label: "Owner" },
+    { key: "performance_owner", label: "Performance Owner" },
+    { key: "next_review_date", label: "Next Review" },
+    { key: "company_name", label: "Company" },
+    { key: "progress_pct", label: "Progress %" },
+    { key: "kpis", label: "KPIs (name / type → scorecard)" },
+  ];
+
+  const handleExportExcel = () => {
+    const rows = filtered.map(o => {
+      const company = companies.find(c => c.id === o.company_id);
+      const kpiStr = (o.kpis || []).map(k => {
+        const sc = scorecards.find(s => s.id === k.linked_scorecard_id);
+        return [k.measurement_name, k.measurement_type, sc ? `→ ${sc.name}` : ""].filter(Boolean).join(" ");
+      }).join("; ");
+      return { ...o, company_name: company?.name || "", kpis: kpiStr };
+    });
+    exportExcel(rows, EXPORT_COLUMNS, "Organisational-Objectives.xls", { title: "Organisational Objectives" });
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.OrgObjective.delete(id),
@@ -104,9 +142,14 @@ export default function ObjectivesSummary() {
             <p className="text-slate-500 text-sm">{filtered.length} objective{filtered.length !== 1 ? "s" : ""} — click a name to view / edit</p>
           </div>
         </div>
-        <Button onClick={() => { setEditObj(null); setDialogOpen(true); }} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
-          <Plus className="w-4 h-4" /> New Objective
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={handleExportExcel} variant="outline" className="gap-2" disabled={filtered.length === 0}>
+            <Download className="w-4 h-4" /> Export to Excel
+          </Button>
+          <Button onClick={() => { setEditObj(null); setDialogOpen(true); }} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+            <Plus className="w-4 h-4" /> New Objective
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

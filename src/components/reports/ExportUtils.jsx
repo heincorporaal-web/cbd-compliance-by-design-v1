@@ -82,3 +82,35 @@ export function exportPDF(rows, fields, title, options = {}) {
   win.document.close();
   win.onload = () => win.print();
 }
+
+function escapeXml(str) {
+  return String(str ?? "").replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+}
+
+/**
+ * Exports rows as a real Excel-readable file (.xls HTML spreadsheet) — no library needed.
+ * `columns` is an array of { key, label }. Nested values are flattened to strings.
+ */
+export function exportExcel(rows, columns, filename, options = {}) {
+  const { title = "Report", branding = {} } = options;
+  const { primaryColor = "#1e3a5f" } = branding;
+
+  const ths = columns.map(c => `<th>${escapeXml(c.label)}</th>`).join("");
+  const trs = rows.map(row =>
+    `<tr>${columns.map(c => {
+      const val = row[c.key] ?? "";
+      const str = Array.isArray(val) ? val.join("; ") : String(val);
+      return `<td style="mso-number-format:'\\@'">${escapeXml(str)}</td>`;
+    }).join("")}</tr>`
+  ).join("");
+
+  const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${escapeXml(title)}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border="1"><thead><tr style="background:${primaryColor};color:#fff;font-weight:bold;">${ths}</tr></thead><tbody>${trs}</tbody></table></body></html>`;
+
+  const blob = new Blob(["\ufeff", html], { type: "application/vnd.ms-excel;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
