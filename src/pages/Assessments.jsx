@@ -16,14 +16,14 @@ import { format } from "date-fns";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function Assessments() {
-  const [globalCompany] = useCompanyFilter();
+  const [globalCompany, , { locked }] = useCompanyFilter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isIssueDialogOpen, setIsIssueDialogOpen] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState(null);
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
-    company_id: "",
+    company_id: globalCompany && globalCompany !== "all" ? globalCompany : "",
     framework_id: "",
     assessment_model_id: "",
     assessment_model_name: "",
@@ -88,7 +88,7 @@ export default function Assessments() {
 
   const resetForm = () => {
     setFormData({
-      company_id: "",
+      company_id: globalCompany && globalCompany !== "all" ? globalCompany : "",
       framework_id: "",
       assessment_model_id: "",
       assessment_model_name: "",
@@ -172,7 +172,7 @@ export default function Assessments() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="company_id">Company *</Label>
-                    <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required>
+                    <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required disabled={locked}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select company" />
                       </SelectTrigger>

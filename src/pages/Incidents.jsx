@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function Incidents() {
-  const [globalCompany] = useCompanyFilter();
+  const [globalCompany, , { locked }] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingIncident, setEditingIncident] = useState(null);
@@ -23,7 +23,7 @@ export default function Incidents() {
 
   const [formData, setFormData] = useState({
     title: "",
-    company_id: "",
+    company_id: globalCompany && globalCompany !== "all" ? globalCompany : "",
     ict_system_id: "",
     incident_type: "operational_disruption",
     severity: "moderate",
@@ -74,7 +74,7 @@ export default function Incidents() {
   const resetForm = () => {
     setFormData({
       title: "",
-      company_id: "",
+      company_id: globalCompany && globalCompany !== "all" ? globalCompany : "",
       ict_system_id: "",
       incident_type: "operational_disruption",
       severity: "moderate",
@@ -167,7 +167,7 @@ export default function Incidents() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company_id">Company *</Label>
-                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value, ict_system_id: ""})} required>
+                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value, ict_system_id: ""})} required disabled={locked}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select company" />
                     </SelectTrigger>

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import {
   Users as UsersIcon, Plus, Search, Shield, Mail, Briefcase,
-  Building2, Edit2, ChevronDown, ChevronUp, UserCheck, Crown
+  Building2, Edit2, ChevronDown, ChevronUp, UserCheck, Crown, Lock
 } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -207,6 +207,13 @@ export default function Users() {
                             {user.department && <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" />{user.department}</span>}
                             {user.created_date && <span>Joined {format(new Date(user.created_date), "dd MMM yyyy")}</span>}
                           </div>
+                          {user.assigned_company_id && (
+                            <div className="mt-2">
+                              <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 rounded px-2 py-0.5">
+                                <Lock className="w-3 h-3" />Login: {user.assigned_company_name || companies.find(c => c.id === user.assigned_company_id)?.name || "Assigned"}
+                              </span>
+                            </div>
+                          )}
                           {companyRoles.length > 0 && (
                             <div className="mt-2 flex flex-wrap gap-1">
                               {companyRoles.map(cr => {
@@ -311,6 +318,24 @@ export default function Users() {
                 <div className="space-y-2">
                   <Label>Department</Label>
                   <Input value={editingUser.department || ""} onChange={e => setEditingUser(p => ({ ...p, department: e.target.value }))} placeholder="e.g., Compliance" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Login Company {editingUser.role === "admin" ? "(N/A — admins access all companies)" : "*"}</Label>
+                  <Select
+                    value={editingUser.assigned_company_id || ""}
+                    onValueChange={v => {
+                      const co = companies.find(c => c.id === v);
+                      setEditingUser(p => ({ ...p, assigned_company_id: v || null, assigned_company_name: co?.name || "" }));
+                    }}
+                    disabled={editingUser.role === "admin"}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={null}>None</SelectItem>
+                      {companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-400">Standard users are locked to this company on login and the company selector is hidden for them. Admins retain access to all companies.</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Status</Label>

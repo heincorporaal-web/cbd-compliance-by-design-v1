@@ -16,7 +16,7 @@ import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function ThirdParties() {
-  const [globalCompany] = useCompanyFilter();
+  const [globalCompany, , { locked }] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState(null);
@@ -24,7 +24,7 @@ export default function ThirdParties() {
 
   const [formData, setFormData] = useState({
     name: "",
-    company_id: "",
+    company_id: globalCompany && globalCompany !== "all" ? globalCompany : "",
     service_type: "other",
     criticality: "supporting",
     contract_start_date: "",
@@ -77,7 +77,7 @@ export default function ThirdParties() {
   const resetForm = () => {
     setFormData({
       name: "",
-      company_id: "",
+      company_id: globalCompany && globalCompany !== "all" ? globalCompany : "",
       service_type: "other",
       criticality: "supporting",
       contract_start_date: "",
@@ -185,7 +185,7 @@ export default function ThirdParties() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company_id">Company *</Label>
-                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required>
+                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required disabled={locked}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select company" />
                     </SelectTrigger>

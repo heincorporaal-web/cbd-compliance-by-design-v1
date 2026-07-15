@@ -43,7 +43,7 @@ function SortIcon({ col, sortCol, sortDir }) {
 
 export default function PrincipalRisksSummary() {
   const queryClient = useQueryClient();
-  const { selectedCompany } = useCompanyFilter();
+  const [selectedCompany] = useCompanyFilter();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");

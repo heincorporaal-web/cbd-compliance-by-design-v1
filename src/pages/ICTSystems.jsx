@@ -16,7 +16,7 @@ import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { getICTSystemErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
 
 export default function ICTSystems() {
-  const [globalCompany] = useCompanyFilter();
+  const [globalCompany, , { locked }] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSystem, setEditingSystem] = useState(null);
@@ -24,7 +24,7 @@ export default function ICTSystems() {
 
   const [formData, setFormData] = useState({
     name: "",
-    company_id: "",
+    company_id: globalCompany && globalCompany !== "all" ? globalCompany : "",
     system_type: "other",
     system_type_custom: "",
     criticality: "supporting",
@@ -76,7 +76,7 @@ export default function ICTSystems() {
   const resetForm = () => {
     setFormData({
       name: "",
-      company_id: "",
+      company_id: globalCompany && globalCompany !== "all" ? globalCompany : "",
       system_type: "other",
       system_type_custom: "",
       criticality: "supporting",
@@ -174,7 +174,7 @@ export default function ICTSystems() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company_id">Company *</Label>
-                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required>
+                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required disabled={locked}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select company" />
                     </SelectTrigger>

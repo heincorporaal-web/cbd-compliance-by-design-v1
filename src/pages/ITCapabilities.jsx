@@ -67,7 +67,7 @@ export default function ITCapabilities() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [expandedId, setExpandedId] = useState(null);
   const [stakeholderSearch, setStakeholderSearch] = useState("");
-  const { selectedCompanyId } = useCompanyFilter();
+  const [selectedCompanyId] = useCompanyFilter();
   const queryClient = useQueryClient();
 
   const { data: capabilities = [] } = useQuery({

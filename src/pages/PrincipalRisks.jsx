@@ -57,7 +57,7 @@ const CRIT_COLORS = {
 
 export default function PrincipalRisks() {
   const queryClient = useQueryClient();
-  const { selectedCompany } = useCompanyFilter();
+  const [selectedCompany, , { locked }] = useCompanyFilter();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -137,7 +137,7 @@ export default function PrincipalRisks() {
     setDialogOpen(true);
   };
 
-  const openNew = () => { setForm(EMPTY_FORM); setEditId(null); setDialogOpen(true); };
+  const openNew = () => { setForm({ ...EMPTY_FORM, company_id: selectedCompany && selectedCompany !== "all" ? selectedCompany : "" }); setEditId(null); setDialogOpen(true); };
 
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }));
 
@@ -336,7 +336,7 @@ export default function PrincipalRisks() {
                   {editId ? (
                     <Input value={companies.find(c => c.id === form.company_id)?.name || form.company_id} disabled className="bg-slate-50 text-slate-500" />
                   ) : (
-                    <Select value={form.company_id} onValueChange={v => set("company_id", v)}>
+                    <Select value={form.company_id} onValueChange={v => set("company_id", v)} disabled={locked}>
                       <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
                       <SelectContent>{companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                     </Select>

@@ -6,6 +6,14 @@
       "type": "string",
       "description": "Reference to UserRole entity"
     },
+    "assigned_company_id": {
+      "type": "string",
+      "description": "Company this user is locked to on login. When set and the user is not an admin, the user can only access this company and the global company selector is hidden. Admins retain access to all companies regardless of this field."
+    },
+    "assigned_company_name": {
+      "type": "string",
+      "description": "Denormalized name of the assigned company (for display)"
+    },
     "assigned_workflow_tasks": {
       "type": "array",
       "items": {
