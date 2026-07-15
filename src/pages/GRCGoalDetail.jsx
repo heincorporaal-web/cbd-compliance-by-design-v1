@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import MaturityScale from "../components/grc/MaturityScale";
 import MaturityBadge from "../components/grc/MaturityBadge";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import CompanyField from "@/components/CompanyField";
 
 export default function GRCGoalDetail() {
   const navigate = useNavigate();
@@ -228,23 +229,7 @@ export default function GRCGoalDetail() {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company_id">Company *</Label>
-                    <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required disabled={locked}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select company" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {companies.length === 0 ? (
-                          <SelectItem value={null} disabled>No companies available</SelectItem>
-                        ) : (
-                          companies.map(c => (
-                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <CompanyField value={formData.company_id} onChange={(value) => setFormData({...formData, company_id: value})} companies={companies} />
                   <div className="space-y-2">
                     <Label htmlFor="category">Category *</Label>
                     <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>

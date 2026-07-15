@@ -13,6 +13,7 @@ import { ArrowLeft, Save, Plus, Trash2, Gauge, TrendingUp } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import CompanyField from "@/components/CompanyField";
 import ScorecardPerspectiveCard from "@/components/scorecard/ScorecardPerspectiveCard";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
 
@@ -230,19 +231,7 @@ export default function BalancedScorecardDetail() {
                 <Label>Period</Label>
                 <Input value={formData.period} onChange={(e) => setField("period", e.target.value)} placeholder="e.g. FY2026" />
               </div>
-              <div className="space-y-1.5">
-                <Label>Company *</Label>
-                <Select value={formData.company_id} onValueChange={(v) => setField("company_id", v)} required disabled={locked}>
-                  <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
-                  <SelectContent>
-                    {companies.length === 0 ? (
-                      <SelectItem value={null} disabled>No companies available</SelectItem>
-                    ) : companies.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <CompanyField value={formData.company_id} onChange={(v) => setField("company_id", v)} companies={companies} />
               <div className="space-y-1.5">
                 <Label>Status</Label>
                 <Select value={formData.status} onValueChange={(v) => setField("status", v)}>

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import CompanyField from "@/components/CompanyField";
 
 export default function Incidents() {
   const [globalCompany, , { locked }] = useCompanyFilter();
@@ -165,19 +166,7 @@ export default function Incidents() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company_id">Company *</Label>
-                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value, ict_system_id: ""})} required disabled={locked}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {companies.map(company => (
-                        <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <CompanyField value={formData.company_id} onChange={(value) => setFormData({...formData, company_id: value, ict_system_id: ""})} companies={companies} />
                 <div className="space-y-2">
                   <Label htmlFor="ict_system_id">Affected ICT System</Label>
                   <Select value={formData.ict_system_id} onValueChange={(value) => setFormData({...formData, ict_system_id: value})}>

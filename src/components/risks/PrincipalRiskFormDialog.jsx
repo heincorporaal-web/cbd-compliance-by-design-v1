@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
 import { toast } from "sonner";
+import CompanyField from "@/components/CompanyField";
 
 const EMPTY_FORM = {
   risk_reference: "", risk_title: "", risk_statement: "", risk_description: "",
@@ -88,13 +89,7 @@ export default function PrincipalRiskFormDialog({ open, onClose, editRisk, compa
               <Label>Risk Reference</Label>
               <Input value={form.risk_reference} onChange={e => set("risk_reference", e.target.value)} placeholder="e.g. PR-001" />
             </div>
-            <div>
-              <Label>Company *</Label>
-              <Select value={form.company_id} onValueChange={v => set("company_id", v)}>
-                <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
-                <SelectContent>{companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
+            <CompanyField value={form.company_id} onChange={v => set("company_id", v)} companies={companies} />
           </div>
 
           {/* Risk Title */}

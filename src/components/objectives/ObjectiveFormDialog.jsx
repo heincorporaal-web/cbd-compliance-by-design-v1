@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import SearchableMultiPicker from "./SearchableMultiPicker";
+import CompanyField from "@/components/CompanyField";
 
 const EMPTY_FORM = {
   reference_number: "", title: "", description: "", company_id: "", category: "Operational",
@@ -124,13 +125,7 @@ export default function ObjectiveFormDialog({ open, onClose, onSaveSuccess, edit
                 <Label>Reference Number</Label>
                 <Input value={form.reference_number} onChange={e => set("reference_number", e.target.value)} placeholder="e.g. OBJ-001" />
               </div>
-              <div>
-                <Label>Company *</Label>
-                <Select value={form.company_id} onValueChange={v => set("company_id", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
-                  <SelectContent>{companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
+              <CompanyField value={form.company_id} onChange={v => set("company_id", v)} companies={companies} />
             </div>
 
             <div>

@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import FileUpload from "../components/FileUpload";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import CompanyField from "@/components/CompanyField";
 import ActionItemsPanel, { applyActionItemNumbers } from "@/components/issues/ActionItemsPanel";
 import { getEntityNumConfig, buildIssueRefNumber, getNextSequence, applyAutoNumber } from "@/lib/autoNumbering";
 
@@ -221,18 +222,8 @@ export default function Issues() {
                     required
                   />
                 </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="company_id">Company</Label>
-                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {companies.map(company => (
-                        <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="md:col-span-2">
+                  <CompanyField value={formData.company_id} onChange={(value) => setFormData({...formData, company_id: value})} companies={companies} required={false} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="issue_type">Type *</Label>

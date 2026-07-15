@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Save, Plus, Trash2, Network, Shield, AlertTriangle, AlertCircle, Target, ClipboardCheck, Link as LinkIcon, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import CompanyField from "@/components/CompanyField";
 
 export default function ProcessDetail() {
   const navigate = useNavigate();
@@ -20,12 +22,13 @@ export default function ProcessDetail() {
   const urlParams = new URLSearchParams(window.location.search);
   const processId = urlParams.get('id');
   const isNew = urlParams.get('new') === 'true';
+  const [globalCompany, , { locked, assignedCompanyId }] = useCompanyFilter();
 
   const [formData, setFormData] = useState({
     process_code: "",
     name: "",
     description: "",
-    company_id: "",
+    company_id: locked ? assignedCompanyId : (globalCompany && globalCompany !== "all" ? globalCompany : ""),
     level: 0,
     parent_id: "",
     value_chain: "",
@@ -297,19 +300,7 @@ export default function ProcessDetail() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company_id">Company *</Label>
-                    <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value, parent_id: ""})} required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select company" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {companies.map(c => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <CompanyField value={formData.company_id} onChange={(value) => setFormData({...formData, company_id: value, parent_id: ""})} companies={companies} />
                 </div>
 
                 <div className="space-y-2">

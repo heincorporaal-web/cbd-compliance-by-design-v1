@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Shield } from "lucide-react";
+import CompanyField from "@/components/CompanyField";
 
 export default function AssessmentForm({ assessment, companies, frameworks, onSubmit, onCancel, isSubmitting }) {
   const [formData, setFormData] = useState(assessment || {
@@ -62,25 +63,7 @@ export default function AssessmentForm({ assessment, companies, frameworks, onSu
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="company_id">Company *</Label>
-              <Select
-                value={formData.company_id}
-                onValueChange={handleCompanyChange}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a company" />
-                </SelectTrigger>
-                <SelectContent>
-                  {companies.map(company => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <CompanyField value={formData.company_id} onChange={handleCompanyChange} companies={companies} />
             <div className="space-y-2">
               <Label htmlFor="framework_id">Framework *</Label>
               <Select

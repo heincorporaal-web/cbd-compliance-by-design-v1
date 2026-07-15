@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import CompanyField from "@/components/CompanyField";
 
 export default function ThirdParties() {
   const [globalCompany, , { locked }] = useCompanyFilter();
@@ -183,19 +184,7 @@ export default function ThirdParties() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company_id">Company *</Label>
-                  <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required disabled={locked}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {companies.map(company => (
-                        <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <CompanyField value={formData.company_id} onChange={(value) => setFormData({...formData, company_id: value})} companies={companies} />
                 <div className="space-y-2">
                   <Label htmlFor="service_type">Service Type *</Label>
                   <Select value={formData.service_type} onValueChange={(value) => setFormData({...formData, service_type: value})}>
