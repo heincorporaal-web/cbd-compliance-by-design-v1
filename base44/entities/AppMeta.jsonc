@@ -1,0 +1,38 @@
+{
+  "name": "AppMeta",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Version label e.g. v1.2"
+    },
+    "release_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Release / build date"
+    },
+    "app_name": {
+      "type": "string",
+      "description": "Application display name"
+    },
+    "tagline": {
+      "type": "string",
+      "description": "Short one-line tagline"
+    },
+    "description": {
+      "type": "string",
+      "description": "Longer description of the application"
+    },
+    "release_notes": {
+      "type": "string",
+      "description": "Release notes / changelog summary"
+    },
+    "last_updated_by": {
+      "type": "string",
+      "description": "Name of the user who last updated this record"
+    }
+  },
+  "required": [
+    "app_name"
+  ]
+}

@@ -31,6 +31,7 @@ import AssessmentModelDetail from './pages/AssessmentModelDetail';
 import EvidenceLibrary from './pages/EvidenceLibrary';
 import BalancedScorecards from './pages/BalancedScorecards';
 import BalancedScorecardDetail from './pages/BalancedScorecardDetail';
+import About from './pages/About';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -96,6 +97,7 @@ const AuthenticatedApp = () => {
         <Route path="/AssessmentsReport" element={<AssessmentsReport />} />
         <Route path="/ThirdPartiesReport" element={<ThirdPartiesReport />} />
         <Route path="/ITCapabilitiesReport" element={<ITCapabilitiesReport />} />
+        <Route path="/about" element={<About />} />
         <Route path="/MobileSettings" element={<MobileSettings />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
