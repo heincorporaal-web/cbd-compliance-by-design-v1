@@ -9,6 +9,8 @@ import {
   Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert, CalendarClock, Gauge, Info
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 // ─── Navigation tree definition ──────────────────────────────────────────────
 export const NAV_GROUPS = [
@@ -54,6 +56,7 @@ export const NAV_GROUPS = [
       { id: "raci_matrix", title: "RACI Matrix", url: createPageUrl("RACIMatrix"), icon: Layers },
       { id: "principal_risks", title: "Principal Risks", url: createPageUrl("PrincipalRisksSummary"), icon: ShieldAlert },
       { id: "tprm", title: "Third Party Risk Management", url: createPageUrl("ThirdPartyRiskManagement"), icon: ShieldAlert },
+      { id: "advanced_tprm", title: "Advanced Third Party Risk Management", url: createPageUrl("AdvancedThirdPartyRiskManagement"), icon: ShieldAlert, requiresTprm: true },
       { id: "issues", title: "Issues", url: createPageUrl("Issues"), icon: AlertCircle },
       { id: "incidents", title: "Incidents", url: createPageUrl("Incidents"), icon: AlertTriangle },
     ],
@@ -217,10 +220,20 @@ function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false
 // ─── Main NavTree ─────────────────────────────────────────────────────────────
 export default function NavTree() {
   const location = useLocation();
+  const [companyId] = useCompanyFilter();
+  const effectiveCompanyId = companyId === "all" ? null : companyId;
   const [userId, setUserId] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [favOpen, setFavOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // TPRM enabled flag — gates visibility of the "Advanced Third Party Risk Management" item
+  const { data: companyPrefs = [] } = useQuery({
+    queryKey: ["companyPrefs", effectiveCompanyId],
+    queryFn: () => base44.entities.CompanyPreference.filter({ company_id: effectiveCompanyId }),
+    enabled: !!effectiveCompanyId,
+  });
+  const tprmEnabled = !!companyPrefs[0]?.enable_third_party_risk_management;
 
   useEffect(() => {
     base44.auth.me().then(user => {
@@ -241,10 +254,12 @@ export default function NavTree() {
     saveFavorites(userId, next);
   };
 
-  const favItems = ALL_NAV_ITEMS.filter(i => favorites.includes(i.id));
+  const isVisible = (i) => !i.requiresTprm || tprmEnabled;
+
+  const favItems = ALL_NAV_ITEMS.filter(i => favorites.includes(i.id) && isVisible(i));
 
   const searchResults = searchQuery.trim()
-    ? ALL_NAV_ITEMS.filter(i => i.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? ALL_NAV_ITEMS.filter(i => isVisible(i) && i.title.toLowerCase().includes(searchQuery.toLowerCase()))
     : null;
 
   return (
@@ -306,16 +321,20 @@ export default function NavTree() {
       <div className="border-t border-slate-200 my-2" />
 
       {/* Nav groups — hide when searching */}
-      {!searchResults && NAV_GROUPS.map((group, i) => (
-        <NavGroup
-          key={group.id}
-          group={group}
-          location={location}
-          favorites={favorites}
-          onToggleFav={toggleFav}
-          defaultOpen={i === 0}
-        />
-      ))}
+      {!searchResults && NAV_GROUPS.map((group, i) => {
+        const visibleItems = group.items.filter(isVisible);
+        if (visibleItems.length === 0) return null;
+        return (
+          <NavGroup
+            key={group.id}
+            group={{ ...group, items: visibleItems }}
+            location={location}
+            favorites={favorites}
+            onToggleFav={toggleFav}
+            defaultOpen={i === 0}
+          />
+        );
+      })}
     </div>
   );
 }
