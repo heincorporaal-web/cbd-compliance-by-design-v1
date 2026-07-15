@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { format, isPast, isWithinInterval, addDays } from "date-fns";
-import { getEntityNumConfig, buildRefNumber, getNextSequence } from "@/lib/autoNumbering";
+import { getEntityNumConfig, buildRefNumber, getNextSequence, applyAutoNumber } from "@/lib/autoNumbering";
 
 const FILE_TYPE_ICONS = {
   document: FileText,
@@ -97,11 +97,9 @@ export default function EvidenceLibrary() {
   const createMutation = useMutation({
     mutationFn: (data) => {
       const pref = companyPrefs.find(p => p.company_id === data.company_id) || null;
-      const cfg  = getEntityNumConfig(pref, "evidence");
       const companyEvidence = evidenceList.filter(e => e.company_id === data.company_id);
-      const seq  = getNextSequence(companyEvidence, cfg);
-      const refNum = buildRefNumber(cfg, seq);
-      return base44.entities.Evidence.create({ ...data, reference_number: refNum });
+      const withAuto = applyAutoNumber("evidence", data, pref, companyEvidence);
+      return base44.entities.Evidence.create(withAuto);
     },
     onSuccess: () => { queryClient.invalidateQueries(["evidence"]); setIsUploadOpen(false); },
   });

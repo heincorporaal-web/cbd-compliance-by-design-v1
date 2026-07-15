@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Hash } from "lucide-react";
-import { DEFAULT_NUMBERING_CONFIG } from "@/lib/autoNumbering";
+import { Button } from "@/components/ui/button";
+import { Hash, Settings2 } from "lucide-react";
+import { DEFAULT_NUMBERING_CONFIG, buildRefNumber } from "@/lib/autoNumbering";
+import { cn } from "@/lib/utils";
+import AdvancedNumberingDialog from "@/components/admin/AdvancedNumberingDialog";
 
 const ENTITY_ROWS = [
   { key: "risk",     label: "Risk" },
@@ -34,13 +37,17 @@ const DIVIDER_OPTIONS = [
 ];
 
 export default function NumberingConfigSection({ numbering = {}, onChange }) {
+  const [advanced, setAdvanced] = useState(null); // entityKey or null
+
   const getCfg = (key) => ({
     ...DEFAULT_NUMBERING_CONFIG[key],
     ...(numbering[key] || {}),
+    auto_number_enabled: (numbering[key] || {}).auto_number_enabled !== false,
+    segments: Array.isArray((numbering[key] || {}).segments) ? (numbering[key] || {}).segments : [],
     ...(key === "issue" ? {
       linked_prefixes: {
         ...DEFAULT_NUMBERING_CONFIG.issue.linked_prefixes,
-        ...(numbering.issue?.linked_prefixes || {}),
+        ...((numbering.issue || {}).linked_prefixes || {}),
       },
     } : {}),
   });
@@ -61,6 +68,8 @@ export default function NumberingConfigSection({ numbering = {}, onChange }) {
     });
   };
 
+  const advancedEntity = advanced ? ENTITY_ROWS.find(e => e.key === advanced) : null;
+
   return (
     <Card className="border border-slate-200 shadow-sm">
       <CardHeader className="pb-3 border-b border-slate-100">
@@ -69,7 +78,7 @@ export default function NumberingConfigSection({ numbering = {}, onChange }) {
           Reference Number Configuration
         </CardTitle>
         <p className="text-xs text-slate-400 mt-0.5">
-          Define the auto-numbering format per entity. Example preview shown in the Entity column.
+          Toggle auto-numbering per entity and customise the format. Example preview shown in the Entity column.
         </p>
       </CardHeader>
       <CardContent className="pt-4 space-y-5">
@@ -78,16 +87,21 @@ export default function NumberingConfigSection({ numbering = {}, onChange }) {
             <thead>
               <tr className="bg-slate-50 text-xs text-slate-500 font-semibold">
                 <th className="text-left px-3 py-2 rounded-l">Entity / Preview</th>
+                <th className="text-left px-3 py-2">Auto #</th>
                 <th className="text-left px-3 py-2">Alpha Prefix</th>
                 <th className="text-left px-3 py-2">Divider</th>
                 <th className="text-left px-3 py-2">Start #</th>
-                <th className="text-left px-3 py-2 rounded-r">Zero Pad</th>
+                <th className="text-left px-3 py-2">Zero Pad</th>
+                <th className="text-left px-3 py-2 rounded-r">Advanced</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {ENTITY_ROWS.map(({ key, label }) => {
-                const cfg     = getCfg(key);
-                const preview = `${cfg.alpha_prefix}${cfg.divider}${String(cfg.start_number).padStart(cfg.zero_pad, "0")}`;
+                const cfg = getCfg(key);
+                const useSegments = Array.isArray(cfg.segments) && cfg.segments.length > 0;
+                const preview = useSegments
+                  ? buildRefNumber(cfg, 1)
+                  : `${cfg.alpha_prefix}${cfg.divider}${String(cfg.start_number).padStart(cfg.zero_pad, "0")}`;
                 return (
                   <tr key={key} className="hover:bg-slate-50">
                     <td className="px-3 py-2.5">
@@ -95,11 +109,26 @@ export default function NumberingConfigSection({ numbering = {}, onChange }) {
                       <p className="text-xs font-mono text-primary">{preview}</p>
                     </td>
                     <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => updateField(key, "auto_number_enabled", true)}
+                          className={cn("px-2.5 py-1 text-xs rounded-md border transition-colors", cfg.auto_number_enabled ? "bg-primary text-white border-primary" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50")}
+                        >On</button>
+                        <button
+                          type="button"
+                          onClick={() => updateField(key, "auto_number_enabled", false)}
+                          className={cn("px-2.5 py-1 text-xs rounded-md border transition-colors", !cfg.auto_number_enabled ? "bg-slate-300 text-slate-700 border-slate-300" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50")}
+                        >Off</button>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5">
                       <Input
                         className="w-24 h-8 text-xs font-mono"
                         value={cfg.alpha_prefix}
                         onChange={e => updateField(key, "alpha_prefix", e.target.value.toUpperCase())}
                         maxLength={8}
+                        disabled={useSegments}
                       />
                     </td>
                     <td className="px-3 py-2.5">
@@ -134,6 +163,18 @@ export default function NumberingConfigSection({ numbering = {}, onChange }) {
                         </SelectContent>
                       </Select>
                     </td>
+                    <td className="px-3 py-2.5">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs"
+                        onClick={() => setAdvanced(key)}
+                      >
+                        <Settings2 className="w-3.5 h-3.5" />
+                        {useSegments ? "Edit" : "Advanced"}
+                      </Button>
+                    </td>
                   </tr>
                 );
               })}
@@ -147,8 +188,10 @@ export default function NumberingConfigSection({ numbering = {}, onChange }) {
             Issue Sub-Prefix by Linked Entity Type
           </p>
           <p className="text-xs text-slate-400 mb-3">
-            When an issue is linked to a specific entity the sub-prefix is inserted. 
-            Example: linked to Risk → <span className="font-mono text-primary">{getCfg("issue").alpha_prefix}-{getCfg("issue").linked_prefixes.Risk}-{String(getCfg("issue").start_number).padStart(getCfg("issue").zero_pad,"0")}</span>
+            Used when advanced segments are not configured. Example: linked to Risk →{" "}
+            <span className="font-mono text-primary">
+              {getCfg("issue").alpha_prefix}-{getCfg("issue").linked_prefixes.Risk}-{String(getCfg("issue").start_number).padStart(getCfg("issue").zero_pad, "0")}
+            </span>
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {ISSUE_LINKED_TYPES.map(({ key, label }) => {
@@ -169,6 +212,20 @@ export default function NumberingConfigSection({ numbering = {}, onChange }) {
           </div>
         </div>
       </CardContent>
+
+      {advancedEntity && (
+        <AdvancedNumberingDialog
+          open={true}
+          onClose={() => setAdvanced(null)}
+          entityKey={advancedEntity.key}
+          entityLabel={advancedEntity.label}
+          cfg={getCfg(advancedEntity.key)}
+          onChange={(patch) => {
+            const current = getCfg(advancedEntity.key);
+            onChange({ ...numbering, [advancedEntity.key]: { ...current, ...patch } });
+          }}
+        />
+      )}
     </Card>
   );
 }

@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import FileUpload from "../components/FileUpload";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import ActionItemsPanel, { applyActionItemNumbers } from "@/components/issues/ActionItemsPanel";
-import { getEntityNumConfig, buildIssueRefNumber, getNextSequence } from "@/lib/autoNumbering";
+import { getEntityNumConfig, buildIssueRefNumber, getNextSequence, applyAutoNumber } from "@/lib/autoNumbering";
 
 export default function Issues() {
   const [globalCompany] = useCompanyFilter();
@@ -73,10 +73,12 @@ export default function Issues() {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const refNum = generateRefNumber(data.company_id, data.linked_entity_type);
+      const pref = getPrefForCompany(data.company_id);
+      const companyIssues = issues.filter(i => i.company_id === data.company_id);
+      const withAuto = applyAutoNumber("issue", data, pref, companyIssues, { linkedEntityType: data.linked_entity_type });
+      const refNum = withAuto.reference_number || "";
       const withRef = {
-        ...data,
-        reference_number: refNum,
+        ...withAuto,
         action_items: applyActionItemNumbers(data.action_items || [], refNum),
       };
       return base44.entities.Issue.create(withRef);

@@ -24,6 +24,7 @@ import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPi
 import CompensatingControlPicker from "@/components/controls/CompensatingControlPicker";
 import TestPlanPanel from "@/components/controls/TestPlanPanel";
 import ArchivedFrameworkBanner from "@/components/frameworks/ArchivedFrameworkBanner";
+import { applyAutoNumber } from "@/lib/autoNumbering";
 
 export default function ControlDetail() {
   const navigate = useNavigate();
@@ -110,6 +111,11 @@ export default function ControlDetail() {
     enabled: !!formData.is_library_control,
   });
 
+  const { data: companyPrefs = [] } = useQuery({
+    queryKey: ['companyPrefs'],
+    queryFn: () => base44.entities.CompanyPreference.list(),
+  });
+
   // Derive the expected risk reference by swapping leading 'C' → 'D' in the control ref
   const suggestedRiskRef = formData.control_id ? formData.control_id.replace(/^C/, 'D') : '';
   const suggestedRisk = libraryRisks.find(r => r.risk_reference_nr === suggestedRiskRef);
@@ -146,7 +152,11 @@ export default function ControlDetail() {
   }, [existingControl]);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Control.create(data),
+    mutationFn: (data) => {
+      const pref = companyPrefs.find(p => p.company_id === data.company_id) || null;
+      const withAuto = applyAutoNumber("control", data, pref, allControls);
+      return base44.entities.Control.create(withAuto);
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries(['controls']);
       navigate(createPageUrl(`ControlDetail?id=${data.id}`));

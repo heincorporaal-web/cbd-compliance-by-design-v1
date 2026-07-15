@@ -21,6 +21,7 @@ import ObjectiveSelector from "@/components/objectives/ObjectiveSelector";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPicker";
 import RiskSignOffPanel from "@/components/risks/RiskSignOffPanel";
+import { applyAutoNumber } from "@/lib/autoNumbering";
 
 const RISK_TYPES = ["Financial", "Operational", "Strategic", "Governance & Compliance", "Governance", "Unspecified"];
 
@@ -90,6 +91,16 @@ export default function RiskDetail() {
   const { data: controls = [] } = useQuery({
     queryKey: ['controls'],
     queryFn: () => base44.entities.Control.list(),
+  });
+
+  const { data: risks = [] } = useQuery({
+    queryKey: ['risks'],
+    queryFn: () => base44.entities.Risk.list(),
+  });
+
+  const { data: companyPrefs = [] } = useQuery({
+    queryKey: ['companyPrefs'],
+    queryFn: () => base44.entities.CompanyPreference.list(),
   });
 
   const { data: frameworks = [] } = useQuery({
@@ -186,7 +197,12 @@ export default function RiskDetail() {
   }, [risk]);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Risk.create(data),
+    mutationFn: (data) => {
+      const pref = companyPrefs.find(p => p.company_id === data.company_id) || null;
+      const companyRisks = risks.filter(r => r.company_id === data.company_id);
+      const withAuto = applyAutoNumber("risk", data, pref, companyRisks);
+      return base44.entities.Risk.create(withAuto);
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries(['risks']);
       navigate(createPageUrl(`RiskDetail?id=${data.id}`));
