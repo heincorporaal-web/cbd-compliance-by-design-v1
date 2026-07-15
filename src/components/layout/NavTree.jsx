@@ -53,6 +53,7 @@ export const NAV_GROUPS = [
       { id: "risk_engine", title: "Risk Engine", url: createPageUrl("RiskControlEngine"), icon: Cog },
       { id: "raci_matrix", title: "RACI Matrix", url: createPageUrl("RACIMatrix"), icon: Layers },
       { id: "principal_risks", title: "Principal Risks", url: createPageUrl("PrincipalRisksSummary"), icon: ShieldAlert },
+      { id: "tprm", title: "Third Party Risk Management", url: createPageUrl("ThirdPartyRiskManagement"), icon: ShieldAlert },
       { id: "issues", title: "Issues", url: createPageUrl("Issues"), icon: AlertCircle },
       { id: "incidents", title: "Incidents", url: createPageUrl("Incidents"), icon: AlertTriangle },
     ],

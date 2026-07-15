@@ -93,6 +93,135 @@
     "notes": {
       "type": "string",
       "description": "Additional notes"
+    },
+    "tprm_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when Third Party Risk Management is being tracked for this provider"
+    },
+    "inherent_risk_rating": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Inherent third-party risk rating (before controls)"
+    },
+    "residual_risk_rating": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Residual third-party risk rating (after controls)"
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Inherent & residual risks from the risk library linked to this third party"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Controls expected from the third party and from your organisation"
+    },
+    "linked_framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Frameworks whose questions/controls are mapped to this third party (ISO 27001, NIST, DORA, GDPR, COBIT, etc.)"
+    },
+    "linked_value_chain_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Value chains / business activities that depend on this third party"
+    },
+    "linked_workstream_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Workstreams that depend on this third party"
+    },
+    "linked_process_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Processes linked to the services delivered by this third party"
+    },
+    "linked_ict_system_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Systems, applications, data and infrastructure operated by the third party"
+    },
+    "linked_issue_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Issues and remediation actions tracked for this third party"
+    },
+    "linked_incident_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Incidents caused by or affecting this third party"
+    },
+    "service_owner_id": {
+      "type": "string",
+      "description": "Stakeholder ID \u2013 service owner"
+    },
+    "service_owner_name": {
+      "type": "string"
+    },
+    "relationship_owner_id": {
+      "type": "string",
+      "description": "Stakeholder ID \u2013 relationship owner"
+    },
+    "relationship_owner_name": {
+      "type": "string"
+    },
+    "risk_owner_id": {
+      "type": "string",
+      "description": "Stakeholder ID \u2013 risk owner"
+    },
+    "risk_owner_name": {
+      "type": "string"
+    },
+    "approver_id": {
+      "type": "string",
+      "description": "Stakeholder ID \u2013 approver"
+    },
+    "approver_name": {
+      "type": "string"
+    },
+    "business_continuity_critical": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this third party supports a critical/business-continuity service"
+    },
+    "bcp_recovery_notes": {
+      "type": "string",
+      "description": "Business continuity / dependency & recovery notes"
+    },
+    "tprm_notes": {
+      "type": "string",
+      "description": "Third Party Risk Management notes"
     }
   },
   "required": [
