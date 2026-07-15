@@ -100,6 +100,10 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
     queryKey: ["entityLink", "Stakeholder"],
     queryFn: () => base44.entities.Stakeholder.list("-created_date", 500),
   });
+  const { data: groups = [] } = useQuery({
+    queryKey: ["entityLink", "StakeholderGroup"],
+    queryFn: () => base44.entities.StakeholderGroup.list("-created_date", 500),
+  });
   const { data: allProviders = [] } = useQuery({
     queryKey: ["tpParentProviders", companyId],
     queryFn: () => companyId && companyId !== "all"
@@ -110,6 +114,23 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
   const stakeholderItems = companyId && companyId !== "all"
     ? stakeholders.filter(s => s.company_id === companyId)
     : stakeholders;
+  const groupItems = companyId && companyId !== "all"
+    ? groups.filter(g => g.company_id === companyId)
+    : groups;
+  // Stakeholders belonging to a named group; falls back to all when the group
+  // doesn't exist for this company, and always keeps the currently-assigned owner visible.
+  const ownerStakeholders = (groupName, currentId) => {
+    let list = stakeholderItems;
+    if (groupName) {
+      const g = groupItems.find(x => x.name === groupName);
+      list = g ? stakeholderItems.filter(s => (s.group_ids || []).includes(g.id)) : stakeholderItems;
+    }
+    if (currentId && !list.some(s => s.id === currentId)) {
+      const cur = stakeholderItems.find(s => s.id === currentId);
+      if (cur) list = [cur, ...list];
+    }
+    return list;
+  };
   const stakeholderName = (id) => stakeholderItems.find(s => s.id === id)?.full_name || "";
 
   const toggle = (field) => (id) => setForm(f => {
@@ -259,18 +280,19 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
           <Section icon={Users} title="Accountable Owners">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                ["service_owner_id", "service_owner_name", "Service Owner"],
-                ["relationship_owner_id", "relationship_owner_name", "Relationship Owner"],
-                ["procurement_owner_id", "procurement_owner_name", "Procurement Owner"],
-                ["risk_owner_id", "risk_owner_name", "Risk Owner"],
-                ["approver_id", "approver_name", "Approver"],
-              ].map(([idField, nameField, lbl]) => (
+                ["service_owner_id", "service_owner_name", "Service Owner", null],
+                ["relationship_owner_id", "relationship_owner_name", "Relationship Owner", "Relationship Owner"],
+                ["procurement_owner_id", "procurement_owner_name", "Procurement Owner", "Procurement Owner"],
+                ["risk_owner_id", "risk_owner_name", "Risk Owner", "Risk Owner"],
+                ["approver_id", "approver_name", "Approver", null],
+              ].map(([idField, nameField, lbl, groupName]) => (
                 <div key={idField}>
                   <Label className="text-xs">{lbl}</Label>
-                  <Select value={form[idField]} onValueChange={setOwner(idField, nameField)}>
+                  <Select value={form[idField] || "__none"} onValueChange={v => v === "__none" ? set(idField, "") : setOwner(idField, nameField)(v)}>
                     <SelectTrigger><SelectValue placeholder="Select stakeholder" /></SelectTrigger>
                     <SelectContent>
-                      {stakeholderItems.map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
+                      <SelectItem value="__none">—</SelectItem>
+                      {ownerStakeholders(groupName, form[idField]).map(s => <SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
