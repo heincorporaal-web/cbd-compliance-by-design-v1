@@ -17,17 +17,19 @@ import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import MaturityScale from "../components/grc/MaturityScale";
 import MaturityBadge from "../components/grc/MaturityBadge";
+import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 
 export default function GRCGoalDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   const goalId = urlParams.get('id');
+  const [globalCompany, , { locked }] = useCompanyFilter();
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    company_id: "",
+    company_id: globalCompany && globalCompany !== "all" ? globalCompany : "",
     category: "governance",
     linked_risk_ids: [],
     linked_control_ids: [],
@@ -228,7 +230,7 @@ export default function GRCGoalDetail() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="company_id">Company *</Label>
-                    <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required>
+                    <Select value={formData.company_id} onValueChange={(value) => setFormData({...formData, company_id: value})} required disabled={locked}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select company" />
                       </SelectTrigger>
