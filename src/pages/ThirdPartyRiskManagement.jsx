@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import {
   ShieldAlert, Globe, Search, Power, Plus, ShieldCheck, Cpu, AlertCircle,
-  TriangleAlert, FileCheck, Network, Users,
+  TriangleAlert, FileCheck, Network, Users, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import ThirdPartyRiskDetailDialog from "@/components/tprm/ThirdPartyRiskDetailDialog";
@@ -27,12 +29,23 @@ const CRIT_COLOR = {
 };
 
 export default function ThirdPartyRiskManagement() {
-  const [companyId, setCompanyId, { locked, isAdmin }] = useCompanyFilter();
+  const [companyId] = useCompanyFilter();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [active, setActive] = useState(null);
 
   const effectiveCompanyId = companyId === "all" ? null : companyId;
+
+  // Product owner = platform admin or a role flagged is_product_owner
+  // (same convention used by the Framework Library maintainer gate).
+  const { data: roles = [] } = useQuery({
+    queryKey: ["userRoles"],
+    queryFn: () => base44.entities.UserRole.list("-created_date", 2000),
+    enabled: !!user?.custom_role_id,
+  });
+  const myRole = roles.find(r => r.id === user?.custom_role_id);
+  const isProductOwner = user?.role === "admin" || !!myRole?.is_product_owner;
 
   // Company preferences (for the TPRM on/off flag)
   const { data: prefs = [] } = useQuery({
@@ -115,34 +128,49 @@ export default function ThirdPartyRiskManagement() {
     <div className="p-6 lg:p-8 space-y-6">
       <PageHeader />
 
-      {/* Module toggle banner */}
-      <Card className="p-5 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${tprmEnabled ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}>
-            <Power className="w-5 h-5" />
+      {/* Module toggle banner — product owner only */}
+      {isProductOwner && (
+        <Card className="p-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${tprmEnabled ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}>
+              <Power className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-800">Third Party Risk Management add-on</h3>
+              <p className="text-sm text-slate-500">
+                {tprmEnabled
+                  ? "Switched on — third parties can be tracked for risk, controls, frameworks, processes, assets, BCP and more."
+                  : "Switched off — only basic Supplier Management (Third Parties under Compliance) is active."}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold text-slate-800">Third Party Risk Management add-on</h3>
-            <p className="text-sm text-slate-500">
-              {tprmEnabled
-                ? "Switched on — third parties can be tracked for risk, controls, frameworks, processes, assets, BCP and more."
-                : "Switched off — only basic Supplier Management (Third Parties under Compliance) is active."}
-            </p>
+          <div className="flex items-center gap-3">
+            <span className={`text-sm font-medium ${tprmEnabled ? "text-indigo-600" : "text-slate-400"}`}>
+              {tprmEnabled ? "Enabled" : "Disabled"}
+            </span>
+            <Switch checked={tprmEnabled} onCheckedChange={(v) => enableModuleMutation.mutate(v)} />
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className={`text-sm font-medium ${tprmEnabled ? "text-indigo-600" : "text-slate-400"}`}>
-            {tprmEnabled ? "Enabled" : "Disabled"}
-          </span>
-          <Switch checked={tprmEnabled} onCheckedChange={(v) => enableModuleMutation.mutate(v)} disabled={!isAdmin} />
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {!tprmEnabled ? (
         <Card className="p-10 text-center text-slate-500">
-          <ShieldAlert className="w-10 h-10 mx-auto mb-3 text-slate-300" />
-          <p className="font-medium">Third Party Risk Management is switched off.</p>
-          <p className="text-sm text-slate-400 mt-1">Enable the add-on above to start tracking third-party risks, controls and dependencies here.</p>
+          {isProductOwner ? (
+            <>
+              <ShieldAlert className="w-10 h-10 mx-auto mb-3 text-slate-300" />
+              <p className="font-medium">Third Party Risk Management is switched off.</p>
+              <p className="text-sm text-slate-400 mt-1">Enable the add-on above to start tracking third-party risks, controls and dependencies here.</p>
+            </>
+          ) : (
+            <>
+              <Lock className="w-10 h-10 mx-auto mb-3 text-slate-300" />
+              <p className="font-medium">Third Party Risk Management is not enabled for your company.</p>
+              <p className="text-sm text-slate-400 mt-1">
+                Request activation using the Contact form in the{" "}
+                <Link to="/about" className="text-indigo-600 font-medium hover:underline">About section</Link>.
+              </p>
+            </>
+          )}
         </Card>
       ) : (
         <>

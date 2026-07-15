@@ -1,0 +1,51 @@
+{
+  "name": "ContactRequest",
+  "type": "object",
+  "properties": {
+    "subject": {
+      "type": "string",
+      "description": "Subject of the contact / activation request"
+    },
+    "message": {
+      "type": "string",
+      "description": "Full message body"
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "activation",
+        "support",
+        "general"
+      ],
+      "default": "activation",
+      "description": "Type of contact request"
+    },
+    "requester_name": {
+      "type": "string",
+      "description": "Name of the user who submitted the request (denormalized)"
+    },
+    "requester_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email of the user who submitted the request (denormalized)"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company the requester belongs to (denormalized, if any)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "resolved",
+        "closed"
+      ],
+      "default": "open"
+    }
+  },
+  "required": [
+    "subject",
+    "message"
+  ]
+}

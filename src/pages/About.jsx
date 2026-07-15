@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
-import { Info, Pencil, Save, ShieldCheck, Calendar, FileText, ScrollText } from "lucide-react";
+import { Info, Pencil, Save, ShieldCheck, Calendar, FileText, ScrollText, Mail, Send } from "lucide-react";
 import { toast } from "sonner";
 
 const DEFAULT_TERMS = "Compliance by Design Platform – User Terms\n\nEnter the user terms for the Compliance by Design Platform here.";
@@ -85,6 +85,7 @@ export default function About() {
         <TabsList>
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="legal">Terms &amp; Policy</TabsTrigger>
+          <TabsTrigger value="contact">Contact</TabsTrigger>
         </TabsList>
 
         {/* ── About tab ─────────────────────────────────────────── */}
@@ -175,6 +176,11 @@ export default function About() {
             </>
           )}
         </TabsContent>
+
+        {/* ── Contact tab ──────────────────────────────────────── */}
+        <TabsContent value="contact" className="mt-4">
+          <ContactTab user={user} />
+        </TabsContent>
       </Tabs>
 
       {/* ── Edit dialog ────────────────────────────────────────── */}
@@ -250,6 +256,83 @@ export default function About() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function ContactTab({ user }) {
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const handleSend = async () => {
+    if (!subject.trim() || !message.trim()) {
+      toast.error("Please enter a subject and a message.");
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await base44.functions.invoke("submitContactRequest", {
+        subject: subject.trim(),
+        message: message.trim(),
+        request_type: "activation",
+      });
+      toast.success("Your request has been sent to the product owner.");
+      setSubject("");
+      setMessage("");
+    } catch (e) {
+      toast.error("Failed to send request: " + (e?.message || "unknown error"));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+        <div className="flex items-center gap-2.5">
+          <Mail className="w-5 h-5 text-indigo-600" />
+          <h3 className="font-semibold text-slate-800">Contact / Request Activation</h3>
+        </div>
+      </div>
+      <div className="p-6 space-y-4">
+        <p className="text-sm text-slate-500">
+          Use this form to request activation of an add-on module (such as Third Party Risk Management)
+          for your company, or to contact the product owner. Your name and email are included automatically.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label>Your Name</Label>
+            <Input value={user?.full_name || ""} disabled />
+          </div>
+          <div>
+            <Label>Your Email</Label>
+            <Input value={user?.email || ""} disabled />
+          </div>
+        </div>
+        <div>
+          <Label>Subject</Label>
+          <Input
+            placeholder="e.g. Request activation of Third Party Risk Management"
+            value={subject}
+            onChange={e => setSubject(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label>Message</Label>
+          <Textarea
+            rows={6}
+            placeholder="Describe your request…"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+          />
+        </div>
+        <div className="flex justify-end">
+          <Button onClick={handleSend} disabled={sending} className="gap-2">
+            <Send className="w-4 h-4" /> {sending ? "Sending…" : "Send Request"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
