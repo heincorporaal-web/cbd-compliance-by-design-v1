@@ -5,9 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Library, Shield, Layers, Lock, BookOpen, ChevronRight, Upload } from "lucide-react";
+import { Search, Library, Shield, Layers, Lock, BookOpen, ChevronRight, Upload, Pencil } from "lucide-react";
 import FrameworkNodeTree from "@/components/frameworklibrary/FrameworkNodeTree";
 import FrameworkUploadWizard from "@/components/frameworklibrary/FrameworkUploadWizard";
+import FrameworkEditDialog from "@/components/frameworklibrary/FrameworkEditDialog";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function FrameworkLibrary() {
@@ -16,6 +17,7 @@ export default function FrameworkLibrary() {
   const [expanded, setExpanded] = useState(() => new Set());
   const [typeFilter, setTypeFilter] = useState("all");
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const refetchLibrary = () => {
@@ -192,6 +194,11 @@ export default function FrameworkLibrary() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={expandAll} className="text-xs px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50">Expand all</button>
+                    {isMaintainer && (
+                      <button onClick={() => setEditOpen(true)} className="text-xs px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary/90 inline-flex items-center gap-1">
+                        <Pencil className="w-3 h-3" /> Edit framework
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -267,6 +274,18 @@ export default function FrameworkLibrary() {
           onClose={() => setUploadOpen(false)}
           frameworks={frameworks}
           onDone={refetchLibrary}
+        />
+      )}
+
+      {isMaintainer && selectedFw && (
+        <FrameworkEditDialog
+          open={editOpen}
+          framework={selectedFw}
+          pillars={frameworkPillars}
+          nodes={nodes.filter(n => n.framework_id === selectedFw.id)}
+          nodeTypes={nodeTypes}
+          onClose={() => setEditOpen(false)}
+          onChanged={refetchLibrary}
         />
       )}
     </div>
