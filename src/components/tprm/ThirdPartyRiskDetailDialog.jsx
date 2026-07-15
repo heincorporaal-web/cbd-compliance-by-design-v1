@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Save, ShieldAlert, Users, Boxes, Cpu, AlertCircle, TriangleAlert, Network, ScrollText, FileCheck, Building2 } from "lucide-react";
 import EntityLinkPicker from "./EntityLinkPicker";
+import CountrySelect from "./CountrySelect";
 
 const RATING = [
   { value: "low", label: "Low" },
@@ -192,11 +193,11 @@ export default function ThirdPartyRiskDetailDialog({ provider, companyId, onClos
               </div>
               <div>
                 <Label className="text-xs">Country of Registration</Label>
-                <Input value={form.country_of_registration || ""} onChange={e => set("country_of_registration", e.target.value)} />
+                <CountrySelect value={form.country_of_registration || ""} onChange={v => set("country_of_registration", v)} />
               </div>
               <div>
                 <Label className="text-xs">Headquarters Country</Label>
-                <Input value={form.headquarters_country || ""} onChange={e => set("headquarters_country", e.target.value)} />
+                <CountrySelect value={form.headquarters_country || ""} onChange={v => set("headquarters_country", v)} />
               </div>
               <div>
                 <Label className="text-xs">Primary Contact Name</Label>
