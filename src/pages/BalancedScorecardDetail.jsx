@@ -158,6 +158,10 @@ export default function BalancedScorecardDetail() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.company_id) {
+      alert("Please select a company before saving.");
+      return;
+    }
     if (scorecardId) await updateMutation.mutateAsync(formData);
     else await createMutation.mutateAsync(formData);
   };
