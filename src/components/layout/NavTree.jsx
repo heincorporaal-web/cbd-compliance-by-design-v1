@@ -6,7 +6,7 @@ import {
   AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert,
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
-  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert, CalendarClock
+  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert, CalendarClock, Gauge
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -37,6 +37,7 @@ export const NAV_GROUPS = [
       { id: "control_assessment_cycles", title: "Control Assessment Cycles", url: createPageUrl("ControlAssessmentCycles"), icon: ClipboardList },
       { id: "framework_mapper", title: "Framework Mapper (AI)", url: createPageUrl("FrameworkControlMapper"), icon: Sparkles },
       { id: "grc_goals", title: "GRC Goals", url: createPageUrl("GRCGoals"), icon: Target },
+      { id: "balanced_scorecards", title: "Balanced Scorecards", url: createPageUrl("BalancedScorecards"), icon: Gauge },
       { id: "org_objectives", title: "Org. Objectives", url: createPageUrl("ObjectivesSummary"), icon: Target },
       { id: "root_cause_categories", title: "Root Cause Categories", url: createPageUrl("RootCauseCategories"), icon: AlertCircle },
     ],

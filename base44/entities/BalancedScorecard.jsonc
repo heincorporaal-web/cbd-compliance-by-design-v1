@@ -1,0 +1,99 @@
+{
+  "name": "BalancedScorecard",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Scorecard name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Scorecard description / scope"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "period": {
+      "type": "string",
+      "description": "Reporting period e.g. FY2026, Q1-2026"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Scorecard owner name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "archived"
+      ],
+      "default": "draft",
+      "description": "Scorecard lifecycle status"
+    },
+    "perspectives": {
+      "type": "array",
+      "description": "Balanced scorecard perspectives (Financial, Customer, Internal Process, Learning & Growth by default)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Perspective name"
+          },
+          "weight_pct": {
+            "type": "number",
+            "description": "Weighting applied to this perspective when computing the overall score (0-100)"
+          },
+          "color_hex": {
+            "type": "string",
+            "description": "Badge / chart colour for this perspective"
+          },
+          "linked_objective_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Linked OrgObjective IDs"
+          },
+          "linked_grc_goal_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Linked GRCGoal IDs"
+          },
+          "linked_control_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Linked Control IDs"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "company_id"
+  ]
+}

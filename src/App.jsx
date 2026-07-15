@@ -29,6 +29,8 @@ import MyActions from './pages/MyActions';
 import AssessmentModels from './pages/AssessmentModels';
 import AssessmentModelDetail from './pages/AssessmentModelDetail';
 import EvidenceLibrary from './pages/EvidenceLibrary';
+import BalancedScorecards from './pages/BalancedScorecards';
+import BalancedScorecardDetail from './pages/BalancedScorecardDetail';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -80,6 +82,8 @@ const AuthenticatedApp = () => {
         <Route path="/AssessmentModels" element={<AssessmentModels />} />
         <Route path="/AssessmentModelDetail" element={<AssessmentModelDetail />} />
         <Route path="/EvidenceLibrary" element={<EvidenceLibrary />} />
+        <Route path="/BalancedScorecards" element={<BalancedScorecards />} />
+        <Route path="/BalancedScorecardDetail" element={<BalancedScorecardDetail />} />
         <Route path="/PrincipalRisks" element={<PrincipalRisks />} />
         <Route path="/ObjectivesSummary" element={<ObjectivesSummary />} />
         <Route path="/PrincipalRisksSummary" element={<PrincipalRisksSummary />} />
