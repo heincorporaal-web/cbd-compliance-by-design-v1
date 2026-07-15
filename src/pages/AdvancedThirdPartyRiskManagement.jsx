@@ -11,11 +11,10 @@ import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import {
   ShieldAlert, Globe, Search, Plus, ShieldCheck, Cpu, AlertCircle,
-  TriangleAlert, FileCheck, Network, Lock, Power, Pencil,
+  TriangleAlert, FileCheck, Network, Lock, Power,
 } from "lucide-react";
 import { toast } from "sonner";
 import ThirdPartyRiskDetailDialog from "@/components/tprm/ThirdPartyRiskDetailDialog";
-import ThirdPartyFormDialog from "@/components/tprm/ThirdPartyFormDialog";
 
 const RATING_COLOR = {
   low: "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -35,8 +34,6 @@ export default function AdvancedThirdPartyRiskManagement() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [active, setActive] = useState(null);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
 
   const effectiveCompanyId = companyId === "all" ? null : companyId;
 
@@ -98,9 +95,6 @@ export default function AdvancedThirdPartyRiskManagement() {
       base44.entities.ThirdPartyProvider.update(providerId, { tprm_enabled: enabled }),
     onSuccess: () => queryClient.invalidateQueries(["tprmProviders"]),
   });
-
-  const openAdd = () => { setEditing(null); setFormOpen(true); };
-  const openEdit = (p) => { setEditing(p); setFormOpen(true); };
 
   // No company selected (admin "all")
   if (!effectiveCompanyId) {
@@ -177,9 +171,9 @@ export default function AdvancedThirdPartyRiskManagement() {
                 <Badge variant="secondary">{tprmCount} in TPRM</Badge>
                 <Badge variant="outline">{providers.length - tprmCount} basic</Badge>
               </div>
-              <Button onClick={openAdd} className="gap-1.5">
-                <Plus className="w-4 h-4" /> Add Third Party
-              </Button>
+              <Link to="/ThirdParties" className="text-sm text-indigo-600 font-medium hover:underline whitespace-nowrap">
+                Add in Third Parties →
+              </Link>
             </div>
           </div>
 
@@ -189,11 +183,13 @@ export default function AdvancedThirdPartyRiskManagement() {
           ) : filtered.length === 0 ? (
             <Card className="p-10 text-center text-slate-500">
               <ShieldAlert className="w-10 h-10 mx-auto mb-3 text-slate-300" />
-              <p className="font-medium">No third parties yet.</p>
-              <p className="text-sm text-slate-400 mt-1 mb-4">Add your first third party to start tracking its risk profile.</p>
-              <Button onClick={openAdd} className="gap-1.5">
-                <Plus className="w-4 h-4" /> Add Third Party
-              </Button>
+              <p className="font-medium">No third parties found for this company.</p>
+              <p className="text-sm text-slate-400 mt-1 mb-4">Add basic third-party records in the Third Parties register, then search and manage their advanced risk profile here.</p>
+              <Link to="/ThirdParties">
+                <Button variant="outline" className="gap-1.5">
+                  <Plus className="w-4 h-4" /> Go to Third Parties
+                </Button>
+              </Link>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -206,9 +202,6 @@ export default function AdvancedThirdPartyRiskManagement() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className={CRIT_COLOR[p.criticality] || ""}>{p.criticality}</Badge>
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(p)} title="Edit">
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Button>
                     </div>
                   </div>
 
@@ -252,9 +245,6 @@ export default function AdvancedThirdPartyRiskManagement() {
       {active && (
         <ThirdPartyRiskDetailDialog provider={active} companyId={effectiveCompanyId} onClose={() => setActive(null)} />
       )}
-      {formOpen && (
-        <ThirdPartyFormDialog open={formOpen} onOpenChange={setFormOpen} companyId={effectiveCompanyId} editingProvider={editing} />
-      )}
     </div>
   );
 }
@@ -267,7 +257,7 @@ function PageHeader() {
       </div>
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Advanced Third Party Risk Management</h1>
-        <p className="text-slate-500 text-sm">Add and manage third-party risk profiles — risks, controls, frameworks, processes, assets & BCP</p>
+        <p className="text-slate-500 text-sm">Search third-party records and manage their advanced risk profiles — risks, controls, frameworks, processes, assets & BCP</p>
       </div>
     </div>
   );
