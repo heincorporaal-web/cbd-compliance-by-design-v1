@@ -1,0 +1,108 @@
+{
+  "name": "FrameworkNode",
+  "type": "object",
+  "properties": {
+    "framework_id": {
+      "type": "string",
+      "description": "Reference to the master Framework entity this node belongs to"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Parent FrameworkNode ID (self-referencing hierarchy)"
+    },
+    "legacy_node_id": {
+      "type": "number",
+      "description": "Source FrameworkNodeID from tblFrameworkNode"
+    },
+    "legacy_parent_node_id": {
+      "type": "number",
+      "description": "Source ParentFrameworkNodeID (used to resolve parent_id during import)"
+    },
+    "legacy_node_type_id": {
+      "type": "number",
+      "description": "Source NodeTypeID (links to FrameworkNodeType.legacy_node_type_id)"
+    },
+    "node_type_name": {
+      "type": "string",
+      "description": "Node type name denormalized (Domain, Chapter, Section, Clause, Article, ...)"
+    },
+    "node_code": {
+      "type": "string",
+      "description": "Node reference code (e.g. 5.1, A.5.9.a, EDM01)"
+    },
+    "node_title": {
+      "type": "string",
+      "description": "Node title / heading"
+    },
+    "node_text": {
+      "type": "string",
+      "description": "Full text / requirement body of the node"
+    },
+    "guidance_text": {
+      "type": "string",
+      "description": "Implementation guidance text"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Display sort order within siblings"
+    },
+    "level_no": {
+      "type": "number",
+      "description": "Hierarchy level number (2=top within framework, increasing deeper)"
+    },
+    "is_leaf": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this node is a leaf (no children)"
+    },
+    "is_mandatory": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the node is mandatory"
+    },
+    "is_checklist_parent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this node is a parent of checklist items"
+    },
+    "reference_url": {
+      "type": "string",
+      "description": "External reference URL"
+    },
+    "external_ref": {
+      "type": "string",
+      "description": "External reference label (e.g. Art. 5(1))"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "retired",
+        "draft"
+      ],
+      "default": "active",
+      "description": "Node status"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "retired_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "key_aspects": {
+      "type": "string",
+      "description": "Key aspects summary"
+    },
+    "implementation_guidance": {
+      "type": "string",
+      "description": "Implementation guidance notes"
+    }
+  },
+  "required": [
+    "framework_id",
+    "node_title"
+  ]
+}

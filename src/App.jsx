@@ -24,6 +24,7 @@ import AssessmentsReport from './pages/AssessmentsReport';
 import ThirdPartiesReport from './pages/ThirdPartiesReport';
 import ITCapabilitiesReport from './pages/ITCapabilitiesReport';
 import HelpCentre from './pages/HelpCentre';
+import FrameworkLibrary from './pages/FrameworkLibrary';
 import MyActions from './pages/MyActions';
 import AssessmentModels from './pages/AssessmentModels';
 import AssessmentModelDetail from './pages/AssessmentModelDetail';
@@ -75,6 +76,7 @@ const AuthenticatedApp = () => {
         <Route path="/MyActions" element={<MyActions />} />
         <Route path="/GettingStarted" element={<GettingStarted />} />
         <Route path="/HelpCentre" element={<HelpCentre />} />
+        <Route path="/FrameworkLibrary" element={<FrameworkLibrary />} />
         <Route path="/AssessmentModels" element={<AssessmentModels />} />
         <Route path="/AssessmentModelDetail" element={<AssessmentModelDetail />} />
         <Route path="/EvidenceLibrary" element={<EvidenceLibrary />} />

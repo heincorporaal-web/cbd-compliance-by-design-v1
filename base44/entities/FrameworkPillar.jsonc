@@ -1,0 +1,33 @@
+{
+  "name": "FrameworkPillar",
+  "type": "object",
+  "properties": {
+    "pillar_ref": {
+      "type": "string",
+      "description": "Pillar reference code (e.g. P.DRA.IRM)"
+    },
+    "pillar_name": {
+      "type": "string",
+      "description": "Pillar name (e.g. ICT Risk Management)"
+    },
+    "pillar_desc": {
+      "type": "string",
+      "description": "Pillar description"
+    },
+    "framework_id": {
+      "type": "string",
+      "description": "Reference to the master Framework entity this pillar belongs to"
+    },
+    "framework_name": {
+      "type": "string",
+      "description": "Framework name (denormalized, e.g. DORA)"
+    },
+    "legacy_pillar_id": {
+      "type": "number",
+      "description": "Source PillarID from tblPillar"
+    }
+  },
+  "required": [
+    "pillar_name"
+  ]
+}

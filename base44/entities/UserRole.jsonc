@@ -15,6 +15,11 @@
       "default": false,
       "description": "Whether this is a system role (cannot be deleted)"
     },
+    "is_product_owner": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for the Product Owner role \u2014 maintains the master framework library and can never be associated with a company"
+    },
     "active_from": {
       "type": "string",
       "format": "date",

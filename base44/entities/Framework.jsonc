@@ -50,6 +50,10 @@
       "default": false,
       "description": "True if this is a master library framework (not company-specific)"
     },
+    "legacy_framework_id": {
+      "type": "number",
+      "description": "Source FRAMEWORKID from tblFrameworkNode (maps master library nodes to this framework)"
+    },
     "sort_order": {
       "type": "number",
       "description": "Display sort order"

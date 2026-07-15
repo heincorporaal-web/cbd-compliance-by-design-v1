@@ -1,0 +1,31 @@
+{
+  "name": "FrameworkNodeType",
+  "type": "object",
+  "properties": {
+    "legacy_node_type_id": {
+      "type": "number",
+      "description": "Source lookup NodeTypeID (e.g. 1=Domain, 2=Chapter)"
+    },
+    "node_type_name": {
+      "type": "string",
+      "description": "Node type name (Domain, Chapter, Section, Clause, Article, ...)"
+    },
+    "node_type_description": {
+      "type": "string",
+      "description": "Description of the node type"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Display sort order"
+    },
+    "is_leaf_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether nodes of this type are leaf nodes by default"
+    }
+  },
+  "required": [
+    "node_type_name"
+  ]
+}

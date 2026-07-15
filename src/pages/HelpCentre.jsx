@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import {
   Search, BookOpen, Shield, TriangleAlert, Users, ClipboardCheck,
   Network, Server, ChevronDown, ChevronRight, HelpCircle, MessageCircle,
-  FileText, Settings, GitBranch, Building2, Layers, Star, X, CalendarClock, Library
+  FileText, Settings, GitBranch, Building2, Layers, Star, X, CalendarClock, Library, ArrowRight
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -368,6 +368,27 @@ export default function HelpCentre() {
           )}
         </div>
       </div>
+
+      {/* Framework Library banner */}
+      <Card className="border-none shadow-lg bg-gradient-to-br from-indigo-50 to-primary/5 border border-indigo-100">
+        <CardContent className="p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shrink-0">
+            <Library className="w-6 h-6 text-white" />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-bold text-slate-900">Framework Library</h2>
+            <p className="text-sm text-slate-600">
+              Browse the master library of compliance frameworks — DORA, COBIT, ISO 27001, NIST and more — with a standardised, searchable hierarchy of domains, chapters, sections, clauses and articles. Maintained by the Product Owner.
+            </p>
+          </div>
+          <Link
+            to="/FrameworkLibrary"
+            className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap flex items-center gap-2 shrink-0"
+          >
+            Open Library <ArrowRight className="w-4 h-4" />
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Search results */}
       {searchResults && (
