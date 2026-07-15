@@ -146,6 +146,10 @@ export default function AdvancedThirdPartyRiskManagement() {
               <ShieldAlert className="w-10 h-10 mx-auto mb-3 text-slate-300" />
               <p className="font-medium">Advanced Third Party Risk Management is switched off.</p>
               <p className="text-sm text-slate-400 mt-1">Enable the add-on above to start adding and tracking third parties.</p>
+              <p className="text-sm text-slate-400 mt-3">You can still add and manage basic third-party records in the Third Parties register.</p>
+              <Link to="/ThirdParties" className="inline-flex items-center gap-1.5 mt-3 text-sm text-indigo-600 font-medium hover:underline">
+                <Plus className="w-4 h-4" /> Go to Third Parties
+              </Link>
             </>
           ) : (
             <>
@@ -155,6 +159,10 @@ export default function AdvancedThirdPartyRiskManagement() {
                 Request activation using the Contact form in the{" "}
                 <Link to="/about" className="text-indigo-600 font-medium hover:underline">About section</Link>.
               </p>
+              <p className="text-sm text-slate-400 mt-3">You can still add and manage basic third-party records in the Third Parties register.</p>
+              <Link to="/ThirdParties" className="inline-flex items-center gap-1.5 mt-3 text-sm text-indigo-600 font-medium hover:underline">
+                <Plus className="w-4 h-4" /> Go to Third Parties
+              </Link>
             </>
           )}
         </Card>

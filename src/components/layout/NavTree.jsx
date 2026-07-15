@@ -53,6 +53,7 @@ export const NAV_GROUPS = [
       { id: "risk_engine", title: "Risk Engine", url: createPageUrl("RiskControlEngine"), icon: Cog },
       { id: "raci_matrix", title: "RACI Matrix", url: createPageUrl("RACIMatrix"), icon: Layers },
       { id: "principal_risks", title: "Principal Risks", url: createPageUrl("PrincipalRisksSummary"), icon: ShieldAlert },
+      { id: "third_parties", title: "Third Parties", url: createPageUrl("ThirdParties"), icon: Globe },
       { id: "advanced_tprm", title: "Advanced Third Party Risk Management", url: createPageUrl("AdvancedThirdPartyRiskManagement"), icon: ShieldAlert },
       { id: "issues", title: "Issues", url: createPageUrl("Issues"), icon: AlertCircle },
       { id: "incidents", title: "Incidents", url: createPageUrl("Incidents"), icon: AlertTriangle },
@@ -65,7 +66,6 @@ export const NAV_GROUPS = [
     items: [
       { id: "assessments", title: "Assessments", url: createPageUrl("Assessments"), icon: ClipboardCheck },
       { id: "surveys", title: "Surveys", url: createPageUrl("Surveys"), icon: ClipboardList },
-      { id: "third_parties", title: "Third Parties", url: createPageUrl("ThirdParties"), icon: Globe },
     ],
   },
   {
