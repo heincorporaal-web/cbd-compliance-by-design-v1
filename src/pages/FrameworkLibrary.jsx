@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Library, Shield, Layers, Lock, BookOpen, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Library, Shield, Layers, Lock, BookOpen, ChevronRight, Upload } from "lucide-react";
 import FrameworkNodeTree from "@/components/frameworklibrary/FrameworkNodeTree";
+import FrameworkUploadWizard from "@/components/frameworklibrary/FrameworkUploadWizard";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function FrameworkLibrary() {
@@ -13,7 +15,14 @@ export default function FrameworkLibrary() {
   const [selectedFwId, setSelectedFwId] = useState(null);
   const [expanded, setExpanded] = useState(() => new Set());
   const [typeFilter, setTypeFilter] = useState("all");
+  const [uploadOpen, setUploadOpen] = useState(false);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const refetchLibrary = () => {
+    queryClient.invalidateQueries({ queryKey: ["master-frameworks"] });
+    queryClient.invalidateQueries({ queryKey: ["fw-pillars"] });
+    queryClient.invalidateQueries({ queryKey: ["fw-nodes"] });
+  };
 
   const { data: frameworks = [] } = useQuery({ queryKey: ["master-frameworks"], queryFn: () => base44.entities.Framework.filter({ is_master: true }, "name", 2000) });
   const { data: pillars = [] } = useQuery({ queryKey: ["fw-pillars"], queryFn: () => base44.entities.FrameworkPillar.list("-sort_order", 2000) });
@@ -92,7 +101,12 @@ export default function FrameworkLibrary() {
             </p>
           </div>
           {isMaintainer ? (
-            <Badge className="bg-amber-100 text-amber-800 border-amber-300"><Lock className="w-3 h-3 mr-1" />Maintainer</Badge>
+            <>
+              <Badge className="bg-amber-100 text-amber-800 border-amber-300"><Lock className="w-3 h-3 mr-1" />Maintainer</Badge>
+              <Button onClick={() => setUploadOpen(true)} className="ml-2 shrink-0">
+                <Upload className="w-4 h-4 mr-1" /> Upload
+              </Button>
+            </>
           ) : (
             <Badge variant="outline" className="text-slate-500">Read-only</Badge>
           )}
@@ -246,6 +260,15 @@ export default function FrameworkLibrary() {
           The master library is maintained by the Product Owner account. Companies create their own version of a framework by adding a Knowledge Article linked to a framework — see Knowledge Management. Product Owner accounts can never be associated with a company.
         </p>
       </div>
+
+      {isMaintainer && (
+        <FrameworkUploadWizard
+          open={uploadOpen}
+          onClose={() => setUploadOpen(false)}
+          frameworks={frameworks}
+          onDone={refetchLibrary}
+        />
+      )}
     </div>
   );
 }
