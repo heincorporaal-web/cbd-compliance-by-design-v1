@@ -6,11 +6,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import {
-  ShieldAlert, RefreshCw, Trash2, Search, Camera, ArrowRight, AlertTriangle,
+  ShieldAlert, RefreshCw, Trash2, Search, Camera, ArrowRight, AlertTriangle, CheckCircle2, FileWarning,
 } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { useIsAuditRole } from "@/hooks/useIsAuditRole";
 import { toast } from "sonner";
+
+// Entity types that can be linked to an Issue (per the Issue schema enum).
+const LINKABLE_TYPES = new Set(["Risk", "Control", "ICTSystem", "OrgProcess", "ThirdPartyProvider"]);
+const gapKey = (g) => `${g.entity_type}|${g.entity_id}|${g.field_label}|${g.stakeholder_id}`;
 
 const snapshotKey = (userId, companyId) =>
   `cbd_stakeholder_gaps_${userId || "guest"}_${companyId || "all"}`;
@@ -29,6 +33,9 @@ export default function StakeholderAssignmentGaps() {
   const [snapTs, setSnapTs] = useState(null);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(() => new Set());
+  const [creating, setCreating] = useState(false);
+  const [createdKeys, setCreatedKeys] = useState(() => new Set());
 
   useEffect(() => {
     base44.auth.me().then((u) => { if (u) setUserId(u.id); }).catch(() => {});
@@ -46,15 +53,82 @@ export default function StakeholderAssignmentGaps() {
         const parsed = JSON.parse(raw);
         setResult(parsed.result || null);
         setSnapTs(parsed.ts || null);
+        setCreatedKeys(new Set(parsed.created_keys || []));
       } else {
         setResult(null);
         setSnapTs(null);
+        setCreatedKeys(new Set());
       }
     } catch {
       setResult(null);
       setSnapTs(null);
+      setCreatedKeys(new Set());
     }
+    setSelected(new Set());
   }, [key, userId]);
+
+  const persistCreated = (next) => {
+    setCreatedKeys(next);
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : {};
+      localStorage.setItem(key, JSON.stringify({
+        ...parsed,
+        result: parsed.result || null,
+        ts: parsed.ts || null,
+        created_keys: Array.from(next),
+      }));
+    } catch { /* ignore */ }
+  };
+
+  const toggleGap = (g, checked) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      const k = gapKey(g);
+      if (checked) next.add(k); else next.delete(k);
+      return next;
+    });
+  };
+
+  const toggleAll = (checked) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const g of filtered) {
+        if (!LINKABLE_TYPES.has(g.entity_type)) continue;
+        if (createdKeys.has(gapKey(g))) continue;
+        const k = gapKey(g);
+        if (checked) next.add(k); else next.delete(k);
+      }
+      return next;
+    });
+  };
+
+  const createIssues = async () => {
+    const chosen = allGaps.filter((g) =>
+      selected.has(gapKey(g)) && LINKABLE_TYPES.has(g.entity_type) && !createdKeys.has(gapKey(g))
+    );
+    if (chosen.length === 0) {
+      toast.error("Select at least one linkable gap that hasn't already had an issue created");
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await base44.functions.invoke("createIssuesFromGaps", { gaps: chosen });
+      const data = res.data ?? res;
+      const newCreated = new Set(createdKeys);
+      for (const g of chosen) newCreated.add(gapKey(g));
+      persistCreated(newCreated);
+      setSelected(new Set());
+      toast.success(
+        `Created ${data.created_count} issue${data.created_count !== 1 ? "s" : ""}` +
+          (data.skipped_count ? ` · ${data.skipped_count} skipped` : "")
+      );
+    } catch (e) {
+      toast.error(e?.response?.data?.error || e?.message || "Could not create issues");
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const runScan = async () => {
     setScanning(true);
@@ -193,6 +267,34 @@ export default function StakeholderAssignmentGaps() {
                 </Button>
               ))}
             </div>
+            {(() => {
+              const linkableFiltered = filtered.filter(
+                (g) => LINKABLE_TYPES.has(g.entity_type) && !createdKeys.has(gapKey(g))
+              );
+              const allChecked = linkableFiltered.length > 0 &&
+                linkableFiltered.every((g) => selected.has(gapKey(g)));
+              return (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleAll(!allChecked)}
+                  disabled={linkableFiltered.length === 0}
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  {allChecked ? "Deselect all" : "Select all"}
+                </Button>
+              );
+            })()}
+            <Button
+              size="sm"
+              onClick={createIssues}
+              disabled={creating || selected.size === 0}
+            >
+              <FileWarning className="w-4 h-4 mr-2" />
+              {creating
+                ? "Creating…"
+                : `Create ${selected.size > 0 ? selected.size : ""} issue${selected.size === 1 ? "" : "s"}`}
+            </Button>
           </div>
 
           {filtered.length === 0 ? (
@@ -203,46 +305,72 @@ export default function StakeholderAssignmentGaps() {
             </Card>
           ) : (
             <div className="space-y-2">
-              {filtered.map((g, i) => (
-                <Card key={i} className="border-none shadow-sm hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 flex items-start justify-between gap-4 flex-wrap">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <Badge className={`border ${critStyle[g.criticality]}`}>
-                          {g.criticality}
-                        </Badge>
-                        <span className="font-semibold text-slate-900">
-                          {g.stakeholder_name}
-                        </span>
-                        {g.end_date && (
-                          <span className="text-xs text-slate-500">
-                            end-dated {g.end_date}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-slate-600">
-                        Still assigned as <span className="font-medium">{g.field_label}</span> on{" "}
-                        <span className="font-medium">{g.entity_label}</span>
-                        <span className="text-slate-400"> ({g.entity_type})</span>
-                      </p>
-                      {g.group_names?.length > 0 && (
-                        <div className="flex gap-1 mt-1.5 flex-wrap">
-                          {g.group_names.map((n) => (
-                            <span key={n} className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                              {n}
+              {filtered.map((g, i) => {
+                const k = gapKey(g);
+                const linkable = LINKABLE_TYPES.has(g.entity_type);
+                const alreadyCreated = createdKeys.has(k);
+                const isSelected = selected.has(k);
+                return (
+                  <Card key={i} className={`border-none shadow-sm hover:shadow-md transition-shadow ${alreadyCreated ? "opacity-70" : ""}`}>
+                    <CardContent className="p-4 flex items-start justify-between gap-4 flex-wrap">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <input
+                          type="checkbox"
+                          className="mt-1 w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary disabled:opacity-40"
+                          disabled={!linkable || alreadyCreated}
+                          checked={isSelected}
+                          onChange={(e) => toggleGap(g, e.target.checked)}
+                          title={!linkable ? "Issues cannot be linked to this record type" : alreadyCreated ? "Issue already created for this gap" : ""}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <Badge className={`border ${critStyle[g.criticality]}`}>
+                              {g.criticality}
+                            </Badge>
+                            <span className="font-semibold text-slate-900">
+                              {g.stakeholder_name}
                             </span>
-                          ))}
+                            {g.end_date && (
+                              <span className="text-xs text-slate-500">
+                                end-dated {g.end_date}
+                              </span>
+                            )}
+                            {alreadyCreated && (
+                              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                                <CheckCircle2 className="w-3 h-3" /> Issue created
+                              </span>
+                            )}
+                            {!linkable && !alreadyCreated && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                                Not linkable to an issue
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            Still assigned as <span className="font-medium">{g.field_label}</span> on{" "}
+                            <span className="font-medium">{g.entity_label}</span>
+                            <span className="text-slate-400"> ({g.entity_type})</span>
+                          </p>
+                          {g.group_names?.length > 0 && (
+                            <div className="flex gap-1 mt-1.5 flex-wrap">
+                              {g.group_names.map((n) => (
+                                <span key={n} className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                                  {n}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <Link to={g.record_url}>
-                      <Button variant="outline" size="sm">
-                        Open record <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
+                      </div>
+                      <Link to={g.record_url}>
+                        <Button variant="outline" size="sm">
+                          Open record <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </>
