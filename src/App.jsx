@@ -33,6 +33,7 @@ import BalancedScorecards from './pages/BalancedScorecards';
 import BalancedScorecardDetail from './pages/BalancedScorecardDetail';
 import About from './pages/About';
 import AdvancedThirdPartyRiskManagement from './pages/AdvancedThirdPartyRiskManagement';
+import StakeholderAssignmentGaps from './pages/StakeholderAssignmentGaps';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -99,6 +100,7 @@ const AuthenticatedApp = () => {
         <Route path="/ThirdPartiesReport" element={<ThirdPartiesReport />} />
         <Route path="/ITCapabilitiesReport" element={<ITCapabilitiesReport />} />
         <Route path="/AdvancedThirdPartyRiskManagement" element={<AdvancedThirdPartyRiskManagement />} />
+        <Route path="/StakeholderAssignmentGaps" element={<StakeholderAssignmentGaps />} />
         <Route path="/about" element={<About />} />
         <Route path="/MobileSettings" element={<MobileSettings />} />
         <Route path="*" element={<PageNotFound />} />
