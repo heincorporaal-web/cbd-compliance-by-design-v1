@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import UnassignedRecordsChart from "@/components/dashboard/UnassignedRecordsChart";
 
 const WIDGET_LABELS = {
   compliance: "Compliance Overview",
@@ -652,6 +653,8 @@ export default function Dashboard() {
         </div>
         </div>
       )}
+
+      <UnassignedRecordsChart />
 
       <div className="grid grid-cols-1 gap-6">
         {visibleWidgets.recentIncidents && (
