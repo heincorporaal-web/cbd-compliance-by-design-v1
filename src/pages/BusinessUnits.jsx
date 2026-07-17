@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2, Search, Building2, ChevronRight, Network } from "
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
 import BusinessUnitImportDialog from "@/components/businessunits/BusinessUnitImportDialog";
+import SearchableSelect from "@/components/ui/SearchableSelect";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { Upload, Download } from "lucide-react";
 
@@ -360,15 +361,15 @@ export default function BusinessUnits() {
               </div>
               <div className="space-y-1">
                 <Label>Parent Unit</Label>
-                <Select value={form.parent_id || "none"} onValueChange={v => handleChange("parent_id", v === "none" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder="None (top-level)" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None (top-level)</SelectItem>
-                    {parentOptions
-                      .filter(bu => !form.company_id || bu.company_id === form.company_id)
-                      .map(bu => <SelectItem key={bu.id} value={bu.id}>{bu.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  value={form.parent_id}
+                  onValueChange={v => handleChange("parent_id", v)}
+                  placeholder="None (top-level)"
+                  noneLabel="None (top-level)"
+                  options={parentOptions
+                    .filter(bu => !form.company_id || bu.company_id === form.company_id)
+                    .map(bu => ({ id: bu.id, label: bu.name }))}
+                />
               </div>
             </div>
 
@@ -376,31 +377,24 @@ export default function BusinessUnits() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Value Chain</Label>
-                <Select value={form.value_chain_id || "none"} onValueChange={v => handleChange("value_chain_id", v === "none" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {valueChains.map(vc => <SelectItem key={vc.id} value={vc.id}>{vc.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  value={form.value_chain_id}
+                  onValueChange={v => handleChange("value_chain_id", v)}
+                  placeholder="Select…"
+                  noneLabel="None"
+                  options={valueChains.map(vc => ({ id: vc.id, label: vc.name }))}
+                />
               </div>
               <div className="space-y-1">
                 <Label>Workstream</Label>
-                <Select
-                  value={form.workstream_id || "none"}
-                  onValueChange={v => handleChange("workstream_id", v === "none" ? "" : v)}
+                <SearchableSelect
+                  value={form.workstream_id}
+                  onValueChange={v => handleChange("workstream_id", v)}
+                  placeholder={form.value_chain_id ? "Select…" : "Select value chain first"}
+                  noneLabel="None"
                   disabled={!form.value_chain_id}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={form.value_chain_id ? "Select…" : "Select value chain first"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {filteredWorkstreams.map(ws => (
-                      <SelectItem key={ws.id} value={ws.id}>{ws.full_label || ws.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={filteredWorkstreams.map(ws => ({ id: ws.id, label: ws.full_label || ws.name }))}
+                />
                 {form.value_chain_id && filteredWorkstreams.length === 0 && (
                   <p className="text-xs text-amber-600 mt-1">No workstreams linked to this value chain.</p>
                 )}
