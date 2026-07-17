@@ -80,6 +80,7 @@ export const NAV_GROUPS = [
       { id: "ict_systems", title: "ICT Systems", url: createPageUrl("ICTSystems"), icon: Server },
       { id: "it_capabilities", title: "IT Capabilities", url: createPageUrl("ITCapabilities"), icon: Cpu },
       { id: "value_chains", title: "Value Chains", url: createPageUrl("ValueChains"), icon: Network },
+      { id: "process_assignment_gaps", title: "Assignment Gap Finder", url: createPageUrl("StakeholderAssignmentGaps"), icon: ShieldAlert },
     ],
   },
   {
