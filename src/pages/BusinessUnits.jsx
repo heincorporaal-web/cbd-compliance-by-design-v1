@@ -12,7 +12,7 @@ import { Plus, Pencil, Trash2, Search, Building2, ChevronRight, Network } from "
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
 import BusinessUnitImportDialog from "@/components/businessunits/BusinessUnitImportDialog";
-import { Upload } from "lucide-react";
+import { Upload, Download } from "lucide-react";
 
 const BU_TYPES = [
   "Profit & Loss Unit", "Department", "Capability", "Center of Excellence",
@@ -161,6 +161,31 @@ export default function BusinessUnits() {
   const getWSName = (id) => workstreams.find(w => w.id === id)?.name;
   const getCompanyName = (id) => companies.find(c => c.id === id)?.name || "—";
 
+  const exportCSV = () => {
+    const headers = ["name", "type", "parent_name", "description", "owner_name", "cost_center_code", "value_chain_name", "workstream_name", "status", "end_date"];
+    const esc = (v) => `"${(v ?? "").toString().replace(/"/g, '""')}"`;
+    const rows = allUnits.map(bu => [
+      bu.name || "",
+      bu.type || "Department",
+      getParentName(bu.parent_id) || "",
+      bu.description || "",
+      bu.owner_name || "",
+      bu.cost_center_code || "",
+      getVCName(bu.value_chain_id) || "",
+      getWSName(bu.workstream_id) || "",
+      bu.status || "active",
+      bu.end_date || "",
+    ].map(esc).join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "business_units_export.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Group by type for display
   const grouped = BU_TYPES.reduce((acc, type) => {
     const items = filtered.filter(bu => bu.type === type);
@@ -179,6 +204,9 @@ export default function BusinessUnits() {
           <p className="text-sm text-slate-500 mt-0.5">Define organizational units — departments, capabilities, CoEs, regions and more.</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={exportCSV} disabled={allUnits.length === 0} className="gap-2">
+            <Download className="w-4 h-4" /> Export
+          </Button>
           <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
             <Upload className="w-4 h-4" /> Import
           </Button>
