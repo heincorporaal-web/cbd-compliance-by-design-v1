@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Plus, Pencil, Trash2, Search, Building2, ChevronRight, Network } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
+import BusinessUnitImportDialog from "@/components/businessunits/BusinessUnitImportDialog";
+import { Upload } from "lucide-react";
 
 const BU_TYPES = [
   "Profit & Loss Unit", "Department", "Capability", "Center of Excellence",
@@ -49,6 +51,7 @@ export default function BusinessUnits() {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteId, setDeleteId] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   const { data: allUnits = [], isLoading } = useQuery({
     queryKey: ["business-units", selectedCompanyId],
@@ -175,9 +178,14 @@ export default function BusinessUnits() {
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">Define organizational units — departments, capabilities, CoEs, regions and more.</p>
         </div>
-        <Button onClick={openCreate} className="gap-2 bg-primary hover:bg-primary/90">
-          <Plus className="w-4 h-4" /> New Business Unit
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
+            <Upload className="w-4 h-4" /> Import
+          </Button>
+          <Button onClick={openCreate} className="gap-2 bg-primary hover:bg-primary/90">
+            <Plus className="w-4 h-4" /> New Business Unit
+          </Button>
+        </div>
       </div>
 
       {/* Stats + search */}
@@ -416,6 +424,14 @@ export default function BusinessUnits() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Import dialog */}
+      <BusinessUnitImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        companies={companies}
+        defaultCompanyId={selectedCompanyId}
+      />
 
       {/* Delete confirm */}
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
