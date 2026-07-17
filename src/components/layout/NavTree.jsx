@@ -101,7 +101,6 @@ export const NAV_GROUPS = [
     icon: Users,
     items: [
       { id: "stakeholders", title: "Stakeholder Management", url: createPageUrl("Stakeholders"), icon: Users },
-      { id: "stakeholder_gaps", title: "Assignment Gap Finder", url: createPageUrl("StakeholderAssignmentGaps"), icon: ShieldAlert },
       { id: "stakeholder_groups", title: "Stakeholder Groups", url: createPageUrl("Stakeholders") + "?tab=groups", icon: Users },
       { id: "stakeholder_hierarchy", title: "Stakeholder Hierarchy", url: createPageUrl("StakeholderHierarchy"), icon: GitBranch },
       { id: "sign_offs", title: "Sign-Offs", url: createPageUrl("SignOffs"), icon: FileCheck },
