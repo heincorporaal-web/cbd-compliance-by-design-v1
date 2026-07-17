@@ -297,8 +297,8 @@ function ContactTab({ user }) {
       </div>
       <div className="p-6 space-y-4">
         <p className="text-sm text-slate-500">
-          Use this form to request activation of an add-on module (such as Third Party Risk Management)
-          for your company, or to contact the product owner. Your name and email are included automatically.
+          Use this form to request activation of an add-on module (such as Third Party Risk Management or
+          Advanced Process Modelling) for your company, or to contact the product owner. Your name and email are included automatically.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -313,7 +313,7 @@ function ContactTab({ user }) {
         <div>
           <Label>Subject</Label>
           <Input
-            placeholder="e.g. Request activation of Third Party Risk Management"
+            placeholder="e.g. Request activation of Advanced Process Modelling"
             value={subject}
             onChange={e => setSubject(e.target.value)}
           />

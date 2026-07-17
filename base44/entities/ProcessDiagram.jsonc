@@ -1,0 +1,52 @@
+{
+  "name": "ProcessDiagram",
+  "type": "object",
+  "properties": {
+    "process_id": {
+      "type": "string",
+      "description": "Reference to OrgProcess entity this diagram models"
+    },
+    "process_code": {
+      "type": "string",
+      "description": "Process code (denormalized)"
+    },
+    "process_name": {
+      "type": "string",
+      "description": "Process name (denormalized)"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "bpmn_xml": {
+      "type": "string",
+      "description": "BPMN 2.0 XML diagram source (bpmn-js)"
+    },
+    "svg_snapshot": {
+      "type": "string",
+      "description": "Last exported SVG snapshot of the diagram (for previews / thumbnails / reports)"
+    },
+    "version_label": {
+      "type": "string",
+      "description": "Optional version label e.g. v1.0"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft",
+      "description": "Diagram lifecycle status"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Modelling notes"
+    }
+  },
+  "required": [
+    "process_id",
+    "bpmn_xml"
+  ]
+}

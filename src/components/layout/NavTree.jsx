@@ -7,7 +7,7 @@ import {
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
   Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert, CalendarClock, Gauge, Info,
-  Presentation, FileSpreadsheet
+  Presentation, FileSpreadsheet, Workflow
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useIsAuditRole } from "@/hooks/useIsAuditRole";
@@ -80,6 +80,7 @@ export const NAV_GROUPS = [
       { id: "ict_systems", title: "ICT Systems", url: createPageUrl("ICTSystems"), icon: Server },
       { id: "it_capabilities", title: "IT Capabilities", url: createPageUrl("ITCapabilities"), icon: Cpu },
       { id: "value_chains", title: "Value Chains", url: createPageUrl("ValueChains"), icon: Network },
+      { id: "advanced_process_modelling", title: "Advanced Process Modelling", url: createPageUrl("AdvancedProcessModelling"), icon: Workflow },
       { id: "process_assignment_gaps", title: "Assignment Gap Finder", url: createPageUrl("StakeholderAssignmentGaps"), icon: ShieldAlert },
     ],
   },

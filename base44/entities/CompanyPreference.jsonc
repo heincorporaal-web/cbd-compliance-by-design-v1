@@ -111,6 +111,11 @@
       "type": "boolean",
       "default": false,
       "description": "Switch on the Third Party Risk Management add-on module for this company"
+    },
+    "enable_advanced_process_modelling": {
+      "type": "boolean",
+      "default": false,
+      "description": "Switch on the Advanced Process Modelling add-on module for this company (BPMN 2.0 diagram designer and risk-based process assessment)"
     }
   },
   "required": [
