@@ -8,11 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Search, Network, ChevronDown, ChevronRight, Info, CalendarOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Network, ChevronDown, ChevronRight, Info, CalendarOff, Upload, Download } from "lucide-react";
 import EndDateBadge from "@/components/ui/EndDateBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
+import ValueChainImportDialog from "@/components/valuechains/ValueChainImportDialog";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { getValueChainErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
 
 const EMPTY_FORM = {
@@ -50,6 +52,8 @@ export default function ValueChains() {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [collapsed, setCollapsed] = useState({});
   const [expandedWS, setExpandedWS] = useState({});
+  const [importOpen, setImportOpen] = useState(false);
+  const { canImport } = useIsImplementerRole();
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
@@ -137,6 +141,28 @@ export default function ValueChains() {
   const toggleCollapse = (key) => setCollapsed(p => ({ ...p, [key]: !p[key] }));
   const toggleWS = (id) => setExpandedWS(p => ({ ...p, [id]: !p[id] }));
 
+  const exportCSV = () => {
+    const headers = ["name", "value_chain_code", "management_chain", "description", "sort_order", "status", "end_date"];
+    const esc = (v) => `"${(v ?? "").toString().replace(/"/g, '""')}"`;
+    const rows = valueChains.map(vc => [
+      vc.name || "",
+      vc.value_chain_code || "",
+      vc.management_chain || "",
+      vc.description || "",
+      vc.sort_order ?? 0,
+      vc.status || "active",
+      vc.end_date || "",
+    ].map(esc).join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "value_chains_export.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const chainDescriptions = {
     "Customer Relationship Management": "Covers marketing, sales, service and customer engagement processes to acquire, retain and grow customer relationships.",
     "Enterprise Asset Management": "Manages the full lifecycle of physical assets — acquisition, maintenance, monitoring and decommissioning — to maximise reliability and value.",
@@ -175,9 +201,19 @@ export default function ValueChains() {
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">Manage organisational value chains grouped by management domain.</p>
         </div>
-        <Button onClick={openCreate} className="gap-2 bg-primary hover:bg-primary/90">
-          <Plus className="w-4 h-4" /> Add Value Chain
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={exportCSV} disabled={valueChains.length === 0} className="gap-2">
+            <Download className="w-4 h-4" /> Export
+          </Button>
+          {canImport && (
+            <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
+              <Upload className="w-4 h-4" /> Import
+            </Button>
+          )}
+          <Button onClick={openCreate} className="gap-2 bg-primary hover:bg-primary/90">
+            <Plus className="w-4 h-4" /> Add Value Chain
+          </Button>
+        </div>
       </div>
 
       {/* Stats + Search */}
@@ -312,6 +348,14 @@ export default function ValueChains() {
           })}
         </div>
       )}
+
+      {/* Import dialog */}
+      <ValueChainImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        companies={companies}
+        defaultCompanyId={selectedCompanyId}
+      />
 
       {/* Form Dialog */}
       <Dialog open={showForm} onOpenChange={o => { if (!o) closeForm(); }}>
