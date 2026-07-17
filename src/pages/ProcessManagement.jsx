@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import OrgProcessTreeView from "@/components/processmanagement/OrgProcessTreeView";
 import ProcessCSVImportDialog from "@/components/processmanagement/ProcessCSVImportDialog";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 
 const levelLabels = {
   0: "Value Chain", 1: "Process Group", 2: "Process",
@@ -38,6 +39,7 @@ const getCriticalityColor = (c) => ({
 export default function ProcessManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [importOpen, setImportOpen] = useState(false);
+  const { canImport } = useIsImplementerRole();
   const [levelFilter, setLevelFilter] = useState("all");
   const [companyFilter, setCompanyFilter] = useState("all");
   const [ownerFilter, setOwnerFilter] = useState("all");
@@ -147,10 +149,12 @@ export default function ProcessManagement() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setImportOpen(true)}>
-            <Upload className="w-4 h-4 mr-2" />
-            Import CSV
-          </Button>
+          {canImport && (
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="w-4 h-4 mr-2" />
+              Import CSV
+            </Button>
+          )}
           <Link to={createPageUrl("ProcessManagementDetail?new=true")}>
             <Button className="bg-teal-600 hover:bg-teal-700">
               <Plus className="w-4 h-4 mr-2" />

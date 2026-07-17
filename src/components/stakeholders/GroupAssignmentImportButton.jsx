@@ -20,12 +20,15 @@ function downloadTemplate() {
   URL.revokeObjectURL(url);
 }
 import { toast } from "sonner";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 
 export default function GroupAssignmentImportButton({ onDone }) {
+  const { canImport } = useIsImplementerRole();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  if (!canImport) return null;
 
   const handleFile = (e) => {
     setFile(e.target.files[0]);

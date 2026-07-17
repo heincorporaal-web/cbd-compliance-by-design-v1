@@ -16,6 +16,7 @@ import { Upload } from "lucide-react";
 import { useDefaultStakeholderGroups } from "@/hooks/useDefaultStakeholderGroups";
 import StakeholderGroupReportButton from "@/components/stakeholders/StakeholderGroupReportButton";
 import GroupAssignmentImportButton from "@/components/stakeholders/GroupAssignmentImportButton";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 
 export default function Stakeholders() {
   const queryClient = useQueryClient();
@@ -27,6 +28,7 @@ export default function Stakeholders() {
   const [hrImportOpen, setHrImportOpen] = useState(false);
   const [editingStakeholder, setEditingStakeholder] = useState(null);
   const [historyStakeholder, setHistoryStakeholder] = useState(null);
+  const { canImport } = useIsImplementerRole();
 
   const { data: stakeholders = [] } = useQuery({
     queryKey: ["stakeholders"],
@@ -148,9 +150,11 @@ export default function Stakeholders() {
         <div className="flex gap-2 flex-wrap">
           <GroupAssignmentImportButton onDone={() => queryClient.invalidateQueries(["stakeholders"])} />
           <StakeholderGroupReportButton stakeholders={stakeholders} groups={groups} companies={companies} />
-          <Button variant="outline" onClick={() => setHrImportOpen(true)}>
-            <Upload className="w-4 h-4 mr-2" /> Import HR Data
-          </Button>
+          {canImport && (
+            <Button variant="outline" onClick={() => setHrImportOpen(true)}>
+              <Upload className="w-4 h-4 mr-2" /> Import HR Data
+            </Button>
+          )}
           <Button onClick={handleNew} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" /> Add Stakeholder
           </Button>

@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2, Search, Building2, ChevronRight, Network } from "
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholderSelect";
 import BusinessUnitImportDialog from "@/components/businessunits/BusinessUnitImportDialog";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { Upload, Download } from "lucide-react";
 
 const BU_TYPES = [
@@ -46,6 +47,7 @@ const EMPTY_FORM = {
 export default function BusinessUnits() {
   const queryClient = useQueryClient();
   const [selectedCompanyId] = useCompanyFilter();
+  const { canImport } = useIsImplementerRole();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -207,9 +209,11 @@ export default function BusinessUnits() {
           <Button variant="outline" onClick={exportCSV} disabled={allUnits.length === 0} className="gap-2">
             <Download className="w-4 h-4" /> Export
           </Button>
-          <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
-            <Upload className="w-4 h-4" /> Import
-          </Button>
+          {canImport && (
+            <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
+              <Upload className="w-4 h-4" /> Import
+            </Button>
+          )}
           <Button onClick={openCreate} className="gap-2 bg-primary hover:bg-primary/90">
             <Plus className="w-4 h-4" /> New Business Unit
           </Button>

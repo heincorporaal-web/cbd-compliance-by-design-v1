@@ -10,6 +10,7 @@ import FrameworkNodeTree from "@/components/frameworklibrary/FrameworkNodeTree";
 import FrameworkUploadWizard from "@/components/frameworklibrary/FrameworkUploadWizard";
 import FrameworkEditDialog from "@/components/frameworklibrary/FrameworkEditDialog";
 import { useAuth } from "@/lib/AuthContext";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 
 export default function FrameworkLibrary() {
   const [search, setSearch] = useState("");
@@ -38,6 +39,7 @@ export default function FrameworkLibrary() {
   });
   const myRole = roles.find(r => r.id === user?.custom_role_id);
   const isMaintainer = user?.role === "admin" || !!myRole?.is_product_owner;
+  const { canImport } = useIsImplementerRole();
 
   const fwWithNodes = useMemo(() => frameworks.filter(f => f.legacy_framework_id != null).sort((a, b) => a.name.localeCompare(b.name)), [frameworks]);
   const selectedFw = selectedFwId ? frameworks.find(f => f.id === selectedFwId) : null;
@@ -109,6 +111,10 @@ export default function FrameworkLibrary() {
                 <Upload className="w-4 h-4 mr-1" /> Upload
               </Button>
             </>
+          ) : canImport ? (
+            <Button onClick={() => setUploadOpen(true)} className="ml-2 shrink-0">
+              <Upload className="w-4 h-4 mr-1" /> Upload
+            </Button>
           ) : (
             <Badge variant="outline" className="text-slate-500">Read-only</Badge>
           )}

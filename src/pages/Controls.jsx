@@ -14,6 +14,7 @@ import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 
 export default function Controls() {
   const queryClient = useQueryClient();
@@ -22,6 +23,7 @@ export default function Controls() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importing, setImporting] = useState(false);
   const [activeTab, setActiveTab] = useState("library");
+  const { canImport } = useIsImplementerRole();
 
   const { data: allControls = [] } = useQuery({
     queryKey: ['controls'],
@@ -98,7 +100,7 @@ export default function Controls() {
           <p className="text-slate-600">Browse and manage security controls across frameworks</p>
         </div>
         <div className="flex gap-2">
-          {activeTab === "company" && (
+          {activeTab === "company" && canImport && (
             <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">

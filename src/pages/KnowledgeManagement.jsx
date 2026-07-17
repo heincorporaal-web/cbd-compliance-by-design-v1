@@ -12,6 +12,7 @@ import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import KnowledgeTreeView from "@/components/knowledge/KnowledgeTreeView";
 import KnowledgeArticleImport from "@/components/knowledge/KnowledgeArticleImport";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 
 export default function KnowledgeManagement() {
   const queryClient = useQueryClient();
@@ -19,6 +20,7 @@ export default function KnowledgeManagement() {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { canImport } = useIsImplementerRole();
 
   useEffect(() => {
     base44.auth.me().then(u => setIsAdmin(u?.role === "admin")).catch(() => {});
@@ -87,15 +89,17 @@ export default function KnowledgeManagement() {
             </div>
           </div>
         </div>
-        {isAdmin && (
+        {(isAdmin || canImport) && (
           <div className="flex items-center gap-2">
-            <KnowledgeArticleImport />
-            <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
-              <Button className="bg-indigo-600 hover:bg-indigo-700">
-                <Plus className="w-4 h-4 mr-2" />
-                New Article
-              </Button>
-            </Link>
+            {canImport && <KnowledgeArticleImport />}
+            {isAdmin && (
+              <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
+                <Button className="bg-indigo-600 hover:bg-indigo-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Article
+                </Button>
+              </Link>
+            )}
           </div>
         )}
       </div>

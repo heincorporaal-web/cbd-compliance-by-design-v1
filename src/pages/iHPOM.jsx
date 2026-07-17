@@ -15,6 +15,7 @@ import IHPOMImportDialog from "@/components/ihpom/IHPOMImportDialog";
 import IHPOMNodeDialog from "@/components/ihpom/IHPOMNodeDialog";
 import IHPOMLevel1View from "@/components/ihpom/IHPOMLevel1View";
 import IHPOMPeriodicTable from "@/components/ihpom/IHPOMPeriodicTable";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 
 const levelLabels = {
   1: "Process Group",
@@ -51,6 +52,7 @@ export default function IHPOM() {
   const [expandedNodes, setExpandedNodes] = useState(new Set());
   const [importOpen, setImportOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("tree");
+  const { canImport } = useIsImplementerRole();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editNode, setEditNode] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
@@ -184,10 +186,12 @@ export default function IHPOM() {
               Tree Report
             </Button>
           </Link>
-          <Button variant="outline" onClick={() => setImportOpen(true)}>
-            <Upload className="w-4 h-4 mr-2" />
-            Import CSV
-          </Button>
+          {canImport && (
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="w-4 h-4 mr-2" />
+              Import CSV
+            </Button>
+          )}
           <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { setEditNode(null); setDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-2" />
             Add Node
@@ -299,9 +303,11 @@ export default function IHPOM() {
               <Network className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <p className="text-slate-500 mb-4">No iHPOM nodes found. Import a CSV or add nodes manually.</p>
               <div className="flex justify-center gap-2">
-                <Button variant="outline" onClick={() => setImportOpen(true)}>
-                  <Upload className="w-4 h-4 mr-2" /> Import CSV
-                </Button>
+                {canImport && (
+                  <Button variant="outline" onClick={() => setImportOpen(true)}>
+                    <Upload className="w-4 h-4 mr-2" /> Import CSV
+                  </Button>
+                )}
                 <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { setEditNode(null); setDialogOpen(true); }}>
                   <Plus className="w-4 h-4 mr-2" /> Add Node
                 </Button>

@@ -11,10 +11,12 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import CSVUploader from "@/components/CSVUploader";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 
 export default function ProcessAssessments() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const { canImport } = useIsImplementerRole();
 
   const { data: assessments = [], isLoading, refetch } = useQuery({
     queryKey: ['processAssessments'],
@@ -84,11 +86,13 @@ export default function ProcessAssessments() {
           <p className="text-slate-600">Evaluate and track business process performance</p>
         </div>
         <div className="flex gap-2">
-          <CSVUploader
-            entityName="ProcessAssessment"
-            entitySchema={assessmentSchema}
-            onComplete={refetch}
-          />
+          {canImport && (
+            <CSVUploader
+              entityName="ProcessAssessment"
+              entitySchema={assessmentSchema}
+              onComplete={refetch}
+            />
+          )}
           <Link to={createPageUrl("ProcessAssessmentDetail?new=true")}>
             <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
