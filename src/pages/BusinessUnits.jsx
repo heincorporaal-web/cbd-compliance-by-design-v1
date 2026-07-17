@@ -16,9 +16,9 @@ import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { Upload, Download } from "lucide-react";
 
 const BU_TYPES = [
-  "Profit & Loss Unit", "Department", "Capability", "Center of Excellence",
-  "Division", "Business Line", "Function", "Region", "Country",
-  "Legal Entity", "Shared Services", "Project Office", "Team", "Other",
+  "Department", "Capability", "Profit & Loss Unit", "Division", "Business Line",
+  "Function", "Center of Excellence", "Shared Services", "Project Office", "Team",
+  "Country", "Region", "Other", "Legal Entity",
 ];
 
 const STATUS_COLORS = {
