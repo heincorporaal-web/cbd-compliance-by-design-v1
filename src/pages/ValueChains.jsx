@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
 import ValueChainImportDialog from "@/components/valuechains/ValueChainImportDialog";
+import EditableOptionSelect from "@/components/ui/EditableOptionSelect";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { getValueChainErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
 
@@ -374,12 +375,13 @@ export default function ValueChains() {
             </div>
             <div className="space-y-1">
               <Label>Management Chain</Label>
-              <Select value={formData.management_chain} onValueChange={v => setFormData(p => ({ ...p, management_chain: v }))}>
-                <SelectTrigger><SelectValue placeholder="Select domain…" /></SelectTrigger>
-                <SelectContent>
-                  {MANAGEMENT_CHAINS.map(mc => <SelectItem key={mc} value={mc}>{mc}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <EditableOptionSelect
+                storageKey="value_chain_management_chains"
+                seededOptions={MANAGEMENT_CHAINS.map(mc => ({ value: mc, label: mc }))}
+                value={formData.management_chain}
+                onValueChange={v => setFormData(p => ({ ...p, management_chain: v }))}
+                placeholder="Select domain…"
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
