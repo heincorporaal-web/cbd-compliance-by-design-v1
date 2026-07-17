@@ -4,7 +4,7 @@
   "properties": {
     "process_id": {
       "type": "string",
-      "description": "Reference to BusinessProcess entity"
+      "description": "Reference to OrgProcess entity"
     },
     "assessment_date": {
       "type": "string",
@@ -48,6 +48,14 @@
         "unsatisfactory"
       ],
       "description": "Overall assessment rating"
+    },
+    "maturity_score": {
+      "type": "number",
+      "description": "Process maturity score on a 0-5 scale (decimals allowed, e.g. 4.1). Feeds the maturity bar on the process matrix."
+    },
+    "risk_score": {
+      "type": "number",
+      "description": "Process risk score on a 0-10 scale. Feeds the risk bar on the process matrix."
     },
     "actions": {
       "type": "array",

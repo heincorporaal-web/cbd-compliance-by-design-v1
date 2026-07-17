@@ -149,6 +149,11 @@
         "ad_hoc"
       ]
     },
+    "review_cycle_months": {
+      "type": "number",
+      "default": 12,
+      "description": "Process review cycle period in months \u2014 how often this process must be reassessed. Drives the 'review due / overdue' indicator on the process matrix."
+    },
     "estimated_duration": {
       "type": "string"
     },

@@ -29,6 +29,8 @@ export default function ProcessAssessmentDetail() {
     findings: "",
     outcomes: "",
     overall_rating: "satisfactory",
+    maturity_score: null,
+    risk_score: null,
     actions: [],
     status: "draft",
     next_assessment_date: "",
@@ -42,8 +44,8 @@ export default function ProcessAssessmentDetail() {
   });
 
   const { data: processes = [] } = useQuery({
-    queryKey: ['businessProcesses'],
-    queryFn: () => base44.entities.BusinessProcess.list('process_code'),
+    queryKey: ['orgProcesses'],
+    queryFn: () => base44.entities.OrgProcess.list('process_code'),
   });
 
   useEffect(() => {
@@ -218,6 +220,30 @@ export default function ProcessAssessmentDetail() {
                         <SelectItem value="unsatisfactory">Unsatisfactory</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="maturity_score">Maturity Score (0-5)</Label>
+                    <Input
+                      id="maturity_score"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="5"
+                      value={formData.maturity_score ?? ""}
+                      onChange={(e) => setFormData({ ...formData, maturity_score: e.target.value === "" ? null : parseFloat(e.target.value) })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="risk_score">Risk Score (0-10)</Label>
+                    <Input
+                      id="risk_score"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="10"
+                      value={formData.risk_score ?? ""}
+                      onChange={(e) => setFormData({ ...formData, risk_score: e.target.value === "" ? null : parseFloat(e.target.value) })}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="status">Status</Label>
