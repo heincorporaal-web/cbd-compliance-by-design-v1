@@ -6,7 +6,8 @@ import {
   AlertTriangle, Users, AlertCircle, ClipboardList, TriangleAlert,
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
-  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert, CalendarClock, Gauge, Info
+  Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert, CalendarClock, Gauge, Info,
+  Presentation, FileSpreadsheet
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useIsAuditRole } from "@/hooks/useIsAuditRole";
@@ -22,7 +23,6 @@ export const NAV_GROUPS = [
       { id: "dashboard", title: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard },
       { id: "companies", title: "Companies", url: createPageUrl("Companies"), icon: Building2 },
       { id: "business_units", title: "Business Units", url: createPageUrl("BusinessUnits"), icon: Network },
-      { id: "reports", title: "Reports", url: createPageUrl("Reports"), icon: FileText },
       { id: "knowledge", title: "Knowledge", url: createPageUrl("KnowledgeManagement"), icon: BookOpen },
       { id: "getting_started", title: "Getting Started", url: createPageUrl("GettingStarted"), icon: HelpCircle },
       { id: "help_centre", title: "Help Centre", url: createPageUrl("HelpCentre"), icon: MessageCircle },
@@ -81,6 +81,18 @@ export const NAV_GROUPS = [
       { id: "it_capabilities", title: "IT Capabilities", url: createPageUrl("ITCapabilities"), icon: Cpu },
       { id: "value_chains", title: "Value Chains", url: createPageUrl("ValueChains"), icon: Network },
       { id: "process_assignment_gaps", title: "Assignment Gap Finder", url: createPageUrl("StakeholderAssignmentGaps"), icon: ShieldAlert },
+    ],
+  },
+  {
+    id: "reports_group",
+    label: "Reports",
+    icon: FileText,
+    items: [
+      { id: "reports_all", title: "All Reports", url: createPageUrl("Reports"), icon: FileText },
+      { id: "performance_management", title: "Performance Management", url: createPageUrl("PerformanceManagement"), icon: Presentation },
+      { id: "data_libraries", title: "Data Libraries", url: createPageUrl("DataLibraries"), icon: FileSpreadsheet },
+      { id: "issue_management", title: "Issue Management", url: createPageUrl("IssueManagement"), icon: AlertCircle },
+      { id: "matrices", title: "Matrices", url: createPageUrl("Matrices"), icon: Layers },
     ],
   },
   {

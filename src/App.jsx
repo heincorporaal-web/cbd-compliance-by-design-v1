@@ -23,6 +23,10 @@ import IncidentsReport from './pages/IncidentsReport';
 import AssessmentsReport from './pages/AssessmentsReport';
 import ThirdPartiesReport from './pages/ThirdPartiesReport';
 import ITCapabilitiesReport from './pages/ITCapabilitiesReport';
+import PerformanceManagement from './pages/reports/PerformanceManagement';
+import DataLibraries from './pages/reports/DataLibraries';
+import IssueManagement from './pages/reports/IssueManagement';
+import Matrices from './pages/reports/Matrices';
 import HelpCentre from './pages/HelpCentre';
 import FrameworkLibrary from './pages/FrameworkLibrary';
 import MyActions from './pages/MyActions';
@@ -99,6 +103,10 @@ const AuthenticatedApp = () => {
         <Route path="/AssessmentsReport" element={<AssessmentsReport />} />
         <Route path="/ThirdPartiesReport" element={<ThirdPartiesReport />} />
         <Route path="/ITCapabilitiesReport" element={<ITCapabilitiesReport />} />
+        <Route path="/PerformanceManagement" element={<PerformanceManagement />} />
+        <Route path="/DataLibraries" element={<DataLibraries />} />
+        <Route path="/IssueManagement" element={<IssueManagement />} />
+        <Route path="/Matrices" element={<Matrices />} />
         <Route path="/AdvancedThirdPartyRiskManagement" element={<AdvancedThirdPartyRiskManagement />} />
         <Route path="/StakeholderAssignmentGaps" element={<StakeholderAssignmentGaps />} />
         <Route path="/about" element={<About />} />
