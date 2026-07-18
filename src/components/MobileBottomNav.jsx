@@ -1,15 +1,16 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { CalendarClock, FileCheck, HelpCircle, Settings } from "lucide-react";
+import { LayoutDashboard, CalendarClock, FileCheck, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Mobile is intentionally restricted to manager self-service: action items,
-// pending approvals (sign-offs), self-service help, and account settings.
+// Mobile is restricted to manager self-service: an optimised dashboard with
+// basic stats (low GUI interaction), action items, pending approvals, and
+// self-service help. No setup or maintenance surfaces are exposed.
 const NAV_ITEMS = [
+  { label: "Dashboard", icon: LayoutDashboard, path: "/Dashboard" },
   { label: "Actions", icon: CalendarClock, path: "/MyActions" },
   { label: "Approvals", icon: FileCheck, path: "/SignOffs" },
   { label: "Help", icon: HelpCircle, path: "/HelpCentre" },
-  { label: "Settings", icon: Settings, path: "/MobileSettings" },
 ];
 
 export default function MobileBottomNav() {
