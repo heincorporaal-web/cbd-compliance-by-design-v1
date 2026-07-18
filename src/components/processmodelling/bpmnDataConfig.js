@@ -23,7 +23,7 @@ export const FIELDS = {
   process_reference: {
     label: "Process Reference",
     type: "text",
-    placeholder: "e.g. AACBIT-MIAL-40.030.020.030",
+    placeholder: "e.g. EVITIT-MIAL-40.030.020.030",
   },
   process_name: { label: "Process Name (override)", type: "text" },
   parent_process_reference: { label: "Parent Process Reference", type: "search", entity: "orgprocess" },
