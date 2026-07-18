@@ -3,8 +3,9 @@ import BpmnModeler from "bpmn-js/lib/Modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, RectangleHorizontal, Rows3, Box } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
 
 export const EMPTY_BPMN_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
@@ -51,52 +52,21 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
   const zoomOut = () => modelerRef.current?.get("zoomScroll").stepZoom(-1);
   const fit = () => modelerRef.current?.get("canvas").zoom("fit-viewport");
 
-  const addPool = () => {
+  // Generic element creation driven by the docked element palette.
+  const createElement = (type, options = {}) => {
     try {
-      const modeling = modelerRef.current.get("modeling");
-      const elementFactory = modelerRef.current.get("elementFactory");
-      const canvas = modelerRef.current.get("canvas");
-      const root = canvas.getRootElement();
-      const shape = elementFactory.createShape({ type: "bpmn:Participant", isExpanded: true });
-      modeling.createShape(shape, { x: 400, y: 250 }, root);
-      setDirty(true);
-    } catch (e) {
-      toast.error("Could not add pool: " + (e?.message || e));
-    }
-  };
-
-  const addLane = () => {
-    try {
-      const modeling = modelerRef.current.get("modeling");
-      const elementFactory = modelerRef.current.get("elementFactory");
-      const selection = modelerRef.current.get("selection");
-      const canvas = modelerRef.current.get("canvas");
-      let participant = (selection.get() || []).find((el) => el.type === "bpmn:Participant");
-      if (!participant) {
-        const root = canvas.getRootElement();
-        const children = root.children || [];
-        participant = children.find((el) => el.type === "bpmn:Participant");
-      }
-      if (!participant) {
-        toast.error("Add a Pool first, then add lanes to it.");
-        return;
-      }
-      const lane = elementFactory.createShape({ type: "bpmn:Lane", isExpanded: true });
-      modeling.createShape(lane, { x: 200, y: 150 }, participant);
-      setDirty(true);
-    } catch (e) {
-      toast.error("Could not add lane: " + (e?.message || e));
-    }
-  };
-
-  const addSubProcess = () => {
-    try {
-      const modeling = modelerRef.current.get("modeling");
-      const elementFactory = modelerRef.current.get("elementFactory");
-      const selection = modelerRef.current.get("selection");
-      const canvas = modelerRef.current.get("canvas");
-      const containerTypes = ["bpmn:Process", "bpmn:Participant", "bpmn:SubProcess", "bpmn:Lane"];
-      let parent = (selection.get() || []).find((el) => containerTypes.includes(el.type));
+      const modeler = modelerRef.current;
+      if (!modeler) return;
+      const modeling = modeler.get("modeling");
+      const elementFactory = modeler.get("elementFactory");
+      const canvas = modeler.get("canvas");
+      const selection = modeler.get("selection");
+      const sel = selection.get() || [];
+      const containerTypes = [
+        "bpmn:Process", "bpmn:Participant", "bpmn:SubProcess", "bpmn:Lane",
+        "bpmn:AdHocSubProcess", "bpmn:Transaction",
+      ];
+      let parent = sel.find((el) => containerTypes.includes(el.type));
       if (!parent) {
         const root = canvas.getRootElement();
         if (root.type === "bpmn:Collaboration") {
@@ -105,11 +75,33 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
           parent = root;
         }
       }
-      const sub = elementFactory.createShape({ type: "bpmn:SubProcess", isExpanded: false });
-      modeling.createShape(sub, { x: 350, y: 200 }, parent);
+      const shapeOpts = { type };
+      if (options.isExpanded !== undefined) shapeOpts.isExpanded = options.isExpanded;
+      if (options.eventDefinitionType) shapeOpts.eventDefinitionType = options.eventDefinitionType;
+      if (options.eventDefinitionTypes) shapeOpts.eventDefinitionTypes = options.eventDefinitionTypes;
+      if (options.triggeredByEvent) shapeOpts.triggeredByEvent = options.triggeredByEvent;
+      const shape = elementFactory.createShape(shapeOpts);
+      const vb = canvas.viewbox();
+      const x = vb.x + vb.width / 2;
+      const y = vb.y + vb.height / 2;
+      if (options.attach) {
+        const activityTypes = [
+          "bpmn:Task", "bpmn:SubProcess", "bpmn:CallActivity", "bpmn:ServiceTask",
+          "bpmn:UserTask", "bpmn:ReceiveTask", "bpmn:SendTask", "bpmn:ScriptTask",
+          "bpmn:ManualTask", "bpmn:BusinessRuleTask", "bpmn:Transaction", "bpmn:AdHocSubProcess",
+        ];
+        const host = sel.find((el) => activityTypes.includes(el.type));
+        if (!host) {
+          toast.error("Select an activity first to attach this boundary event.");
+          return;
+        }
+        modeling.createShape(shape, { x, y }, host, { attach: true });
+      } else {
+        modeling.createShape(shape, { x, y }, parent);
+      }
       setDirty(true);
     } catch (e) {
-      toast.error("Could not add sub-process: " + (e?.message || e));
+      toast.error("Could not create element: " + (e?.message || e));
     }
   };
 
@@ -153,40 +145,36 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-      <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50 flex-wrap">
-        <div className="flex items-center gap-2">
-          {onBack && (
-            <Button size="sm" variant="ghost" onClick={onBack} className="gap-1.5">
-              <ArrowLeft className="w-4 h-4" /> Back
+    <div className="flex h-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+      <BpmnElementPalette onCreate={createElement} />
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50 flex-wrap">
+          <div className="flex items-center gap-2">
+            {onBack && (
+              <Button size="sm" variant="ghost" onClick={onBack} className="gap-1.5">
+                <ArrowLeft className="w-4 h-4" /> Back
+              </Button>
+            )}
+            <span className="text-sm font-semibold text-slate-700 truncate max-w-xs">{processLabel || "Process diagram"}</span>
+            {dirty && <span className="w-2 h-2 rounded-full bg-amber-500" title="Unsaved changes" />}
+          </div>
+          <div className="flex items-center gap-1">
+            <Button size="sm" variant="ghost" onClick={zoomOut} title="Zoom out"><ZoomOut className="w-4 h-4" /></Button>
+            <Button size="sm" variant="ghost" onClick={zoomIn} title="Zoom in"><ZoomIn className="w-4 h-4" /></Button>
+            <Button size="sm" variant="ghost" onClick={fit} title="Fit to screen"><Maximize2 className="w-4 h-4" /></Button>
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+            <Button size="sm" variant="ghost" onClick={handleDownloadSvg} title="Export SVG"><FileImage className="w-4 h-4" /></Button>
+            <Button size="sm" variant="ghost" onClick={handleDownloadXml} title="Download .bpmn"><Download className="w-4 h-4" /></Button>
+            <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
+              <Save className="w-4 h-4" /> {saving ? "Saving…" : "Save"}
             </Button>
-          )}
-          <span className="text-sm font-semibold text-slate-700 truncate max-w-xs">{processLabel || "Process diagram"}</span>
-          {dirty && <span className="w-2 h-2 rounded-full bg-amber-500" title="Unsaved changes" />}
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Button size="sm" variant="ghost" onClick={zoomOut} title="Zoom out"><ZoomOut className="w-4 h-4" /></Button>
-          <Button size="sm" variant="ghost" onClick={zoomIn} title="Zoom in"><ZoomIn className="w-4 h-4" /></Button>
-          <Button size="sm" variant="ghost" onClick={fit} title="Fit to screen"><Maximize2 className="w-4 h-4" /></Button>
-          <div className="w-px h-6 bg-slate-200 mx-1" />
-          <Button size="sm" variant="ghost" onClick={addPool} title="Add pool (participant)" className="gap-1.5">
-            <RectangleHorizontal className="w-4 h-4" /> Pool
-          </Button>
-          <Button size="sm" variant="ghost" onClick={addLane} title="Add lane (swimlane)" className="gap-1.5">
-            <Rows3 className="w-4 h-4" /> Lane
-          </Button>
-          <Button size="sm" variant="ghost" onClick={addSubProcess} title="Add collapsed sub-process" className="gap-1.5">
-            <Box className="w-4 h-4" /> Sub-process
-          </Button>
-          <div className="w-px h-6 bg-slate-200 mx-1" />
-          <Button size="sm" variant="ghost" onClick={handleDownloadSvg} title="Export SVG"><FileImage className="w-4 h-4" /></Button>
-          <Button size="sm" variant="ghost" onClick={handleDownloadXml} title="Download .bpmn"><Download className="w-4 h-4" /></Button>
-          <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
-            <Save className="w-4 h-4" /> {saving ? "Saving…" : "Save"}
-          </Button>
+        <div ref={containerRef} className="flex-1 min-h-[60vh] bg-slate-50 relative">
+          {/* Hide the native floating bpmn-js palette — elements are now in the docked pane */}
+          <style>{`.djs-palette{display:none!important}`}</style>
         </div>
       </div>
-      <div ref={containerRef} className="flex-1 min-h-[60vh] bg-slate-50" />
     </div>
   );
 }
