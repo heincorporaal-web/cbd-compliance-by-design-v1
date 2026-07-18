@@ -1,10 +1,10 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
+import { X, HelpCircle, Copy, Check } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -136,12 +136,24 @@ export default function BpmnDataPane({
   category,
   elementId,
   elementLabel,
+  elementGuid,
   data,
   onChange, // (key, value) => void
   onClose,
 }) {
   const options = useEntityOptions(companyId);
   const sections = CATEGORY_SECTIONS[category] || CATEGORY_SECTIONS.default;
+  const [showGuid, setShowGuid] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copyGuid = async () => {
+    if (!elementGuid) return;
+    try {
+      await navigator.clipboard.writeText(elementGuid);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
+  };
 
   const renderField = (key) => {
     const def = FIELDS[key];
@@ -186,14 +198,47 @@ export default function BpmnDataPane({
             <p className="text-sm text-slate-500">Process-level metadata</p>
           )}
         </div>
-        <button
-          onClick={onClose}
-          className="p-1.5 rounded-md hover:bg-slate-200 text-slate-500"
-          title="Hide data pane"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setShowGuid((v) => !v)}
+            className="p-1.5 rounded-md hover:bg-slate-200 text-slate-500"
+            title="Show unique element identifier (GUID)"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-md hover:bg-slate-200 text-slate-500"
+            title="Hide data pane"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
+
+      {showGuid && (
+        <div className="px-4 py-2.5 border-b border-slate-200 bg-indigo-50/60">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-indigo-500">
+            Unique Identifier (GUID)
+          </p>
+          <div className="mt-1 flex items-center gap-2">
+            <code className="flex-1 min-w-0 truncate text-xs text-slate-700 font-mono bg-white border border-slate-200 rounded px-2 py-1">
+              {elementGuid || "—"}
+            </code>
+            <button
+              onClick={copyGuid}
+              disabled={!elementGuid}
+              className="p-1.5 rounded-md hover:bg-indigo-100 text-indigo-600 disabled:opacity-40"
+              title="Copy GUID"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+          <p className="mt-1 text-[10px] text-slate-400">
+            Stable link for machine-learning and cross-system traceability.
+          </p>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {sections.map((sec) => (

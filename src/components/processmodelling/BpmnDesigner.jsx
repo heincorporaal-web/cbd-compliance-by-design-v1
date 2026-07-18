@@ -26,6 +26,11 @@ export const EMPTY_BPMN_XML = `<?xml version="1.0" encoding="UTF-8"?>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>`;
 
+const newGuid = () =>
+  (typeof crypto !== "undefined" && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : "g-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+
 export default function BpmnDesigner({
   initialXml,
   initialCanvasMeta,
@@ -43,6 +48,29 @@ export default function BpmnDesigner({
   const [elementMeta, setElementMeta] = useState(() => initialElementMeta || {});
   const [selection, setSelection] = useState(null); // { id, label, category }
   const [paneOpen, setPaneOpen] = useState(false);
+
+  // Ensure every BPMN element on the canvas has a stable GUID stored in its
+  // element metadata. GUIDs are persisted with the diagram so machine-learning
+  // pipelines can link back to a unique element across versions/exports.
+  const ensureGuids = () => {
+    const modeler = modelerRef.current;
+    if (!modeler) return;
+    setElementMeta((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      const all = modeler.get("elementRegistry").getAll();
+      for (const el of all) {
+        if (el.type === "label") continue;
+        const cur = next[el.id] || {};
+        if (!cur.guid) {
+          next[el.id] = { ...cur, guid: newGuid() };
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+    setCanvasMeta((prev) => (prev.guid ? prev : { ...prev, guid: newGuid() }));
+  };
 
   // Seed source/target labels for sequence flows into element meta on selection.
   const describeSelection = (el) => {
@@ -68,10 +96,16 @@ export default function BpmnDesigner({
       .importXML(initialXml || EMPTY_BPMN_XML)
       .then(() => {
         modeler.get("canvas").zoom("fit-viewport");
+        ensureGuids();
       })
       .catch((err) => toast.error("Failed to load diagram: " + (err?.message || err)));
 
     modeler.on("commandStack.changed", () => setDirty(true));
+
+    // Assign a GUID to newly created elements (tasks, events, flows, …).
+    const onShapeAdded = () => ensureGuids();
+    modeler.on("shape.added", onShapeAdded);
+    modeler.on("connection.added", onShapeAdded);
 
     const onSelectionChanged = ({ newSelection }) => {
       const el = newSelection && newSelection[0];
@@ -93,6 +127,8 @@ export default function BpmnDesigner({
 
     return () => {
       modeler.off("selection.changed", onSelectionChanged);
+      modeler.off("shape.added", onShapeAdded);
+      modeler.off("connection.added", onShapeAdded);
       try { modeler.destroy(); } catch {}
       modelerRef.current = null;
     };
@@ -246,6 +282,7 @@ export default function BpmnDesigner({
           category={paneCategory}
           elementId={selection?.id}
           elementLabel={selection?.label}
+          elementGuid={selection ? elementMeta[selection.id]?.guid : canvasMeta.guid}
           data={paneData}
           onChange={selection ? onElementChange : onCanvasChange}
           onClose={() => setPaneOpen(false)}
