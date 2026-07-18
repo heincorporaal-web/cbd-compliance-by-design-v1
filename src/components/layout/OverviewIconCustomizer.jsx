@@ -33,7 +33,20 @@ export default function OverviewIconCustomizer({
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [removeWhiteBg, setRemoveWhiteBg] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Which nav items currently use this custom icon record (by ref)
+  const usageFor = (recId) => {
+    const ref = CUSTOM_ICON_PREFIX + recId;
+    const used = [];
+    for (const g of groups || []) {
+      for (const it of g.items || []) {
+        if (customIcons?.[it.id] === ref) used.push(it.title);
+      }
+    }
+    return used;
+  };
 
   // Accept a PNG/JPEG/WebP upload and wrap it as an inline SVG (base64 <image>)
   // so it flows through the existing svg-based custom icon storage. Keep files
@@ -219,24 +232,34 @@ export default function OverviewIconCustomizer({
               </div>
               {customIconRecords.length > 0 && (
                 <div className="pt-1">
-                  <p className="text-xs text-slate-400 mb-1">Loaded custom icons:</p>
+                  <p className="text-xs text-slate-400 mb-1.5">
+                    Loaded custom icons — click an icon to delete it from the library:
+                  </p>
                   <div className="flex flex-wrap gap-2">
-                    {customIconRecords.map((rec) => (
-                      <div
-                        key={rec.id}
-                        className="group relative w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center"
-                        title={rec.name}
-                      >
-                        <CustomSvgIcon svg={rec.svg} className="w-5 h-5" />
-                        <button
-                          onClick={() => onDeleteCustomIcon?.(rec.id)}
-                          className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                          title={`Delete ${rec.name}`}
+                    {customIconRecords.map((rec) => {
+                      const usage = usageFor(rec.id);
+                      return (
+                        <div
+                          key={rec.id}
+                          className="group relative flex flex-col items-center gap-1"
+                          title={rec.name}
                         >
-                          <Trash2 className="w-2.5 h-2.5" />
-                        </button>
-                      </div>
-                    ))}
+                          <button
+                            onClick={() => setPendingDelete({ rec, usage })}
+                            className="relative w-12 h-12 rounded-md border border-slate-200 flex items-center justify-center hover:border-destructive hover:bg-red-50 transition-colors"
+                            title={`Delete "${rec.name}" from library${usage.length ? ` (used by ${usage.length} item${usage.length !== 1 ? "s" : ""})` : ""}`}
+                          >
+                            <CustomSvgIcon svg={rec.svg} className="w-6 h-6" />
+                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-destructive text-white flex items-center justify-center shadow">
+                              <Trash2 className="w-2.5 h-2.5" />
+                            </span>
+                          </button>
+                          <span className="max-w-[3.5rem] truncate text-[10px] text-slate-500 text-center leading-tight">
+                            {rec.name}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -343,6 +366,47 @@ export default function OverviewIconCustomizer({
             </div>
           ))}
         </div>
+
+        {/* Confirm deleting a custom icon from the library */}
+        {pendingDelete && (
+          <Dialog open onOpenChange={(o) => !o && setPendingDelete(null)}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                  Delete icon from library?
+                </DialogTitle>
+                <DialogDescription>
+                  This permanently removes “{pendingDelete.rec.name}” from the custom icon library.
+                  {pendingDelete.usage.length > 0
+                    ? ` It is currently assigned to: ${pendingDelete.usage.join(", ")}. Those menu items will revert to their default icon.`
+                    : " It is not assigned to any menu item."}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex items-center gap-2 mt-3">
+                <CustomSvgIcon svg={pendingDelete.rec.svg} className="w-8 h-8" />
+              </div>
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={() => setPendingDelete(null)}
+                  className="px-3 py-1.5 text-sm rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    await onDeleteCustomIcon?.(pendingDelete.rec.id);
+                    setPendingDelete(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md bg-destructive text-destructive-foreground hover:opacity-90"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete from library
+                </button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </DialogContent>
     </Dialog>
   );
