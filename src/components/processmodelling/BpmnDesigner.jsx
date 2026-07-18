@@ -3,7 +3,7 @@ import BpmnModeler from "bpmn-js/lib/Modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline } from "lucide-react";
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
 import BpmnDataPane from "@/components/processmodelling/BpmnDataPane";
@@ -48,7 +48,18 @@ export default function BpmnDesigner({
   const [elementMeta, setElementMeta] = useState(() => initialElementMeta || {});
   const [selection, setSelection] = useState(null); // { id, label, category }
   const [paneOpen, setPaneOpen] = useState(false);
+  const [connectMode, setConnectMode] = useState(false);
+  const connectModeRef = useRef(false);
+  connectModeRef.current = connectMode;
   const fileInputRef = useRef(null);
+
+  // Exit connect mode on Escape
+  useEffect(() => {
+    if (!connectMode) return;
+    const onKey = (e) => { if (e.key === "Escape") setConnectMode(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [connectMode]);
 
   // Ensure every BPMN element on the canvas has a stable GUID stored in its
   // element metadata. GUIDs are persisted with the diagram so machine-learning
@@ -126,7 +137,25 @@ export default function BpmnDesigner({
     };
     modeler.on("selection.changed", onSelectionChanged);
 
+    // Connect mode: when active, mousedown on an element starts a connection
+    // drag. bpmn-js snaps the resulting flow to the nearest connection point
+    // on the target element automatically.
+    const eventBus = modeler.get("eventBus");
+    const connect = modeler.get("connect");
+    const onElementMouseDown = (e) => {
+      if (!connectModeRef.current) return;
+      const { element, originalEvent } = e;
+      if (!element || element.type === "label") return;
+      if (element.id === "__implicitroot") return;
+      try {
+        connect.start(originalEvent, element);
+      } catch {}
+      e.stopPropagation();
+    };
+    eventBus.on("element.mousedown", 1500, onElementMouseDown);
+
     return () => {
+      eventBus.off("element.mousedown", onElementMouseDown);
       modeler.off("selection.changed", onSelectionChanged);
       modeler.off("shape.added", onShapeAdded);
       modeler.off("connection.added", onShapeAdded);
@@ -265,6 +294,15 @@ export default function BpmnDesigner({
             <Button size="sm" variant="ghost" onClick={zoomIn} title="Zoom in"><ZoomIn className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={fit} title="Fit to screen"><Maximize2 className="w-4 h-4" /></Button>
             <div className="w-px h-6 bg-slate-200 mx-1" />
+            <Button
+              size="sm"
+              variant={connectMode ? "default" : "ghost"}
+              onClick={() => setConnectMode((v) => !v)}
+              title={connectMode ? "Connect mode active — click an element, drag to target (Esc to exit)" : "Connect elements (click source, drag to target)"}
+              className={`gap-1.5 ${connectMode ? "bg-indigo-600 hover:bg-indigo-700 text-white" : ""}`}
+            >
+              <Spline className="w-4 h-4" /> {connectMode ? "Connecting…" : "Connect"}
+            </Button>
             <Button size="sm" variant="ghost" onClick={() => fileInputRef.current?.click()} title="Import BPMN/XML"><Upload className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={handleDownloadSvg} title="Export SVG"><FileImage className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={handleDownloadXml} title="Download .bpmn"><Download className="w-4 h-4" /></Button>
@@ -302,7 +340,11 @@ export default function BpmnDesigner({
             <span className="pointer-events-none absolute top-2 left-3 z-10 text-[10px] font-semibold uppercase tracking-wide text-slate-300 select-none">
               Canvas
             </span>
-            <div ref={containerRef} className="w-full h-full min-h-[560px]">
+            <div
+              ref={containerRef}
+              className="w-full h-full min-h-[560px]"
+              style={connectMode ? { cursor: "crosshair" } : undefined}
+            >
               {/* Hide the native floating bpmn-js palette — elements are now in the docked pane */}
               <style>{`.djs-palette{display:none!important}`}</style>
             </div>
