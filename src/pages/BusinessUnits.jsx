@@ -15,6 +15,7 @@ import BusinessUnitImportDialog from "@/components/businessunits/BusinessUnitImp
 import SearchableSelect from "@/components/ui/SearchableSelect";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { Upload, Download } from "lucide-react";
+import NavIcon from "@/hooks/useNavIcon.jsx";
 
 const BU_TYPES = [
   "Department", "Capability", "Profit & Loss Unit", "Division", "Business Line",
@@ -202,7 +203,7 @@ export default function BusinessUnits() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Building2 className="w-6 h-6 text-primary" /> Business Units
+            <NavIcon itemId="business_units" defaultIcon={Building2} className="w-6 h-6 text-primary" /> Business Units
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">Define organizational units — departments, capabilities, CoEs, regions and more.</p>
         </div>
@@ -242,7 +243,7 @@ export default function BusinessUnits() {
         <div className="text-center py-16 text-slate-400">Loading…</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed rounded-xl">
-          <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <NavIcon itemId="business_units" defaultIcon={Building2} className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <p className="text-slate-500 mb-3">No business units found.</p>
           <Button onClick={openCreate} className="gap-2"><Plus className="w-4 h-4" /> Create First Business Unit</Button>
         </div>
