@@ -42,13 +42,7 @@ export function getICTModuleErrors(module) {
 
 // Value Chain validation errors
 export function getValueChainErrors(vc) {
-  const errors = [];
-  
-  if (!vc.owner && !vc.process_owner) {
-    errors.push({ type: 'no_owner', message: 'No owner' });
-  }
-  
-  return errors;
+  return [];
 }
 
 // Workstream validation errors
