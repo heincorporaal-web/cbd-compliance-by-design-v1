@@ -3,7 +3,7 @@ import BpmnModeler from "bpmn-js/lib/Modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2 } from "lucide-react";
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
 import BpmnDataPane from "@/components/processmodelling/BpmnDataPane";
@@ -52,6 +52,8 @@ export default function BpmnDesigner({
   const connectModeRef = useRef(false);
   connectModeRef.current = connectMode;
   const fileInputRef = useRef(null);
+  const selectedElementRef = useRef(null);
+  const [selectedIsExpanded, setSelectedIsExpanded] = useState(false);
 
   // Exit connect mode on Escape
   useEffect(() => {
@@ -124,8 +126,14 @@ export default function BpmnDesigner({
       const desc = describeSelection(el);
       if (!desc) {
         setSelection(null);
+        selectedElementRef.current = null;
+        setSelectedIsExpanded(false);
       } else {
         setSelection(desc);
+        selectedElementRef.current = el;
+        const bo = el.businessObject || {};
+        const di = bo.di || {};
+        setSelectedIsExpanded(di.isExpanded === true);
         if (desc.seed && Object.keys(desc.seed).length) {
           setElementMeta((prev) => ({
             ...prev,
@@ -190,6 +198,36 @@ export default function BpmnDesigner({
   const zoomIn = () => modelerRef.current?.get("zoomScroll").stepZoom(1);
   const zoomOut = () => modelerRef.current?.get("zoomScroll").stepZoom(-1);
   const fit = () => modelerRef.current?.get("canvas").zoom("fit-viewport");
+
+  // Toggle the selected sub-process between collapsed (plus marker) and
+  // expanded (children visible) using the bpmn-js replace service, which
+  // preserves the element id and re-lays out the diagram cleanly.
+  const toggleSubProcessExpand = () => {
+    const modeler = modelerRef.current;
+    const el = selectedElementRef.current;
+    if (!modeler || !el) return;
+    const bo = el.businessObject || {};
+    if (bo.$type !== "bpmn:SubProcess") {
+      toast.info("Select a sub-process to expand or collapse");
+      return;
+    }
+    try {
+      const isExpanded = !((bo.di && bo.di.isExpanded) === true);
+      modeler.get("replace").replaceElement(el, {
+        type: "bpmn:SubProcess",
+        isExpanded,
+      });
+      setSelectedIsExpanded(isExpanded);
+      setDirty(true);
+    } catch (e) {
+      toast.error("Could not toggle sub-process: " + (e?.message || e));
+    }
+  };
+
+  const canToggleSubProcess = (() => {
+    const el = selectedElementRef.current;
+    return !!(el && el.businessObject && el.businessObject.$type === "bpmn:SubProcess");
+  })();
 
   // Start a native bpmn-js drag-create from the docked palette so elements
   // can be dragged onto the canvas with live preview and proper drop targets
@@ -293,6 +331,18 @@ export default function BpmnDesigner({
             <Button size="sm" variant="ghost" onClick={zoomOut} title="Zoom out"><ZoomOut className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={zoomIn} title="Zoom in"><ZoomIn className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={fit} title="Fit to screen"><Maximize2 className="w-4 h-4" /></Button>
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+            <Button
+              size="sm"
+              variant={canToggleSubProcess ? "default" : "ghost"}
+              onClick={toggleSubProcessExpand}
+              disabled={!canToggleSubProcess}
+              title={canToggleSubProcess ? (selectedIsExpanded ? "Collapse sub-process" : "Expand sub-process") : "Select a sub-process to expand/collapse"}
+              className={`gap-1.5 ${canToggleSubProcess && !selectedIsExpanded ? "bg-indigo-600 hover:bg-indigo-700 text-white" : ""}`}
+            >
+              {selectedIsExpanded ? <Minimize2 className="w-4 h-4" /> : <Expand className="w-4 h-4" />}
+              {selectedIsExpanded ? "Collapse" : "Expand"}
+            </Button>
             <div className="w-px h-6 bg-slate-200 mx-1" />
             <Button
               size="sm"
