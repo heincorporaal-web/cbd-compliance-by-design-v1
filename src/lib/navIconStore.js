@@ -1,3 +1,4 @@
+import React from "react";
 import {
   LayoutDashboard, CalendarClock, Building2, Network, BookOpen, HelpCircle,
   MessageCircle, Info, Shield, ShieldCheck, ShieldAlert, ShieldQuestion,
@@ -153,11 +154,75 @@ export const NAV_ICON_POOL = [
 
 const ICON_BY_NAME = Object.fromEntries(NAV_ICON_POOL.map((p) => [p.name, p.Icon]));
 
-// Returns the icon component for a nav item: the admin-chosen override if set,
-// otherwise the item's default icon component.
-export function resolveIcon(customIcons, itemId, defaultIcon) {
+// ─── Custom SVG icons ────────────────────────────────────────────────────────
+// Custom icons are stored as raw SVG markup in the CustomIcon entity. An
+// override value of "custom:<id>" references one of these records. The markup
+// is normalized so the inner <svg> scales to its container and any <script>
+// tags are stripped.
+
+function normalizeSvg(svg) {
+  if (typeof window === "undefined" || !svg) return svg || "";
+  try {
+    const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
+    const svgEl = doc.querySelector("svg");
+    if (!svgEl) return svg;
+    svgEl.setAttribute("width", "100%");
+    svgEl.setAttribute("height", "100%");
+    svgEl.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    svgEl.querySelectorAll("script").forEach((s) => s.remove());
+    return new XMLSerializer().serializeToString(svgEl);
+  } catch {
+    return svg;
+  }
+}
+
+// Override values for custom icons use this prefix so they never collide with
+// lucide icon names.
+export const CUSTOM_ICON_PREFIX = "custom:";
+
+export function isCustomIconRef(name) {
+  return typeof name === "string" && name.startsWith(CUSTOM_ICON_PREFIX);
+}
+
+export function customIconIdFromRef(name) {
+  return isCustomIconRef(name) ? name.slice(CUSTOM_ICON_PREFIX.length) : null;
+}
+
+// Builds a map of "custom:<id>" -> CustomSvgIcon for fast lookup in resolveIcon.
+export function buildCustomIconMap(customIconRecords = []) {
+  const map = {};
+  for (const rec of customIconRecords) {
+    if (rec?.id && rec.svg) {
+      map[CUSTOM_ICON_PREFIX + rec.id] = { name: rec.name || "Custom", svg: rec.svg };
+    }
+  }
+  return map;
+}
+
+// A tiny component that renders raw (normalized) SVG markup inside a span
+// sized by the passed className, so it drops in wherever a lucide icon would.
+export function CustomSvgIcon({ svg, className }) {
+  return React.createElement("span", {
+    className: `inline-flex items-center justify-center ${className || ""}`,
+    style: { lineHeight: 0 },
+    dangerouslySetInnerHTML: { __html: normalizeSvg(svg) },
+  });
+}
+
+// Returns the icon component for a nav item: the admin-chosen override if set
+// (lucide name or custom:<id>), otherwise the item's default icon component.
+// `customIconMap` is the result of buildCustomIconMap() — optional.
+export function resolveIcon(customIcons, itemId, defaultIcon, customIconMap = {}) {
   const name = customIcons?.[itemId];
-  if (name && ICON_BY_NAME[name]) return ICON_BY_NAME[name];
+  if (name) {
+    if (isCustomIconRef(name) && customIconMap[name]) {
+      const { svg } = customIconMap[name];
+      return function CustomNavIcon(props) {
+        return React.createElement(CustomSvgIcon, { svg, ...props });
+      };
+    }
+    if (ICON_BY_NAME[name]) return ICON_BY_NAME[name];
+  }
   return defaultIcon;
 }
 

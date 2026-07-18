@@ -1,0 +1,18 @@
+{
+  "name": "CustomIcon",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display label for this custom icon (shown in the icon picker)"
+    },
+    "svg": {
+      "type": "string",
+      "description": "Raw SVG markup for the icon. Colors are preserved as authored."
+    }
+  },
+  "required": [
+    "name",
+    "svg"
+  ]
+}

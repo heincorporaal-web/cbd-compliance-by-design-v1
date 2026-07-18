@@ -13,7 +13,7 @@ import { base44 } from "@/api/base44Client";
 import { useIsAuditRole } from "@/hooks/useIsAuditRole";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import OverviewIconCustomizer from "@/components/layout/OverviewIconCustomizer";
-import { resolveIcon } from "@/lib/navIconStore";
+import { resolveIcon, buildCustomIconMap, CUSTOM_ICON_PREFIX } from "@/lib/navIconStore";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // ─── Navigation tree definition ──────────────────────────────────────────────
@@ -156,9 +156,9 @@ const saveFavorites = (userId, favs) => {
 };
 
 // ─── Single nav link ──────────────────────────────────────────────────────────
-function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false, customIcons }) {
+function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false, customIcons, customIconMap }) {
   const isFav = favorites.includes(item.id);
-  const Icon = resolveIcon(customIcons, item.id, item.icon);
+  const Icon = resolveIcon(customIcons, item.id, item.icon, customIconMap);
   return (
     <div className="group flex items-center rounded-lg hover:bg-slate-50 transition-colors">
       <Link
@@ -197,7 +197,7 @@ const groupColors = {
   configuration: "text-secondary font-medium",
 };
 
-function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false, customIcons, extra }) {
+function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false, customIcons, customIconMap, extra }) {
   const [open, setOpen] = useState(defaultOpen);
   const hasActive = group.items.some(i => location.pathname === i.url);
 
@@ -227,6 +227,7 @@ function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false
               onToggleFav={onToggleFav}
               showFavBtn
               customIcons={customIcons}
+              customIconMap={customIconMap}
             />
           ))}
           {extra}
@@ -267,6 +268,12 @@ export default function NavTree() {
   const meta = metas[0];
   const navIcons = meta?.nav_icon_overrides || {};
 
+  const { data: customIconRecords = [] } = useQuery({
+    queryKey: ["customIcons"],
+    queryFn: () => base44.entities.CustomIcon.list("-updated_date", 200),
+  });
+  const customIconMap = buildCustomIconMap(customIconRecords);
+
   // Always read the latest overrides from the query cache so rapid successive
   // edits merge on top of the most recent state (not a stale render snapshot).
   const latestOverrides = () => {
@@ -293,6 +300,22 @@ export default function NavTree() {
     const next = { ...latestOverrides() };
     delete next[itemId];
     persistOverrides(next).catch(() => {});
+  };
+
+  const addCustomIcon = async (name, svg) => {
+    const rec = await base44.entities.CustomIcon.create({ name, svg });
+    queryClient.invalidateQueries(["customIcons"]);
+    return rec;
+  };
+  const deleteCustomIcon = async (id) => {
+    // Clear any nav overrides that reference this custom icon first.
+    const overrides = latestOverrides();
+    const ref = CUSTOM_ICON_PREFIX + id;
+    const next = { ...overrides };
+    for (const k of Object.keys(next)) if (next[k] === ref) delete next[k];
+    await base44.entities.CustomIcon.delete(id);
+    if (JSON.stringify(next) !== JSON.stringify(overrides)) await persistOverrides(next);
+    queryClient.invalidateQueries(["customIcons"]);
   };
 
   const toggleFav = (itemId) => {
@@ -378,6 +401,7 @@ export default function NavTree() {
           onToggleFav={toggleFav}
           defaultOpen={i === 0}
           customIcons={navIcons}
+          customIconMap={customIconMap}
         />
       ))}
 
@@ -393,6 +417,7 @@ export default function NavTree() {
             favorites={favorites}
             onToggleFav={toggleFav}
             customIcons={navIcons}
+            customIconMap={customIconMap}
             extra={
               <div className="group flex items-center rounded-lg hover:bg-slate-50 transition-colors">
                 <button
@@ -414,8 +439,11 @@ export default function NavTree() {
           onClose={() => setIconDialogOpen(false)}
           groups={NAV_GROUPS}
           customIcons={navIcons}
+          customIconRecords={customIconRecords}
           onSetIcon={setNavItemIcon}
           onResetIcon={resetNavItemIcon}
+          onAddCustomIcon={addCustomIcon}
+          onDeleteCustomIcon={deleteCustomIcon}
         />
       )}
     </div>

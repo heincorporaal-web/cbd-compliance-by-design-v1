@@ -6,18 +6,52 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ChevronDown, ChevronRight, RotateCcw } from "lucide-react";
-import { NAV_ICON_POOL, resolveIcon, nameForDefaultIcon } from "@/lib/navIconStore";
+import { ChevronDown, ChevronRight, RotateCcw, Plus, Trash2, Upload } from "lucide-react";
+import {
+  NAV_ICON_POOL,
+  resolveIcon,
+  nameForDefaultIcon,
+  CustomSvgIcon,
+  CUSTOM_ICON_PREFIX,
+} from "@/lib/navIconStore";
 
 export default function OverviewIconCustomizer({
   open,
   onClose,
   groups,
   customIcons,
+  customIconRecords = [],
   onSetIcon,
   onResetIcon,
+  onAddCustomIcon,
+  onDeleteCustomIcon,
 }) {
   const [openItemId, setOpenItemId] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newSvg, setNewSvg] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleAdd = async () => {
+    setError("");
+    const name = newName.trim();
+    const svg = newSvg.trim();
+    if (!name) return setError("Give the icon a name.");
+    if (!svg) return setError("Paste SVG markup.");
+    if (!/<svg[\s\S]*<\/svg>/i.test(svg)) return setError("Markup must contain an <svg>…</svg>.");
+    setAdding(true);
+    try {
+      await onAddCustomIcon?.(name, svg);
+      setNewName("");
+      setNewSvg("");
+      setShowAdd(false);
+    } catch (e) {
+      setError(e?.message || "Could not save the icon.");
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -26,9 +60,86 @@ export default function OverviewIconCustomizer({
           <DialogTitle>Customize Menu Icons</DialogTitle>
           <DialogDescription>
             Expand a menu item, then pick an icon. Each item gets a unique icon,
-            applied app-wide for everyone.
+            applied app-wide for everyone. You can also load your own SVG icons below.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Load custom SVG */}
+        <div className="mt-2 rounded-lg border border-slate-200">
+          <button
+            onClick={() => setShowAdd(v => !v)}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg"
+          >
+            {showAdd ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            <Upload className="w-4 h-4 text-slate-500" />
+            <span>Load custom SVG</span>
+            {customIconRecords.length > 0 && (
+              <span className="ml-1 text-[10px] uppercase tracking-wide text-primary">
+                {customIconRecords.length} loaded
+              </span>
+            )}
+          </button>
+          {showAdd && (
+            <div className="px-3 pb-3 space-y-2">
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Icon name (e.g. Network Dollar)"
+                className="w-full px-2.5 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <textarea
+                value={newSvg}
+                onChange={(e) => setNewSvg(e.target.value)}
+                placeholder='<svg ...>...</svg>'
+                rows={4}
+                className="w-full px-2.5 py-1.5 text-xs font-mono border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              {error && <p className="text-xs text-destructive">{error}</p>}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleAdd}
+                  disabled={adding}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  {adding ? "Adding…" : "Add icon"}
+                </button>
+                {newSvg && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-500 border border-slate-200 rounded-md">
+                    Preview:
+                    <span className="w-5 h-5 inline-flex items-center justify-center border border-slate-200 rounded">
+                      <CustomSvgIcon svg={newSvg} className="w-4 h-4" />
+                    </span>
+                  </span>
+                )}
+              </div>
+              {customIconRecords.length > 0 && (
+                <div className="pt-1">
+                  <p className="text-xs text-slate-400 mb-1">Loaded custom icons:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {customIconRecords.map((rec) => (
+                      <div
+                        key={rec.id}
+                        className="group relative w-9 h-9 rounded-md border border-slate-200 flex items-center justify-center"
+                        title={rec.name}
+                      >
+                        <CustomSvgIcon svg={rec.svg} className="w-5 h-5" />
+                        <button
+                          onClick={() => onDeleteCustomIcon?.(rec.id)}
+                          className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          title={`Delete ${rec.name}`}
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="space-y-1 mt-2">
           {groups.map((group) => (
@@ -37,11 +148,10 @@ export default function OverviewIconCustomizer({
                 {group.label}
               </p>
               {group.items.map((item) => {
-                const Icon = resolveIcon(customIcons, item.id, item.icon);
+                const Icon = resolveIcon(customIcons, item.id, item.icon, buildMap(customIconRecords));
                 const isCustom = !!customIcons?.[item.id];
                 const expanded = openItemId === item.id;
-                const activeName =
-                  customIcons?.[item.id] || nameForDefaultIcon(item.icon);
+                const activeName = customIcons?.[item.id] || nameForDefaultIcon(item.icon);
 
                 return (
                   <div key={item.id} className="rounded-lg">
@@ -75,24 +185,52 @@ export default function OverviewIconCustomizer({
                     </div>
 
                     {expanded && (
-                      <div className="grid grid-cols-10 gap-1.5 px-2 pb-2 pt-1">
-                        {NAV_ICON_POOL.map(({ name, Icon: Opt }) => {
-                          const active = activeName === name;
-                          return (
-                            <button
-                              key={name}
-                              title={name}
-                              onClick={() => onSetIcon(item.id, name)}
-                              className={`w-7 h-7 rounded flex items-center justify-center border transition-colors ${
-                                active
-                                  ? "border-primary bg-primary/10 text-primary"
-                                  : "border-slate-200 text-slate-600 hover:bg-slate-100"
-                              }`}
-                            >
-                              <Opt className="w-3.5 h-3.5" />
-                            </button>
-                          );
-                        })}
+                      <div className="px-2 pb-2 pt-1">
+                        {customIconRecords.length > 0 && (
+                          <div className="mb-2">
+                            <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">Custom SVG</p>
+                            <div className="grid grid-cols-10 gap-1.5">
+                              {customIconRecords.map((rec) => {
+                                const ref = CUSTOM_ICON_PREFIX + rec.id;
+                                const active = activeName === ref;
+                                return (
+                                  <button
+                                    key={rec.id}
+                                    title={rec.name}
+                                    onClick={() => onSetIcon(item.id, ref)}
+                                    className={`w-7 h-7 rounded flex items-center justify-center border transition-colors ${
+                                      active
+                                        ? "border-primary bg-primary/10"
+                                        : "border-slate-200 hover:bg-slate-100"
+                                    }`}
+                                  >
+                                    <CustomSvgIcon svg={rec.svg} className="w-4 h-4" />
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                        <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">Library</p>
+                        <div className="grid grid-cols-10 gap-1.5">
+                          {NAV_ICON_POOL.map(({ name, Icon: Opt }) => {
+                            const active = activeName === name;
+                            return (
+                              <button
+                                key={name}
+                                title={name}
+                                onClick={() => onSetIcon(item.id, name)}
+                                className={`w-7 h-7 rounded flex items-center justify-center border transition-colors ${
+                                  active
+                                    ? "border-primary bg-primary/10 text-primary"
+                                    : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                                }`}
+                              >
+                                <Opt className="w-3.5 h-3.5" />
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -104,4 +242,13 @@ export default function OverviewIconCustomizer({
       </DialogContent>
     </Dialog>
   );
+}
+
+// Lightweight local builder so we don't need to import buildCustomIconMap here.
+function buildMap(records) {
+  const map = {};
+  for (const rec of records || []) {
+    if (rec?.id && rec.svg) map[CUSTOM_ICON_PREFIX + rec.id] = { name: rec.name, svg: rec.svg };
+  }
+  return map;
 }
