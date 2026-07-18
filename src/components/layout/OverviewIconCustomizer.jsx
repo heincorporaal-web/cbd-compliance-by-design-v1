@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ChevronDown, ChevronRight, RotateCcw, Plus, Trash2, Upload, ImagePlus } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, Plus, Upload, ImagePlus } from "lucide-react";
 import {
   NAV_ICON_POOL,
   resolveIcon,
@@ -279,10 +279,11 @@ export default function OverviewIconCustomizer({
                       {isCustom && (
                         <button
                           onClick={() => onResetIcon(item.id)}
-                          className="p-1 rounded text-slate-400 hover:text-slate-600"
-                          title="Reset to default icon"
+                          className="inline-flex items-center gap-1 px-1.5 py-1 rounded text-xs text-slate-500 hover:bg-red-50 hover:text-destructive border border-transparent hover:border-red-200 transition-colors"
+                          title="Remove custom icon — revert to default"
                         >
-                          <RotateCcw className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3 h-3" />
+                          <span>Remove</span>
                         </button>
                       )}
                     </div>
