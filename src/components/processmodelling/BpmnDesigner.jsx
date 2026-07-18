@@ -3,7 +3,7 @@ import BpmnModeler from "bpmn-js/lib/Modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, RectangleHorizontal, Rows3 } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, RectangleHorizontal, Rows3, Box } from "lucide-react";
 import { toast } from "sonner";
 
 export const EMPTY_BPMN_XML = `<?xml version="1.0" encoding="UTF-8"?>
@@ -89,6 +89,30 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
     }
   };
 
+  const addSubProcess = () => {
+    try {
+      const modeling = modelerRef.current.get("modeling");
+      const elementFactory = modelerRef.current.get("elementFactory");
+      const selection = modelerRef.current.get("selection");
+      const canvas = modelerRef.current.get("canvas");
+      const containerTypes = ["bpmn:Process", "bpmn:Participant", "bpmn:SubProcess", "bpmn:Lane"];
+      let parent = (selection.get() || []).find((el) => containerTypes.includes(el.type));
+      if (!parent) {
+        const root = canvas.getRootElement();
+        if (root.type === "bpmn:Collaboration") {
+          parent = (root.children || []).find((el) => el.type === "bpmn:Participant") || root;
+        } else {
+          parent = root;
+        }
+      }
+      const sub = elementFactory.createShape({ type: "bpmn:SubProcess", isExpanded: false });
+      modeling.createShape(sub, { x: 350, y: 200 }, parent);
+      setDirty(true);
+    } catch (e) {
+      toast.error("Could not add sub-process: " + (e?.message || e));
+    }
+  };
+
   const handleSave = async () => {
     try {
       const { xml } = await modelerRef.current.saveXML({ format: true });
@@ -150,6 +174,9 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
           </Button>
           <Button size="sm" variant="ghost" onClick={addLane} title="Add lane (swimlane)" className="gap-1.5">
             <Rows3 className="w-4 h-4" /> Lane
+          </Button>
+          <Button size="sm" variant="ghost" onClick={addSubProcess} title="Add collapsed sub-process" className="gap-1.5">
+            <Box className="w-4 h-4" /> Sub-process
           </Button>
           <div className="w-px h-6 bg-slate-200 mx-1" />
           <Button size="sm" variant="ghost" onClick={handleDownloadSvg} title="Export SVG"><FileImage className="w-4 h-4" /></Button>
