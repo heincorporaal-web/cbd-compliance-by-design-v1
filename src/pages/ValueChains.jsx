@@ -59,6 +59,7 @@ export default function ValueChains() {
   const [collapsed, setCollapsed] = useState({});
   const [expandedWS, setExpandedWS] = useState({});
   const [importOpen, setImportOpen] = useState(false);
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const { canImport } = useIsImplementerRole();
   const { getLabel: getChainLabel } = useCustomOptions("value_chain_management_chains");
 
@@ -116,6 +117,7 @@ export default function ValueChains() {
   const openCreate = () => {
     setFormData({ ...EMPTY_FORM, company_id: selectedCompanyId || (companies[0]?.id ?? "") });
     setEditingItem(null);
+    setColorPickerOpen(false);
     setShowForm(true);
   };
 
@@ -134,6 +136,7 @@ export default function ValueChains() {
       status: item.status || "active",
       end_date: item.end_date || "",
     });
+    setColorPickerOpen(false);
     setShowForm(true);
   };
 
@@ -405,10 +408,6 @@ export default function ValueChains() {
               <Input value={formData.value_chain_code} onChange={e => setFormData(p => ({ ...p, value_chain_code: e.target.value }))} required placeholder="e.g. EAM-Acquire-to-Decommission" />
             </div>
             <div className="space-y-1">
-              <Label>Badge Colour</Label>
-              <ColorPicker value={formData.badge_color} onChange={v => setFormData(p => ({ ...p, badge_color: v }))} />
-            </div>
-            <div className="space-y-1">
               <Label>Management Chain</Label>
               <EditableOptionSelect
                 storageKey="value_chain_management_chains"
@@ -460,6 +459,19 @@ export default function ValueChains() {
             <div className="space-y-1">
               <Label>Description</Label>
               <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} rows={3} />
+            </div>
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => setColorPickerOpen(o => !o)}
+                className="flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900"
+              >
+                {colorPickerOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                Badge Colour
+              </button>
+              {colorPickerOpen && (
+                <ColorPicker value={formData.badge_color} onChange={v => setFormData(p => ({ ...p, badge_color: v }))} />
+              )}
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t">
               <Button type="button" variant="outline" onClick={closeForm}>Cancel</Button>
