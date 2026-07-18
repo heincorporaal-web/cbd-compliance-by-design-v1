@@ -7,10 +7,13 @@ import {
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
   Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert, CalendarClock, Gauge, Info,
-  Presentation, FileSpreadsheet, Workflow
+  Presentation, FileSpreadsheet, Workflow, Palette
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useIsAuditRole } from "@/hooks/useIsAuditRole";
+import OverviewIconCustomizer from "@/components/layout/OverviewIconCustomizer";
+import { resolveIcon } from "@/lib/navIconStore";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // ─── Navigation tree definition ──────────────────────────────────────────────
 export const NAV_GROUPS = [
@@ -152,8 +155,9 @@ const saveFavorites = (userId, favs) => {
 };
 
 // ─── Single nav link ──────────────────────────────────────────────────────────
-function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false }) {
+function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false, customIcons }) {
   const isFav = favorites.includes(item.id);
+  const Icon = resolveIcon(customIcons, item.id, item.icon);
   return (
     <div className="group flex items-center rounded-lg hover:bg-slate-50 transition-colors">
       <Link
@@ -162,7 +166,7 @@ function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false })
           isActive ? "text-primary font-semibold" : "text-slate-700"
         }`}
       >
-        <item.icon className={`w-4 h-4 shrink-0 ${isActive ? "text-primary" : "text-slate-500"}`} />
+        <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-primary" : "text-slate-500"}`} />
         <span className="truncate">{item.title}</span>
       </Link>
       {showFavBtn && (
@@ -192,7 +196,7 @@ const groupColors = {
   configuration: "text-secondary font-medium",
 };
 
-function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false }) {
+function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false, customIcons }) {
   const [open, setOpen] = useState(defaultOpen);
   const hasActive = group.items.some(i => location.pathname === i.url);
 
@@ -221,6 +225,7 @@ function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false
               favorites={favorites}
               onToggleFav={onToggleFav}
               showFavBtn
+              customIcons={customIcons}
             />
           ))}
         </div>
@@ -233,20 +238,50 @@ function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false
 export default function NavTree() {
   const location = useLocation();
   const [userId, setUserId] = useState(null);
+  const [user, setUser] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [favOpen, setFavOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [iconDialogOpen, setIconDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
-    base44.auth.me().then(user => {
-      if (user) {
-        setUserId(user.id);
-        setFavorites(loadFavorites(user.id));
+    base44.auth.me().then(u => {
+      if (u) {
+        setUser(u);
+        setUserId(u.id);
+        setFavorites(loadFavorites(u.id));
       }
     }).catch(() => {
       setFavorites(loadFavorites(null));
     });
   }, []);
+
+  const { data: metas = [] } = useQuery({
+    queryKey: ["appMeta"],
+    queryFn: () => base44.entities.AppMeta.list("-updated_date", 1),
+  });
+  const meta = metas[0];
+  const navIcons = meta?.nav_icon_overrides || {};
+
+  const persistOverrides = async (next) => {
+    const payload = {
+      nav_icon_overrides: next,
+      last_updated_by: user?.full_name || user?.email || "admin",
+    };
+    if (meta) await base44.entities.AppMeta.update(meta.id, payload);
+    else await base44.entities.AppMeta.create({ app_name: "GRC Platform", ...payload });
+    queryClient.invalidateQueries(["appMeta"]);
+  };
+
+  const setNavItemIcon = (itemId, name) =>
+    persistOverrides({ ...navIcons, [itemId]: name }).catch(() => {});
+  const resetNavItemIcon = (itemId) => {
+    const next = { ...navIcons };
+    delete next[itemId];
+    persistOverrides(next).catch(() => {});
+  };
 
   const toggleFav = (itemId) => {
     const next = favorites.includes(itemId)
@@ -303,10 +338,23 @@ export default function NavTree() {
                 favorites={favorites}
                 onToggleFav={toggleFav}
                 showFavBtn
+                customIcons={navIcons}
               />
             ))}
           </div>
           <div className="border-t border-slate-200 mt-2" />
+        </div>
+      )}
+
+      {isAdmin && (
+        <div className="px-2 mb-1">
+          <button
+            onClick={() => setIconDialogOpen(true)}
+            className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs text-slate-500 hover:text-primary hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            <Palette className="w-3.5 h-3.5" />
+            Customize menu icons
+          </button>
         </div>
       )}
 
@@ -329,8 +377,20 @@ export default function NavTree() {
           favorites={favorites}
           onToggleFav={toggleFav}
           defaultOpen={i === 0}
+          customIcons={navIcons}
         />
       ))}
+
+      {isAdmin && (
+        <OverviewIconCustomizer
+          open={iconDialogOpen}
+          onClose={() => setIconDialogOpen(false)}
+          groups={NAV_GROUPS}
+          customIcons={navIcons}
+          onSetIcon={setNavItemIcon}
+          onResetIcon={resetNavItemIcon}
+        />
+      )}
     </div>
   );
 }

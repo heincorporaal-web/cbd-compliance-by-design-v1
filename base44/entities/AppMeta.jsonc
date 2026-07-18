@@ -38,6 +38,13 @@
     "last_updated_by": {
       "type": "string",
       "description": "Name of the user who last updated this record"
+    },
+    "nav_icon_overrides": {
+      "type": "object",
+      "description": "Admin-defined navigation menu icons. Map of nav item id to a lucide icon name, applied app-wide.",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   },
   "required": [
