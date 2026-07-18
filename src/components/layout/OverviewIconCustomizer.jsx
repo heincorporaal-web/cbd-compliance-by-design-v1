@@ -33,6 +33,14 @@ export default function OverviewIconCustomizer({
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
 
+  // Icons reserved for top-level menu groups (Overview, Governance, …) are
+  // excluded from the picker so sub-items can't reuse a group's icon. Match by
+  // component (not name) so lucide aliases like AlertTriangle/TriangleAlert are
+  // both excluded.
+  const reservedIcons = new Set(
+    (groups || []).map((g) => g.icon).filter(Boolean)
+  );
+
   const handleAdd = async () => {
     setError("");
     const name = newName.trim();
@@ -57,7 +65,7 @@ export default function OverviewIconCustomizer({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Customize Menu Icons</DialogTitle>
+          <DialogTitle>Customise Menu Icons</DialogTitle>
           <DialogDescription>
             Expand a menu item, then pick an icon. Each item gets a unique icon,
             applied app-wide for everyone. You can also load your own SVG icons below.
@@ -213,7 +221,7 @@ export default function OverviewIconCustomizer({
                         )}
                         <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">Library</p>
                         <div className="grid grid-cols-10 gap-1.5">
-                          {NAV_ICON_POOL.map(({ name, Icon: Opt }) => {
+                          {NAV_ICON_POOL.filter(({ Icon }) => !reservedIcons.has(Icon)).map(({ name, Icon: Opt }) => {
                             const active = activeName === name;
                             return (
                               <button

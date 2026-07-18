@@ -21,9 +21,9 @@ export const CURATED_PLAYBOOKS = [
     title: "Custom Menu Icons — Format & How-To",
     summary: "How to add bespoke SVG icons to the navigation menu.",
     format_spec:
-      "ViewBox 0 0 24 24 (renders at 16–20px) • SVG 1.1, raw XML markup (not base64) • single-color or two-tone • stroke or fill • no external assets, fonts, or script tags • self-contained (no external image refs)",
+      "ViewBox 0 0 24 24 (renders at 16–20px) • SVG 1.1, raw XML markup (not base64) • single-colour or two-tone • stroke or fill • no external assets, fonts, or script tags • self-contained (no external image refs)",
     steps: [
-      { id: "s1", title: "Open the customizer", detail: "Configuration → Customize menu icons." },
+      { id: "s1", title: "Open the customiser", detail: "Configuration → Customise menu icons." },
       { id: "s2", title: "Load your SVG", detail: "Click 'Load custom SVG', paste the raw <svg>…</svg> markup, and give it a display name." },
       { id: "s3", title: "Add it", detail: "Click 'Add icon'. It now appears under a 'Custom SVG' section in the picker." },
       { id: "s4", title: "Assign to a menu item", detail: "Expand any navigation item, then click your custom icon to apply it app-wide." },
@@ -32,7 +32,7 @@ export const CURATED_PLAYBOOKS = [
     content: `### Icon format
 - **Size:** use a viewBox of "0 0 24 24" (it scales cleanly to the 16–20px nav size; a 32×32 artboard also works if you prefer).
 - **Format:** SVG 1.1, pasted as **raw XML markup** — not base64, not an image file.
-- **Color:** single-color or **two-tone** are both supported. Colors are preserved as authored — use hex (e.g. #384666) or currentColor.
+- **Colour:** single-colour or **two-tone** are both supported. Colours are preserved as authored — use hex (e.g. #384666) or currentColor.
 - **Stroke vs fill:** either is fine. Keep stroke-width ≥ 1.5 so it stays visible at small sizes.
 - **Self-contained:** no external image references, web fonts, or script tags. Inline gradients/filters are okay but keep them minimal.
 

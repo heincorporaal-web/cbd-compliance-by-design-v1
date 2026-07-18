@@ -177,7 +177,7 @@ function NavLink({ item, isActive, favorites, onToggleFav, showFavBtn = false, c
           className={`mr-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity ${
             isFav ? "opacity-100 text-amber-500" : "text-slate-400 hover:text-amber-500"
           }`}
-          title={isFav ? "Remove from favorites" : "Add to favorites"}
+          title={isFav ? "Remove from favourites" : "Add to favourites"}
         >
           <Star className={`w-3.5 h-3.5 ${isFav ? "fill-amber-400" : ""}`} />
         </button>
@@ -426,7 +426,7 @@ export default function NavTree() {
                   className="flex items-center gap-2.5 px-3 py-2 flex-1 min-w-0 text-sm text-slate-700 hover:text-primary"
                 >
                   <Palette className="w-4 h-4 shrink-0 text-slate-500" />
-                  <span className="truncate">Customize menu icons</span>
+                  <span className="truncate">Customise menu icons</span>
                 </button>
               </div>
             }
