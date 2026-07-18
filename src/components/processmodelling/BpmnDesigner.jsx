@@ -3,7 +3,7 @@ import BpmnModeler from "bpmn-js/lib/Modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, RectangleHorizontal, Rows3 } from "lucide-react";
 import { toast } from "sonner";
 
 export const EMPTY_BPMN_XML = `<?xml version="1.0" encoding="UTF-8"?>
@@ -50,6 +50,44 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
   const zoomIn = () => modelerRef.current?.get("zoomScroll").stepZoom(1);
   const zoomOut = () => modelerRef.current?.get("zoomScroll").stepZoom(-1);
   const fit = () => modelerRef.current?.get("canvas").zoom("fit-viewport");
+
+  const addPool = () => {
+    try {
+      const modeling = modelerRef.current.get("modeling");
+      const elementFactory = modelerRef.current.get("elementFactory");
+      const canvas = modelerRef.current.get("canvas");
+      const root = canvas.getRootElement();
+      const shape = elementFactory.createShape({ type: "bpmn:Participant", isExpanded: true });
+      modeling.createShape(shape, { x: 400, y: 250 }, root);
+      setDirty(true);
+    } catch (e) {
+      toast.error("Could not add pool: " + (e?.message || e));
+    }
+  };
+
+  const addLane = () => {
+    try {
+      const modeling = modelerRef.current.get("modeling");
+      const elementFactory = modelerRef.current.get("elementFactory");
+      const selection = modelerRef.current.get("selection");
+      const canvas = modelerRef.current.get("canvas");
+      let participant = (selection.get() || []).find((el) => el.type === "bpmn:Participant");
+      if (!participant) {
+        const root = canvas.getRootElement();
+        const children = root.children || [];
+        participant = children.find((el) => el.type === "bpmn:Participant");
+      }
+      if (!participant) {
+        toast.error("Add a Pool first, then add lanes to it.");
+        return;
+      }
+      const lane = elementFactory.createShape({ type: "bpmn:Lane", isExpanded: true });
+      modeling.createShape(lane, { x: 200, y: 150 }, participant);
+      setDirty(true);
+    } catch (e) {
+      toast.error("Could not add lane: " + (e?.message || e));
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -106,6 +144,13 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
           <Button size="sm" variant="ghost" onClick={zoomOut} title="Zoom out"><ZoomOut className="w-4 h-4" /></Button>
           <Button size="sm" variant="ghost" onClick={zoomIn} title="Zoom in"><ZoomIn className="w-4 h-4" /></Button>
           <Button size="sm" variant="ghost" onClick={fit} title="Fit to screen"><Maximize2 className="w-4 h-4" /></Button>
+          <div className="w-px h-6 bg-slate-200 mx-1" />
+          <Button size="sm" variant="ghost" onClick={addPool} title="Add pool (participant)" className="gap-1.5">
+            <RectangleHorizontal className="w-4 h-4" /> Pool
+          </Button>
+          <Button size="sm" variant="ghost" onClick={addLane} title="Add lane (swimlane)" className="gap-1.5">
+            <Rows3 className="w-4 h-4" /> Lane
+          </Button>
           <div className="w-px h-6 bg-slate-200 mx-1" />
           <Button size="sm" variant="ghost" onClick={handleDownloadSvg} title="Export SVG"><FileImage className="w-4 h-4" /></Button>
           <Button size="sm" variant="ghost" onClick={handleDownloadXml} title="Download .bpmn"><Download className="w-4 h-4" /></Button>
