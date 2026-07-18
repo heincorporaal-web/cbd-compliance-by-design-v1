@@ -187,7 +187,7 @@ export default function ValueChainImportDialog({ open, onOpenChange, companies, 
             <ul className="space-y-1.5 text-xs text-slate-600 ml-6 list-disc">
               <li><strong>name</strong> — value chain name (required).</li>
               <li><strong>value_chain_code</strong> — short reference code e.g. <code>EAM-ATD</code>.</li>
-              <li><strong>management_chain</strong> — one of: {MANAGEMENT_CHAINS.map(c => <span key={c} className="font-medium">{c}; </span>)} leave blank if unknown.</li>
+              <li><strong>management_chain</strong> — initially use one of the seeded values: {MANAGEMENT_CHAINS.map(c => <span key={c} className="font-medium">{c}; </span>)} leave blank if unknown. To use a different management chain, first add it as a new Management chain option on the Value Chains screen, then update the value here to the new option.</li>
               <li><strong>sort_order</strong> — numeric sort order (defaults to 0).</li>
               <li><strong>status</strong> — <code>active</code>, <code>inactive</code>, or <code>archived</code> (defaults to active).</li>
               <li><strong>end_date</strong> — optional, format <code>YYYY-MM-DD</code>.</li>
