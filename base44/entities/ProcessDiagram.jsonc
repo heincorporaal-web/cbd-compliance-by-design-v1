@@ -26,6 +26,14 @@
       "type": "string",
       "description": "Last exported SVG snapshot of the diagram (for previews / thumbnails / reports)"
     },
+    "canvas_meta": {
+      "type": "object",
+      "description": "Canvas-level (global) BPMN-to-SOP metadata for this diagram. Links to Process Management (basic) and holds the SOP header / context fields. Allows overriding the process name."
+    },
+    "element_meta": {
+      "type": "object",
+      "description": "Per-BPMN-element SOP metadata, keyed by element id. Each value is an object of the fields shown for that element's category in the Data Pane."
+    },
     "version_label": {
       "type": "string",
       "description": "Optional version label e.g. v1.0"

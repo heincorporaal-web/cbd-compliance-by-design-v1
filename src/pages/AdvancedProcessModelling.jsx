@@ -76,14 +76,17 @@ export default function AdvancedProcessModelling() {
   const diagram = diagrams[0];
 
   const saveMutation = useMutation({
-    mutationFn: async ({ xml, svg }) => {
+    mutationFn: async ({ xml, svg, canvasMeta, elementMeta }) => {
+      const overriddenName = canvasMeta?.process_name;
       const payload = {
         process_id: selectedProcess.id,
         process_code: selectedProcess.process_code,
-        process_name: selectedProcess.name,
+        process_name: overriddenName || selectedProcess.name,
         company_id: selectedProcess.company_id,
         bpmn_xml: xml,
         svg_snapshot: svg,
+        canvas_meta: canvasMeta || {},
+        element_meta: elementMeta || {},
       };
       if (diagram) return base44.entities.ProcessDiagram.update(diagram.id, payload);
       return base44.entities.ProcessDiagram.create({ ...payload, status: "draft" });
@@ -186,10 +189,15 @@ export default function AdvancedProcessModelling() {
           <BpmnDesigner
             key={selectedProcess.id}
             initialXml={diagram?.bpmn_xml}
-            onSave={(xml, svg) => saveMutation.mutate({ xml, svg })}
+            initialCanvasMeta={diagram?.canvas_meta}
+            initialElementMeta={diagram?.element_meta}
+            onSave={(xml, svg, canvasMeta, elementMeta) =>
+              saveMutation.mutate({ xml, svg, canvasMeta, elementMeta })
+            }
             saving={saveMutation.isPending}
             onBack={() => setSelectedProcess(null)}
-            processLabel={`${selectedProcess.process_code || ""} ${selectedProcess.name || ""}`.trim()}
+            processLabel={`${selectedProcess.process_code || ""} ${diagram?.canvas_meta?.process_name || selectedProcess.name || ""}`.trim()}
+            companyId={selectedProcess.company_id}
           />
         </div>
       ) : (

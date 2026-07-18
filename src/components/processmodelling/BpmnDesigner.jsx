@@ -3,9 +3,11 @@ import BpmnModeler from "bpmn-js/lib/Modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight } from "lucide-react";
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
+import BpmnDataPane from "@/components/processmodelling/BpmnDataPane";
+import { getElementCategory } from "@/components/processmodelling/bpmnDataConfig";
 
 export const EMPTY_BPMN_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
@@ -24,10 +26,39 @@ export const EMPTY_BPMN_XML = `<?xml version="1.0" encoding="UTF-8"?>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>`;
 
-export default function BpmnDesigner({ initialXml, onSave, saving, onBack, processLabel }) {
+export default function BpmnDesigner({
+  initialXml,
+  initialCanvasMeta,
+  initialElementMeta,
+  onSave,
+  saving,
+  onBack,
+  processLabel,
+  companyId,
+}) {
   const containerRef = useRef(null);
   const modelerRef = useRef(null);
   const [dirty, setDirty] = useState(false);
+  const [canvasMeta, setCanvasMeta] = useState(() => initialCanvasMeta || {});
+  const [elementMeta, setElementMeta] = useState(() => initialElementMeta || {});
+  const [selection, setSelection] = useState(null); // { id, label, category }
+  const [paneOpen, setPaneOpen] = useState(false);
+
+  // Seed source/target labels for sequence flows into element meta on selection.
+  const describeSelection = (el) => {
+    if (!el || el.type === "label") return null;
+    const bo = el.businessObject || {};
+    const label = bo.name || el.id;
+    let category = getElementCategory(el);
+    const seed = {};
+    if (category === "sequence_flow") {
+      const src = el.source && el.source.businessObject ? el.source.businessObject.name || el.source.id : "";
+      const tgt = el.target && el.target.businessObject ? el.target.businessObject.name || el.target.id : "";
+      if (src) seed.from_element = src;
+      if (tgt) seed.to_element = tgt;
+    }
+    return { id: el.id, label, category, seed };
+  };
 
   useEffect(() => {
     const modeler = new BpmnModeler({ container: containerRef.current });
@@ -42,11 +73,53 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
 
     modeler.on("commandStack.changed", () => setDirty(true));
 
+    const onSelectionChanged = ({ newSelection }) => {
+      const el = newSelection && newSelection[0];
+      const desc = describeSelection(el);
+      if (!desc) {
+        setSelection(null);
+      } else {
+        setSelection(desc);
+        if (desc.seed && Object.keys(desc.seed).length) {
+          setElementMeta((prev) => ({
+            ...prev,
+            [desc.id]: { ...desc.seed, ...(prev[desc.id] || {}) },
+          }));
+        }
+        setPaneOpen(true);
+      }
+    };
+    modeler.on("selection.changed", onSelectionChanged);
+
     return () => {
+      modeler.off("selection.changed", onSelectionChanged);
       try { modeler.destroy(); } catch {}
       modelerRef.current = null;
     };
   }, []);
+
+  const onCanvasChange = (key, value) => {
+    setCanvasMeta((prev) => ({ ...prev, [key]: value }));
+    setDirty(true);
+  };
+
+  const onElementChange = (key, value) => {
+    if (!selection) return;
+    const id = selection.id;
+    setElementMeta((prev) => ({ ...prev, [id]: { ...(prev[id] || {}), [key]: value } }));
+    // "name" overrides the BPMN element label on the canvas.
+    if (key === "name" && modelerRef.current) {
+      try {
+        const elementRegistry = modelerRef.current.get("elementRegistry");
+        const el = elementRegistry.get(id);
+        if (el) modelerRef.current.get("modeling").updateProperties(el, { name: value });
+      } catch {}
+    }
+    setDirty(true);
+  };
+
+  const paneData = selection ? elementMeta[selection.id] || {} : canvasMeta;
+  const paneCategory = selection ? selection.category : "canvas";
 
   const zoomIn = () => modelerRef.current?.get("zoomScroll").stepZoom(1);
   const zoomOut = () => modelerRef.current?.get("zoomScroll").stepZoom(-1);
@@ -84,7 +157,7 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
         const { svg: svgStr } = await modelerRef.current.saveSVG();
         svg = svgStr;
       } catch {}
-      await onSave(xml, svg);
+      await onSave(xml, svg, canvasMeta, elementMeta);
       setDirty(false);
     } catch (e) {
       toast.error("Save failed: " + (e?.message || e));
@@ -136,6 +209,16 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
             <div className="w-px h-6 bg-slate-200 mx-1" />
             <Button size="sm" variant="ghost" onClick={handleDownloadSvg} title="Export SVG"><FileImage className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={handleDownloadXml} title="Download .bpmn"><Download className="w-4 h-4" /></Button>
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+            <Button
+              size="sm"
+              variant={paneOpen ? "default" : "ghost"}
+              onClick={() => setPaneOpen((v) => !v)}
+              title="Toggle data pane"
+              className="gap-1.5"
+            >
+              <PanelRight className="w-4 h-4" /> Data
+            </Button>
             <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
               <Save className="w-4 h-4" /> {saving ? "Saving…" : "Save"}
             </Button>
@@ -156,6 +239,18 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
           </div>
         </div>
       </div>
+
+      {paneOpen && (
+        <BpmnDataPane
+          companyId={companyId}
+          category={paneCategory}
+          elementId={selection?.id}
+          elementLabel={selection?.label}
+          data={paneData}
+          onChange={selection ? onElementChange : onCanvasChange}
+          onClose={() => setPaneOpen(false)}
+        />
+      )}
     </div>
   );
 }
