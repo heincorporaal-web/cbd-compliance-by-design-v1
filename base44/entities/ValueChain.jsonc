@@ -18,6 +18,10 @@
       "type": "string",
       "description": "Owning stakeholder group (name)"
     },
+    "badge_color": {
+      "type": "string",
+      "description": "Hex colour for the value chain badge (e.g. #0070C0). Dark colours are rendered as a transparent tint."
+    },
     "description": {
       "type": "string",
       "description": "Detailed description of the value chain"

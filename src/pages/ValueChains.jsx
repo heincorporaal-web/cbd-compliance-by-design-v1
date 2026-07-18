@@ -16,6 +16,7 @@ import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
 import ValueChainImportDialog from "@/components/valuechains/ValueChainImportDialog";
 import EditableOptionSelect from "@/components/ui/EditableOptionSelect";
 import OwnerGroupSelect from "@/components/valuechains/OwnerGroupSelect";
+import ColorPicker, { badgeStyleFromColor } from "@/components/ui/ColorPicker";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { useCustomOptions } from "@/hooks/useCustomOptions";
 import { getValueChainErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
@@ -25,6 +26,7 @@ const EMPTY_FORM = {
   name: "",
   management_chain: "",
   owner: "",
+  badge_color: "",
   description: "",
   company_id: "",
   sort_order: 0,
@@ -124,6 +126,7 @@ export default function ValueChains() {
       name: item.name || "",
       management_chain: item.management_chain || "",
       owner: item.owner || "",
+      badge_color: item.badge_color || "",
       description: item.description || "",
       company_id: item.company_id || "",
       sort_order: item.sort_order ?? 0,
@@ -162,12 +165,13 @@ export default function ValueChains() {
   const toggleWS = (id) => setExpandedWS(p => ({ ...p, [id]: !p[id] }));
 
   const exportCSV = () => {
-    const headers = ["name", "value_chain_code", "management_chain", "description", "sort_order", "status", "end_date"];
+    const headers = ["name", "value_chain_code", "management_chain", "badge_color", "description", "sort_order", "status", "end_date"];
     const esc = (v) => `"${(v ?? "").toString().replace(/"/g, '""')}"`;
     const rows = valueChains.map(vc => [
       vc.name || "",
       vc.value_chain_code || "",
       vc.management_chain || "",
+      vc.badge_color || "",
       vc.description || "",
       vc.sort_order ?? 0,
       vc.status || "active",
@@ -317,7 +321,12 @@ export default function ValueChains() {
                          <span className="font-medium text-sm text-slate-900">{vc.name}</span>
                        </button>
                        <ErrorIcon errors={getValueChainErrors(vc)} />
-                       <span className="text-xs text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{vc.value_chain_code}</span>
+                       <span
+                         className="text-xs font-mono px-1.5 py-0.5 rounded border"
+                         style={badgeStyleFromColor(vc.badge_color) || { backgroundColor: "#f1f5f9", color: "#64748b", borderColor: "transparent" }}
+                       >
+                         {vc.value_chain_code}
+                       </span>
                        {vc.owner && (
                          <Badge variant="outline" className="text-xs text-indigo-700 border-indigo-200 bg-indigo-50">{vc.owner}</Badge>
                        )}
@@ -394,6 +403,10 @@ export default function ValueChains() {
             <div className="space-y-1">
               <Label>Code *</Label>
               <Input value={formData.value_chain_code} onChange={e => setFormData(p => ({ ...p, value_chain_code: e.target.value }))} required placeholder="e.g. EAM-Acquire-to-Decommission" />
+            </div>
+            <div className="space-y-1">
+              <Label>Badge Colour</Label>
+              <ColorPicker value={formData.badge_color} onChange={v => setFormData(p => ({ ...p, badge_color: v }))} />
             </div>
             <div className="space-y-1">
               <Label>Management Chain</Label>
