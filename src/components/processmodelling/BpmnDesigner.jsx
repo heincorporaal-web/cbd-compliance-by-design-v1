@@ -3,7 +3,7 @@ import BpmnModeler from "bpmn-js/lib/Modeler";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload } from "lucide-react";
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
 import BpmnDataPane from "@/components/processmodelling/BpmnDataPane";
@@ -48,6 +48,7 @@ export default function BpmnDesigner({
   const [elementMeta, setElementMeta] = useState(() => initialElementMeta || {});
   const [selection, setSelection] = useState(null); // { id, label, category }
   const [paneOpen, setPaneOpen] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Ensure every BPMN element on the canvas has a stable GUID stored in its
   // element metadata. GUIDs are persisted with the diagram so machine-learning
@@ -224,6 +225,27 @@ export default function BpmnDesigner({
     }
   };
 
+  const handleImportXml = async (file) => {
+    if (!file) return;
+    const name = file.name.toLowerCase();
+    if (!/\.(bpmn|xml)$/.test(name)) {
+      toast.error("Please choose a .bpmn or .xml file");
+      return;
+    }
+    try {
+      const text = await file.text();
+      await modelerRef.current.importXML(text);
+      modelerRef.current.get("canvas").zoom("fit-viewport");
+      // Imported elements start with no metadata; keep existing element_meta but
+      // assign GUIDs to any new ids so traceability is preserved on save.
+      ensureGuids();
+      setDirty(true);
+      toast.success("Diagram imported");
+    } catch (e) {
+      toast.error("Import failed: " + (e?.message || e));
+    }
+  };
+
   return (
     <div className="flex h-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
       <BpmnElementPalette onDragStart={onDragStart} />
@@ -243,8 +265,20 @@ export default function BpmnDesigner({
             <Button size="sm" variant="ghost" onClick={zoomIn} title="Zoom in"><ZoomIn className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={fit} title="Fit to screen"><Maximize2 className="w-4 h-4" /></Button>
             <div className="w-px h-6 bg-slate-200 mx-1" />
+            <Button size="sm" variant="ghost" onClick={() => fileInputRef.current?.click()} title="Import BPMN/XML"><Upload className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={handleDownloadSvg} title="Export SVG"><FileImage className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={handleDownloadXml} title="Download .bpmn"><Download className="w-4 h-4" /></Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".bpmn,.xml,application/xml,text/xml"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                handleImportXml(f);
+                e.target.value = "";
+              }}
+            />
             <div className="w-px h-6 bg-slate-200 mx-1" />
             <Button
               size="sm"
