@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Trash2, Settings2, Pencil } from "lucide-react";
+import { Plus, Trash2, Settings2, Pencil, Search } from "lucide-react";
 import { loadFromDB, writeToDB, subscribe } from "@/lib/customOptionsStore";
 
 export function CustomOptionIcon({ className = "" }) {
@@ -26,6 +26,7 @@ export default function EditableOptionSelect({
   const [newLabel, setNewLabel] = useState("");
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -46,6 +47,9 @@ export default function EditableOptionSelect({
   const isCustom = (val) => options.some(o => o.value === val);
 
   const allOptions = [...seededOptions, ...options];
+  const filteredOptions = allOptions.filter(o =>
+    (o.label || "").toLowerCase().includes(search.toLowerCase())
+  );
 
   const addOption = async () => {
     const trimmed = newLabel.trim();
@@ -68,7 +72,23 @@ export default function EditableOptionSelect({
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
-          {allOptions.map(opt => (
+          <div className="px-2 py-2 sticky top-0 bg-white z-10 border-b border-slate-100">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <Input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search…"
+                className="h-7 pl-7 text-xs"
+                onKeyDown={e => e.stopPropagation()}
+                onClick={e => e.stopPropagation()}
+              />
+            </div>
+          </div>
+          {filteredOptions.length === 0 && (
+            <div className="px-3 py-2 text-xs text-slate-400">No results</div>
+          )}
+          {filteredOptions.map(opt => (
             <SelectItem key={opt.value} value={opt.value}>
               <span className="flex items-center gap-1.5">
                 {opt.label}
