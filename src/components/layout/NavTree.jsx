@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useIsAuditRole } from "@/hooks/useIsAuditRole";
+import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import OverviewIconCustomizer from "@/components/layout/OverviewIconCustomizer";
 import { resolveIcon } from "@/lib/navIconStore";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -61,6 +62,7 @@ export const NAV_GROUPS = [
       { id: "advanced_tprm", title: "Advanced Third Party Risk Management", url: createPageUrl("AdvancedThirdPartyRiskManagement"), icon: ShieldAlert },
       { id: "issues", title: "Issues", url: createPageUrl("Issues"), icon: AlertCircle },
       { id: "incidents", title: "Incidents", url: createPageUrl("Incidents"), icon: AlertTriangle },
+      { id: "assessment_models", title: "Assessment Models", url: createPageUrl("AssessmentModels"), icon: SlidersHorizontal },
     ],
   },
   {
@@ -70,6 +72,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "assessments", title: "Assessments", url: createPageUrl("Assessments"), icon: ClipboardCheck },
       { id: "surveys", title: "Surveys", url: createPageUrl("Surveys"), icon: ClipboardList },
+      { id: "evidence_library", title: "Evidence Library", url: createPageUrl("EvidenceLibrary"), icon: Folder },
     ],
   },
   {
@@ -128,8 +131,6 @@ export const NAV_GROUPS = [
     items: [
       { id: "workflows", title: "Workflows", url: createPageUrl("Workflows"), icon: GitBranch },
       { id: "configuration", title: "Configuration & Imports", url: createPageUrl("Configuration"), icon: Settings },
-      { id: "assessment_models", title: "Assessment Models", url: createPageUrl("AssessmentModels"), icon: SlidersHorizontal },
-      { id: "evidence_library", title: "Evidence Library", url: createPageUrl("EvidenceLibrary"), icon: Folder },
     ],
   },
 ];
@@ -196,7 +197,7 @@ const groupColors = {
   configuration: "text-secondary font-medium",
 };
 
-function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false, customIcons }) {
+function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false, customIcons, extra }) {
   const [open, setOpen] = useState(defaultOpen);
   const hasActive = group.items.some(i => location.pathname === i.url);
 
@@ -228,6 +229,7 @@ function NavGroup({ group, location, favorites, onToggleFav, defaultOpen = false
               customIcons={customIcons}
             />
           ))}
+          {extra}
         </div>
       )}
     </div>
@@ -244,7 +246,7 @@ export default function NavTree() {
   const [searchQuery, setSearchQuery] = useState("");
   const [iconDialogOpen, setIconDialogOpen] = useState(false);
   const queryClient = useQueryClient();
-  const isAdmin = user?.role === "admin";
+  const { canImport } = useIsImplementerRole();
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -356,18 +358,6 @@ export default function NavTree() {
         </div>
       )}
 
-      {isAdmin && (
-        <div className="px-2 mb-1">
-          <button
-            onClick={() => setIconDialogOpen(true)}
-            className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs text-slate-500 hover:text-primary hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            <Palette className="w-3.5 h-3.5" />
-            Customize menu icons
-          </button>
-        </div>
-      )}
-
       {/* Hint */}
       <div className="px-3 py-2 mb-1">
         <p className="text-xs text-slate-400 italic flex items-center gap-1.5">
@@ -379,7 +369,7 @@ export default function NavTree() {
       <div className="border-t border-slate-200 my-2" />
 
       {/* Nav groups — hide when searching */}
-      {!searchResults && NAV_GROUPS.map((group, i) => (
+      {!searchResults && NAV_GROUPS.filter(g => g.id !== "configuration").map((group, i) => (
         <NavGroup
           key={group.id}
           group={group}
@@ -391,7 +381,34 @@ export default function NavTree() {
         />
       ))}
 
-      {isAdmin && (
+      {/* Configuration group — restricted to implementers & product owners */}
+      {!searchResults && canImport && (() => {
+        const cfgGroup = NAV_GROUPS.find(g => g.id === "configuration");
+        if (!cfgGroup) return null;
+        return (
+          <NavGroup
+            key={cfgGroup.id}
+            group={cfgGroup}
+            location={location}
+            favorites={favorites}
+            onToggleFav={toggleFav}
+            customIcons={navIcons}
+            extra={
+              <div className="group flex items-center rounded-lg hover:bg-slate-50 transition-colors">
+                <button
+                  onClick={() => setIconDialogOpen(true)}
+                  className="flex items-center gap-2.5 px-3 py-2 flex-1 min-w-0 text-sm text-slate-700 hover:text-primary"
+                >
+                  <Palette className="w-4 h-4 shrink-0 text-slate-500" />
+                  <span className="truncate">Customize menu icons</span>
+                </button>
+              </div>
+            }
+          />
+        );
+      })()}
+
+      {canImport && (
         <OverviewIconCustomizer
           open={iconDialogOpen}
           onClose={() => setIconDialogOpen(false)}
