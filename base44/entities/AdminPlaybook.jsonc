@@ -1,0 +1,77 @@
+{
+  "name": "AdminPlaybook",
+  "type": "object",
+  "properties": {
+    "playbook_key": {
+      "type": "string",
+      "description": "Matches a curated playbook key to override it. Blank for standalone custom playbooks."
+    },
+    "title": {
+      "type": "string",
+      "description": "Playbook title"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Custom Icons",
+        "Workflows",
+        "Bulk Imports",
+        "Auto-Numbering",
+        "Framework Library",
+        "Process Modelling",
+        "Stakeholders",
+        "General"
+      ],
+      "default": "General",
+      "description": "Playbook category"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short one-line summary"
+    },
+    "content": {
+      "type": "string",
+      "description": "Markdown body of the playbook"
+    },
+    "format_spec": {
+      "type": "string",
+      "description": "Format / specification note (e.g. icon size & file format)"
+    },
+    "steps": {
+      "type": "array",
+      "description": "Ordered step-by-step instructions",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 100,
+      "description": "Display sort order within category"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this playbook is visible. Setting an override inactive hides the curated baseline."
+    },
+    "updated_by": {
+      "type": "string",
+      "description": "Name of the user who last edited this record"
+    }
+  },
+  "required": [
+    "title",
+    "category"
+  ]
+}

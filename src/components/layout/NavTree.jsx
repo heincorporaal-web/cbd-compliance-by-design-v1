@@ -131,6 +131,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "workflows", title: "Workflows", url: createPageUrl("Workflows"), icon: GitBranch },
       { id: "configuration", title: "Configuration & Imports", url: createPageUrl("Configuration"), icon: Settings },
+      { id: "admin_playbooks", title: "Admin Playbooks", url: createPageUrl("AdminPlaybooks"), icon: BookOpen },
     ],
   },
 ];

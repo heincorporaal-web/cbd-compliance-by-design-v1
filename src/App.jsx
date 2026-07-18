@@ -37,6 +37,7 @@ import BalancedScorecards from './pages/BalancedScorecards';
 import BalancedScorecardDetail from './pages/BalancedScorecardDetail';
 import About from './pages/About';
 import AdvancedThirdPartyRiskManagement from './pages/AdvancedThirdPartyRiskManagement';
+import AdminPlaybooks from './pages/AdminPlaybooks';
 import AdvancedProcessModelling from './pages/AdvancedProcessModelling';
 import StakeholderAssignmentGaps from './pages/StakeholderAssignmentGaps';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -109,6 +110,7 @@ const AuthenticatedApp = () => {
         <Route path="/IssueManagement" element={<IssueManagement />} />
         <Route path="/Matrices" element={<Matrices />} />
         <Route path="/AdvancedThirdPartyRiskManagement" element={<AdvancedThirdPartyRiskManagement />} />
+        <Route path="/AdminPlaybooks" element={<AdminPlaybooks />} />
         <Route path="/AdvancedProcessModelling" element={<AdvancedProcessModelling />} />
         <Route path="/StakeholderAssignmentGaps" element={<StakeholderAssignmentGaps />} />
         <Route path="/about" element={<About />} />
