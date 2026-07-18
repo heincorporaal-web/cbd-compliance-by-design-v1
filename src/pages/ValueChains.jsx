@@ -16,6 +16,7 @@ import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
 import ValueChainImportDialog from "@/components/valuechains/ValueChainImportDialog";
 import EditableOptionSelect from "@/components/ui/EditableOptionSelect";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
+import { useCustomOptions } from "@/hooks/useCustomOptions";
 import { getValueChainErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
 
 const EMPTY_FORM = {
@@ -55,6 +56,17 @@ export default function ValueChains() {
   const [expandedWS, setExpandedWS] = useState({});
   const [importOpen, setImportOpen] = useState(false);
   const { canImport } = useIsImplementerRole();
+  const { getLabel: getChainLabel } = useCustomOptions("value_chain_management_chains");
+
+  // Resolve a stored management_chain value to its human-readable label.
+  // Seeded options store value === label; legacy custom records stored a
+  // slugified value, which we look up via the custom options store.
+  const resolveChainLabel = (val) => {
+    if (!val) return "Uncategorised";
+    if (MANAGEMENT_CHAINS.includes(val)) return val;
+    const custom = getChainLabel(val);
+    return custom && custom !== val ? custom : val;
+  };
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
@@ -125,15 +137,19 @@ export default function ValueChains() {
     else createMutation.mutate(formData);
   };
 
-  const filtered = valueChains.filter(vc =>
-    !search || vc.name?.toLowerCase().includes(search.toLowerCase()) ||
-    vc.value_chain_code?.toLowerCase().includes(search.toLowerCase()) ||
-    vc.management_chain?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = valueChains.filter(vc => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    const chainLabel = resolveChainLabel(vc.management_chain);
+    return vc.name?.toLowerCase().includes(q) ||
+      vc.value_chain_code?.toLowerCase().includes(q) ||
+      vc.management_chain?.toLowerCase().includes(q) ||
+      chainLabel.toLowerCase().includes(q);
+  });
 
-  // Group by management_chain
+  // Group by management_chain (resolved to its display label)
   const grouped = filtered.reduce((acc, vc) => {
-    const key = vc.management_chain || "Uncategorised";
+    const key = resolveChainLabel(vc.management_chain);
     if (!acc[key]) acc[key] = [];
     acc[key].push(vc);
     return acc;
