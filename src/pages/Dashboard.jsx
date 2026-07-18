@@ -96,8 +96,8 @@ export default function Dashboard() {
   });
 
   const { data: processes = [] } = useQuery({
-    queryKey: ['businessProcesses', globalCompany],
-    queryFn: () => base44.entities.BusinessProcess.list(),
+    queryKey: ['orgProcesses', globalCompany],
+    queryFn: () => base44.entities.OrgProcess.list(),
   });
 
   const { data: processAssessments = [] } = useQuery({
