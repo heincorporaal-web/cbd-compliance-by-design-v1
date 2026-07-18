@@ -32,18 +32,21 @@ export default function OverviewIconCustomizer({
   const [newSvg, setNewSvg] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
+  const [removeWhiteBg, setRemoveWhiteBg] = useState(false);
   const fileInputRef = useRef(null);
 
   // Accept a PNG/JPEG/WebP upload and wrap it as an inline SVG (base64 <image>)
   // so it flows through the existing svg-based custom icon storage. Keep files
   // small — they are stored as markup inside the CustomIcon record.
+  // Optionally strip a near-white background to transparent so the icon blends
+  // into the sidebar instead of rendering as a white square.
   const handleImageFile = (file) => {
     setError("");
     if (!file) return;
     if (file.size > 200 * 1024) {
       return setError("Image is too large. Use a small icon (under 200 KB).");
     }
-    // SVG files: load the markup directly.
+    // SVG files: load the markup directly (transparency preserved by author).
     if (file.type === "image/svg+xml" || /\.svg$/i.test(file.name)) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -62,7 +65,30 @@ export default function OverviewIconCustomizer({
       img.onload = () => {
         const w = img.naturalWidth || 24;
         const h = img.naturalHeight || 24;
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><image href="${dataUrl}" width="${w}" height="${h}"/></svg>`;
+        let href = dataUrl;
+        if (removeWhiteBg) {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            const data = ctx.getImageData(0, 0, w, h);
+            const px = data.data;
+            // Treat pixels close to white (each channel >= 240) as background
+            // and make them fully transparent.
+            for (let i = 0; i < px.length; i += 4) {
+              if (px[i] >= 240 && px[i + 1] >= 240 && px[i + 2] >= 240) {
+                px[i + 3] = 0;
+              }
+            }
+            ctx.putImageData(data, 0, 0);
+            href = canvas.toDataURL("image/png");
+          } catch {
+            // Ignore — fall back to the original image if canvas access fails.
+          }
+        }
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><image href="${href}" width="${w}" height="${h}"/></svg>`;
         setNewSvg(svg);
         if (!newName.trim()) setNewName(file.name.replace(/\.[^.]+$/, ""));
       };
@@ -153,6 +179,15 @@ export default function OverviewIconCustomizer({
                   e.target.value = "";
                 }}
               />
+              <label className="flex items-center gap-2 text-xs text-slate-600 select-none cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={removeWhiteBg}
+                  onChange={(e) => setRemoveWhiteBg(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-slate-300 accent-primary"
+                />
+                Remove white background (make it transparent)
+              </label>
               <p className="text-[11px] text-slate-400">
                 Paste SVG markup, or upload a PNG / JPEG / WebP image (it's wrapped as an inline SVG; keep it under 200 KB).
               </p>
