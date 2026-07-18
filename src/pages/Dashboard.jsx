@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import UnassignedRecordsChart from "@/components/dashboard/UnassignedRecordsChart";
+import NavIcon from "@/hooks/useNavIcon.jsx";
 
 const WIDGET_LABELS = {
   compliance: "Compliance Overview",
@@ -219,7 +220,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <LayoutDashboard className="w-7 h-7 text-primary" /> Executive Dashboard
+            <NavIcon itemId="dashboard" defaultIcon={LayoutDashboard} className="w-7 h-7 text-primary" /> Executive Dashboard
           </h1>
           <p className="text-slate-600">Real-time overview of risk, compliance, and operational performance</p>
         </div>
