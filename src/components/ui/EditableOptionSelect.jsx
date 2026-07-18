@@ -54,9 +54,8 @@ export default function EditableOptionSelect({
   const addOption = async () => {
     const trimmed = newLabel.trim();
     if (!trimmed) return;
-    const val = trimmed.toLowerCase().replace(/\s+/g, "_");
-    if (allOptions.some(o => o.value === val)) return;
-    await persist([...options, { value: val, label: trimmed }]);
+    if (allOptions.some(o => o.value.toLowerCase() === trimmed.toLowerCase() || o.label.toLowerCase() === trimmed.toLowerCase())) return;
+    await persist([...options, { value: trimmed, label: trimmed }]);
     setNewLabel("");
   };
 
