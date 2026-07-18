@@ -265,20 +265,30 @@ export default function NavTree() {
   const meta = metas[0];
   const navIcons = meta?.nav_icon_overrides || {};
 
+  // Always read the latest overrides from the query cache so rapid successive
+  // edits merge on top of the most recent state (not a stale render snapshot).
+  const latestOverrides = () => {
+    const cached = queryClient.getQueryData(["appMeta"]);
+    const m = Array.isArray(cached) ? cached[0] : cached;
+    return m?.nav_icon_overrides || {};
+  };
+
   const persistOverrides = async (next) => {
     const payload = {
       nav_icon_overrides: next,
       last_updated_by: user?.full_name || user?.email || "admin",
     };
-    if (meta) await base44.entities.AppMeta.update(meta.id, payload);
+    const current = queryClient.getQueryData(["appMeta"]);
+    const m = Array.isArray(current) ? current[0] : current;
+    if (m) await base44.entities.AppMeta.update(m.id, payload);
     else await base44.entities.AppMeta.create({ app_name: "GRC Platform", ...payload });
     queryClient.invalidateQueries(["appMeta"]);
   };
 
   const setNavItemIcon = (itemId, name) =>
-    persistOverrides({ ...navIcons, [itemId]: name }).catch(() => {});
+    persistOverrides({ ...latestOverrides(), [itemId]: name }).catch(() => {});
   const resetNavItemIcon = (itemId) => {
-    const next = { ...navIcons };
+    const next = { ...latestOverrides() };
     delete next[itemId];
     persistOverrides(next).catch(() => {});
   };
