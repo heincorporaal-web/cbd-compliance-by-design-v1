@@ -367,7 +367,7 @@ function BpmnIcon({ item }) {
 
 /* ------------------------------- Component ------------------------------- */
 
-export default function BpmnElementPalette({ onCreate }) {
+export default function BpmnElementPalette({ onDragStart }) {
   const [open, setOpen] = useState(() =>
     Object.fromEntries(CATEGORIES.map((c) => [c.key, true]))
   );
@@ -400,9 +400,9 @@ export default function BpmnElementPalette({ onCreate }) {
                   <button
                     key={item.label}
                     type="button"
-                    title={`Add ${item.label}`}
-                    onClick={() => onCreate(item.type, item)}
-                    className="flex flex-col items-center gap-1 p-2 rounded-md border border-transparent hover:border-indigo-200 hover:bg-indigo-50/60 transition-colors"
+                    title={`Drag ${item.label} onto the canvas`}
+                    onMouseDown={(e) => onDragStart(e, item.type, item)}
+                    className="flex flex-col items-center gap-1 p-2 rounded-md border border-transparent hover:border-indigo-200 hover:bg-indigo-50/60 transition-colors cursor-grab active:cursor-grabbing"
                   >
                     <BpmnIcon item={item} />
                     <span className="text-[10px] leading-tight text-slate-600 text-center">

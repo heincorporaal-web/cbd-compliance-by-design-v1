@@ -52,56 +52,27 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
   const zoomOut = () => modelerRef.current?.get("zoomScroll").stepZoom(-1);
   const fit = () => modelerRef.current?.get("canvas").zoom("fit-viewport");
 
-  // Generic element creation driven by the docked element palette.
-  const createElement = (type, options = {}) => {
+  // Start a native bpmn-js drag-create from the docked palette so elements
+  // can be dragged onto the canvas with live preview and proper drop targets
+  // (lanes, pools, attaching boundary events to activities, etc.).
+  const onDragStart = (event, type, options = {}) => {
     try {
       const modeler = modelerRef.current;
       if (!modeler) return;
-      const modeling = modeler.get("modeling");
+      if (event.button !== undefined && event.button !== 0) return;
+      event.preventDefault();
       const elementFactory = modeler.get("elementFactory");
-      const canvas = modeler.get("canvas");
-      const selection = modeler.get("selection");
-      const sel = selection.get() || [];
-      const containerTypes = [
-        "bpmn:Process", "bpmn:Participant", "bpmn:SubProcess", "bpmn:Lane",
-        "bpmn:AdHocSubProcess", "bpmn:Transaction",
-      ];
-      let parent = sel.find((el) => containerTypes.includes(el.type));
-      if (!parent) {
-        const root = canvas.getRootElement();
-        if (root.type === "bpmn:Collaboration") {
-          parent = (root.children || []).find((el) => el.type === "bpmn:Participant") || root;
-        } else {
-          parent = root;
-        }
-      }
+      const create = modeler.get("create");
       const shapeOpts = { type };
       if (options.isExpanded !== undefined) shapeOpts.isExpanded = options.isExpanded;
       if (options.eventDefinitionType) shapeOpts.eventDefinitionType = options.eventDefinitionType;
       if (options.eventDefinitionTypes) shapeOpts.eventDefinitionTypes = options.eventDefinitionTypes;
       if (options.triggeredByEvent) shapeOpts.triggeredByEvent = options.triggeredByEvent;
       const shape = elementFactory.createShape(shapeOpts);
-      const vb = canvas.viewbox();
-      const x = vb.x + vb.width / 2;
-      const y = vb.y + vb.height / 2;
-      if (options.attach) {
-        const activityTypes = [
-          "bpmn:Task", "bpmn:SubProcess", "bpmn:CallActivity", "bpmn:ServiceTask",
-          "bpmn:UserTask", "bpmn:ReceiveTask", "bpmn:SendTask", "bpmn:ScriptTask",
-          "bpmn:ManualTask", "bpmn:BusinessRuleTask", "bpmn:Transaction", "bpmn:AdHocSubProcess",
-        ];
-        const host = sel.find((el) => activityTypes.includes(el.type));
-        if (!host) {
-          toast.error("Select an activity first to attach this boundary event.");
-          return;
-        }
-        modeling.createShape(shape, { x, y }, host, { attach: true });
-      } else {
-        modeling.createShape(shape, { x, y }, parent);
-      }
+      create.start(event, shape, options.attach ? { attach: true } : undefined);
       setDirty(true);
     } catch (e) {
-      toast.error("Could not create element: " + (e?.message || e));
+      toast.error("Could not start drag: " + (e?.message || e));
     }
   };
 
@@ -146,7 +117,7 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
 
   return (
     <div className="flex h-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-      <BpmnElementPalette onCreate={createElement} />
+      <BpmnElementPalette onDragStart={onDragStart} />
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50 flex-wrap">
           <div className="flex items-center gap-2">
