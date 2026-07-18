@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ChevronDown, ChevronRight, RotateCcw, Plus, Trash2, Upload } from "lucide-react";
+import { ChevronDown, ChevronRight, RotateCcw, Plus, Trash2, Upload, ImagePlus } from "lucide-react";
 import {
   NAV_ICON_POOL,
   resolveIcon,
@@ -32,6 +32,46 @@ export default function OverviewIconCustomizer({
   const [newSvg, setNewSvg] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef(null);
+
+  // Accept a PNG/JPEG/WebP upload and wrap it as an inline SVG (base64 <image>)
+  // so it flows through the existing svg-based custom icon storage. Keep files
+  // small — they are stored as markup inside the CustomIcon record.
+  const handleImageFile = (file) => {
+    setError("");
+    if (!file) return;
+    if (file.size > 200 * 1024) {
+      return setError("Image is too large. Use a small icon (under 200 KB).");
+    }
+    // SVG files: load the markup directly.
+    if (file.type === "image/svg+xml" || /\.svg$/i.test(file.name)) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setNewSvg(String(reader.result || ""));
+        if (!newName.trim()) setNewName(file.name.replace(/\.svg$/i, ""));
+      };
+      return reader.readAsText(file);
+    }
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+      return setError("Choose a PNG, JPEG, WebP or SVG image.");
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || "");
+      const img = new Image();
+      img.onload = () => {
+        const w = img.naturalWidth || 24;
+        const h = img.naturalHeight || 24;
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><image href="${dataUrl}" width="${w}" height="${h}"/></svg>`;
+        setNewSvg(svg);
+        if (!newName.trim()) setNewName(file.name.replace(/\.[^.]+$/, ""));
+      };
+      img.onerror = () => setError("Could not read the image file.");
+      img.src = dataUrl;
+    };
+    reader.onerror = () => setError("Could not read the image file.");
+    reader.readAsDataURL(file);
+  };
 
   // Icons reserved for top-level menu groups (Overview, Governance, …) are
   // excluded from the picker so sub-items can't reuse a group's icon. Match by
@@ -103,6 +143,19 @@ export default function OverviewIconCustomizer({
                 rows={4}
                 className="w-full px-2.5 py-1.5 text-xs font-mono border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="hidden"
+                onChange={(e) => {
+                  handleImageFile(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+              <p className="text-[11px] text-slate-400">
+                Paste SVG markup, or upload a PNG / JPEG / WebP image (it's wrapped as an inline SVG; keep it under 200 KB).
+              </p>
               {error && <p className="text-xs text-destructive">{error}</p>}
               <div className="flex items-center gap-2">
                 <button
@@ -112,6 +165,13 @@ export default function OverviewIconCustomizer({
                 >
                   <Plus className="w-3.5 h-3.5" />
                   {adding ? "Adding…" : "Add icon"}
+                </button>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50"
+                >
+                  <ImagePlus className="w-3.5 h-3.5" />
+                  Upload image
                 </button>
                 {newSvg && (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-500 border border-slate-200 rounded-md">
