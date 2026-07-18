@@ -141,9 +141,19 @@ export default function BpmnDesigner({ initialXml, onSave, saving, onBack, proce
             </Button>
           </div>
         </div>
-        <div ref={containerRef} className="flex-1 min-h-[60vh] bg-slate-50 relative">
-          {/* Hide the native floating bpmn-js palette — elements are now in the docked pane */}
-          <style>{`.djs-palette{display:none!important}`}</style>
+        {/* Bounded canvas area: a white "page" on a grey workspace. Everything
+            outside the page is clipped (overflow hidden), so the future image
+            preview will only capture what is placed inside this canvas. */}
+        <div className="flex-1 min-h-[60vh] bg-slate-200 p-3 md:p-5 overflow-auto flex justify-center">
+          <div className="relative w-full max-w-[1200px] min-h-[560px] bg-white rounded-lg shadow-lg ring-1 ring-slate-300 overflow-hidden">
+            <span className="pointer-events-none absolute top-2 left-3 z-10 text-[10px] font-semibold uppercase tracking-wide text-slate-300 select-none">
+              Canvas
+            </span>
+            <div ref={containerRef} className="w-full h-full min-h-[560px]">
+              {/* Hide the native floating bpmn-js palette — elements are now in the docked pane */}
+              <style>{`.djs-palette{display:none!important}`}</style>
+            </div>
+          </div>
         </div>
       </div>
     </div>
