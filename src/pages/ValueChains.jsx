@@ -381,7 +381,6 @@ export default function ValueChains() {
                 value={formData.management_chain}
                 onValueChange={v => setFormData(p => ({ ...p, management_chain: v }))}
                 placeholder="Select domain…"
-                editableSeeded
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
