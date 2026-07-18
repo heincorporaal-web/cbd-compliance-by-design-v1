@@ -53,13 +53,7 @@ export function getValueChainErrors(vc) {
 
 // Workstream validation errors
 export function getWorkstreamErrors(ws) {
-  const errors = [];
-  
-  if (!ws.owner && !ws.process_owner) {
-    errors.push({ type: 'no_owner', message: 'No owner' });
-  }
-  
-  return errors;
+  return [];
 }
 
 // Error icon component helper
