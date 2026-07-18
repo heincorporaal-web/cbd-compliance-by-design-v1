@@ -42,12 +42,20 @@ export function getICTModuleErrors(module) {
 
 // Value Chain validation errors
 export function getValueChainErrors(vc) {
-  return [];
+  const errors = [];
+  if (!vc.owner) {
+    errors.push({ type: 'no_owner', message: 'No owner' });
+  }
+  return errors;
 }
 
 // Workstream validation errors
 export function getWorkstreamErrors(ws) {
-  return [];
+  const errors = [];
+  if (!ws.owner) {
+    errors.push({ type: 'no_owner', message: 'No owner' });
+  }
+  return errors;
 }
 
 // Error icon component helper

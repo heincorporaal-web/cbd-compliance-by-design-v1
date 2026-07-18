@@ -26,6 +26,10 @@
       "type": "string",
       "description": "Reference to Company entity"
     },
+    "owner": {
+      "type": "string",
+      "description": "Owning stakeholder group (name)"
+    },
     "domain_code": {
       "type": "string",
       "description": "Domain code (e.g. SCM, EIT, GRC, HCM, FIN, EPM)"

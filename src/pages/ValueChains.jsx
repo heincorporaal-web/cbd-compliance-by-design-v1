@@ -15,6 +15,7 @@ import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
 import ValueChainImportDialog from "@/components/valuechains/ValueChainImportDialog";
 import EditableOptionSelect from "@/components/ui/EditableOptionSelect";
+import OwnerGroupSelect from "@/components/valuechains/OwnerGroupSelect";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { useCustomOptions } from "@/hooks/useCustomOptions";
 import { getValueChainErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
@@ -23,6 +24,7 @@ const EMPTY_FORM = {
   value_chain_code: "",
   name: "",
   management_chain: "",
+  owner: "",
   description: "",
   company_id: "",
   sort_order: 0,
@@ -121,6 +123,7 @@ export default function ValueChains() {
       value_chain_code: item.value_chain_code || "",
       name: item.name || "",
       management_chain: item.management_chain || "",
+      owner: item.owner || "",
       description: item.description || "",
       company_id: item.company_id || "",
       sort_order: item.sort_order ?? 0,
@@ -315,6 +318,9 @@ export default function ValueChains() {
                        </button>
                        <ErrorIcon errors={getValueChainErrors(vc)} />
                        <span className="text-xs text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{vc.value_chain_code}</span>
+                       {vc.owner && (
+                         <Badge variant="outline" className="text-xs text-indigo-700 border-indigo-200 bg-indigo-50">{vc.owner}</Badge>
+                       )}
                        {vc.description && (
                          <TooltipProvider delayDuration={200}>
                            <Tooltip>
@@ -397,6 +403,14 @@ export default function ValueChains() {
                 value={formData.management_chain}
                 onValueChange={v => setFormData(p => ({ ...p, management_chain: v }))}
                 placeholder="Select domain…"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Owner</Label>
+              <OwnerGroupSelect
+                companyId={formData.company_id}
+                value={formData.owner}
+                onValueChange={v => setFormData(p => ({ ...p, owner: v }))}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">

@@ -10,12 +10,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, Pencil, Trash2, Layers, AlertTriangle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getWorkstreamErrors } from "@/utils/validationErrors.jsx";
+import OwnerGroupSelect from "@/components/valuechains/OwnerGroupSelect";
 
 const EMPTY_FORM = {
   workstream_code: "",
   name: "",
   full_label: "",
   description: "",
+  owner: "",
   domain_code: "",
   e2e_code: "",
   sort_order: 0,
@@ -61,6 +63,7 @@ export default function WorkstreamPanel({ valueChainId, companyId }) {
       name: ws.name || "",
       full_label: ws.full_label || "",
       description: ws.description || "",
+      owner: ws.owner || "",
       domain_code: ws.domain_code || "",
       e2e_code: ws.e2e_code || "",
       sort_order: ws.sort_order ?? 0,
@@ -137,6 +140,9 @@ export default function WorkstreamPanel({ valueChainId, companyId }) {
                   {ws.e2e_code && (
                     <Badge variant="outline" className="text-xs px-1 py-0 h-4">{ws.e2e_code}</Badge>
                   )}
+                  {ws.owner && (
+                    <Badge variant="outline" className="text-xs px-1 py-0 h-4 text-indigo-700 border-indigo-200 bg-indigo-50">{ws.owner}</Badge>
+                  )}
                 </div>
                 {ws.description && (
                   <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{ws.description}</p>
@@ -188,6 +194,14 @@ export default function WorkstreamPanel({ valueChainId, companyId }) {
             <div className="space-y-1">
               <Label>Full Label</Label>
               <Input value={formData.full_label} onChange={e => setFormData(p => ({ ...p, full_label: e.target.value }))} placeholder="e.g. SCM - O2C-Order Management" />
+            </div>
+            <div className="space-y-1">
+              <Label>Owner</Label>
+              <OwnerGroupSelect
+                companyId={companyId}
+                value={formData.owner}
+                onValueChange={v => setFormData(p => ({ ...p, owner: v }))}
+              />
             </div>
             <div className="space-y-1">
               <Label>Description</Label>
