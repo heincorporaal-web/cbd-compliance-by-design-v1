@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import BpmnDesigner from "@/components/processmodelling/BpmnDesigner";
+import ProcessDocumentTemplates from "@/components/processmodelling/ProcessDocumentTemplates";
 
 export default function AdvancedProcessModelling() {
   const [companyId] = useCompanyFilter();
@@ -21,6 +22,7 @@ export default function AdvancedProcessModelling() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [selectedProcess, setSelectedProcess] = useState(null);
+  const [activeTab, setActiveTab] = useState("diagrams");
 
   const effectiveCompanyId = companyId === "all" ? null : companyId;
 
@@ -178,8 +180,16 @@ export default function AdvancedProcessModelling() {
             </>
           )}
         </Card>
-      ) : selectedProcess ? (
-        <div className="space-y-3">
+      ) : (
+        <>
+          <div className="flex items-center gap-1 border-b border-slate-200">
+            <TabButton active={activeTab === "diagrams"} onClick={() => setActiveTab("diagrams")}>Process Diagrams</TabButton>
+            <TabButton active={activeTab === "templates"} onClick={() => setActiveTab("templates")}>Document Templates</TabButton>
+          </div>
+          {activeTab === "templates" ? (
+            <ProcessDocumentTemplates companyId={effectiveCompanyId} user={user} />
+          ) : selectedProcess ? (
+            <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <span className="font-mono">{selectedProcess.process_code}</span>
             <span className="text-slate-300">/</span>
@@ -262,7 +272,20 @@ export default function AdvancedProcessModelling() {
           )}
         </>
       )}
+        </>
+      )}
     </div>
+  );
+}
+
+function TabButton({ active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${active ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+    >
+      {children}
+    </button>
   );
 }
 

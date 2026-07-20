@@ -1,0 +1,61 @@
+{
+  "name": "ProcessDocumentTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "description": {
+      "type": "string",
+      "description": "Template description / purpose"
+    },
+    "category": {
+      "type": "string",
+      "description": "Template category (e.g. SOP, Work Instruction, Report)"
+    },
+    "body_html": {
+      "type": "string",
+      "description": "Template body (HTML) with {{merge_field}} placeholders drawn from process-flow data fields"
+    },
+    "fields_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Merge-field keys referenced in the body"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "collaborate",
+        "draft",
+        "review",
+        "approved"
+      ],
+      "default": "collaborate",
+      "description": "Template lifecycle / collaboration status"
+    },
+    "version_label": {
+      "type": "string",
+      "description": "Optional version label e.g. v1.0"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Name of the user who created the template (denormalized)"
+    },
+    "updated_by": {
+      "type": "string",
+      "description": "Name of the user who last updated the template"
+    }
+  },
+  "required": [
+    "name",
+    "company_id",
+    "status"
+  ]
+}
