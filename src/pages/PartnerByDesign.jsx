@@ -11,5 +11,5 @@ const FEATURES = [
 ];
 
 export default function PartnerByDesign() {
-  return <ModuleLanding brand={BRANDS.pbd} Icon={Handshake} features={FEATURES} />;
+  return <ModuleLanding brand={BRANDS.pbd} Icon={Handshake} features={FEATURES} logoUrl={BRANDS.pbd.logoUrl} />;
 }

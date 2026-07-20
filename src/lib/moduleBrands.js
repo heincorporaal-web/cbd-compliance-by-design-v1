@@ -32,6 +32,8 @@ export const BRANDS = {
     enterLabel: "Enter Partner by Design",
     enterPath: "/AdvancedThirdPartyRiskManagement",
     landingPath: "/PartnerByDesign",
+    logoUrl:
+      "https://media.base44.com/images/public/6975dcbcbc9efd8b47128ae3/b2addef7f_file_00000000292481f4bc020f2871b3703d.png",
     // Plum — partnership / relationship
     gradient: "from-fuchsia-700 to-purple-800",
     solid: "bg-purple-700",

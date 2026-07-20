@@ -267,6 +267,7 @@ function PageHeader() {
       title="Partner by Design"
       subtitle="Search third-party records and manage their advanced risk profiles — risks, controls, frameworks, processes, assets & BCP"
       landingPath="/PartnerByDesign"
+      logoUrl={BRANDS.pbd.logoUrl}
     />
   );
 }

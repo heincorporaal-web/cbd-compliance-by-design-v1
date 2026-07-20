@@ -5,14 +5,18 @@ import { ArrowLeft } from "lucide-react";
 // Branded page header shared by the OBD and PBD module pages.
 // Keeps the CBD layout language but carries the module's accent + monogram
 // and a link back to the module landing page.
-export default function ModulePageHeader({ brand, Icon, title, subtitle, landingPath }) {
+export default function ModulePageHeader({ brand, Icon, title, subtitle, landingPath, logoUrl }) {
   return (
     <div className="flex items-center gap-3 flex-wrap">
-      <div
-        className={`w-12 h-12 bg-gradient-to-br ${brand.gradient} rounded-xl flex items-center justify-center shadow-lg shrink-0`}
-      >
-        <Icon className="w-7 h-7 text-white" />
-      </div>
+      {logoUrl ? (
+        <div className="w-12 h-12 rounded-xl bg-white shadow-lg flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-slate-200">
+          <img src={logoUrl} alt={title} className="w-9 h-9 object-contain" />
+        </div>
+      ) : (
+        <div className={`w-12 h-12 bg-gradient-to-br ${brand.gradient} rounded-xl flex items-center justify-center shadow-lg shrink-0`}>
+          <Icon className="w-7 h-7 text-white" />
+        </div>
+      )}
       <div className="min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-3xl font-bold text-slate-900">{title}</h1>

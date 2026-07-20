@@ -4,7 +4,7 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-export default function ModuleLanding({ brand, Icon, features }) {
+export default function ModuleLanding({ brand, Icon, features, logoUrl }) {
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-6xl mx-auto">
       {/* Hero */}
@@ -15,9 +15,15 @@ export default function ModuleLanding({ brand, Icon, features }) {
         <div className="absolute -bottom-20 -left-10 w-72 h-72 bg-black/10 rounded-full blur-3xl" />
         <div className="relative p-8 lg:p-12">
           <div className="flex items-start gap-4 flex-wrap">
-            <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur ring-1 ring-white/30 flex items-center justify-center shrink-0">
-              <Icon className="w-9 h-9" />
-            </div>
+            {logoUrl ? (
+              <div className="w-16 h-16 rounded-2xl bg-white shadow-lg flex items-center justify-center shrink-0 overflow-hidden">
+                <img src={logoUrl} alt={brand.name} className="w-12 h-12 object-contain" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur ring-1 ring-white/30 flex items-center justify-center shrink-0">
+                <Icon className="w-9 h-9" />
+              </div>
+            )}
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-[0.2em] text-white/70 font-semibold">
                 {brand.suite}
@@ -70,9 +76,15 @@ export default function ModuleLanding({ brand, Icon, features }) {
 
       {/* Suite footer */}
       <div className={`rounded-2xl border ${brand.border} ${brand.softBg} p-5 flex items-center gap-3`}>
-        <div className={`w-9 h-9 rounded-lg ${brand.solid} text-white flex items-center justify-center shrink-0`}>
-          <Icon className="w-5 h-5" />
-        </div>
+        {logoUrl ? (
+          <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-slate-200">
+            <img src={logoUrl} alt={brand.name} className="w-7 h-7 object-contain" />
+          </div>
+        ) : (
+          <div className={`w-9 h-9 rounded-lg ${brand.solid} text-white flex items-center justify-center shrink-0`}>
+            <Icon className="w-5 h-5" />
+          </div>
+        )}
         <div>
           <p className={`text-sm font-semibold ${brand.softText}`}>{brand.name} is part of the CBD suite</p>
           <p className="text-xs text-slate-500">
