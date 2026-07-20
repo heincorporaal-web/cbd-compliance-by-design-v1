@@ -15,6 +15,8 @@ import {
 import { toast } from "sonner";
 import BpmnDesigner from "@/components/processmodelling/BpmnDesigner";
 import ProcessDocumentTemplates from "@/components/processmodelling/ProcessDocumentTemplates";
+import ModulePageHeader from "@/components/branding/ModulePageHeader";
+import { BRANDS } from "@/lib/moduleBrands";
 
 export default function AdvancedProcessModelling() {
   const [companyId] = useCompanyFilter();
@@ -291,14 +293,12 @@ function TabButton({ active, onClick, children }) {
 
 function PageHeader() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
-        <Workflow className="w-7 h-7 text-white" />
-      </div>
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Advanced Process Modelling</h1>
-        <p className="text-slate-500 text-sm">Model processes with BPMN 2.0 diagrams, build documentation, and assess risk posture</p>
-      </div>
-    </div>
+    <ModulePageHeader
+      brand={BRANDS.obd}
+      Icon={Workflow}
+      title="Operations by Design"
+      subtitle="Model processes with BPMN 2.0 diagrams, build documentation, and assess risk posture"
+      landingPath="/OperationsByDesign"
+    />
   );
 }

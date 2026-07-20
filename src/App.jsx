@@ -39,6 +39,8 @@ import About from './pages/About';
 import AdvancedThirdPartyRiskManagement from './pages/AdvancedThirdPartyRiskManagement';
 import AdminPlaybooks from './pages/AdminPlaybooks';
 import AdvancedProcessModelling from './pages/AdvancedProcessModelling';
+import OperationsByDesign from './pages/OperationsByDesign';
+import PartnerByDesign from './pages/PartnerByDesign';
 import StakeholderAssignmentGaps from './pages/StakeholderAssignmentGaps';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -112,6 +114,8 @@ const AuthenticatedApp = () => {
         <Route path="/AdvancedThirdPartyRiskManagement" element={<AdvancedThirdPartyRiskManagement />} />
         <Route path="/AdminPlaybooks" element={<AdminPlaybooks />} />
         <Route path="/AdvancedProcessModelling" element={<AdvancedProcessModelling />} />
+        <Route path="/OperationsByDesign" element={<OperationsByDesign />} />
+        <Route path="/PartnerByDesign" element={<PartnerByDesign />} />
         <Route path="/StakeholderAssignmentGaps" element={<StakeholderAssignmentGaps />} />
         <Route path="/about" element={<About />} />
         <Route path="/MobileSettings" element={<MobileSettings />} />

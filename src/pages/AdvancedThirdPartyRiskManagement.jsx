@@ -11,10 +11,12 @@ import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import {
   ShieldAlert, Globe, Search, Plus, ShieldCheck, Cpu, AlertCircle,
-  TriangleAlert, FileCheck, Network, Lock, Power,
+  TriangleAlert, FileCheck, Network, Lock, Power, Handshake,
 } from "lucide-react";
 import { toast } from "sonner";
 import ThirdPartyRiskDetailDialog from "@/components/tprm/ThirdPartyRiskDetailDialog";
+import ModulePageHeader from "@/components/branding/ModulePageHeader";
+import { BRANDS } from "@/lib/moduleBrands";
 
 const RATING_COLOR = {
   low: "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -259,15 +261,13 @@ export default function AdvancedThirdPartyRiskManagement() {
 
 function PageHeader() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="w-12 h-12 bg-gradient-to-br from-rose-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-        <ShieldAlert className="w-7 h-7 text-white" />
-      </div>
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Advanced Third Party Risk Management</h1>
-        <p className="text-slate-500 text-sm">Search third-party records and manage their advanced risk profiles — risks, controls, frameworks, processes, assets & BCP</p>
-      </div>
-    </div>
+    <ModulePageHeader
+      brand={BRANDS.pbd}
+      Icon={Handshake}
+      title="Partner by Design"
+      subtitle="Search third-party records and manage their advanced risk profiles — risks, controls, frameworks, processes, assets & BCP"
+      landingPath="/PartnerByDesign"
+    />
   );
 }
 
