@@ -13,6 +13,8 @@ export const BRANDS = {
     enterLabel: "Enter Operations by Design",
     enterPath: "/AdvancedProcessModelling",
     landingPath: "/OperationsByDesign",
+    logoUrl:
+      "https://media.base44.com/images/public/6975dcbcbc9efd8b47128ae3/38769a811_file_00000000ff9081f4808ba318cfe7664a.png",
     // Teal — operations / precision
     gradient: "from-teal-600 to-cyan-700",
     solid: "bg-teal-700",

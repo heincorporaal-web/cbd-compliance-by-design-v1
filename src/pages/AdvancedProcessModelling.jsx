@@ -299,6 +299,7 @@ function PageHeader() {
       title="Operations by Design"
       subtitle="Model processes with BPMN 2.0 diagrams, build documentation, and assess risk posture"
       landingPath="/OperationsByDesign"
+      logoUrl={BRANDS.obd.logoUrl}
     />
   );
 }

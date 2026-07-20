@@ -11,5 +11,5 @@ const FEATURES = [
 ];
 
 export default function OperationsByDesign() {
-  return <ModuleLanding brand={BRANDS.obd} Icon={Workflow} features={FEATURES} />;
+  return <ModuleLanding brand={BRANDS.obd} Icon={Workflow} features={FEATURES} logoUrl={BRANDS.obd.logoUrl} />;
 }
