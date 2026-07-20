@@ -1,8 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Roboto:wght@300;400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Merriweather:wght@400;700&family=Source+Sans+Pro:wght@400;700&family=Source+Code+Pro:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Open-source TrueType font families for the Activity Description rich editor (Quill) */
+.ql-font-nunito { font-family: 'Nunito', sans-serif; }
+.ql-font-roboto { font-family: 'Roboto', sans-serif; }
+.ql-font-open-sans { font-family: 'Open Sans', sans-serif; }
+.ql-font-lato { font-family: 'Lato', sans-serif; }
+.ql-font-montserrat { font-family: 'Montserrat', sans-serif; }
+.ql-font-merriweather { font-family: 'Merriweather', serif; }
+.ql-font-source-sans-pro { font-family: 'Source Sans Pro', sans-serif; }
+.ql-font-source-code-pro { font-family: 'Source Code Pro', monospace; }
+.activity-description-editor .ql-toolbar { border-top-left-radius: 0.375rem; border-top-right-radius: 0.375rem; }
+.activity-description-editor .ql-container { border-bottom-left-radius: 0.375rem; border-bottom-right-radius: 0.375rem; min-height: 120px; font-size: 14px; }
 
 
 /* :root {

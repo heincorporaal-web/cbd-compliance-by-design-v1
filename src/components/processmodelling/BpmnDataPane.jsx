@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SearchableSelect from "@/components/ui/SearchableSelect";
+import ActivityDescriptionEditor from "@/components/processmodelling/ActivityDescriptionEditor";
 import {
   FIELDS,
   CATEGORY_SECTIONS,
@@ -158,6 +159,17 @@ export default function BpmnDataPane({
   const renderField = (key) => {
     const def = FIELDS[key];
     if (!def) return null;
+    if (key === "activity_description") {
+      return (
+        <div key={key} className="space-y-1">
+          <Label className="text-xs font-medium text-slate-600">{def.label}</Label>
+          <ActivityDescriptionEditor
+            value={data?.[key]}
+            onChange={(v) => onChange(key, v)}
+          />
+        </div>
+      );
+    }
     if (def.type === "search") {
       return (
         <div key={key} className="space-y-1">
