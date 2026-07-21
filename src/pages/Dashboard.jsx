@@ -354,40 +354,16 @@ export default function Dashboard() {
 
       {filteredPrincipalRisks.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-red-600" /> Principal Risks
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <Card className="border-none shadow-lg">
-              <CardContent className="pt-5 pb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm text-slate-500">Total</p>
-                  <ShieldAlert className="w-4 h-4 text-slate-400" />
-                </div>
-                <p className="text-3xl font-bold text-slate-900">{filteredPrincipalRisks.length}</p>
-                <p className="text-xs text-green-600 mt-1">{activePrincipalRisks} active</p>
-              </CardContent>
-            </Card>
-            <Card className="border-none shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
-              <CardContent className="pt-5 pb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm text-slate-500">High Priority</p>
-                  <AlertTriangle className="w-4 h-4 text-red-500" />
-                </div>
-                <p className="text-3xl font-bold text-red-600">{highPrincipalRisks}</p>
-                <p className="text-xs text-slate-500 mt-1">{criticalPrincipalRisks} critical</p>
-              </CardContent>
-            </Card>
-            <Card className="border-none shadow-lg">
-              <CardContent className="pt-5 pb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm text-slate-500">Under Review</p>
-                  <AlertCircle className="w-4 h-4 text-amber-500" />
-                </div>
-                <p className="text-3xl font-bold text-slate-900">{filteredPrincipalRisks.filter(r => r.status === 'Under Review').length}</p>
-                <p className="text-xs text-slate-500 mt-1">Awaiting action</p>
-              </CardContent>
-            </Card>
+          <div className="mb-4">
+            <MetricSection
+              title={<span className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-red-600" /> Principal Risks</span>}
+              view={viewMode}
+              items={[
+                { icon: ShieldAlert, label: "Total", value: filteredPrincipalRisks.length, sub: `${activePrincipalRisks} active`, iconColor: "text-slate-400" },
+                { icon: AlertTriangle, label: "High Priority", value: highPrincipalRisks, sub: `${criticalPrincipalRisks} critical`, iconColor: "text-red-500", tint: "from-red-50 to-orange-50" },
+                { icon: AlertCircle, label: "Under Review", value: filteredPrincipalRisks.filter(r => r.status === 'Under Review').length, sub: "Awaiting action", iconColor: "text-amber-500" },
+              ]}
+            />
           </div>
           <Card className="border-none shadow-lg">
             <CardContent className="p-0">
