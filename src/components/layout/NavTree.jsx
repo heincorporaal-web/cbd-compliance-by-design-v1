@@ -13,6 +13,7 @@ import { base44 } from "@/api/base44Client";
 import { useIsAuditRole } from "@/hooks/useIsAuditRole";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import OverviewIconCustomizer from "@/components/layout/OverviewIconCustomizer";
+import ModuleNavigator from "@/components/layout/ModuleNavigator";
 import { resolveIcon, buildCustomIconMap, CUSTOM_ICON_PREFIX } from "@/lib/navIconStore";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -335,6 +336,11 @@ export default function NavTree() {
 
   return (
     <div className="space-y-1 py-2">
+      {/* Add-on module navigator */}
+      <ModuleNavigator />
+
+      <div className="border-t border-slate-200 my-2" />
+
       {/* Search bar */}
       <div className="px-2 pb-2">
         <div className="relative">
