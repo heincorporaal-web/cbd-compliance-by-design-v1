@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import SvgIcon from "@/components/ui/SvgIcon";
 
 /**
  * Compact metric tile for the Executive Dashboard.
@@ -9,8 +10,13 @@ import { Link } from "react-router-dom";
  * - `iconColor`: tailwind text color for the icon on plain/tinted tiles
  * - `to`: optional route path — makes the tile clickable (navigates to the listed records)
  */
-export function MetricTile({ icon: Icon, label, value, sub, gradient, tint, iconColor, to }) {
+export function MetricTile({ icon: Icon, svg, label, value, sub, gradient, tint, iconColor, to }) {
   const solid = !!gradient;
+  const renderIcon = () => {
+    if (svg) return <SvgIcon svg={svg} white={solid} className="w-4 h-4 shrink-0" />;
+    if (Icon) return <Icon className={`w-4 h-4 shrink-0 ${solid ? "text-white/80" : iconColor || "text-slate-400"}`} />;
+    return null;
+  };
   const inner = (
     <Card
       className={`border shadow-sm overflow-hidden transition-shadow hover:shadow-md ${
@@ -28,9 +34,7 @@ export function MetricTile({ icon: Icon, label, value, sub, gradient, tint, icon
           <span className={`text-xl font-bold leading-none ${solid ? "text-white" : "text-slate-900"}`}>
             {value}
           </span>
-          {Icon && (
-            <Icon className={`w-4 h-4 shrink-0 ${solid ? "text-white/80" : iconColor || "text-slate-400"}`} />
-          )}
+          {renderIcon()}
         </div>
         <p className={`text-xs font-medium mt-2 ${solid ? "text-white/90" : "text-slate-600"}`}>{label}</p>
         {sub && (
@@ -63,9 +67,11 @@ export default function MetricSection({ title, items, view, action }) {
                 const row = (
                   <div className={`flex items-center justify-between gap-3 px-4 py-2.5 ${it.to ? "cursor-pointer hover:bg-slate-50" : ""}`}>
                     <div className="flex items-center gap-2.5 min-w-0">
-                      {Icon && (
+                      {it.svg ? (
+                        <SvgIcon svg={it.svg} className="w-4 h-4 shrink-0" />
+                      ) : Icon ? (
                         <Icon className={`w-4 h-4 shrink-0 ${it.iconColor || "text-slate-400"}`} />
-                      )}
+                      ) : null}
                       <span className="text-sm text-slate-600 truncate">{it.label}</span>
                     </div>
                     <div className="flex items-baseline gap-2 shrink-0">
