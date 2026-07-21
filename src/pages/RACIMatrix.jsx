@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { AlertTriangle, CheckCircle, Search, Filter, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import PageHeader from "@/components/layout/PageHeader";
 
 // RACI role definitions — which stakeholder group → which RACI role
 const GROUP_RACI_MAP = {
@@ -171,10 +172,13 @@ export default function RACIMatrix() {
       <div className="p-6 lg:p-8 space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">RACI Matrix</h1>
-            <p className="text-slate-500 mt-1">Responsibility assignment across Risks and Controls</p>
-          </div>
+          <PageHeader
+            navItemId="raci_matrix"
+            icon={AlertTriangle}
+            title="RACI Matrix"
+            tagline="Responsibility assignment across Risks and Controls"
+            gradient="from-sky-600 to-blue-700"
+          />
           <div className="flex items-center gap-2 flex-wrap">
             {/* Legend */}
             {Object.entries(RACI_CONFIG).filter(([k]) => k !== "?").map(([key, cfg]) => (

@@ -9,6 +9,7 @@ import { ShieldAlert, Search, Plus, Trash2, ChevronUp, ChevronDown, ChevronsUpDo
 import PrincipalRiskFormDialog from "@/components/risks/PrincipalRiskFormDialog";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
+import PageHeader from "@/components/layout/PageHeader";
 
 const STATUS_COLORS = {
   Draft: "bg-slate-100 text-slate-600",
@@ -109,15 +110,13 @@ export default function PrincipalRisksSummary() {
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-            <ShieldAlert className="w-7 h-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Principal Risks</h1>
-            <p className="text-slate-500 text-sm">{filtered.length} risk{filtered.length !== 1 ? "s" : ""} — click a name to view / edit</p>
-          </div>
-        </div>
+        <PageHeader
+          navItemId="principal_risks"
+          icon={ShieldAlert}
+          title="Principal Risks"
+          tagline={`${filtered.length} risk${filtered.length !== 1 ? "s" : ""} — click a name to view / edit`}
+          gradient="from-red-600 to-orange-600"
+        />
         <Button onClick={() => { setEditRisk(null); setDialogOpen(true); }} className="gap-2 bg-red-600 hover:bg-red-700">
           <Plus className="w-4 h-4" /> New Principal Risk
         </Button>

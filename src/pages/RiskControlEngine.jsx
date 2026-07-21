@@ -12,6 +12,7 @@ import { Cog, RefreshCw, CheckCircle, XCircle, Clock, Shield, AlertTriangle, Net
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function RiskControlEngine() {
   const [selectedCompany, setSelectedCompany] = useState("all");
@@ -220,15 +221,13 @@ export default function RiskControlEngine() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
-              <Cog className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Risk & Control Engine</h1>
-              <p className="text-slate-600">Review and approve auto-generated risk assignments</p>
-            </div>
-          </div>
+          <PageHeader
+            navItemId="risk_engine"
+            icon={Cog}
+            title="Risk & Control Engine"
+            tagline="Review and approve auto-generated risk assignments"
+            gradient="from-indigo-600 to-purple-700"
+          />
         </div>
         <Button 
           onClick={() => generateMutation.mutate()} 

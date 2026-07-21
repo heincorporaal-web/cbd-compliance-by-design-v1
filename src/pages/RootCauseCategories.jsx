@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, Pencil, Trash2, Search, AlertCircle, ChevronDown, ChevronRight, CalendarOff } from "lucide-react";
 import EndDateBadge from "@/components/ui/EndDateBadge";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import PageHeader from "@/components/layout/PageHeader";
 
 const CATEGORIES = [
   "Human-Related",
@@ -125,12 +126,13 @@ export default function RootCauseCategories() {
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <AlertCircle className="w-6 h-6 text-primary" /> Root Cause Categories
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage root cause types grouped by category for issue and incident analysis.</p>
-        </div>
+        <PageHeader
+          navItemId="root_cause_categories"
+          icon={AlertCircle}
+          title="Root Cause Categories"
+          tagline="Manage root cause types grouped by category for issue and incident analysis."
+          gradient="from-orange-600 to-red-700"
+        />
         <Button onClick={openCreate} className="gap-2 bg-primary hover:bg-primary/90">
           <Plus className="w-4 h-4" /> Add Root Cause Type
         </Button>

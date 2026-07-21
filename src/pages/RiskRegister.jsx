@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function RiskRegister() {
   const [globalCompany] = useCompanyFilter();
@@ -140,10 +141,13 @@ export default function RiskRegister() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Risk Register</h1>
-          <p className="text-slate-600">Identify, assess, and manage organizational risks</p>
-        </div>
+        <PageHeader
+          navItemId="risk_register"
+          icon={AlertTriangle}
+          title="Risk Register"
+          tagline="Identify, assess, and manage organizational risks"
+          gradient="from-orange-600 to-red-700"
+        />
         <Link to={createPageUrl("RiskDetail?new=true")}>
           <Button className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" />

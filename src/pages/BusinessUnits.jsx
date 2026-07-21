@@ -16,6 +16,7 @@ import SearchableSelect from "@/components/ui/SearchableSelect";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { Upload, Download } from "lucide-react";
 import NavIcon from "@/hooks/useNavIcon.jsx";
+import PageHeader from "@/components/layout/PageHeader";
 
 const BU_TYPES = [
   "Department", "Capability", "Profit & Loss Unit", "Division", "Business Line",
@@ -201,12 +202,13 @@ export default function BusinessUnits() {
     <div className="p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <NavIcon itemId="business_units" defaultIcon={Network} className="w-6 h-6 text-primary" /> Business Units
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">Define organizational units — departments, capabilities, CoEs, regions and more.</p>
-        </div>
+        <PageHeader
+          navItemId="business_units"
+          icon={Network}
+          title="Business Units"
+          tagline="Define organizational units — departments, capabilities, CoEs, regions and more."
+          gradient="from-purple-600 to-indigo-700"
+        />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={exportCSV} disabled={allUnits.length === 0} className="gap-2">
             <Download className="w-4 h-4" /> Export

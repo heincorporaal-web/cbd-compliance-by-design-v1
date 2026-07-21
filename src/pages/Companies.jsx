@@ -13,6 +13,7 @@ import EndDateBadge, { isExpired } from "@/components/ui/EndDateBadge";
 import CompanyCalendarTab from "@/components/companies/CompanyCalendarTab";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PageHeader from "@/components/layout/PageHeader";
 
 const DEFAULT_COLORS = {
   primary: "#1e40af", secondary: "#3b82f6", accent: "#0ea5e9", background: "#f8fafc", text: "#0f172a",
@@ -189,10 +190,13 @@ export default function Companies() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Companies</h1>
-          <p className="text-slate-600">Manage organizations for risk assessment</p>
-        </div>
+        <PageHeader
+          navItemId="companies"
+          icon={Building2}
+          title="Companies"
+          tagline="Manage organizations for risk assessment"
+          gradient="from-blue-600 to-cyan-700"
+        />
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();

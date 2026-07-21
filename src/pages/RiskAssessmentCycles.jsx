@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { toast } from "sonner";
+import PageHeader from "@/components/layout/PageHeader";
 
 const STATUS_COLORS = {
   planning: "bg-blue-100 text-blue-700 border-blue-200",
@@ -72,10 +73,13 @@ export default function RiskAssessmentCycles() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-1">Risk Assessment Cycles</h1>
-          <p className="text-slate-600">Plan and manage periodic risk assessment programmes</p>
-        </div>
+        <PageHeader
+          navItemId="risk_assessment_cycles"
+          icon={ClipboardList}
+          title="Risk Assessment Cycles"
+          tagline="Plan and manage periodic risk assessment programmes"
+          gradient="from-amber-600 to-orange-700"
+        />
         <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowCreate(true)}>
           <Plus className="w-4 h-4 mr-2" /> New Cycle
         </Button>

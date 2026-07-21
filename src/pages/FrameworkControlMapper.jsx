@@ -9,6 +9,7 @@ import { ArrowLeft, Bot, Send, Loader2, Shield, Sparkles, Building2 } from "luci
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ReactMarkdown from "react-markdown";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function FrameworkControlMapper() {
   const [conversation, setConversation] = useState(null);
@@ -114,15 +115,13 @@ export default function FrameworkControlMapper() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-            <Sparkles className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Framework → Control Mapper</h1>
-            <p className="text-slate-500 text-sm">AI-powered mapping of framework content to existing controls</p>
-          </div>
-        </div>
+        <PageHeader
+          navItemId="framework_mapper"
+          icon={Sparkles}
+          title="Framework → Control Mapper"
+          tagline="AI-powered mapping of framework content to existing controls"
+          gradient="from-violet-600 to-indigo-700"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

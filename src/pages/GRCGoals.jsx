@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import MaturityBadge from "../components/grc/MaturityBadge";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function GRCGoals() {
   const [globalCompany] = useCompanyFilter();
@@ -69,10 +70,13 @@ export default function GRCGoals() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">GRC Goals</h1>
-          <p className="text-slate-600">Manage goals with maturity assessments</p>
-        </div>
+        <PageHeader
+          navItemId="grc_goals"
+          icon={Target}
+          title="GRC Goals"
+          tagline="Manage goals with maturity assessments"
+          gradient="from-rose-600 to-pink-700"
+        />
         <Link to={createPageUrl("GRCGoalDetail")}>
           <Button className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" />

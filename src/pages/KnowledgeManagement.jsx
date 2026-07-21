@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import KnowledgeTreeView from "@/components/knowledge/KnowledgeTreeView";
 import KnowledgeArticleImport from "@/components/knowledge/KnowledgeArticleImport";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function KnowledgeManagement() {
   const queryClient = useQueryClient();
@@ -78,17 +79,12 @@ export default function KnowledgeManagement() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
-              <BookOpen className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Knowledge Management</h1>
-              <p className="text-slate-600">Framework guides, best practices, and documentation</p>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          icon={BookOpen}
+          title="Knowledge Management"
+          tagline="Framework guides, best practices, and documentation"
+          gradient="from-indigo-600 to-purple-700"
+        />
         {(isAdmin || canImport) && (
           <div className="flex items-center gap-2">
             {canImport && <KnowledgeArticleImport />}

@@ -13,6 +13,7 @@ import { Plus, Search, Shield, Calendar, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
+import PageHeader from "@/components/layout/PageHeader";
 
 const STATUS_COLORS = {
   planning: "bg-blue-100 text-blue-700 border-blue-200",
@@ -62,10 +63,13 @@ export default function ControlAssessmentCycles() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Control Assessment Cycles</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage periodic control assessment programs</p>
-        </div>
+        <PageHeader
+          navItemId="control_assessment_cycles"
+          icon={Shield}
+          title="Control Assessment Cycles"
+          tagline="Manage periodic control assessment programs"
+          gradient="from-teal-600 to-cyan-700"
+        />
         <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowCreate(true)}>
           <Plus className="w-4 h-4 mr-2" /> New Cycle
         </Button>

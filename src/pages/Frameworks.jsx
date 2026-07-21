@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/collapsible";
 import { CustomOptionIcon } from "@/components/ui/EditableOptionSelect";
 import { useCustomOptions } from "@/hooks/useCustomOptions";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Frameworks() {
   const queryClient = useQueryClient();
@@ -194,10 +195,13 @@ export default function Frameworks() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Risk & Control Frameworks</h1>
-          <p className="text-slate-600">Manage compliance frameworks and controls</p>
-        </div>
+        <PageHeader
+          navItemId="frameworks"
+          icon={Shield}
+          title="Risk & Control Frameworks"
+          tagline="Manage compliance frameworks and controls"
+          gradient="from-blue-700 to-indigo-800"
+        />
         <div className="flex items-center gap-3">
           {frameworks.some(isExpired) && (
             <button

@@ -9,6 +9,7 @@ import { Target, Search, Plus, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, D
 import { exportExcel } from "@/components/reports/ExportUtils";
 import ObjectiveFormDialog from "@/components/objectives/ObjectiveFormDialog";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import PageHeader from "@/components/layout/PageHeader";
 import { toast } from "sonner";
 
 const STATUS_COLORS = {
@@ -133,15 +134,13 @@ export default function ObjectivesSummary() {
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
-            <Target className="w-7 h-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Organisational Objectives</h1>
-            <p className="text-slate-500 text-sm">{filtered.length} objective{filtered.length !== 1 ? "s" : ""} — click a name to view / edit</p>
-          </div>
-        </div>
+        <PageHeader
+          navItemId="org_objectives"
+          icon={Target}
+          title="Organisational Objectives"
+          tagline={`${filtered.length} objective${filtered.length !== 1 ? "s" : ""} — click a name to view / edit`}
+          gradient="from-indigo-600 to-purple-700"
+        />
         <div className="flex items-center gap-2">
           <Button onClick={handleExportExcel} variant="outline" className="gap-2" disabled={filtered.length === 0}>
             <Download className="w-4 h-4" /> Export to Excel

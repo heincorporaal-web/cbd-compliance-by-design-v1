@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Controls() {
   const queryClient = useQueryClient();
@@ -95,10 +96,13 @@ export default function Controls() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Controls</h1>
-          <p className="text-slate-600">Browse and manage security controls across frameworks</p>
-        </div>
+        <PageHeader
+          navItemId="controls"
+          icon={Shield}
+          title="Controls"
+          tagline="Browse and manage security controls across frameworks"
+          gradient="from-emerald-600 to-teal-700"
+        />
         <div className="flex gap-2">
           {activeTab === "company" && canImport && (
             <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>

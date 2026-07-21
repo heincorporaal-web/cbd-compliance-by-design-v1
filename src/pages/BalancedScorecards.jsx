@@ -9,6 +9,7 @@ import { Plus, Search, Gauge, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import PageHeader from "@/components/layout/PageHeader";
 
 const statusColors = {
   draft: "bg-slate-100 text-slate-700 border-slate-200",
@@ -50,10 +51,13 @@ export default function BalancedScorecards() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-1">Balanced Scorecards</h1>
-          <p className="text-slate-600">Manage organisational performance across scorecard perspectives</p>
-        </div>
+        <PageHeader
+          navItemId="balanced_scorecards"
+          icon={Gauge}
+          title="Balanced Scorecards"
+          tagline="Manage organisational performance across scorecard perspectives"
+          gradient="from-violet-600 to-purple-700"
+        />
         <Link to={createPageUrl("BalancedScorecardDetail")}>
           <Button className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" /> New Scorecard
