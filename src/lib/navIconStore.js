@@ -201,10 +201,10 @@ export function buildCustomIconMap(customIconRecords = []) {
 
 // A tiny component that renders raw (normalized) SVG markup inside a span
 // sized by the passed className, so it drops in wherever a lucide icon would.
-export function CustomSvgIcon({ svg, className }) {
+export function CustomSvgIcon({ svg, className, forceWhite = false }) {
   return React.createElement("span", {
     className: `inline-flex items-center justify-center ${className || ""}`,
-    style: { lineHeight: 0 },
+    style: { lineHeight: 0, ...(forceWhite ? { filter: "brightness(0) invert(1)" } : {}) },
     dangerouslySetInnerHTML: { __html: normalizeSvg(svg) },
   });
 }
@@ -217,9 +217,11 @@ export function resolveIcon(customIcons, itemId, defaultIcon, customIconMap = {}
   if (name) {
     if (isCustomIconRef(name) && customIconMap[name]) {
       const { svg } = customIconMap[name];
-      return function CustomNavIcon(props) {
+      const CustomNavIcon = function (props) {
         return React.createElement(CustomSvgIcon, { svg, ...props });
       };
+      CustomNavIcon._isCustomSvg = true;
+      return CustomNavIcon;
     }
     if (ICON_BY_NAME[name]) return ICON_BY_NAME[name];
   }

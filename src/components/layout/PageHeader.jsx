@@ -21,7 +21,7 @@ export default function PageHeader({ icon: Icon, navItemId, title, tagline, grad
     <div className="flex items-center gap-3">
       <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center shadow-lg shrink-0`}>
         {navItemId ? (
-          <NavIcon itemId={navItemId} defaultIcon={Icon} className="w-7 h-7 text-white" />
+          <NavIcon itemId={navItemId} defaultIcon={Icon} className="w-7 h-7 text-white" forceWhite />
         ) : (
           Icon ? <Icon className="w-7 h-7 text-white" /> : null
         )}

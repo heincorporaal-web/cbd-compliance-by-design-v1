@@ -31,7 +31,7 @@ export function useNavIcon(itemId, defaultIcon) {
 
 // Drop-in replacement for a hardcoded header icon: renders the resolved icon
 // (lucide component or custom SVG) with the supplied className.
-export default function NavIcon({ itemId, defaultIcon, className }) {
+export default function NavIcon({ itemId, defaultIcon, className, forceWhite = false }) {
   const Icon = useNavIcon(itemId, defaultIcon);
-  return <Icon className={className} />;
+  return <Icon className={className} {...(Icon?._isCustomSvg && forceWhite ? { forceWhite } : {})} />;
 }
