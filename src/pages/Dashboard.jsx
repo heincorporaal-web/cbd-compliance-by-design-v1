@@ -353,46 +353,15 @@ export default function Dashboard() {
       )}
 
       {filteredPrincipalRisks.length > 0 && (
-        <div>
-          <div className="mb-4">
-            <MetricSection
-              title={<span className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-red-600" /> Principal Risks</span>}
-              view={viewMode}
-              items={[
-                { icon: ShieldAlert, label: "Total", value: filteredPrincipalRisks.length, sub: `${activePrincipalRisks} active`, iconColor: "text-slate-400", to: "/PrincipalRisks" },
-                { icon: AlertTriangle, label: "High Priority", value: highPrincipalRisks, sub: `${criticalPrincipalRisks} critical`, iconColor: "text-red-500", tint: "from-red-50 to-orange-50", to: "/PrincipalRisks" },
-                { icon: AlertCircle, label: "Under Review", value: filteredPrincipalRisks.filter(r => r.status === 'Under Review').length, sub: "Awaiting action", iconColor: "text-amber-500", to: "/PrincipalRisks" },
-              ]}
-            />
-          </div>
-          <Card className="border-none shadow-lg">
-            <CardContent className="p-0">
-              <div className="divide-y divide-slate-100">
-                {filteredPrincipalRisks.slice(0, 5).map(r => (
-                  <div key={r.id} className="p-4 flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {r.risk_reference && <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{r.risk_reference}</span>}
-                        <span className="font-medium text-slate-900 text-sm">{r.risk_title}</span>
-                      </div>
-                      {r.risk_statement && <p className="text-xs text-slate-500 mt-0.5 line-clamp-1 italic">"{r.risk_statement}"</p>}
-                    </div>
-                    <div className="flex gap-1.5 shrink-0 flex-wrap justify-end">
-                      <Badge className="bg-blue-100 text-blue-700 text-xs">{r.risk_category}</Badge>
-                      <Badge className={`text-xs ${{ High: "bg-red-100 text-red-700", Medium: "bg-yellow-100 text-yellow-700", Low: "bg-slate-100 text-slate-600" }[r.priority] || ""}`}>{r.priority}</Badge>
-                      <Badge className={`text-xs ${{ Draft: "bg-slate-100 text-slate-600", Active: "bg-green-100 text-green-700", "Under Review": "bg-yellow-100 text-yellow-700", Retired: "bg-red-100 text-red-700" }[r.status] || ""}`}>{r.status}</Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {filteredPrincipalRisks.length > 5 && (
-                <div className="p-3 text-center border-t">
-                  <Link to="/PrincipalRisks"><Button variant="ghost" size="sm">View all {filteredPrincipalRisks.length} principal risks</Button></Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <MetricSection
+          title={<span className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-red-600" /> Principal Risks</span>}
+          view={viewMode}
+          items={[
+            { icon: ShieldAlert, label: "Total", value: filteredPrincipalRisks.length, sub: `${activePrincipalRisks} active`, iconColor: "text-slate-400", to: "/PrincipalRisks" },
+            { icon: AlertTriangle, label: "High Priority", value: highPrincipalRisks, sub: `${criticalPrincipalRisks} critical`, iconColor: "text-red-500", tint: "from-red-50 to-orange-50", to: "/PrincipalRisks" },
+            { icon: AlertCircle, label: "Under Review", value: filteredPrincipalRisks.filter(r => r.status === 'Under Review').length, sub: "Awaiting action", iconColor: "text-amber-500", to: "/PrincipalRisks" },
+          ]}
+        />
       )}
 
       {visibleWidgets.resilience && (
