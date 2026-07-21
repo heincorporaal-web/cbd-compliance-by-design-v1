@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import UnassignedRecordsChart from "@/components/dashboard/UnassignedRecordsChart";
+import PrincipalRiskHeatmap from "@/components/dashboard/PrincipalRiskHeatmap";
 import NavIcon from "@/hooks/useNavIcon.jsx";
 import PageHeader from "@/components/layout/PageHeader";
 import MetricSection from "@/components/dashboard/DashboardMetrics";
@@ -375,6 +376,10 @@ export default function Dashboard() {
             { icon: CheckCircle2, label: "Closed Issues", value: closedIssues, sub: "Resolved", iconColor: "text-green-600", tint: "from-green-50 to-emerald-50", to: "/Issues" },
           ]}
         />
+      )}
+
+      {filteredPrincipalRisks.length > 0 && (
+        <PrincipalRiskHeatmap principalRisks={filteredPrincipalRisks} companyId={gc} />
       )}
 
       <UnassignedRecordsChart />
