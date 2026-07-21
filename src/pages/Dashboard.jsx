@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import UnassignedRecordsChart from "@/components/dashboard/UnassignedRecordsChart";
-import PrincipalRiskHeatmap from "@/components/dashboard/PrincipalRiskHeatmap";
+import RiskHeatmap from "@/components/dashboard/RiskHeatmap";
 import NavIcon from "@/hooks/useNavIcon.jsx";
 import PageHeader from "@/components/layout/PageHeader";
 import MetricSection from "@/components/dashboard/DashboardMetrics";
@@ -378,8 +378,8 @@ export default function Dashboard() {
         />
       )}
 
-      {filteredPrincipalRisks.length > 0 && (
-        <PrincipalRiskHeatmap principalRisks={filteredPrincipalRisks} companyId={gc} />
+      {filteredRisks.length > 0 && (
+        <RiskHeatmap risks={filteredRisks} companyId={gc} />
       )}
 
       <UnassignedRecordsChart />
