@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import BpmnModeler from "bpmn-js/lib/Modeler";
+import BpmnViewer from "bpmn-js/lib/NavigatedViewer";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2 } from "lucide-react";
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
@@ -40,6 +42,7 @@ export default function BpmnDesigner({
   onBack,
   processLabel,
   companyId,
+  readOnly = false,
 }) {
   const containerRef = useRef(null);
   const modelerRef = useRef(null);
@@ -103,23 +106,24 @@ export default function BpmnDesigner({
   };
 
   useEffect(() => {
-    const modeler = new BpmnModeler({ container: containerRef.current });
+    const modeler = new (readOnly ? BpmnViewer : BpmnModeler)({ container: containerRef.current });
     modelerRef.current = modeler;
 
     modeler
       .importXML(initialXml || EMPTY_BPMN_XML)
       .then(() => {
         modeler.get("canvas").zoom("fit-viewport");
-        ensureGuids();
+        if (!readOnly) ensureGuids();
       })
       .catch((err) => toast.error("Failed to load diagram: " + (err?.message || err)));
 
-    modeler.on("commandStack.changed", () => setDirty(true));
-
     // Assign a GUID to newly created elements (tasks, events, flows, …).
     const onShapeAdded = () => ensureGuids();
-    modeler.on("shape.added", onShapeAdded);
-    modeler.on("connection.added", onShapeAdded);
+    if (!readOnly) {
+      modeler.on("commandStack.changed", () => setDirty(true));
+      modeler.on("shape.added", onShapeAdded);
+      modeler.on("connection.added", onShapeAdded);
+    }
 
     const onSelectionChanged = ({ newSelection }) => {
       const el = newSelection && newSelection[0];
@@ -149,7 +153,7 @@ export default function BpmnDesigner({
     // drag. bpmn-js snaps the resulting flow to the nearest connection point
     // on the target element automatically.
     const eventBus = modeler.get("eventBus");
-    const connect = modeler.get("connect");
+    const connect = readOnly ? null : modeler.get("connect");
     const onElementMouseDown = (e) => {
       if (!connectModeRef.current) return;
       const { element, originalEvent } = e;
@@ -165,8 +169,10 @@ export default function BpmnDesigner({
     return () => {
       eventBus.off("element.mousedown", onElementMouseDown);
       modeler.off("selection.changed", onSelectionChanged);
-      modeler.off("shape.added", onShapeAdded);
-      modeler.off("connection.added", onShapeAdded);
+      if (!readOnly) {
+        modeler.off("shape.added", onShapeAdded);
+        modeler.off("connection.added", onShapeAdded);
+      }
       try { modeler.destroy(); } catch {}
       modelerRef.current = null;
     };
@@ -315,7 +321,7 @@ export default function BpmnDesigner({
 
   return (
     <div className="flex h-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-      <BpmnElementPalette onDragStart={onDragStart} />
+      {!readOnly && <BpmnElementPalette onDragStart={onDragStart} />}
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50 flex-wrap">
           <div className="flex items-center gap-2">
@@ -325,6 +331,7 @@ export default function BpmnDesigner({
               </Button>
             )}
             <span className="text-sm font-semibold text-slate-700 truncate max-w-xs">{processLabel || "Process diagram"}</span>
+            {readOnly && <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">Read-only</Badge>}
             {dirty && <span className="w-2 h-2 rounded-full bg-amber-500" title="Unsaved changes" />}
           </div>
           <div className="flex items-center gap-1">
@@ -332,28 +339,34 @@ export default function BpmnDesigner({
             <Button size="sm" variant="ghost" onClick={zoomIn} title="Zoom in"><ZoomIn className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={fit} title="Fit to screen"><Maximize2 className="w-4 h-4" /></Button>
             <div className="w-px h-6 bg-slate-200 mx-1" />
-            <Button
-              size="sm"
-              variant={canToggleSubProcess ? "default" : "ghost"}
-              onClick={toggleSubProcessExpand}
-              disabled={!canToggleSubProcess}
-              title={canToggleSubProcess ? (selectedIsExpanded ? "Collapse sub-process" : "Expand sub-process") : "Select a sub-process to expand/collapse"}
-              className={`gap-1.5 ${canToggleSubProcess && !selectedIsExpanded ? "bg-indigo-600 hover:bg-indigo-700 text-white" : ""}`}
-            >
-              {selectedIsExpanded ? <Minimize2 className="w-4 h-4" /> : <Expand className="w-4 h-4" />}
-              {selectedIsExpanded ? "Collapse" : "Expand"}
-            </Button>
-            <div className="w-px h-6 bg-slate-200 mx-1" />
-            <Button
-              size="sm"
-              variant={connectMode ? "default" : "ghost"}
-              onClick={() => setConnectMode((v) => !v)}
-              title={connectMode ? "Connect mode active — click an element, drag to target (Esc to exit)" : "Connect elements (click source, drag to target)"}
-              className={`gap-1.5 ${connectMode ? "bg-indigo-600 hover:bg-indigo-700 text-white" : ""}`}
-            >
-              <Spline className="w-4 h-4" /> {connectMode ? "Connecting…" : "Connect"}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => fileInputRef.current?.click()} title="Import BPMN/XML"><Upload className="w-4 h-4" /></Button>
+            {!readOnly && (
+              <Button
+                size="sm"
+                variant={canToggleSubProcess ? "default" : "ghost"}
+                onClick={toggleSubProcessExpand}
+                disabled={!canToggleSubProcess}
+                title={canToggleSubProcess ? (selectedIsExpanded ? "Collapse sub-process" : "Expand sub-process") : "Select a sub-process to expand/collapse"}
+                className={`gap-1.5 ${canToggleSubProcess && !selectedIsExpanded ? "bg-indigo-600 hover:bg-indigo-700 text-white" : ""}`}
+              >
+                {selectedIsExpanded ? <Minimize2 className="w-4 h-4" /> : <Expand className="w-4 h-4" />}
+                {selectedIsExpanded ? "Collapse" : "Expand"}
+              </Button>
+            )}
+            {!readOnly && (
+              <>
+                <div className="w-px h-6 bg-slate-200 mx-1" />
+                <Button
+                  size="sm"
+                  variant={connectMode ? "default" : "ghost"}
+                  onClick={() => setConnectMode((v) => !v)}
+                  title={connectMode ? "Connect mode active — click an element, drag to target (Esc to exit)" : "Connect elements (click source, drag to target)"}
+                  className={`gap-1.5 ${connectMode ? "bg-indigo-600 hover:bg-indigo-700 text-white" : ""}`}
+                >
+                  <Spline className="w-4 h-4" /> {connectMode ? "Connecting…" : "Connect"}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => fileInputRef.current?.click()} title="Import BPMN/XML"><Upload className="w-4 h-4" /></Button>
+              </>
+            )}
             <Button size="sm" variant="ghost" onClick={handleDownloadSvg} title="Export SVG"><FileImage className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={handleDownloadXml} title="Download .bpmn"><Download className="w-4 h-4" /></Button>
             <input
@@ -377,9 +390,11 @@ export default function BpmnDesigner({
             >
               <PanelRight className="w-4 h-4" /> Data
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
-              <Save className="w-4 h-4" /> {saving ? "Saving…" : "Save"}
-            </Button>
+            {!readOnly && (
+              <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
+                <Save className="w-4 h-4" /> {saving ? "Saving…" : "Save"}
+              </Button>
+            )}
           </div>
         </div>
         {/* Bounded canvas area: a white "page" on a grey workspace. Everything

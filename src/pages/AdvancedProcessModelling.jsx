@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -10,10 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import {
-  Workflow, Globe, Search, Lock, Power, GitBranch, ArrowLeft, Cpu,
+  Workflow, Globe, Lock, Power, GitBranch, ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import BpmnDesigner from "@/components/processmodelling/BpmnDesigner";
+import ProcessDiagramList from "@/components/processmodelling/ProcessDiagramList";
 import ProcessDocumentTemplates from "@/components/processmodelling/ProcessDocumentTemplates";
 import ModulePageHeader from "@/components/branding/ModulePageHeader";
 import { BRANDS } from "@/lib/moduleBrands";
@@ -22,8 +23,8 @@ export default function AdvancedProcessModelling() {
   const [companyId] = useCompanyFilter();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
   const [selectedProcess, setSelectedProcess] = useState(null);
+  const [viewMode, setViewMode] = useState("edit");
   const [activeTab, setActiveTab] = useState("diagrams");
 
   const effectiveCompanyId = companyId === "all" ? null : companyId;
@@ -101,18 +102,6 @@ export default function AdvancedProcessModelling() {
     },
     onError: (e) => toast.error("Save failed: " + (e?.message || e)),
   });
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return processes;
-    return processes.filter(
-      (p) =>
-        (p.name || "").toLowerCase().includes(q) ||
-        (p.process_code || "").toLowerCase().includes(q)
-    );
-  }, [processes, search]);
-
-  const modelledCount = processes.length; // simple stat; per-process saved detection kept light
 
   // No company selected (admin "all")
   if (!effectiveCompanyId) {
@@ -199,10 +188,11 @@ export default function AdvancedProcessModelling() {
             <Badge variant="outline" className="ml-2">L{selectedProcess.level}</Badge>
           </div>
           <BpmnDesigner
-            key={selectedProcess.id}
+            key={`${selectedProcess.id}-${viewMode}`}
             initialXml={diagram?.bpmn_xml}
             initialCanvasMeta={diagram?.canvas_meta}
             initialElementMeta={diagram?.element_meta}
+            readOnly={viewMode === "view"}
             onSave={(xml, svg, canvasMeta, elementMeta) =>
               saveMutation.mutate({ xml, svg, canvasMeta, elementMeta })
             }
@@ -213,66 +203,12 @@ export default function AdvancedProcessModelling() {
           />
         </div>
       ) : (
-        <>
-          {/* Toolbar */}
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search processes…" className="pl-9" />
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Badge variant="secondary">{modelledCount} processes</Badge>
-            </div>
-          </div>
-
-          {/* List */}
-          {isLoading ? (
-            <div className="text-center text-slate-400 py-20">Loading…</div>
-          ) : filtered.length === 0 ? (
-            <Card className="p-10 text-center text-slate-500">
-              <Cpu className="w-10 h-10 mx-auto mb-3 text-slate-300" />
-              <p className="font-medium">No processes found for this company.</p>
-              <p className="text-sm text-slate-400 mt-1 mb-4">Add processes in Process Management first, then design their BPMN 2.0 diagrams here.</p>
-              <Link to="/ProcessManagement">
-                <Button variant="outline" className="gap-1.5">
-                  <GitBranch className="w-4 h-4" /> Go to Process Management
-                </Button>
-              </Link>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filtered.map((p) => (
-                <Card key={p.id} className="p-4 space-y-3 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h3 className="font-semibold text-slate-800">{p.name}</h3>
-                      <p className="text-xs font-mono text-slate-400">L{p.level} · {p.process_code}</p>
-                    </div>
-                    {p.criticality && (
-                      <Badge variant="outline" className="capitalize">{p.criticality}</Badge>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                    {(p.linked_risk_ids?.length || 0) > 0 && (
-                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">{p.linked_risk_ids.length} risks</Badge>
-                    )}
-                    {(p.linked_control_ids?.length || 0) > 0 && (
-                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">{p.linked_control_ids.length} controls</Badge>
-                    )}
-                    {(p.linked_system_ids?.length || 0) > 0 && (
-                      <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">{p.linked_system_ids.length} systems</Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-end pt-2 border-t border-slate-100">
-                    <Button size="sm" onClick={() => setSelectedProcess(p)} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
-                      <Workflow className="w-3.5 h-3.5" /> Design BPMN diagram
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </>
+        <ProcessDiagramList
+          processes={processes}
+          isLoading={isLoading}
+          onView={(p) => { setViewMode("view"); setSelectedProcess(p); }}
+          onEdit={(p) => { setViewMode("edit"); setSelectedProcess(p); }}
+        />
       )}
         </>
       )}
