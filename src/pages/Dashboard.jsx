@@ -309,9 +309,9 @@ export default function Dashboard() {
           title="Compliance Overview"
           view={viewMode}
           items={[
-            { icon: Building2, label: "Active Companies", value: activeCompanies, sub: `Total ${companies.length}`, gradient: "from-blue-500 to-blue-600" },
-            { icon: ClipboardCheck, label: "In Progress", value: inProgressAssessments, sub: "Active assessments", gradient: "from-amber-500 to-amber-600" },
-            { icon: TrendingUp, label: "Compliance Rate", value: `${complianceRate}%`, sub: `${compliantControls}/${totalAssessedControls} controls`, gradient: "from-green-500 to-green-600" },
+            { icon: Building2, label: "Active Companies", value: activeCompanies, sub: `Total ${companies.length}`, gradient: "from-blue-500 to-blue-600", to: "/Companies" },
+            { icon: ClipboardCheck, label: "In Progress", value: inProgressAssessments, sub: "Active assessments", gradient: "from-amber-500 to-amber-600", to: "/Assessments" },
+            { icon: TrendingUp, label: "Compliance Rate", value: `${complianceRate}%`, sub: `${compliantControls}/${totalAssessedControls} controls`, gradient: "from-green-500 to-green-600", to: "/Controls" },
           ]}
         />
       )}
@@ -321,9 +321,9 @@ export default function Dashboard() {
           title="Process Health (iHPOM)"
           view={viewMode}
           items={[
-            { icon: Network, label: "Active Processes", value: activeProcesses, sub: `${criticalProcesses} critical`, iconColor: "text-purple-600" },
-            { icon: ClipboardCheck, label: "Assessments", value: filteredProcessAssessments.length, sub: `${excellentProcesses} excellent`, iconColor: "text-blue-600" },
-            { icon: AlertTriangle, label: "Needs Attention", value: needsImprovementCount, sub: "Requires improvement", iconColor: "text-orange-600", tint: "from-amber-50 to-orange-50" },
+            { icon: Network, label: "Active Processes", value: activeProcesses, sub: `${criticalProcesses} critical`, iconColor: "text-purple-600", to: "/ProcessManagement" },
+            { icon: ClipboardCheck, label: "Assessments", value: filteredProcessAssessments.length, sub: `${excellentProcesses} excellent`, iconColor: "text-blue-600", to: "/ProcessAssessments" },
+            { icon: AlertTriangle, label: "Needs Attention", value: needsImprovementCount, sub: "Requires improvement", iconColor: "text-orange-600", tint: "from-amber-50 to-orange-50", to: "/ProcessAssessments" },
           ]}
         />
       )}
@@ -333,9 +333,9 @@ export default function Dashboard() {
           title="Goal Achievement"
           view={viewMode}
           items={[
-            { icon: Target, label: "Achievement Rate", value: `${goalAchievementRate}%`, sub: `${achievedGoals + onTrackGoals}/${filteredGoals.length} goals`, gradient: "from-purple-500 to-purple-600" },
-            { icon: CheckCircle2, label: "Achieved", value: achievedGoals, sub: "Completed", iconColor: "text-green-600", tint: "from-green-50 to-emerald-50" },
-            { icon: AlertTriangle, label: "At Risk", value: atRiskGoals, sub: "Needs intervention", iconColor: "text-red-600", tint: "from-red-50 to-orange-50" },
+            { icon: Target, label: "Achievement Rate", value: `${goalAchievementRate}%`, sub: `${achievedGoals + onTrackGoals}/${filteredGoals.length} goals`, gradient: "from-purple-500 to-purple-600", to: "/GRCGoals" },
+            { icon: CheckCircle2, label: "Achieved", value: achievedGoals, sub: "Completed", iconColor: "text-green-600", tint: "from-green-50 to-emerald-50", to: "/GRCGoals" },
+            { icon: AlertTriangle, label: "At Risk", value: atRiskGoals, sub: "Needs intervention", iconColor: "text-red-600", tint: "from-red-50 to-orange-50", to: "/GRCGoals" },
           ]}
         />
       )}
@@ -345,9 +345,9 @@ export default function Dashboard() {
           title="Risk & Control Posture"
           view={viewMode}
           items={[
-            { icon: AlertTriangle, label: "Total Risks", value: filteredRisks.length, sub: `${highRisks} high/critical`, iconColor: "text-slate-500" },
-            { icon: AlertCircle, label: "Open Risks", value: openRisks, sub: "Require mitigation", iconColor: "text-red-600", tint: "from-red-50 to-orange-50" },
-            { icon: Shield, label: "Control Compliance", value: `${complianceRate}%`, sub: `${compliantControls}/${totalAssessedControls} compliant`, gradient: "from-green-500 to-green-600" },
+            { icon: AlertTriangle, label: "Total Risks", value: filteredRisks.length, sub: `${highRisks} high/critical`, iconColor: "text-slate-500", to: "/RiskRegister" },
+            { icon: AlertCircle, label: "Open Risks", value: openRisks, sub: "Require mitigation", iconColor: "text-red-600", tint: "from-red-50 to-orange-50", to: "/RiskRegister" },
+            { icon: Shield, label: "Control Compliance", value: `${complianceRate}%`, sub: `${compliantControls}/${totalAssessedControls} compliant`, gradient: "from-green-500 to-green-600", to: "/Controls" },
           ]}
         />
       )}
@@ -359,9 +359,9 @@ export default function Dashboard() {
               title={<span className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-red-600" /> Principal Risks</span>}
               view={viewMode}
               items={[
-                { icon: ShieldAlert, label: "Total", value: filteredPrincipalRisks.length, sub: `${activePrincipalRisks} active`, iconColor: "text-slate-400" },
-                { icon: AlertTriangle, label: "High Priority", value: highPrincipalRisks, sub: `${criticalPrincipalRisks} critical`, iconColor: "text-red-500", tint: "from-red-50 to-orange-50" },
-                { icon: AlertCircle, label: "Under Review", value: filteredPrincipalRisks.filter(r => r.status === 'Under Review').length, sub: "Awaiting action", iconColor: "text-amber-500" },
+                { icon: ShieldAlert, label: "Total", value: filteredPrincipalRisks.length, sub: `${activePrincipalRisks} active`, iconColor: "text-slate-400", to: "/PrincipalRisks" },
+                { icon: AlertTriangle, label: "High Priority", value: highPrincipalRisks, sub: `${criticalPrincipalRisks} critical`, iconColor: "text-red-500", tint: "from-red-50 to-orange-50", to: "/PrincipalRisks" },
+                { icon: AlertCircle, label: "Under Review", value: filteredPrincipalRisks.filter(r => r.status === 'Under Review').length, sub: "Awaiting action", iconColor: "text-amber-500", to: "/PrincipalRisks" },
               ]}
             />
           </div>
@@ -400,10 +400,10 @@ export default function Dashboard() {
           title="DORA Resilience & Issue Tracking"
           view={viewMode}
           items={[
-            { icon: Server, label: "ICT Systems", value: filteredIctSystems.length, sub: `${criticalSystems} critical`, iconColor: "text-blue-600" },
-            { icon: AlertTriangle, label: "Open Incidents", value: openIncidents, sub: `${criticalIncidents} critical`, iconColor: "text-orange-600" },
-            { icon: AlertCircle, label: "Open Issues", value: openIssues, sub: "Action items", iconColor: "text-red-600", tint: "from-red-50 to-orange-50" },
-            { icon: CheckCircle2, label: "Closed Issues", value: closedIssues, sub: "Resolved", iconColor: "text-green-600", tint: "from-green-50 to-emerald-50" },
+            { icon: Server, label: "ICT Systems", value: filteredIctSystems.length, sub: `${criticalSystems} critical`, iconColor: "text-blue-600", to: "/ICTSystems" },
+            { icon: AlertTriangle, label: "Open Incidents", value: openIncidents, sub: `${criticalIncidents} critical`, iconColor: "text-orange-600", to: "/Incidents" },
+            { icon: AlertCircle, label: "Open Issues", value: openIssues, sub: "Action items", iconColor: "text-red-600", tint: "from-red-50 to-orange-50", to: "/Issues" },
+            { icon: CheckCircle2, label: "Closed Issues", value: closedIssues, sub: "Resolved", iconColor: "text-green-600", tint: "from-green-50 to-emerald-50", to: "/Issues" },
           ]}
         />
       )}

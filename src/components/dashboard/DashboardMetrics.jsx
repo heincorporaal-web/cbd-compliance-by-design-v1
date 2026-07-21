@@ -1,17 +1,21 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 
 /**
  * Compact metric tile for the Executive Dashboard.
  * - `gradient`: dark saturated gradient (white text), e.g. "from-blue-500 to-blue-600"
  * - `tint`: light gradient background (slate text), e.g. "from-amber-50 to-orange-50"
  * - `iconColor`: tailwind text color for the icon on plain/tinted tiles
+ * - `to`: optional route path — makes the tile clickable (navigates to the listed records)
  */
-export function MetricTile({ icon: Icon, label, value, sub, gradient, tint, iconColor }) {
+export function MetricTile({ icon: Icon, label, value, sub, gradient, tint, iconColor, to }) {
   const solid = !!gradient;
-  return (
+  const inner = (
     <Card
       className={`border shadow-sm overflow-hidden transition-shadow hover:shadow-md ${
+        to ? "cursor-pointer hover:border-slate-300" : ""
+      } ${
         gradient
           ? `bg-gradient-to-br ${gradient} text-white border-transparent`
           : tint
@@ -35,10 +39,12 @@ export function MetricTile({ icon: Icon, label, value, sub, gradient, tint, icon
       </CardContent>
     </Card>
   );
+  return to ? <Link to={to}>{inner}</Link> : inner;
 }
 
 /**
  * Renders a dashboard metric section in either compact tiles or a consolidated list.
+ * Each item may carry a `to` route path to make it clickable.
  */
 export default function MetricSection({ title, items, view, action }) {
   if (!items || items.length === 0) return null;
@@ -54,8 +60,8 @@ export default function MetricSection({ title, items, view, action }) {
             <div className="divide-y divide-slate-100">
               {items.map((it, i) => {
                 const Icon = it.icon;
-                return (
-                  <div key={i} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                const row = (
+                  <div className={`flex items-center justify-between gap-3 px-4 py-2.5 ${it.to ? "cursor-pointer hover:bg-slate-50" : ""}`}>
                     <div className="flex items-center gap-2.5 min-w-0">
                       {Icon && (
                         <Icon className={`w-4 h-4 shrink-0 ${it.iconColor || "text-slate-400"}`} />
@@ -67,6 +73,11 @@ export default function MetricSection({ title, items, view, action }) {
                       {it.sub && <span className="text-xs text-slate-400">{it.sub}</span>}
                     </div>
                   </div>
+                );
+                return it.to ? (
+                  <Link key={i} to={it.to} className="block">{row}</Link>
+                ) : (
+                  <div key={i}>{row}</div>
                 );
               })}
             </div>
