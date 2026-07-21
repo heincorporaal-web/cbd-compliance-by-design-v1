@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Assessments() {
   const [globalCompany, , { locked }] = useCompanyFilter();
@@ -153,10 +154,13 @@ export default function Assessments() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Assessments</h1>
-          <p className="text-slate-600">Create and manage compliance assessments</p>
-        </div>
+        <PageHeader
+          navItemId="assessments"
+          icon={ClipboardCheck}
+          title="Assessments"
+          tagline="Create and manage compliance assessments"
+          gradient="from-violet-600 to-purple-700"
+        />
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700">

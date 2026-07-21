@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Users, ChevronRight, ChevronDown, User, Building2 } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import PageHeader from "@/components/layout/PageHeader";
 
 function buildTree(stakeholders) {
   const map = {};
@@ -131,14 +132,13 @@ export default function StakeholderHierarchy() {
     <div className="p-6 lg:p-8 space-y-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Users className="w-6 h-6 text-primary" /> Stakeholder Hierarchy
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Reporting structure of all active stakeholders. Set a manager on each stakeholder profile to build the hierarchy.
-          </p>
-        </div>
+        <PageHeader
+          navItemId="stakeholder_hierarchy"
+          icon={Users}
+          title="Stakeholder Hierarchy"
+          tagline="Reporting structure of all active stakeholders. Set a manager on each stakeholder profile to build the hierarchy."
+          gradient="from-indigo-600 to-violet-700"
+        />
       </div>
 
       {/* Stats + Search */}

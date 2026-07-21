@@ -15,6 +15,7 @@ import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import CompanyField from "@/components/CompanyField";
 import { getICTSystemErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function ICTSystems() {
   const [globalCompany, , { locked }] = useCompanyFilter();
@@ -144,10 +145,13 @@ export default function ICTSystems() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">ICT Systems Inventory</h1>
-          <p className="text-slate-600">Manage critical ICT infrastructure for DORA compliance</p>
-        </div>
+        <PageHeader
+          navItemId="ict_systems"
+          icon={Server}
+          title="ICT Systems Inventory"
+          tagline="Manage critical ICT infrastructure for DORA compliance"
+          gradient="from-sky-600 to-cyan-700"
+        />
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();

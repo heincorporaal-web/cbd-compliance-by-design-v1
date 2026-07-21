@@ -20,6 +20,7 @@ import ColorPicker, { badgeStyleFromColor } from "@/components/ui/ColorPicker";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { useCustomOptions } from "@/hooks/useCustomOptions";
 import { getValueChainErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
+import PageHeader from "@/components/layout/PageHeader";
 
 const EMPTY_FORM = {
   value_chain_code: "",
@@ -222,12 +223,13 @@ export default function ValueChains() {
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Network className="w-6 h-6 text-primary" /> Value Chains
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage organisational value chains grouped by management domain.</p>
-        </div>
+        <PageHeader
+          navItemId="value_chains"
+          icon={Network}
+          title="Value Chains"
+          tagline="Manage organisational value chains grouped by management domain."
+          gradient="from-indigo-600 to-blue-700"
+        />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={exportCSV} disabled={valueChains.length === 0} className="gap-2">
             <Download className="w-4 h-4" /> Export

@@ -11,6 +11,7 @@ import StuckWorkflowPanel from "@/components/admin/StuckWorkflowPanel";
 import CompanyPreferencesPanel from "@/components/admin/CompanyPreferencesPanel";
 import ToxicCombinationsPanel from "@/components/stakeholders/ToxicCombinationsPanel";
 import ToxicCombinationsDOASelector from "@/components/doa/ToxicCombinationsDOASelector";
+import PageHeader from "@/components/layout/PageHeader";
 
 function UploadSection({ title, description, icon: Icon, iconColor, onUpload, accept = ".xlsx,.xls,.csv", isLoading, result }) {
   const fileRef = useRef(null);
@@ -199,10 +200,13 @@ export default function Configuration() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Configuration</h1>
-        <p className="text-slate-500 text-sm mt-1">Bulk imports, reference data management and system configuration.</p>
-      </div>
+      <PageHeader
+        navItemId="configuration"
+        icon={BookOpen}
+        title="Configuration"
+        tagline="Bulk imports, reference data management and system configuration."
+        gradient="from-slate-600 to-slate-800"
+      />
 
       <Tabs defaultValue="company_prefs">
         <TabsList>

@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import CompanyField from "@/components/CompanyField";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function ThirdParties() {
   const [globalCompany, , { locked }] = useCompanyFilter();
@@ -155,10 +156,13 @@ export default function ThirdParties() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Third Party Providers</h1>
-          <p className="text-slate-600">Manage third-party risk and vendor relationships</p>
-        </div>
+        <PageHeader
+          navItemId="third_parties"
+          icon={Users}
+          title="Third Party Providers"
+          tagline="Manage third-party risk and vendor relationships"
+          gradient="from-cyan-600 to-teal-700"
+        />
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();

@@ -11,6 +11,7 @@ import {
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { useIsAuditRole } from "@/hooks/useIsAuditRole";
 import { toast } from "sonner";
+import PageHeader from "@/components/layout/PageHeader";
 
 // Entity types that can be linked to an Issue (per the Issue schema enum).
 const LINKABLE_TYPES = new Set(["Risk", "Control", "ICTSystem", "OrgProcess", "ThirdPartyProvider"]);
@@ -193,17 +194,13 @@ export default function StakeholderAssignmentGaps() {
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-            <ShieldAlert className="w-7 h-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Assignment Gap Finder</h1>
-            <p className="text-slate-500 mt-1">
-              Find stakeholders who have been end-dated but are still assigned to records
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          navItemId="stakeholder_assignment_gaps"
+          icon={ShieldAlert}
+          title="Assignment Gap Finder"
+          tagline="Find stakeholders who have been end-dated but are still assigned to records"
+          gradient="from-amber-500 to-orange-600"
+        />
         <div className="flex gap-2 flex-wrap items-center">
           {snapTs && (
             <span className="text-xs text-slate-500 flex items-center gap-1.5 mr-1">

@@ -2,14 +2,18 @@ import React from "react";
 import { Presentation, FileSpreadsheet } from "lucide-react";
 import ReportCard from "@/components/reports/ReportCard";
 import { PERFORMANCE_REPORTS, DATA_LIBRARY_REPORTS, ISSUE_REPORTS } from "@/lib/reportsCatalog";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Reports() {
   return (
     <div className="p-6 lg:p-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Reports</h1>
-        <p className="text-slate-600 mt-1">Generate compliance, GRC, and data reports</p>
-      </div>
+      <PageHeader
+        navItemId="reports"
+        icon={Presentation}
+        title="Reports"
+        tagline="Generate compliance, GRC, and data reports"
+        gradient="from-indigo-600 to-violet-700"
+      />
 
       {/* Performance Reports */}
       <div>

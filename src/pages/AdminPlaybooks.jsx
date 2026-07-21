@@ -7,6 +7,7 @@ import { CURATED_PLAYBOOKS, ADMIN_PLAYBOOK_CATEGORIES } from "@/lib/adminPlayboo
 import AdminPlaybookEditor from "@/components/admin/AdminPlaybookEditor";
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from "react-markdown";
+import PageHeader from "@/components/layout/PageHeader";
 import {
   BookOpen, Search, PlusCircle, Pencil, RotateCcw, Lock, X,
   Palette, GitBranch, Upload, Hash, Library, Workflow, Users, HelpCircle,
@@ -169,14 +170,13 @@ export default function AdminPlaybooks() {
     <div className="flex flex-col h-[calc(100vh-7rem)]">
       <div className="px-6 pt-6 pb-3 border-b border-slate-200 bg-white">
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-primary" /> Admin Playbooks
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Step-by-step configuration guidance — custom icons, workflows, bulk imports, and more.
-            </p>
-          </div>
+          <PageHeader
+            navItemId="admin_playbooks"
+            icon={BookOpen}
+            title="Admin Playbooks"
+            tagline="Step-by-step configuration guidance — custom icons, workflows, bulk imports, and more."
+            gradient="from-slate-600 to-slate-800"
+          />
           {isAdmin && (
             <Button onClick={openNew} className="bg-primary text-white">
               <PlusCircle className="w-4 h-4 mr-1" /> New playbook

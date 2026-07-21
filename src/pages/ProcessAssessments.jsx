@@ -12,6 +12,7 @@ import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import CSVUploader from "@/components/CSVUploader";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function ProcessAssessments() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -81,10 +82,13 @@ export default function ProcessAssessments() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Process Assessments</h1>
-          <p className="text-slate-600">Evaluate and track business process performance</p>
-        </div>
+        <PageHeader
+          navItemId="process_assessments"
+          icon={ClipboardCheck}
+          title="Process Assessments"
+          tagline="Evaluate and track business process performance"
+          gradient="from-blue-600 to-indigo-700"
+        />
         <div className="flex gap-2">
           {canImport && (
             <CSVUploader

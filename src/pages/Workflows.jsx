@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import WorkflowBuilder from "@/components/workflows/WorkflowBuilder";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Workflows() {
   const [globalCompany] = useCompanyFilter();
@@ -145,10 +146,13 @@ export default function Workflows() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Workflow Automation</h1>
-          <p className="text-slate-600">Manage approval workflows and automated notifications</p>
-        </div>
+        <PageHeader
+          navItemId="workflows"
+          icon={GitBranch}
+          title="Workflow Automation"
+          tagline="Manage approval workflows and automated notifications"
+          gradient="from-violet-600 to-purple-700"
+        />
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();

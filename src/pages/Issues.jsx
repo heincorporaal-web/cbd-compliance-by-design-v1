@@ -17,6 +17,7 @@ import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import CompanyField from "@/components/CompanyField";
 import ActionItemsPanel, { applyActionItemNumbers } from "@/components/issues/ActionItemsPanel";
 import { getEntityNumConfig, buildIssueRefNumber, getNextSequence, applyAutoNumber } from "@/lib/autoNumbering";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Issues() {
   const [globalCompany] = useCompanyFilter();
@@ -187,10 +188,13 @@ export default function Issues() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Issue Management</h1>
-          <p className="text-slate-600">Track action items, findings, and recommendations</p>
-        </div>
+        <PageHeader
+          navItemId="issues"
+          icon={AlertCircle}
+          title="Issue Management"
+          tagline="Track action items, findings, and recommendations"
+          gradient="from-rose-600 to-red-700"
+        />
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();

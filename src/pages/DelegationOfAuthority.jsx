@@ -9,6 +9,7 @@ import { Plus, Search, FileText, Calendar, User, Building2, ChevronRight, Shield
 import { Link, useNavigate } from "react-router-dom";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { format } from "date-fns";
+import PageHeader from "@/components/layout/PageHeader";
 
 const statusColor = (s) => ({
   draft: "bg-slate-100 text-slate-600 border-slate-200",
@@ -73,12 +74,13 @@ export default function DelegationOfAuthority() {
     <div className="p-6 lg:p-8 space-y-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-primary" /> Delegation of Authority
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage approval authorities and delegation frameworks per company.</p>
-        </div>
+        <PageHeader
+          navItemId="doa"
+          icon={ShieldCheck}
+          title="Delegation of Authority"
+          tagline="Manage approval authorities and delegation frameworks per company."
+          gradient="from-sky-600 to-blue-700"
+        />
         <Button onClick={handleNew} disabled={createMutation.isPending} className="gap-2 bg-primary hover:bg-primary/90">
           <Plus className="w-4 h-4" /> New DOA
         </Button>

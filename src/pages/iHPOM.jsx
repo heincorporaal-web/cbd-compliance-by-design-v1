@@ -16,6 +16,7 @@ import IHPOMNodeDialog from "@/components/ihpom/IHPOMNodeDialog";
 import IHPOMLevel1View from "@/components/ihpom/IHPOMLevel1View";
 import IHPOMPeriodicTable from "@/components/ihpom/IHPOMPeriodicTable";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
+import PageHeader from "@/components/layout/PageHeader";
 
 const levelLabels = {
   1: "Process Group",
@@ -168,15 +169,13 @@ export default function IHPOM() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-              <Network className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">iHPOM</h1>
-              <p className="text-slate-600">Integrated High Performance Organisational Model — Reference Repository</p>
-            </div>
-          </div>
+          <PageHeader
+            navItemId="ihpom"
+            icon={Network}
+            title="iHPOM"
+            tagline="Integrated High Performance Organisational Model — Reference Repository"
+            gradient="from-purple-600 to-indigo-700"
+          />
           <p className="text-sm text-slate-500 ml-15">Company-independent 6-level process hierarchy for benchmarking and comparison.</p>
         </div>
         <div className="flex gap-2">

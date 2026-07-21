@@ -15,6 +15,7 @@ import {
 import { format, subDays, isAfter } from "date-fns";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import PageHeader from "@/components/layout/PageHeader";
 
 // ─── Config maps ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -371,15 +372,13 @@ export default function AuditLogs() {
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl flex items-center justify-center shadow-lg">
-            <Activity className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Audit Trail</h1>
-            <p className="text-slate-500">Full change history for Risks, Controls, ICT Systems & Principle Risks</p>
-          </div>
-        </div>
+        <PageHeader
+          navItemId="audit_logs"
+          icon={Activity}
+          title="Audit Trail"
+          tagline="Full change history for Risks, Controls, ICT Systems & Principle Risks"
+          gradient="from-slate-700 to-slate-800"
+        />
         <button
           onClick={handleExport}
           className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"

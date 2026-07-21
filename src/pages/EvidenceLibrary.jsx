@@ -18,6 +18,7 @@ import {
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import { format, isPast, isWithinInterval, addDays } from "date-fns";
 import { getEntityNumConfig, buildRefNumber, getNextSequence, applyAutoNumber } from "@/lib/autoNumbering";
+import PageHeader from "@/components/layout/PageHeader";
 
 const FILE_TYPE_ICONS = {
   document: FileText,
@@ -192,10 +193,13 @@ export default function EvidenceLibrary() {
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-1">Evidence Library</h1>
-          <p className="text-slate-500 text-sm">Upload, tag, and link audit evidence to controls and assessment cycles</p>
-        </div>
+        <PageHeader
+          navItemId="evidence_library"
+          icon={BookOpen}
+          title="Evidence Library"
+          tagline="Upload, tag, and link audit evidence to controls and assessment cycles"
+          gradient="from-emerald-600 to-teal-700"
+        />
         <Button onClick={() => openUpload()}>
           <Upload className="w-4 h-4 mr-2" /> Upload Evidence
         </Button>

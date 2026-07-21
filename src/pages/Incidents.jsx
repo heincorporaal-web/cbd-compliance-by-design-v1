@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import CompanyField from "@/components/CompanyField";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Incidents() {
   const [globalCompany, , { locked }] = useCompanyFilter();
@@ -137,10 +138,13 @@ export default function Incidents() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Incident Management</h1>
-          <p className="text-slate-600">Track and manage ICT-related incidents for DORA compliance</p>
-        </div>
+        <PageHeader
+          navItemId="incidents"
+          icon={AlertTriangle}
+          title="Incident Management"
+          tagline="Track and manage ICT-related incidents for DORA compliance"
+          gradient="from-red-600 to-rose-700"
+        />
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, ClipboardList, Pencil, Trash2, Copy } from "lucide-react";
 import { toast } from "sonner";
+import PageHeader from "@/components/layout/PageHeader";
 
 const STATUS_COLORS = {
   draft: "bg-slate-100 text-slate-500",
@@ -56,10 +57,13 @@ export default function AssessmentModels() {
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Assessment Models</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Define reusable scoring and rating models for assessments, risk, and supplier evaluations.</p>
-        </div>
+        <PageHeader
+          navItemId="assessment_models"
+          icon={ClipboardList}
+          title="Assessment Models"
+          tagline="Define reusable scoring and rating models for assessments, risk, and supplier evaluations."
+          gradient="from-slate-600 to-slate-800"
+        />
         <Link to={`${createPageUrl("AssessmentModelDetail")}?mode=new`}>
           <Button className="bg-primary hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" /> New Model

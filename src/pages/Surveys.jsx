@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Surveys() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,10 +46,13 @@ export default function Surveys() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Surveys</h1>
-          <p className="text-slate-600">Create and manage surveys for systems, suppliers, and frameworks</p>
-        </div>
+        <PageHeader
+          navItemId="surveys"
+          icon={ClipboardList}
+          title="Surveys"
+          tagline="Create and manage surveys for systems, suppliers, and frameworks"
+          gradient="from-fuchsia-600 to-purple-700"
+        />
         <Link to={createPageUrl("SurveyBuilder")}>
           <Button className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" />

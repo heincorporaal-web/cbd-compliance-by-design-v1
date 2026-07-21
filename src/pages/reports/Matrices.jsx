@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import ProcessMatrix from "@/components/reports/ProcessMatrix";
 import { Card, CardContent } from "@/components/ui/card";
+import { Grid3x3 } from "lucide-react";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Matrices() {
   const [globalCompany, , { locked, assignedCompanyId }] = useCompanyFilter();
@@ -28,12 +30,13 @@ export default function Matrices() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Process Matrix</h1>
-        <p className="text-slate-600 mt-1">
-          Periodic-table view of company processes with maturity &amp; risk scores fed from assessments.
-        </p>
-      </div>
+      <PageHeader
+        navItemId="matrices"
+        icon={Grid3x3}
+        title="Process Matrix"
+        tagline="Periodic-table view of company processes with maturity & risk scores fed from assessments."
+        gradient="from-fuchsia-600 to-purple-700"
+      />
 
       {!companyId && (
         <Card className="border-dashed border-slate-300">

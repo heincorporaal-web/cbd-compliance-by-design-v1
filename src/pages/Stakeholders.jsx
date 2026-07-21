@@ -17,6 +17,7 @@ import { useDefaultStakeholderGroups } from "@/hooks/useDefaultStakeholderGroups
 import StakeholderGroupReportButton from "@/components/stakeholders/StakeholderGroupReportButton";
 import GroupAssignmentImportButton from "@/components/stakeholders/GroupAssignmentImportButton";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Stakeholders() {
   const queryClient = useQueryClient();
@@ -143,10 +144,13 @@ export default function Stakeholders() {
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Stakeholder Management</h1>
-          <p className="text-slate-500 mt-1">Manage stakeholders, groups and matrix assignments</p>
-        </div>
+        <PageHeader
+          navItemId="stakeholders"
+          icon={Users}
+          title="Stakeholder Management"
+          tagline="Manage stakeholders, groups and matrix assignments"
+          gradient="from-blue-600 to-indigo-700"
+        />
         <div className="flex gap-2 flex-wrap">
           <GroupAssignmentImportButton onDone={() => queryClient.invalidateQueries(["stakeholders"])} />
           <StakeholderGroupReportButton stakeholders={stakeholders} groups={groups} companies={companies} />

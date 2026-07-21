@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Shield, Plus, Edit2, Trash2, ChevronDown, ChevronRight, CheckCircle2, CalendarRange } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PageHeader from "@/components/layout/PageHeader";
 
 // ─── Module Groups & Actions ─────────────────────────────────────────────────
 const MODULE_GROUPS = [
@@ -551,15 +552,13 @@ export default function Roles() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-            <Shield className="w-7 h-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Role Management</h1>
-            <p className="text-slate-500 text-sm">Define granular roles with per-module permissions across all GRC workflows</p>
-          </div>
-        </div>
+        <PageHeader
+          navItemId="roles"
+          icon={Shield}
+          title="Role Management"
+          tagline="Define granular roles with per-module permissions across all GRC workflows"
+          gradient="from-purple-600 to-indigo-700"
+        />
         <Button onClick={() => { setEditingRole(null); setDialogOpen(true); }}>
           <Plus className="w-4 h-4 mr-2" /> Create Role
         </Button>

@@ -13,6 +13,7 @@ import { createPageUrl } from "@/utils";
 import OrgProcessTreeView from "@/components/processmanagement/OrgProcessTreeView";
 import ProcessCSVImportDialog from "@/components/processmanagement/ProcessCSVImportDialog";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
+import PageHeader from "@/components/layout/PageHeader";
 
 const levelLabels = {
   0: "Value Chain", 1: "Process Group", 2: "Process",
@@ -139,15 +140,13 @@ export default function ProcessManagement() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-teal-600 to-cyan-700 rounded-xl flex items-center justify-center shadow-lg">
-            <Cpu className="w-7 h-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Process Management</h1>
-            <p className="text-slate-600">Manage process ownership and system allocations</p>
-          </div>
-        </div>
+        <PageHeader
+          navItemId="process_management"
+          icon={Cpu}
+          title="Process Management"
+          tagline="Manage process ownership and system allocations"
+          gradient="from-teal-600 to-cyan-700"
+        />
         <div className="flex gap-2">
           {canImport && (
             <Button variant="outline" onClick={() => setImportOpen(true)}>

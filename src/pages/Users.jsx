@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UserCompanyAssignments from "@/components/users/UserCompanyAssignments";
 import { format } from "date-fns";
+import PageHeader from "@/components/layout/PageHeader";
 
 function permissionCount(permissions) {
   if (!permissions) return 0;
@@ -103,15 +104,13 @@ export default function Users() {
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-            <UsersIcon className="w-7 h-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">User Management</h1>
-            <p className="text-slate-500 text-sm">Invite, manage, and assign GRC roles to platform users</p>
-          </div>
-        </div>
+        <PageHeader
+          navItemId="users"
+          icon={UsersIcon}
+          title="User Management"
+          tagline="Invite, manage, and assign GRC roles to platform users"
+          gradient="from-blue-600 to-indigo-700"
+        />
         <Button onClick={() => setIsInviteOpen(true)}>
           <Plus className="w-4 h-4 mr-2" /> Invite User
         </Button>

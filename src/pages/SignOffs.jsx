@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function SignOffs() {
   const [globalCompany] = useCompanyFilter();
@@ -61,10 +62,13 @@ export default function SignOffs() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Period Sign-Offs</h1>
-          <p className="text-slate-600">Review and approve controls, narratives, and issues by period</p>
-        </div>
+        <PageHeader
+          navItemId="sign_offs"
+          icon={FileCheck}
+          title="Period Sign-Offs"
+          tagline="Review and approve controls, narratives, and issues by period"
+          gradient="from-amber-500 to-orange-600"
+        />
         <Link to={createPageUrl("SignOffDetail")}>
           <Button className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" />

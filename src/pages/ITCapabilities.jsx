@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Search, Edit2, Trash2, Cpu, Users, ChevronDown, ChevronUp, CalendarOff } from "lucide-react";
 import EndDateBadge from "@/components/ui/EndDateBadge";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
+import PageHeader from "@/components/layout/PageHeader";
 
 const CATEGORIES = [
   { value: "infrastructure", label: "Infrastructure" },
@@ -179,10 +180,13 @@ export default function ITCapabilities() {
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-1">IT Capabilities</h1>
-          <p className="text-slate-600">Manage IT capabilities per company and assign responsible stakeholders</p>
-        </div>
+        <PageHeader
+          navItemId="it_capabilities"
+          icon={Cpu}
+          title="IT Capabilities"
+          tagline="Manage IT capabilities per company and assign responsible stakeholders"
+          gradient="from-cyan-600 to-blue-700"
+        />
         <Button className="bg-blue-600 hover:bg-blue-700" onClick={openCreate}>
           <Plus className="w-4 h-4 mr-2" />
           Add Capability
