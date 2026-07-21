@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import NavIcon from "@/hooks/useNavIcon.jsx";
 
 const STEPS = [
   {
@@ -219,7 +220,7 @@ export default function GettingStarted() {
       <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-8 border border-primary/20">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-            <HelpCircle className="w-6 h-6 text-white" />
+            <NavIcon itemId="getting_started" defaultIcon={HelpCircle} className="w-6 h-6 text-white" forceWhite />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Getting Started with CBD</h1>

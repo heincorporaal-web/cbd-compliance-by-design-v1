@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import CompanyFilterBar from "@/components/CompanyFilterBar";
+import NavIcon from "@/hooks/useNavIcon.jsx";
 import { differenceInDays, parseISO, isValid, addDays, addWeeks, addMonths, addYears } from "date-fns";
 
 const TODAY = new Date();
@@ -253,7 +254,7 @@ export default function MyActions() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-            <CalendarClock className="w-7 h-7 text-white" />
+            <NavIcon itemId="my_actions" defaultIcon={CalendarClock} className="w-7 h-7 text-white" forceWhite />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-slate-900">My Actions</h1>

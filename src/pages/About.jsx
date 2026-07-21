@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Info, Pencil, Save, ShieldCheck, Calendar, FileText, ScrollText, Mail, Send } from "lucide-react";
 import { toast } from "sonner";
+import NavIcon from "@/hooks/useNavIcon.jsx";
 
 const DEFAULT_TERMS = "Compliance by Design Platform – User Terms\n\nEnter the user terms for the Compliance by Design Platform here.";
 const DEFAULT_AUP = "Acceptable Use Policy\n\nEnter the Acceptable Use Policy here.";
@@ -73,7 +74,7 @@ export default function About() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 bg-gradient-to-br from-slate-700 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-          <Info className="w-7 h-7 text-white" />
+          <NavIcon itemId="about" defaultIcon={Info} className="w-7 h-7 text-white" forceWhite />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-slate-900">About</h1>

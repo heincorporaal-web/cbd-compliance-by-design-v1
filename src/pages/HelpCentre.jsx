@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import NavIcon from "@/hooks/useNavIcon.jsx";
 
 const CATEGORIES = [
   {
@@ -346,7 +347,7 @@ export default function HelpCentre() {
       {/* Header */}
       <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-8 border border-primary/20 text-center">
         <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <MessageCircle className="w-7 h-7 text-white" />
+          <NavIcon itemId="help_centre" defaultIcon={MessageCircle} className="w-7 h-7 text-white" forceWhite />
         </div>
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Help Centre</h1>
         <p className="text-slate-600 mb-6">Find answers to common questions about the CBD platform.</p>
