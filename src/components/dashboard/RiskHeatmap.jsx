@@ -2,8 +2,9 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldAlert, SlidersHorizontal } from "lucide-react";
+import { ShieldAlert, SlidersHorizontal, Download } from "lucide-react";
 import { Link } from "react-router-dom";
+import { exportHeatmapImage } from "./exportHeatmapImage";
 
 const LIKELIHOOD_RANK = { very_low: 1, low: 2, medium: 3, high: 4, very_high: 5 };
 
@@ -207,6 +208,22 @@ export default function RiskHeatmap({ risks, companyId }) {
 
   if (risks.length === 0) return null;
 
+  const activeStatusLabels = RISK_STATUSES.filter((s) => statuses.has(s)).map((s) => s.replace(/_/g, " "));
+  const activeCategoryLabels = RISK_CATEGORIES.filter((c) => categories.has(c)).map((c) => c.replace(/_/g, " "));
+  const canExport = rows.length > 0;
+
+  const handleExport = () => {
+    exportHeatmapImage({
+      rows,
+      bands,
+      columnTotals,
+      totalShown,
+      modelName: model?.name,
+      statusLabels: activeStatusLabels.length === RISK_STATUSES.length ? [] : activeStatusLabels,
+      categoryLabels: activeCategoryLabels.length === RISK_CATEGORIES.length ? [] : activeCategoryLabels,
+    });
+  };
+
   const toggle = (set, setter, val) => {
     const next = new Set(set);
     if (next.has(val)) next.delete(val);
@@ -222,9 +239,20 @@ export default function RiskHeatmap({ risks, companyId }) {
             <ShieldAlert className="w-4 h-4 text-red-600" />
             Risk Heatmap — by Business Unit &amp; Assessment Model Rating
           </CardTitle>
-          <Link to="/RiskRegister" className="text-xs font-medium text-primary hover:underline">
-            View all
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleExport}
+              disabled={!canExport}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Download heatmap as PNG image"
+            >
+              <Download className="w-3.5 h-3.5" /> Export image
+            </button>
+            <Link to="/RiskRegister" className="text-xs font-medium text-primary hover:underline">
+              View all
+            </Link>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-4 space-y-4">
