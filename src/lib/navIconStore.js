@@ -204,7 +204,12 @@ export function buildCustomIconMap(customIconRecords = []) {
 export function CustomSvgIcon({ svg, className, forceWhite = false }) {
   return React.createElement("span", {
     className: `inline-flex items-center justify-center ${className || ""}`,
-    style: { lineHeight: 0, ...(forceWhite ? { filter: "brightness(0) invert(1)" } : {}) },
+    style: {
+      lineHeight: 0,
+      transform: "scale(1.2)",
+      transformOrigin: "center",
+      ...(forceWhite ? { filter: "brightness(0) invert(1)" } : {}),
+    },
     dangerouslySetInnerHTML: { __html: normalizeSvg(svg) },
   });
 }
