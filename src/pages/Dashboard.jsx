@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Settings, LayoutDashboard, ShieldAlert } from "lucide-react";
+import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Settings, LayoutDashboard, ShieldAlert, LayoutGrid, List } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import UnassignedRecordsChart from "@/components/dashboard/UnassignedRecordsChart";
 import NavIcon from "@/hooks/useNavIcon.jsx";
 import PageHeader from "@/components/layout/PageHeader";
+import MetricSection from "@/components/dashboard/DashboardMetrics";
 
 const WIDGET_LABELS = {
   compliance: "Compliance Overview",
@@ -48,6 +49,13 @@ export default function Dashboard() {
   useEffect(() => {
     try { localStorage.setItem("dashboard_widgets", JSON.stringify(visibleWidgets)); } catch {}
   }, [visibleWidgets]);
+
+  const [viewMode, setViewMode] = useState(() => {
+    try { return localStorage.getItem("dashboard_view") || "tile"; } catch { return "tile"; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("dashboard_view", viewMode); } catch {}
+  }, [viewMode]);
 
   const applyView = (viewId) => {
     setActiveView(viewId);
@@ -217,7 +225,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <PageHeader
           navItemId="dashboard"
@@ -228,6 +236,24 @@ export default function Dashboard() {
         />
         <div className="flex items-center gap-3 flex-wrap">
           <CompanyFilterBar />
+          <div className="flex items-center bg-slate-100 rounded-lg p-0.5">
+            <button
+              onClick={() => setViewMode("tile")}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all ${
+                viewMode === "tile" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" /> Tiles
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all ${
+                viewMode === "list" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <List className="w-3.5 h-3.5" /> List
+            </button>
+          </div>
           <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline">
@@ -279,243 +305,51 @@ export default function Dashboard() {
       </div>
 
       {visibleWidgets.compliance && (
-        <div>
-          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">Compliance Overview</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-none shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium opacity-90">Active Companies</CardTitle>
-                <Building2 className="w-5 h-5 opacity-75" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{activeCompanies}</div>
-              <p className="text-xs opacity-75 mt-1">Total: {companies.length}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium opacity-90">Frameworks</CardTitle>
-                <Shield className="w-5 h-5 opacity-75" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{activeFrameworks}</div>
-              <p className="text-xs opacity-75 mt-1">Ready for assessment</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-lg bg-gradient-to-br from-amber-500 to-amber-600 text-white">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium opacity-90">In Progress</CardTitle>
-                <ClipboardCheck className="w-5 h-5 opacity-75" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{inProgressAssessments}</div>
-              <p className="text-xs opacity-75 mt-1">Active assessments</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-lg bg-gradient-to-br from-green-500 to-green-600 text-white">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium opacity-90">Compliance Rate</CardTitle>
-                <TrendingUp className="w-5 h-5 opacity-75" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{complianceRate}%</div>
-              <p className="text-xs opacity-75 mt-1">{compliantControls} of {totalAssessedControls} controls</p>
-            </CardContent>
-          </Card>
-        </div>
-        </div>
+        <MetricSection
+          title="Compliance Overview"
+          view={viewMode}
+          items={[
+            { icon: Building2, label: "Active Companies", value: activeCompanies, sub: `Total ${companies.length}`, gradient: "from-blue-500 to-blue-600" },
+            { icon: ClipboardCheck, label: "In Progress", value: inProgressAssessments, sub: "Active assessments", gradient: "from-amber-500 to-amber-600" },
+            { icon: TrendingUp, label: "Compliance Rate", value: `${complianceRate}%`, sub: `${compliantControls}/${totalAssessedControls} controls`, gradient: "from-green-500 to-green-600" },
+          ]}
+        />
       )}
 
       {visibleWidgets.processHealth && (
-        <div>
-          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">Process Health (iHPOM)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="border-none shadow-lg">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">Active Processes</CardTitle>
-                  <Network className="w-5 h-5 text-purple-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{activeProcesses}</div>
-                <p className="text-xs text-slate-500 mt-1">{criticalProcesses} critical processes</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">Process Assessments</CardTitle>
-                  <ClipboardCheck className="w-5 h-5 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{filteredProcessAssessments.length}</div>
-                <p className="text-xs text-green-600 mt-1">{excellentProcesses} rated excellent</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg bg-gradient-to-br from-amber-50 to-orange-50">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">Needs Attention</CardTitle>
-                  <AlertTriangle className="w-5 h-5 text-orange-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{needsImprovementCount}</div>
-                <p className="text-xs text-slate-500 mt-1">Requires improvement</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">Open Actions</CardTitle>
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">
-                  {processAssessments.reduce((sum, pa) => 
-                    sum + (pa.actions?.filter(a => a.status === 'open' || a.status === 'in_progress').length || 0), 0
-                  )}
-                </div>
-                <p className="text-xs text-slate-500 mt-1">From process assessments</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <MetricSection
+          title="Process Health (iHPOM)"
+          view={viewMode}
+          items={[
+            { icon: Network, label: "Active Processes", value: activeProcesses, sub: `${criticalProcesses} critical`, iconColor: "text-purple-600" },
+            { icon: ClipboardCheck, label: "Assessments", value: filteredProcessAssessments.length, sub: `${excellentProcesses} excellent`, iconColor: "text-blue-600" },
+            { icon: AlertTriangle, label: "Needs Attention", value: needsImprovementCount, sub: "Requires improvement", iconColor: "text-orange-600", tint: "from-amber-50 to-orange-50" },
+          ]}
+        />
       )}
 
       {visibleWidgets.goals && (
-        <div>
-          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">Goal Achievement</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="border-none shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium opacity-90">Achievement Rate</CardTitle>
-                  <Target className="w-5 h-5 opacity-75" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{goalAchievementRate}%</div>
-                <p className="text-xs opacity-75 mt-1">{achievedGoals + onTrackGoals} of {filteredGoals.length} goals</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">Achieved</CardTitle>
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{achievedGoals}</div>
-                <p className="text-xs text-slate-500 mt-1">Goals completed</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">On Track</CardTitle>
-                  <TrendingUp className="w-5 h-5 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{onTrackGoals}</div>
-                <p className="text-xs text-slate-500 mt-1">Progressing well</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">At Risk</CardTitle>
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{atRiskGoals}</div>
-                <p className="text-xs text-slate-500 mt-1">Needs intervention</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <MetricSection
+          title="Goal Achievement"
+          view={viewMode}
+          items={[
+            { icon: Target, label: "Achievement Rate", value: `${goalAchievementRate}%`, sub: `${achievedGoals + onTrackGoals}/${filteredGoals.length} goals`, gradient: "from-purple-500 to-purple-600" },
+            { icon: CheckCircle2, label: "Achieved", value: achievedGoals, sub: "Completed", iconColor: "text-green-600", tint: "from-green-50 to-emerald-50" },
+            { icon: AlertTriangle, label: "At Risk", value: atRiskGoals, sub: "Needs intervention", iconColor: "text-red-600", tint: "from-red-50 to-orange-50" },
+          ]}
+        />
       )}
 
       {visibleWidgets.riskPosture && (
-        <div>
-          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">Risk & Control Posture</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="border-none shadow-lg">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">Total Risks</CardTitle>
-                  <AlertTriangle className="w-5 h-5 text-slate-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{filteredRisks.length}</div>
-                <p className="text-xs text-red-600 mt-1">{highRisks} high/critical risks</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">Open Risks</CardTitle>
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{openRisks}</div>
-                <p className="text-xs text-slate-500 mt-1">Require mitigation</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-600">Mitigated Risks</CardTitle>
-                  <Shield className="w-5 h-5 text-green-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{mitigatedRisks}</div>
-                <p className="text-xs text-slate-500 mt-1">Controls in place</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg bg-gradient-to-br from-green-500 to-green-600 text-white">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium opacity-90">Control Compliance</CardTitle>
-                  <Shield className="w-5 h-5 opacity-75" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{complianceRate}%</div>
-                <p className="text-xs opacity-75 mt-1">{compliantControls}/{totalAssessedControls} compliant</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <MetricSection
+          title="Risk & Control Posture"
+          view={viewMode}
+          items={[
+            { icon: AlertTriangle, label: "Total Risks", value: filteredRisks.length, sub: `${highRisks} high/critical`, iconColor: "text-slate-500" },
+            { icon: AlertCircle, label: "Open Risks", value: openRisks, sub: "Require mitigation", iconColor: "text-red-600", tint: "from-red-50 to-orange-50" },
+            { icon: Shield, label: "Control Compliance", value: `${complianceRate}%`, sub: `${compliantControls}/${totalAssessedControls} compliant`, gradient: "from-green-500 to-green-600" },
+          ]}
+        />
       )}
 
       {filteredPrincipalRisks.length > 0 && (
@@ -586,75 +420,16 @@ export default function Dashboard() {
       )}
 
       {visibleWidgets.resilience && (
-        <div>
-          <h2 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wider">DORA Resilience & Issue Tracking</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          <Card className="border-none shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">ICT Systems</CardTitle>
-                <Server className="w-5 h-5 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{filteredIctSystems.length}</div>
-              <p className="text-xs text-slate-500 mt-1">{criticalSystems} critical systems</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">Open Incidents</CardTitle>
-                <AlertTriangle className="w-5 h-5 text-orange-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{openIncidents}</div>
-              <p className="text-xs text-red-600 mt-1">{criticalIncidents} critical</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">Third Parties</CardTitle>
-                <Users className="w-5 h-5 text-purple-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{filteredThirdParties.length}</div>
-              <p className="text-xs text-slate-500 mt-1">{highRiskProviders} high risk</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">Open Issues</CardTitle>
-                <AlertCircle className="w-5 h-5 text-red-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{openIssues}</div>
-              <p className="text-xs text-slate-500 mt-1">Action items & findings</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-slate-600">Closed Issues</CardTitle>
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{closedIssues}</div>
-              <p className="text-xs text-slate-500 mt-1">Resolved items</p>
-            </CardContent>
-          </Card>
-        </div>
-        </div>
+        <MetricSection
+          title="DORA Resilience & Issue Tracking"
+          view={viewMode}
+          items={[
+            { icon: Server, label: "ICT Systems", value: filteredIctSystems.length, sub: `${criticalSystems} critical`, iconColor: "text-blue-600" },
+            { icon: AlertTriangle, label: "Open Incidents", value: openIncidents, sub: `${criticalIncidents} critical`, iconColor: "text-orange-600" },
+            { icon: AlertCircle, label: "Open Issues", value: openIssues, sub: "Action items", iconColor: "text-red-600", tint: "from-red-50 to-orange-50" },
+            { icon: CheckCircle2, label: "Closed Issues", value: closedIssues, sub: "Resolved", iconColor: "text-green-600", tint: "from-green-50 to-emerald-50" },
+          ]}
+        />
       )}
 
       <UnassignedRecordsChart />
