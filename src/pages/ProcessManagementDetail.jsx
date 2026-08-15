@@ -17,6 +17,7 @@ import {
 import ProcessFlowChart from "@/components/processmanagement/ProcessFlowChart";
 import StakeholderPickerDialog from "@/components/processmanagement/StakeholderPickerDialog";
 import IHPOMNodeLinkDialog from "@/components/processmanagement/IHPOMNodeLinkDialog";
+import DeleteProcessButton from "@/components/processmanagement/DeleteProcessButton";
 import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import { applyAutoNumber } from "@/lib/autoNumbering";
 import { Link, useNavigate } from "react-router-dom";
@@ -256,6 +257,15 @@ export default function ProcessManagementDetail() {
           </div>
         </div>
         <div className="flex gap-2">
+          {!isNew && processId && (
+            <DeleteProcessButton
+              process={{ ...formData, id: processId }}
+              variant="outline"
+              size="sm"
+              label="Delete"
+              onDeleted={() => navigate(createPageUrl("ProcessManagement"))}
+            />
+          )}
           <Link to={createPageUrl("ProcessManagement")}>
             <Button variant="outline">Cancel</Button>
           </Link>

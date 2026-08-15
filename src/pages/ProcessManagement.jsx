@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import OrgProcessTreeView from "@/components/processmanagement/OrgProcessTreeView";
 import ProcessCSVImportDialog from "@/components/processmanagement/ProcessCSVImportDialog";
+import DeleteProcessButton from "@/components/processmanagement/DeleteProcessButton";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import PageHeader from "@/components/layout/PageHeader";
 
@@ -120,6 +121,7 @@ export default function ProcessManagement() {
                   {process.linked_risk_ids.length} risks
                 </Badge>
               )}
+              <DeleteProcessButton process={process} />
             </div>
           </div>
         </div>

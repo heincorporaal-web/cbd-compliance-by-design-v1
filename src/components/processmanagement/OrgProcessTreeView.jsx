@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronDown, Network, Circle, User, Server } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import DeleteProcessButton from "@/components/processmanagement/DeleteProcessButton";
 
 const getLevelColor = (level) => {
   const colors = {
@@ -82,6 +83,7 @@ const OrgProcessNode = ({ process, systems, expandedNodes, toggleNode, searchTer
               {process.linked_risk_ids.length} risks
             </Badge>
           )}
+          <DeleteProcessButton process={process} />
         </div>
       </div>
 
