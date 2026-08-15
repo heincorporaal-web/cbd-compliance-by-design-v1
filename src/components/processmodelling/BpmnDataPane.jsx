@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import SearchableSelect from "@/components/ui/SearchableSelect";
 import ActivityDescriptionEditor from "@/components/processmodelling/ActivityDescriptionEditor";
+import DiagramProcessPicker from "@/components/processmodelling/DiagramProcessPicker";
 import {
   FIELDS,
   CATEGORY_SECTIONS,
@@ -170,6 +171,7 @@ export default function BpmnDataPane({
   elementGuid,
   data,
   onChange, // (key, value) => void
+  currentProcess,
   onClose,
 }) {
   const { options, records } = useEntityOptions(companyId);
@@ -288,6 +290,16 @@ export default function BpmnDataPane({
       )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        {category === "canvas" && (
+          <DiagramProcessPicker
+            companyId={companyId}
+            parentProcessId={data?.parent_process_reference}
+            value={data?.diagram_process_id}
+            currentProcess={currentProcess}
+            processes={Object.values(records.orgprocess || {})}
+            onChange={onChange}
+          />
+        )}
         {sections.map((sec) => (
           <section key={sec.title} className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wide text-indigo-500 border-b border-slate-100 pb-1">

@@ -82,12 +82,17 @@ export default function AdvancedProcessModelling() {
 
   const saveMutation = useMutation({
     mutationFn: async ({ xml, svg, canvasMeta, elementMeta }) => {
-      const overriddenName = canvasMeta?.process_name;
+      const chosenId = canvasMeta?.diagram_process_id;
+      let proc = selectedProcess;
+      if (chosenId && chosenId !== selectedProcess.id) {
+        proc = await base44.entities.OrgProcess.get(chosenId);
+      }
+      const overriddenName = canvasMeta?.process_name || proc.name;
       const payload = {
-        process_id: selectedProcess.id,
-        process_code: selectedProcess.process_code,
-        process_name: overriddenName || selectedProcess.name,
-        company_id: selectedProcess.company_id,
+        process_id: proc.id,
+        process_code: proc.process_code,
+        process_name: overriddenName,
+        company_id: proc.company_id,
         bpmn_xml: xml,
         svg_snapshot: svg,
         canvas_meta: canvasMeta || {},
@@ -96,8 +101,16 @@ export default function AdvancedProcessModelling() {
       if (diagram) return base44.entities.ProcessDiagram.update(diagram.id, payload);
       return base44.entities.ProcessDiagram.create({ ...payload, status: "draft" });
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      const chosenId = variables?.canvasMeta?.diagram_process_id;
       queryClient.invalidateQueries(["processDiagram", selectedProcess.id]);
+      if (chosenId) queryClient.invalidateQueries(["processDiagram", chosenId]);
+      queryClient.invalidateQueries(["orgProcesses", effectiveCompanyId]);
+      if (chosenId && chosenId !== selectedProcess.id) {
+        base44.entities.OrgProcess.get(chosenId)
+          .then((p) => { if (p) setSelectedProcess(p); })
+          .catch(() => {});
+      }
       toast.success("Process diagram saved");
     },
     onError: (e) => toast.error("Save failed: " + (e?.message || e)),
@@ -193,6 +206,7 @@ export default function AdvancedProcessModelling() {
             initialCanvasMeta={diagram?.canvas_meta}
             initialElementMeta={diagram?.element_meta}
             readOnly={viewMode === "view"}
+            currentProcess={selectedProcess}
             onSave={(xml, svg, canvasMeta, elementMeta) =>
               saveMutation.mutate({ xml, svg, canvasMeta, elementMeta })
             }

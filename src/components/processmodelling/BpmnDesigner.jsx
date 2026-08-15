@@ -42,6 +42,7 @@ export default function BpmnDesigner({
   onBack,
   processLabel,
   companyId,
+  currentProcess,
   readOnly = false,
 }) {
   const containerRef = useRef(null);
@@ -420,6 +421,7 @@ export default function BpmnDesigner({
       {paneOpen && (
         <BpmnDataPane
           companyId={companyId}
+          currentProcess={currentProcess}
           category={paneCategory}
           elementId={selection?.id}
           elementLabel={selection?.label}
