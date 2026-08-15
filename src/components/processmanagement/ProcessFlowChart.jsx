@@ -20,6 +20,7 @@ const CRITICALITY_COLORS = {
   high:     { bg: "#ffedd5", border: "#fdba74", text: "#9a3412" },
   medium:   { bg: "#fef9c3", border: "#fde047", text: "#854d0e" },
   low:      { bg: "#dbeafe", border: "#93c5fd", text: "#1e40af" },
+  na:       { bg: "#f1f5f9", border: "#cbd5e1", text: "#475569" },
 };
 
 const NODE_W = 200;

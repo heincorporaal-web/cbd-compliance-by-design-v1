@@ -123,6 +123,7 @@ export default function IHPOMNodeDialog({ open, onOpenChange, editNode, allNodes
                   <SelectItem value="high">High</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="na">N/A</SelectItem>
                 </SelectContent>
               </Select>
             </div>

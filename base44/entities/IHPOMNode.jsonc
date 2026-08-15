@@ -53,7 +53,8 @@
         "critical",
         "high",
         "medium",
-        "low"
+        "low",
+        "na"
       ],
       "default": "medium",
       "description": "Business criticality"

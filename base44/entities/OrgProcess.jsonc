@@ -172,7 +172,8 @@
         "critical",
         "high",
         "medium",
-        "low"
+        "low",
+        "na"
       ],
       "default": "medium"
     },
