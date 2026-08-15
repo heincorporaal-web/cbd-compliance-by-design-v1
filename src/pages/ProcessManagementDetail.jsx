@@ -23,8 +23,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 const levelLabels = {
-  0: "Value Chain", 1: "Process Group", 2: "Process",
-  3: "Sub-Process", 4: "Procedure", 5: "Task", 6: "Activity/Keystroke"
+  0: "Entity Level", 1: "Functional Area", 2: "Process Groups",
+  3: "Process", 4: "Sub Process", 5: "Activity"
 };
 
 export default function ProcessManagementDetail() {
