@@ -81,11 +81,14 @@ function useEntityOptions(companyId) {
   };
   return useMemo(() => {
     const out = {};
+    const records = {};
     Object.keys(queries).forEach((k) => {
       const rows = queries[k].data || [];
       out[k] = rows.map((r) => ({ id: r.id, label: (LABEL_BUILDERS[k] || (() => ""))(r) }));
+      records[k] = {};
+      rows.forEach((r) => { records[k][r.id] = r; });
     });
-    return out;
+    return { options: out, records };
   }, [
     queries.stakeholder.data,
     queries.ictsystem.data,
@@ -132,6 +135,33 @@ function Field({ fieldKey, def, value, onChange }) {
   );
 }
 
+function LinkedProcessSummary({ record }) {
+  if (!record) return null;
+  const rows = [
+    record.process_code && { k: "Code", v: record.process_code },
+    record.name && { k: "Name", v: record.name },
+    record.process_owner && { k: "Owner", v: record.process_owner },
+    record.workstream && { k: "Workstream", v: record.workstream },
+    record.value_chain && { k: "Value chain", v: record.value_chain },
+    record.criticality && { k: "Criticality", v: record.criticality },
+    record.status && { k: "Status", v: record.status },
+  ].filter(Boolean);
+  if (!rows.length) return null;
+  return (
+    <div className="mt-1.5 rounded-md border border-indigo-100 bg-indigo-50/50 p-2.5 space-y-1">
+      {rows.map((r) => (
+        <div key={r.k} className="flex gap-2 text-xs">
+          <span className="w-20 shrink-0 text-slate-400 font-medium">{r.k}</span>
+          <span className="text-slate-700 break-words">{r.v}</span>
+        </div>
+      ))}
+      {record.description && (
+        <p className="pt-1 text-xs text-slate-600 border-t border-indigo-100/70">{record.description}</p>
+      )}
+    </div>
+  );
+}
+
 export default function BpmnDataPane({
   companyId,
   category,
@@ -142,7 +172,7 @@ export default function BpmnDataPane({
   onChange, // (key, value) => void
   onClose,
 }) {
-  const options = useEntityOptions(companyId);
+  const { options, records } = useEntityOptions(companyId);
   const sections = CATEGORY_SECTIONS[category] || CATEGORY_SECTIONS.default;
   const [showGuid, setShowGuid] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -171,6 +201,10 @@ export default function BpmnDataPane({
       );
     }
     if (def.type === "search") {
+      const linkedRecord =
+        key === "linked_process" && data?.[key]
+          ? (records.orgprocess || {})[data[key]]
+          : null;
       return (
         <div key={key} className="space-y-1">
           <Label className="text-xs font-medium text-slate-600">{def.label}</Label>
@@ -181,6 +215,7 @@ export default function BpmnDataPane({
             placeholder="Search…"
             noneLabel="— Clear"
           />
+          {linkedRecord && <LinkedProcessSummary record={linkedRecord} />}
         </div>
       );
     }

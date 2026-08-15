@@ -136,7 +136,7 @@ export default function BpmnDesigner({
         setSelection(desc);
         selectedElementRef.current = el;
         const bo = el.businessObject || {};
-        const di = bo.di || {};
+        const di = el.di || {};
         setSelectedIsExpanded(di.isExpanded === true);
         if (desc.seed && Object.keys(desc.seed).length) {
           setElementMeta((prev) => ({

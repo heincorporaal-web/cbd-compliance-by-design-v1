@@ -14,6 +14,7 @@ export const ENTITY_LABELS = {
 
 export const FIELDS = {
   // ---- common / core ----
+  linked_process: { label: "Link to defined process", type: "search", entity: "orgprocess" },
   name: { label: "Name (overrides BPMN label)", type: "text" },
   process_level: {
     label: "Process Level",
@@ -258,6 +259,7 @@ export const CATEGORY_SECTIONS = {
     {
       title: "Task / Activity",
       fields: [
+        "linked_process",
         "name",
         "activity_id",
         "activity_type",
@@ -282,6 +284,7 @@ export const CATEGORY_SECTIONS = {
     {
       title: "Subprocess",
       fields: [
+        "linked_process",
         "name",
         "subprocess_id",
         "parent_process_reference",
@@ -300,6 +303,7 @@ export const CATEGORY_SECTIONS = {
     {
       title: "Gateway / Decision",
       fields: [
+        "linked_process",
         "name",
         "gateway_id",
         "gateway_type",
