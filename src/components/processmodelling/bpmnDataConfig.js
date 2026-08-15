@@ -243,6 +243,7 @@ export const CATEGORY_SECTIONS = {
     {
       title: "Start Event",
       fields: [
+        "linked_process",
         "name",
         "start_event_id",
         "trigger_type",
@@ -322,6 +323,7 @@ export const CATEGORY_SECTIONS = {
     {
       title: "End Event",
       fields: [
+        "linked_process",
         "name",
         "end_event_id",
         "end_state_description",
@@ -343,6 +345,7 @@ export const CATEGORY_SECTIONS = {
     {
       title: "Data Object / Artefact",
       fields: [
+        "linked_process",
         "name",
         "artefact_id",
         "artefact_type",
@@ -356,7 +359,7 @@ export const CATEGORY_SECTIONS = {
     { title: "Core BPMN-to-SOP", fields: DATA_CORE_KEYS },
   ],
   default: [
-    { title: "Element", fields: ["name"] },
+    { title: "Element", fields: ["linked_process", "name"] },
     { title: "Core BPMN-to-SOP", fields: CORE_KEYS },
   ],
 };

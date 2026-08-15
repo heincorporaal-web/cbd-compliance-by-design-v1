@@ -40,6 +40,18 @@ const LABEL_BUILDERS = {
     `${p.process_code || ""} ${p.name || ""}`.trim() || `Process ${String(p.id).slice(-4)}`,
 };
 
+// Map an OrgProcess record onto element-pane fields, used to auto-populate
+// the element's data when it is linked to an existing company process.
+const buildProcessFieldMap = (p) => ({
+  name: p.name || "",
+  process_reference: p.process_code || "",
+  process_owner: p.process_owner || "",
+  activity_owner_performer: p.process_owner || "",
+  activity_description: p.description || "",
+  input: p.inputs || "",
+  output: p.outputs || "",
+});
+
 function useEntityOptions(companyId) {
   const enabled = !!companyId;
   const queries = {
@@ -203,16 +215,28 @@ export default function BpmnDataPane({
       );
     }
     if (def.type === "search") {
+      const isLink = key === "linked_process";
       const linkedRecord =
-        key === "linked_process" && data?.[key]
-          ? (records.orgprocess || {})[data[key]]
-          : null;
+        isLink && data?.[key] ? (records.orgprocess || {})[data[key]] : null;
+      const handle = (v) => {
+        onChange(key, v);
+        if (isLink && v) {
+          const rec = (records.orgprocess || {})[v];
+          if (rec) {
+            const map = buildProcessFieldMap(rec);
+            const allowed = new Set(sections.flatMap((s) => s.fields));
+            Object.entries(map).forEach(([fk, fv]) => {
+              if (fv && allowed.has(fk) && !data?.[fk]) onChange(fk, fv);
+            });
+          }
+        }
+      };
       return (
         <div key={key} className="space-y-1">
           <Label className="text-xs font-medium text-slate-600">{def.label}</Label>
           <SearchableSelect
             value={data?.[key] || ""}
-            onValueChange={(v) => onChange(key, v)}
+            onValueChange={handle}
             options={options[def.entity] || []}
             placeholder="Search…"
             noneLabel="— Clear"

@@ -9,7 +9,10 @@ import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, Panel
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
 import BpmnDataPane from "@/components/processmodelling/BpmnDataPane";
+import UnlinkedElementsDialog from "@/components/processmodelling/UnlinkedElementsDialog";
 import { getElementCategory } from "@/components/processmodelling/bpmnDataConfig";
+import { base44 } from "@/api/base44Client";
+import { queryClientInstance } from "@/lib/query-client";
 
 export const EMPTY_BPMN_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
@@ -32,6 +35,13 @@ const newGuid = () =>
   (typeof crypto !== "undefined" && crypto.randomUUID)
     ? crypto.randomUUID()
     : "g-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+const parseLevel = (v) => {
+  if (v == null || v === "") return null;
+  if (typeof v === "number") return v;
+  const m = String(v).match(/(\d+)/);
+  return m ? Number(m[1]) : null;
+};
 
 export default function BpmnDesigner({
   initialXml,
@@ -58,6 +68,8 @@ export default function BpmnDesigner({
   const fileInputRef = useRef(null);
   const selectedElementRef = useRef(null);
   const [selectedIsExpanded, setSelectedIsExpanded] = useState(false);
+  const [unlinked, setUnlinked] = useState(null);
+  const [adding, setAdding] = useState(false);
 
   // Exit connect mode on Escape
   useEffect(() => {
@@ -260,7 +272,7 @@ export default function BpmnDesigner({
     }
   };
 
-  const handleSave = async () => {
+  const doSave = async (metaOverride) => {
     try {
       const { xml } = await modelerRef.current.saveXML({ format: true });
       let svg = null;
@@ -268,11 +280,74 @@ export default function BpmnDesigner({
         const { svg: svgStr } = await modelerRef.current.saveSVG();
         svg = svgStr;
       } catch {}
-      await onSave(xml, svg, canvasMeta, elementMeta);
+      await onSave(xml, svg, canvasMeta, metaOverride || elementMeta);
       setDirty(false);
     } catch (e) {
       toast.error("Save failed: " + (e?.message || e));
     }
+  };
+
+  const handleSave = async () => {
+    const modeler = modelerRef.current;
+    if (!modeler) return;
+    const all = modeler.get("elementRegistry").getAll();
+    const DEFAULT_NAMES = new Set(["Start"]);
+    const LINKABLE = new Set([
+      "task", "subprocess", "gateway", "start_event", "end_event", "data_object", "default",
+    ]);
+    const found = [];
+    for (const el of all) {
+      if (el.type === "label") continue;
+      const cat = getElementCategory(el);
+      if (!LINKABLE.has(cat)) continue;
+      const meta = elementMeta[el.id] || {};
+      if (meta.linked_process) continue;
+      const bo = el.businessObject || {};
+      const name = meta.name || bo.name || "";
+      if (!name || DEFAULT_NAMES.has(name)) continue;
+      found.push({ id: el.id, name, category: cat });
+    }
+    if (found.length) {
+      setUnlinked(found);
+      return;
+    }
+    await doSave();
+  };
+
+  const handleAddAll = async () => {
+    setAdding(true);
+    try {
+      const parentId = canvasMeta.diagram_process_id || canvasMeta.parent_process_reference || null;
+      const canvasLevel = parseLevel(canvasMeta.process_level);
+      const newMeta = { ...elementMeta };
+      for (const el of unlinked || []) {
+        const meta = elementMeta[el.id] || {};
+        const code = meta.process_reference || `ELEM-${(meta.guid || el.id).slice(0, 8)}`;
+        const created = await base44.entities.OrgProcess.create({
+          name: el.name,
+          process_code: code,
+          level: parseLevel(meta.process_level) ?? canvasLevel ?? 3,
+          parent_id: parentId,
+          company_id: companyId,
+          description: meta.activity_description || meta.purpose || "",
+          process_owner: meta.process_owner || "",
+          status: "active",
+        });
+        newMeta[el.id] = { ...meta, linked_process: created.id };
+      }
+      setElementMeta(newMeta);
+      setUnlinked(null);
+      setAdding(false);
+      try { await queryClientInstance.invalidateQueries(["dpOrgProcesses"]); } catch {}
+      await doSave(newMeta);
+    } catch (e) {
+      setAdding(false);
+      toast.error("Could not add to company process data: " + (e?.message || e));
+    }
+  };
+
+  const handleGoBack = () => {
+    setUnlinked(null);
   };
 
   const download = (content, filename, mime) => {
@@ -431,6 +506,12 @@ export default function BpmnDesigner({
           onClose={() => setPaneOpen(false)}
         />
       )}
+      <UnlinkedElementsDialog
+        elements={unlinked}
+        adding={adding}
+        onAddAll={handleAddAll}
+        onGoBack={handleGoBack}
+      />
     </div>
   );
 }
