@@ -1,0 +1,108 @@
+{
+  "name": "DiscoveredAsset",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "asset_name": {
+      "type": "string",
+      "description": "Discovered asset display name (defaults to hostname)"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "device",
+        "software",
+        "cloud_resource",
+        "network_device",
+        "virtual_machine",
+        "mobile_device",
+        "other"
+      ],
+      "description": "Type of discovered asset"
+    },
+    "discovery_source": {
+      "type": "string",
+      "enum": [
+        "microsoft_intune",
+        "azure_ad",
+        "microsoft_sccm",
+        "azure_resource_graph",
+        "manual"
+      ],
+      "description": "Native Microsoft discovery tool that found this asset (or manual entry)"
+    },
+    "hostname": {
+      "type": "string",
+      "description": "Device / resource hostname"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address"
+    },
+    "mac_address": {
+      "type": "string",
+      "description": "MAC address"
+    },
+    "manufacturer": {
+      "type": "string",
+      "description": "Hardware manufacturer / publisher"
+    },
+    "model": {
+      "type": "string",
+      "description": "Hardware model / SKU"
+    },
+    "serial_number": {
+      "type": "string",
+      "description": "Serial number / unique device id"
+    },
+    "operating_system": {
+      "type": "string",
+      "description": "Operating system or platform"
+    },
+    "os_version": {
+      "type": "string",
+      "description": "Operating system version"
+    },
+    "location": {
+      "type": "string",
+      "description": "Physical or cloud location"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Assigned owner / primary user"
+    },
+    "linked_ict_system_id": {
+      "type": "string",
+      "description": "Reference to ICTSystem entity once the discovered asset is matched to the ICT register"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "discovered",
+        "linked",
+        "ignored",
+        "decommissioned"
+      ],
+      "default": "discovered",
+      "description": "CMDB lifecycle status"
+    },
+    "last_discovered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the last discovery scan that reported this asset"
+    },
+    "raw_discovery_data": {
+      "type": "object",
+      "description": "Raw payload from the Microsoft discovery tool, kept for audit and reconciliation"
+    }
+  },
+  "required": [
+    "company_id",
+    "asset_name",
+    "asset_type",
+    "discovery_source"
+  ]
+}

@@ -39,6 +39,8 @@ import About from './pages/About';
 import AdvancedThirdPartyRiskManagement from './pages/AdvancedThirdPartyRiskManagement';
 import AdminPlaybooks from './pages/AdminPlaybooks';
 import AdvancedProcessModelling from './pages/AdvancedProcessModelling';
+import AssetsByDesign from './pages/AssetsByDesign';
+import AdvancedAssetManagement from './pages/AdvancedAssetManagement';
 import OperationsByDesign from './pages/OperationsByDesign';
 import PartnerByDesign from './pages/PartnerByDesign';
 import StakeholderAssignmentGaps from './pages/StakeholderAssignmentGaps';
@@ -114,6 +116,8 @@ const AuthenticatedApp = () => {
         <Route path="/AdvancedThirdPartyRiskManagement" element={<AdvancedThirdPartyRiskManagement />} />
         <Route path="/AdminPlaybooks" element={<AdminPlaybooks />} />
         <Route path="/AdvancedProcessModelling" element={<AdvancedProcessModelling />} />
+        <Route path="/AssetsByDesign" element={<AssetsByDesign />} />
+        <Route path="/AdvancedAssetManagement" element={<AdvancedAssetManagement />} />
         <Route path="/OperationsByDesign" element={<OperationsByDesign />} />
         <Route path="/PartnerByDesign" element={<PartnerByDesign />} />
         <Route path="/StakeholderAssignmentGaps" element={<StakeholderAssignmentGaps />} />

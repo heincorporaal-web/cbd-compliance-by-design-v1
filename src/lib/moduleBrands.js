@@ -45,4 +45,25 @@ export const BRANDS = {
     badgeBg: "bg-purple-100 text-purple-700",
     text: "text-purple-700",
   },
+  abd: {
+    key: "abd",
+    name: "Assets by Design",
+    short: "ABD",
+    suite: "CBD — Compliance by Design",
+    tagline:
+      "Run a CMDB with native Microsoft discovery — scan the network with Intune, Azure AD and SCCM, import discovered items, and match them to your ICT system register.",
+    enterLabel: "Enter Assets by Design",
+    enterPath: "/AdvancedAssetManagement",
+    landingPath: "/AssetsByDesign",
+    logoUrl:
+      "https://media.base44.com/images/public/6975dcbcbc9efd8b47128ae3/fc8c4210c_file_000000002b88822fbcaf3d586c6138ee.png",
+    // Blue — assets / infrastructure
+    gradient: "from-blue-600 to-indigo-700",
+    solid: "bg-blue-700",
+    softBg: "bg-blue-50",
+    softText: "text-blue-700",
+    border: "border-blue-200",
+    badgeBg: "bg-blue-100 text-blue-700",
+    text: "text-blue-700",
+  },
 };

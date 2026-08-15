@@ -7,11 +7,12 @@ import { BRANDS } from "@/lib/moduleBrands";
 const MODULE_ROUTES = {
   obd: ["/OperationsByDesign", "/AdvancedProcessModelling"],
   pbd: ["/PartnerByDesign", "/AdvancedThirdPartyRiskManagement"],
+  abd: ["/AssetsByDesign", "/AdvancedAssetManagement"],
 };
 
 export default function ModuleNavigator() {
   const location = useLocation();
-  const modules = [BRANDS.obd, BRANDS.pbd];
+  const modules = [BRANDS.obd, BRANDS.pbd, BRANDS.abd];
 
   return (
     <div className="px-2 pb-2">

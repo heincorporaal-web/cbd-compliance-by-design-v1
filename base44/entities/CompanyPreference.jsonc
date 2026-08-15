@@ -116,6 +116,11 @@
       "type": "boolean",
       "default": false,
       "description": "Switch on the Advanced Process Modelling add-on module for this company (BPMN 2.0 diagram designer and risk-based process assessment)"
+    },
+    "enable_assets_by_design": {
+      "type": "boolean",
+      "default": false,
+      "description": "Switch on the Assets by Design add-on module for this company (CMDB with native Microsoft network discovery, linked to the ICT system register)"
     }
   },
   "required": [
