@@ -10,12 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import {
-  Workflow, Globe, Lock, Power, GitBranch, ArrowLeft,
+  Workflow, Globe, Lock, Power, GitBranch, ArrowLeft, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import BpmnDesigner from "@/components/processmodelling/BpmnDesigner";
 import ProcessDiagramList from "@/components/processmodelling/ProcessDiagramList";
 import ProcessDocumentTemplates from "@/components/processmodelling/ProcessDocumentTemplates";
+import GenerateDocumentDialog from "@/components/processmodelling/GenerateDocumentDialog";
 import ModulePageHeader from "@/components/branding/ModulePageHeader";
 import { BRANDS } from "@/lib/moduleBrands";
 
@@ -26,6 +27,7 @@ export default function AdvancedProcessModelling() {
   const [selectedProcess, setSelectedProcess] = useState(null);
   const [viewMode, setViewMode] = useState("edit");
   const [activeTab, setActiveTab] = useState("diagrams");
+  const [showDocDialog, setShowDocDialog] = useState(false);
 
   const effectiveCompanyId = companyId === "all" ? null : companyId;
 
@@ -194,11 +196,16 @@ export default function AdvancedProcessModelling() {
             <ProcessDocumentTemplates companyId={effectiveCompanyId} user={user} />
           ) : selectedProcess ? (
             <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <span className="font-mono">{selectedProcess.process_code}</span>
-            <span className="text-slate-300">/</span>
-            <span className="font-medium text-slate-700">{selectedProcess.name}</span>
-            <Badge variant="outline" className="ml-2">L{selectedProcess.level}</Badge>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <span className="font-mono">{selectedProcess.process_code}</span>
+              <span className="text-slate-300">/</span>
+              <span className="font-medium text-slate-700">{selectedProcess.name}</span>
+              <Badge variant="outline" className="ml-2">L{selectedProcess.level}</Badge>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setShowDocDialog(true)} className="gap-1.5">
+              <FileText className="w-4 h-4" /> Generate Document
+            </Button>
           </div>
           <BpmnDesigner
             key={`${selectedProcess.id}-${viewMode}`}
@@ -213,6 +220,13 @@ export default function AdvancedProcessModelling() {
             saving={saveMutation.isPending}
             onBack={() => setSelectedProcess(null)}
             processLabel={`${selectedProcess.process_code || ""} ${diagram?.canvas_meta?.process_name || selectedProcess.name || ""}`.trim()}
+            companyId={selectedProcess.company_id}
+          />
+          <GenerateDocumentDialog
+            open={showDocDialog}
+            onClose={() => setShowDocDialog(false)}
+            process={selectedProcess}
+            diagram={diagram}
             companyId={selectedProcess.company_id}
           />
         </div>

@@ -12,7 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, X, Shield, Target, BookOpen, Info } from "lucide-react";
+import { ArrowLeft, Plus, X, Shield, Target, BookOpen, Info, Printer, Send, Download } from "lucide-react";
+import ActionsMenu from "@/components/ui/ActionsMenu";
+import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -297,6 +299,36 @@ export default function RiskDetail() {
     }
   };
 
+  const submitForReview = () => {
+    const data = { ...formData, status: 'pending_review' };
+    setFormData(data);
+    markClean();
+    if (riskId) updateMutation.mutate({ id: riskId, data });
+    toast.success('Risk submitted for review');
+  };
+
+  const exportCsv = () => {
+    const rows = [
+      ['Field', 'Value'],
+      ...Object.entries(formData).map(([k, v]) => [
+        k,
+        Array.isArray(v) ? v.join('; ') : v && typeof v === 'object' ? JSON.stringify(v) : (v ?? ''),
+      ]),
+    ];
+    const csv = rows
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `risk-${riskId || 'new'}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const linkedControls = controls.filter(c => formData.control_ids?.includes(c.id));
   const linkedFrameworks = frameworks.filter(f => formData.framework_ids?.includes(f.id));
   const company = companies.find(c => c.id === formData.company_id);
@@ -328,7 +360,16 @@ export default function RiskDetail() {
             </h1>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {!isNew && riskId && (
+            <ActionsMenu
+              actions={[
+                { label: 'Print record', icon: Printer, onClick: () => window.print() },
+                { label: 'Submit for review', icon: Send, onClick: submitForReview },
+                { label: 'Export to spreadsheet', icon: Download, onClick: exportCsv },
+              ]}
+            />
+          )}
           <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("RiskRegister"))}>Cancel</Button>
           {!isNew && riskId && (
             <Button

@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Plus, Trash2, Network, Shield, AlertTriangle, AlertCircle, Target, ClipboardCheck, Link as LinkIcon, X } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Network, Shield, AlertTriangle, AlertCircle, Target, ClipboardCheck, Link as LinkIcon, X, Link2, ListChecks } from "lucide-react";
+import ActionsMenu from "@/components/ui/ActionsMenu";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
@@ -57,6 +58,8 @@ export default function ProcessDetail() {
   const [activeDialog, setActiveDialog] = useState(null);
   const [isObjectiveDialogOpen, setIsObjectiveDialogOpen] = useState(false);
   const [isPrincipleRiskDialogOpen, setIsPrincipleRiskDialogOpen] = useState(false);
+  const [isLinksDialogOpen, setIsLinksDialogOpen] = useState(false);
+  const [isExecutionDialogOpen, setIsExecutionDialogOpen] = useState(false);
 
   const { data: existingProcess } = useQuery({
     queryKey: ['businessProcess', processId],
@@ -240,7 +243,15 @@ export default function ProcessDetail() {
             <p className="text-slate-600">iHPOM Process Management</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {!isNew && processId && (
+            <ActionsMenu
+              actions={[
+                { label: 'Manage Links', icon: Link2, onClick: () => setIsLinksDialogOpen(true) },
+                { label: 'Execution Details', icon: ListChecks, onClick: () => setIsExecutionDialogOpen(true) },
+              ]}
+            />
+          )}
           <Link to={createPageUrl("iHPOM")}>
             <Button type="button" variant="outline">Cancel</Button>
           </Link>
@@ -252,25 +263,7 @@ export default function ProcessDetail() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Tabs defaultValue="details" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="links">
-              Links
-              {(formData.linked_risk_ids?.length + formData.linked_control_ids?.length + 
-                formData.linked_issue_ids?.length + formData.linked_goal_ids?.length + 
-                formData.linked_assessment_ids?.length) > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {formData.linked_risk_ids?.length + formData.linked_control_ids?.length + 
-                   formData.linked_issue_ids?.length + formData.linked_goal_ids?.length + 
-                   formData.linked_assessment_ids?.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="execution">Execution Details</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="details" className="space-y-6">
+        <div className="space-y-6">
             <Card className="border-none shadow-lg">
               <CardHeader className="border-b border-slate-100">
                 <CardTitle>Basic Information</CardTitle>
@@ -424,9 +417,13 @@ export default function ProcessDetail() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="links" className="space-y-6">
+          <Dialog open={isLinksDialogOpen} onOpenChange={setIsLinksDialogOpen}>
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Manage Links</DialogTitle>
+              </DialogHeader>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Risks */}
               <Card className="border-none shadow-lg">
@@ -972,9 +969,14 @@ export default function ProcessDetail() {
                 </CardContent>
               </Card>
               </div>
-              </TabsContent>
+            </DialogContent>
+          </Dialog>
 
-          <TabsContent value="execution" className="space-y-6">
+          <Dialog open={isExecutionDialogOpen} onOpenChange={setIsExecutionDialogOpen}>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Execution Details</DialogTitle>
+              </DialogHeader>
             <Card className="border-none shadow-lg">
               <CardHeader className="border-b border-slate-100">
                 <CardTitle>Execution Details</CardTitle>
@@ -1066,8 +1068,8 @@ export default function ProcessDetail() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+            </DialogContent>
+          </Dialog>
 
         </form>
     </div>
