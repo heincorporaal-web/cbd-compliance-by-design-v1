@@ -253,8 +253,10 @@ export default function MyActions() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-            <NavIcon itemId="my_actions" defaultIcon={CalendarClock} className="w-7 h-7 text-white" forceWhite />
+          <div className="w-12 h-12 p-[2px] bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shrink-0">
+            <div className="w-full h-full bg-slate-100 rounded-[10px] flex items-center justify-center">
+              <NavIcon itemId="my_actions" defaultIcon={CalendarClock} className="w-7 h-7 text-primary" />
+            </div>
           </div>
           <div>
             <h1 className="text-3xl font-bold text-slate-900">My Actions</h1>
