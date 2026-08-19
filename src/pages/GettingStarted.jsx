@@ -219,8 +219,10 @@ export default function GettingStarted() {
       {/* Header */}
       <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-8 border border-primary/20">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-            <NavIcon itemId="getting_started" defaultIcon={HelpCircle} className="w-6 h-6 text-white" forceWhite />
+          <div className="w-12 h-12 p-[2px] bg-gradient-to-br from-primary to-secondary rounded-xl shrink-0">
+            <div className="w-full h-full bg-slate-100 rounded-[10px] flex items-center justify-center">
+              <NavIcon itemId="getting_started" defaultIcon={HelpCircle} className="w-6 h-6 text-primary" />
+            </div>
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Getting Started with CBD</h1>
