@@ -79,9 +79,11 @@
         "active",
         "decommissioned",
         "planned",
-        "under_review"
+        "under_review",
+        "discovered"
       ],
-      "default": "active"
+      "default": "active",
+      "description": "System status. 'discovered' is set by the CMDB (Assets by Design) when infrastructure CIs are linked to this system \u2014 only when ABD is enabled for the company."
     },
     "dependencies": {
       "type": "array",

@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Boxes, Search, Plus, AppWindow, AlertCircle, CheckCircle2, Link2 } from "lucide-react";
+import { Boxes, Search, Plus, AppWindow, AlertCircle, CheckCircle2, Link2, RefreshCw, ShieldAlert } from "lucide-react";
 import ModulePageHeader from "@/components/branding/ModulePageHeader";
 import { BRANDS } from "@/lib/moduleBrands";
 import CBDApplicationFormDialog from "@/components/cmdb/CBDApplicationFormDialog";
+import { toast } from "sonner";
 
 export default function CBDApplications() {
   const [companyId] = useCompanyFilter();
@@ -19,6 +20,7 @@ export default function CBDApplications() {
   const [critFilter, setCritFilter] = useState("all");
   const [activeFilter, setActiveFilter] = useState("all");
   const [showAdd, setShowAdd] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   const { data: apps = [], isLoading } = useQuery({
     queryKey: ["cbdAppRefs", companyId],
@@ -31,6 +33,13 @@ export default function CBDApplications() {
     queryFn: () => companyId ? base44.entities.ApplicationCIRelationship.filter({ company_id: companyId }) : [],
     enabled: !!companyId,
   });
+
+  const { data: prefs } = useQuery({
+    queryKey: ["companyPrefs", companyId],
+    queryFn: () => companyId ? base44.entities.CompanyPreference.filter({ company_id: companyId }) : [],
+    enabled: !!companyId,
+  });
+  const abdEnabled = prefs?.[0]?.enable_assets_by_design === true;
 
   const relCountByApp = useMemo(() => {
     const m = {};
@@ -58,6 +67,23 @@ export default function CBDApplications() {
     withoutLinks: apps.length - Object.keys(relCountByApp).length,
   }), [apps, relCountByApp]);
 
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await base44.functions.invoke("syncCBDApplications", { company_id: companyId });
+      const d = res.data;
+      let msg = `Synced ${d.total_ict_systems} ICT system(s): ${d.created} new, ${d.updated} updated`;
+      if (d.deactivated) msg += `, ${d.deactivated} deactivated`;
+      if (d.write_back_skipped) msg += ". Write-back skipped — ABD not enabled.";
+      else if (d.discovered_writebacks > 0) msg += `, ${d.discovered_writebacks} marked Discovered`;
+      toast.success(msg);
+    } catch (e) {
+      toast.error(e.response?.data?.error || e.message || "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
     <div>
       <ModulePageHeader brand={BRANDS.abd} Icon={Boxes} title="CBD Applications" subtitle="Read-only references to CBD ICT applications and their CI dependencies" />
@@ -77,6 +103,12 @@ export default function CBDApplications() {
               <Card className="p-4"><div className="flex items-center gap-2"><AlertCircle className="w-5 h-5 text-amber-500" /><div><p className="text-2xl font-bold">{stats.withoutLinks}</p><p className="text-xs text-slate-500">Unlinked</p></div></div></Card>
             </div>
 
+            {!abdEnabled && (
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5">
+                <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+                <p className="text-sm text-amber-700">Assets by Design is not enabled for this company. Sync will read CBD ICT systems but <strong>cannot write back</strong> "Discovered" status. Enable ABD in company preferences to allow write-back.</p>
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -100,6 +132,7 @@ export default function CBDApplications() {
                   <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
+              <Button variant="outline" onClick={handleSync} disabled={syncing} className="gap-1.5"><RefreshCw className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} /> Sync from CBD</Button>
               <Button onClick={() => setShowAdd(true)} className="gap-1.5"><Plus className="w-4 h-4" /> Add Application</Button>
             </div>
 
