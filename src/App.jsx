@@ -40,6 +40,8 @@ import AdvancedThirdPartyRiskManagement from './pages/AdvancedThirdPartyRiskMana
 import AdminPlaybooks from './pages/AdminPlaybooks';
 import AdvancedProcessModelling from './pages/AdvancedProcessModelling';
 import AssetsByDesign from './pages/AssetsByDesign';
+import CIInventory from './pages/cmdb/CIInventory';
+import CIDetail from './pages/cmdb/CIDetail';
 import AdvancedAssetManagement from './pages/AdvancedAssetManagement';
 import OperationsByDesign from './pages/OperationsByDesign';
 import PartnerByDesign from './pages/PartnerByDesign';
@@ -117,6 +119,8 @@ const AuthenticatedApp = () => {
         <Route path="/AdminPlaybooks" element={<AdminPlaybooks />} />
         <Route path="/AdvancedProcessModelling" element={<AdvancedProcessModelling />} />
         <Route path="/AssetsByDesign" element={<AssetsByDesign />} />
+        <Route path="/CMDBInventory" element={<CIInventory />} />
+        <Route path="/CIDetail" element={<CIDetail />} />
         <Route path="/AdvancedAssetManagement" element={<AdvancedAssetManagement />} />
         <Route path="/OperationsByDesign" element={<OperationsByDesign />} />
         <Route path="/PartnerByDesign" element={<PartnerByDesign />} />

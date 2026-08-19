@@ -52,8 +52,8 @@ export const BRANDS = {
     suite: "CBD — Compliance by Design",
     tagline:
       "Run a CMDB with native Microsoft discovery — scan the network with Intune, Azure AD and SCCM, import discovered items, and match them to your ICT system register.",
-    enterLabel: "Enter Assets by Design",
-    enterPath: "/AdvancedAssetManagement",
+    enterLabel: "Enter CMDB",
+    enterPath: "/CMDBInventory",
     landingPath: "/AssetsByDesign",
     logoUrl:
       "https://media.base44.com/images/public/6975dcbcbc9efd8b47128ae3/fc8c4210c_file_000000002b88822fbcaf3d586c6138ee.png",

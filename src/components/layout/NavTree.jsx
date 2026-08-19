@@ -89,6 +89,7 @@ export const NAV_GROUPS = [
       { id: "value_chains", title: "Value Chains", url: createPageUrl("ValueChains"), icon: Network },
       { id: "advanced_process_modelling", title: "Operations by Design (OBD)", url: createPageUrl("OperationsByDesign"), icon: Workflow },
       { id: "assets_by_design", title: "Assets by Design (ABD)", url: createPageUrl("AssetsByDesign"), icon: Boxes },
+      { id: "cmdb_inventory", title: "CMDB Inventory", url: createPageUrl("CMDBInventory"), icon: Boxes },
       { id: "process_assignment_gaps", title: "Assignment Gap Finder", url: createPageUrl("StakeholderAssignmentGaps"), icon: ShieldAlert },
     ],
   },
