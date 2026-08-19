@@ -139,7 +139,7 @@ export default function CIInventory() {
                     <td className="py-2.5 px-3"><Badge variant="outline" className="text-xs">{c.lifecycle_status || "—"}</Badge></td>
                     <td className="py-2.5 px-3"><Badge variant="outline" className={`text-xs ${MANAGED_COLOR[c.managed_unmanaged] || ""}`}>{c.managed_unmanaged}</Badge></td>
                     <td className="py-2.5 px-3">{c.intrinsic_criticality && <Badge variant="outline" className={`text-xs ${CRIT_COLOR[c.intrinsic_criticality] || ""}`}>{c.intrinsic_criticality}</Badge>}</td>
-                    <td className="py-2.5 px-3 text-xs text-slate-500">{c.last_seen ? new Date(c.last_seen).toLocaleDateString() : "—"}</td>
+                    <td className="py-2.5 px-3 text-xs text-slate-500">{c.last_seen ? new Date(c.last_seen).toLocaleDateString("en-GB") : "—"}</td>
                   </tr>
                 ))}
               </tbody>

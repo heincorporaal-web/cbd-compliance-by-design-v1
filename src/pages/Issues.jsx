@@ -499,13 +499,13 @@ export default function Issues() {
                         {issue.due_date && (
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
-                            Due: {format(new Date(issue.due_date), 'MMM d, yyyy')}
+                            Due: {format(new Date(issue.due_date), 'd MMM yyyy')}
                           </span>
                         )}
                         {issue.resolved_date && (
                           <span className="flex items-center gap-1 text-green-600">
                             <CheckCircle2 className="w-3 h-3" />
-                            Resolved: {format(new Date(issue.resolved_date), 'MMM d, yyyy')}
+                            Resolved: {format(new Date(issue.resolved_date), 'd MMM yyyy')}
                           </span>
                         )}
                       </div>

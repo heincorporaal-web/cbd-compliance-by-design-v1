@@ -258,7 +258,7 @@ export default function WorkflowPanel({ entityType, entityId, entityName, compan
                   <div className="flex-1 min-w-0">
                     <p className="text-slate-600 truncate">{entry.actor}</p>
                     {entry.comments && <p className="text-slate-500 italic truncate">{entry.comments}</p>}
-                    <p className="text-slate-400">{entry.timestamp ? format(new Date(entry.timestamp), "MMM d, yyyy HH:mm") : ""}</p>
+                    <p className="text-slate-400">{entry.timestamp ? format(new Date(entry.timestamp), "d MMM yyyy HH:mm") : ""}</p>
                   </div>
                 </div>
               ))}

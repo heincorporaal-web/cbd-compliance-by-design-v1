@@ -158,7 +158,7 @@ function EntityHistoryRow({ log }) {
           </span>
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            {log.created_date ? format(new Date(log.created_date), "MMM dd, yyyy HH:mm") : "—"}
+            {log.created_date ? format(new Date(log.created_date), "dd MMM yyyy HH:mm") : "—"}
           </span>
         </div>
         {log.changes && <ChangeDiff changes={log.changes} />}
@@ -260,7 +260,7 @@ function TimelineRow({ entry }) {
           <span className="flex items-center gap-1"><User className="w-3 h-3" />{entry.actor}</span>
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            {entry.timestamp ? format(new Date(entry.timestamp), "MMM dd, yyyy HH:mm") : "—"}
+            {entry.timestamp ? format(new Date(entry.timestamp), "dd MMM yyyy HH:mm") : "—"}
           </span>
         </div>
         {entry.comments && <p className="mt-1.5 text-xs text-slate-500 italic">{entry.comments}</p>}

@@ -150,7 +150,7 @@ export default function SignOffs() {
                             {company && <span>{company.name}</span>}
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
-                              {format(new Date(signOff.period_start), 'MMM d')} - {format(new Date(signOff.period_end), 'MMM d, yyyy')}
+                              {format(new Date(signOff.period_start), 'd MMM')} - {format(new Date(signOff.period_end), 'd MMM yyyy')}
                             </span>
                           </div>
                           <div className="flex gap-4 mt-2 text-xs text-slate-500">

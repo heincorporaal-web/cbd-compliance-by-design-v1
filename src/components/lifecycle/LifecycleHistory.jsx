@@ -41,7 +41,7 @@ export default function LifecycleHistory({ history = [] }) {
                         {event.status?.replace(/_/g, ' ')}
                       </span>
                       <span className="text-sm text-slate-500">
-                        {new Date(event.timestamp).toLocaleString()}
+                        {new Date(event.timestamp).toLocaleString("en-GB")}
                       </span>
                     </div>
                     <p className="text-sm text-slate-600">By: {event.actor}</p>

@@ -373,13 +373,13 @@ export default function ThirdParties() {
                             {provider.contract_end_date && (
                               <p className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
-                                Contract ends: {format(new Date(provider.contract_end_date), 'MMM d, yyyy')}
+                                Contract ends: {format(new Date(provider.contract_end_date), 'd MMM yyyy')}
                               </p>
                             )}
                             {provider.next_audit_date && (
                               <p className="flex items-center gap-1">
                                 <Shield className="w-3 h-3" />
-                                Next audit: {format(new Date(provider.next_audit_date), 'MMM d, yyyy')}
+                                Next audit: {format(new Date(provider.next_audit_date), 'd MMM yyyy')}
                               </p>
                             )}
                           </div>

@@ -23,7 +23,7 @@ export default function LifecycleNotifications({ entity }) {
             <div>
               <p className="font-medium text-green-900">Approved by {entity.approver}</p>
               <p className="text-sm text-green-700 mt-1">
-                {new Date(entity.approval_date).toLocaleString()}
+                {new Date(entity.approval_date).toLocaleString("en-GB")}
               </p>
             </div>
           </div>

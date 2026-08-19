@@ -44,7 +44,7 @@ export default function AuditTab({ ci }) {
               <p className="text-sm mt-1"><span className="text-red-600">{a.previous_value}</span> <span className="text-slate-400">→</span> <span className="text-emerald-600">{a.new_value}</span></p>
             )}
             <p className="text-xs text-slate-400 mt-1">
-              {a.timestamp ? new Date(a.timestamp).toLocaleString() : ""} · {a.user || "—"} {a.reason && `· ${a.reason}`}
+              {a.timestamp ? new Date(a.timestamp).toLocaleString("en-GB") : ""} · {a.user || "—"} {a.reason && `· ${a.reason}`}
             </p>
           </div>
         </div>

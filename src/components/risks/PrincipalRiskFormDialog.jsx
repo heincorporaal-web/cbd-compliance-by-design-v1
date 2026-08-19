@@ -241,8 +241,8 @@ export default function PrincipalRiskFormDialog({ open, onClose, editRisk, compa
           {editRisk && (editRisk.created_date || editRisk.updated_date) && (
             <div className="border rounded-lg p-3 bg-slate-50 text-xs text-slate-500 space-y-1">
               <p className="font-medium text-slate-600 uppercase tracking-wide text-xs mb-1">Audit Trail</p>
-              {editRisk.created_date && <p>Created: {new Date(editRisk.created_date).toLocaleString()}</p>}
-              {editRisk.updated_date && <p>Last Modified: {new Date(editRisk.updated_date).toLocaleString()}</p>}
+              {editRisk.created_date && <p>Created: {new Date(editRisk.created_date).toLocaleString("en-GB")}</p>}
+              {editRisk.updated_date && <p>Last Modified: {new Date(editRisk.updated_date).toLocaleString("en-GB")}</p>}
             </div>
           )}
 

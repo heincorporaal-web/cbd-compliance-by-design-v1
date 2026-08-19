@@ -487,7 +487,7 @@ export default function AssessmentDetail() {
                 <div>
                   <p className="font-medium text-green-900">Approved by {assessment.approver}</p>
                   <p className="text-sm text-green-700 mt-1">
-                    {new Date(assessment.approval_date).toLocaleString()}
+                    {new Date(assessment.approval_date).toLocaleString("en-GB")}
                   </p>
                 </div>
               </div>
@@ -800,7 +800,7 @@ export default function AssessmentDetail() {
                               {event.status?.replace('_', ' ')}
                             </span>
                             <span className="text-sm text-slate-500">
-                              {new Date(event.timestamp).toLocaleString()}
+                              {new Date(event.timestamp).toLocaleString("en-GB")}
                             </span>
                           </div>
                           <p className="text-sm text-slate-600">By: {event.actor}</p>

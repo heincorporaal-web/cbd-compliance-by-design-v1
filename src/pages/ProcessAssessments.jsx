@@ -205,7 +205,7 @@ export default function ProcessAssessments() {
                           <div className="flex items-center gap-4">
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
-                              {format(new Date(assessment.assessment_date), 'MMM d, yyyy')}
+                              {format(new Date(assessment.assessment_date), 'd MMM yyyy')}
                             </span>
                             {assessment.assessor && <span>Assessor: {assessment.assessor}</span>}
                             {assessment.assessment_type && (

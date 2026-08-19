@@ -538,7 +538,7 @@ export default function GRCGoalDetail() {
                         <div className="flex items-center justify-between mb-1">
                           <MaturityBadge level={assessment.level} />
                           <span className="text-xs text-slate-500">
-                            {format(new Date(assessment.date), 'MMM d, yyyy')}
+                            {format(new Date(assessment.date), 'd MMM yyyy')}
                           </span>
                         </div>
                         {assessment.assessor && (

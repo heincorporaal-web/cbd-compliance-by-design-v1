@@ -89,7 +89,7 @@ export default function CBDApplicationDetail() {
             <InfoRow label="Application Owner" value={app.application_owner} icon={User} />
             <InfoRow label="Technical Owner" value={app.technical_owner} icon={User} />
             <InfoRow label="Business Owner" value={app.business_owner} icon={User} />
-            <InfoRow label="Last Refreshed from CBD" value={app.last_refreshed ? new Date(app.last_refreshed).toLocaleString() : "Never"} icon={Calendar} />
+            <InfoRow label="Last Refreshed from CBD" value={app.last_refreshed ? new Date(app.last_refreshed).toLocaleString("en-GB") : "Never"} icon={Calendar} />
             <InfoRow label="Active in CBD" value={app.is_active ? "Yes" : "No"} />
           </div>
         </Card>

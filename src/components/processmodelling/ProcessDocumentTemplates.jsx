@@ -122,7 +122,7 @@ export default function ProcessDocumentTemplates({ companyId, user }) {
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                 <span className="text-xs text-slate-400">
-                  By {t.created_by || "—"} · {t.created_date ? new Date(t.created_date).toLocaleDateString() : ""}
+                  By {t.created_by || "—"} · {t.created_date ? new Date(t.created_date).toLocaleDateString("en-GB") : ""}
                 </span>
                 <div className="flex items-center gap-1">
                   <Button size="sm" variant="ghost" onClick={() => setEditing(t)}><Pencil className="w-4 h-4" /></Button>

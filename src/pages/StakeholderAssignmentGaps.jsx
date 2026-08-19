@@ -205,7 +205,7 @@ export default function StakeholderAssignmentGaps() {
           {snapTs && (
             <span className="text-xs text-slate-500 flex items-center gap-1.5 mr-1">
               <Camera className="w-3.5 h-3.5" />
-              Snapshot from {new Date(snapTs).toLocaleString()}
+              Snapshot from {new Date(snapTs).toLocaleString("en-GB")}
             </span>
           )}
           {result && (

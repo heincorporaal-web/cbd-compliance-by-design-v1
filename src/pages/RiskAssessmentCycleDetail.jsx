@@ -406,7 +406,7 @@ export default function RiskAssessmentCycleDetail() {
                 <div key={i} className="p-4 text-sm">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="font-medium text-slate-800">{a.amended_by}</span>
-                    <span className="text-xs text-slate-400">{a.amended_at ? new Date(a.amended_at).toLocaleDateString() : ""}</span>
+                    <span className="text-xs text-slate-400">{a.amended_at ? new Date(a.amended_at).toLocaleDateString("en-GB") : ""}</span>
                   </div>
                   <p className="text-slate-600 mb-1"><span className="font-medium">Changes:</span> {a.changes}</p>
                   <p className="text-slate-500 italic">Reason: {a.reason}</p>

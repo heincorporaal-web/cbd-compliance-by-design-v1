@@ -290,7 +290,7 @@ export default function IHPOMTreeReport() {
         </Card>
 
         <div className="mt-6 text-xs text-slate-500 text-center">
-          Report generated on {new Date().toLocaleString()} | CBD Compliance Platform
+          Report generated on {new Date().toLocaleString("en-GB")} | CBD Compliance Platform
         </div>
       </div>
     </div>

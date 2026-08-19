@@ -46,7 +46,7 @@ export default function ChangesTab({ ci }) {
               {ch.new_value && <span className="text-emerald-600">{ch.new_value}</span>}
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              {ch.change_date ? new Date(ch.change_date).toLocaleString() : ""} · {ch.discovery_source || "—"} · {ch.changed_by || "—"}
+              {ch.change_date ? new Date(ch.change_date).toLocaleString("en-GB") : ""} · {ch.discovery_source || "—"} · {ch.changed_by || "—"}
             </p>
           </div>
         </div>

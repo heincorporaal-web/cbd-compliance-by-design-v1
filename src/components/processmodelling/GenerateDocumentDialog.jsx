@@ -38,7 +38,7 @@ function buildContext(process, diagram, template) {
   ctx.process_name = diagram?.canvas_meta?.process_name || process?.name || "";
   ctx.process_code = process?.process_code || "";
   ctx.created_date = process?.created_date
-    ? new Date(process.created_date).toLocaleDateString()
+    ? new Date(process.created_date).toLocaleDateString("en-GB")
     : "";
   ctx.status = template?.status || "";
   ctx.created_by = template?.created_by || "";

@@ -54,7 +54,7 @@ You have been invited to complete the following survey:
 ${survey.title}
 ${survey.description || ''}
 
-Please complete the survey by ${survey.due_date ? new Date(survey.due_date).toLocaleDateString() : 'the due date'}.
+Please complete the survey by ${survey.due_date ? new Date(survey.due_date).toLocaleDateString("en-GB") : 'the due date'}.
 
 Survey Link: ${surveyUrl}
 

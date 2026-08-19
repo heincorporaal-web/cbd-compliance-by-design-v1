@@ -446,7 +446,7 @@ export default function Assessments() {
                     {assessment.due_date && (
                       <div className="flex items-center gap-2 text-sm text-slate-600">
                         <Calendar className="w-4 h-4" />
-                        Due: {format(new Date(assessment.due_date), 'MMM d, yyyy')}
+                        Due: {format(new Date(assessment.due_date), 'd MMM yyyy')}
                       </div>
                     )}
                   </div>

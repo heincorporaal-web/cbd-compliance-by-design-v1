@@ -27,7 +27,7 @@ export default function ArchivedFrameworkBanner({ frameworkId }) {
         </p>
         <p className="text-xs text-amber-700 mt-0.5">
           This record is linked to <strong>{framework.name}</strong>
-          {framework.end_date ? ` which expired on ${new Date(framework.end_date).toLocaleDateString()}` : " which has been archived"}.
+          {framework.end_date ? ` which expired on ${new Date(framework.end_date).toLocaleDateString("en-GB")}` : " which has been archived"}.
           Consider updating this record to use an active framework.
         </p>
       </div>

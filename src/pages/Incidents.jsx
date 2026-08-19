@@ -373,11 +373,11 @@ export default function Incidents() {
                         <div className="text-sm text-slate-600 space-y-1">
                           <p>{company?.name || 'Unknown Company'} • {incident.incident_type.replace(/_/g, ' ')}</p>
                           {system && <p>System: {system.name}</p>}
-                          <p>Detected: {format(new Date(incident.detected_date), 'MMM d, yyyy HH:mm')}</p>
+                          <p>Detected: {format(new Date(incident.detected_date), 'd MMM yyyy HH:mm')}</p>
                           {incident.resolved_date && (
                             <p className="text-green-600">
                               <CheckCircle2 className="w-3 h-3 inline mr-1" />
-                              Resolved: {format(new Date(incident.resolved_date), 'MMM d, yyyy HH:mm')}
+                              Resolved: {format(new Date(incident.resolved_date), 'd MMM yyyy HH:mm')}
                             </p>
                           )}
                         </div>

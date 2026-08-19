@@ -137,7 +137,7 @@ export default function Surveys() {
 
                     {survey.due_date && (
                       <p className="text-sm text-slate-600">
-                        Due: {format(new Date(survey.due_date), 'MMM d, yyyy')}
+                        Due: {format(new Date(survey.due_date), 'd MMM yyyy')}
                       </p>
                     )}
                   </div>

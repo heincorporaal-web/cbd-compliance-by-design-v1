@@ -68,7 +68,7 @@ export function buildPrintHTML(rows, fields, title, options = {}) {
     <div>${classificationBadge}</div>
   </div>
   <div class="meta">
-    <p>${title} &nbsp;|&nbsp; Generated: ${new Date().toLocaleString()} &nbsp;|&nbsp; ${rows.length} records</p>
+    <p>${title} &nbsp;|&nbsp; Generated: ${new Date().toLocaleString("en-GB")} &nbsp;|&nbsp; ${rows.length} records</p>
   </div>
   <table><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table>
   ${footerHtml}

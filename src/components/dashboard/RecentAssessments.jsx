@@ -55,7 +55,7 @@ export default function RecentAssessments({ assessments }) {
                     <p className="text-sm text-slate-600 mb-2">{assessment.framework_name}</p>
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <Calendar className="w-3 h-3" />
-                      {format(new Date(assessment.assessment_date), "MMM d, yyyy")}
+                      {format(new Date(assessment.assessment_date), "d MMM yyyy")}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">

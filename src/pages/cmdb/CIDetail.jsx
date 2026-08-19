@@ -69,7 +69,7 @@ export default function CIDetail() {
             {ci.environment && <Badge variant="outline" className="text-xs bg-blue-50">{ci.environment}</Badge>}
             <Badge variant="outline" className={`text-xs ${MANAGED_COLOR[ci.managed_unmanaged] || ""}`}>{ci.managed_unmanaged}</Badge>
             {ci.intrinsic_criticality && <Badge variant="outline" className="text-xs bg-slate-50">Criticality: {ci.intrinsic_criticality}</Badge>}
-            {ci.last_seen && <span className="text-xs text-slate-400">Last seen: {new Date(ci.last_seen).toLocaleDateString()}</span>}
+            {ci.last_seen && <span className="text-xs text-slate-400">Last seen: {new Date(ci.last_seen).toLocaleDateString("en-GB")}</span>}
           </div>
         </div>
       </Card>

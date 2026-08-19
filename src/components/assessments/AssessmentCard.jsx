@@ -69,7 +69,7 @@ export default function AssessmentCard({ assessment, onEdit, onDelete }) {
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2 text-slate-600">
             <Calendar className="w-4 h-4 text-slate-400" />
-            <span>{format(new Date(assessment.assessment_date), "MMM d, yyyy")}</span>
+            <span>{format(new Date(assessment.assessment_date), "d MMM yyyy")}</span>
           </div>
           {assessment.assessor && (
             <div className="flex items-center gap-2 text-slate-600">
@@ -80,7 +80,7 @@ export default function AssessmentCard({ assessment, onEdit, onDelete }) {
           {assessment.next_review_date && (
             <div className="flex items-center gap-2 text-slate-600">
               <TrendingUp className="w-4 h-4 text-slate-400" />
-              <span>Next: {format(new Date(assessment.next_review_date), "MMM d, yyyy")}</span>
+              <span>Next: {format(new Date(assessment.next_review_date), "d MMM yyyy")}</span>
             </div>
           )}
         </div>

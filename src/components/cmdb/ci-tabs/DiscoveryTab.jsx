@@ -45,11 +45,11 @@ export default function DiscoveryTab({ ci }) {
           <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Discovery Metadata</h4>
           <InfoRow label="Primary Discovery Source" value={ci.discovery_source} />
           <InfoRow label="Source Record ID" value={ci.source_record_id} />
-          <InfoRow label="First Seen" value={ci.first_seen ? new Date(ci.first_seen).toLocaleString() : ""} />
-          <InfoRow label="Last Seen" value={ci.last_seen ? new Date(ci.last_seen).toLocaleString() : ""} />
-          <InfoRow label="Last Successful Discovery" value={ci.last_successful_discovery ? new Date(ci.last_successful_discovery).toLocaleString() : ""} />
+          <InfoRow label="First Seen" value={ci.first_seen ? new Date(ci.first_seen).toLocaleString("en-GB") : ""} />
+          <InfoRow label="Last Seen" value={ci.last_seen ? new Date(ci.last_seen).toLocaleString("en-GB") : ""} />
+          <InfoRow label="Last Successful Discovery" value={ci.last_successful_discovery ? new Date(ci.last_successful_discovery).toLocaleString("en-GB") : ""} />
           <InfoRow label="Discovery Confidence" value={ci.discovery_confidence != null ? `${ci.discovery_confidence}%` : ""} />
-          <InfoRow label="Last Reconciled" value={ci.last_reconciled_date ? new Date(ci.last_reconciled_date).toLocaleString() : ""} />
+          <InfoRow label="Last Reconciled" value={ci.last_reconciled_date ? new Date(ci.last_reconciled_date).toLocaleString("en-GB") : ""} />
         </div>
       </div>
 
@@ -86,7 +86,7 @@ export default function DiscoveryTab({ ci }) {
                     <Badge2 className="bg-blue-50 text-blue-700 border-blue-200">{SOURCES.find(s => s.value === ext.source_system)?.label || ext.source_system}</Badge2>
                     <span className="font-mono text-sm text-slate-800 truncate">{ext.external_id}</span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">{ext.external_object_type} {ext.last_seen && `· last seen ${new Date(ext.last_seen).toLocaleDateString()}`}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{ext.external_object_type} {ext.last_seen && `· last seen ${new Date(ext.last_seen).toLocaleDateString("en-GB")}`}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {ext.source_url && <a href={ext.source_url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-blue-600"><ExternalLink className="w-4 h-4" /></a>}

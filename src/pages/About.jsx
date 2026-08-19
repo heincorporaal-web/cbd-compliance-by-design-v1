@@ -148,7 +148,7 @@ export default function About() {
                 {meta?.last_updated_by && (
                   <p className="text-xs text-slate-400 pt-2 border-t border-slate-100">
                     Last updated by {meta.last_updated_by}
-                    {meta.updated_date && ` · ${new Date(meta.updated_date).toLocaleString()}`}
+                    {meta.updated_date && ` · ${new Date(meta.updated_date).toLocaleString("en-GB")}`}
                   </p>
                 )}
               </div>

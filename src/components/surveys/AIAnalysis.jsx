@@ -138,7 +138,7 @@ Be specific and actionable in your analysis.`;
                 </Badge>
                 {analysis.last_analyzed && (
                   <p className="text-xs text-slate-500">
-                    Last analyzed: {format(new Date(analysis.last_analyzed), 'MMM d, yyyy HH:mm')}
+                    Last analyzed: {format(new Date(analysis.last_analyzed), 'd MMM yyyy HH:mm')}
                   </p>
                 )}
               </div>

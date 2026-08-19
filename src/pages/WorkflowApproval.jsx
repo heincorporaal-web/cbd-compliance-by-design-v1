@@ -318,7 +318,7 @@ export default function WorkflowApproval() {
               <p className="text-sm text-orange-700 mt-1"><strong>Reason:</strong> {instanceData.return_reason}</p>
             )}
             {instanceData.returned_date && (
-              <p className="text-xs text-orange-600 mt-1">Returned on {format(new Date(instanceData.returned_date), 'MMM d, yyyy HH:mm')}</p>
+              <p className="text-xs text-orange-600 mt-1">Returned on {format(new Date(instanceData.returned_date), 'd MMM yyyy HH:mm')}</p>
             )}
           </div>
           {isOriginator && (
@@ -546,7 +546,7 @@ export default function WorkflowApproval() {
               )}
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Started</p>
-                <p className="font-medium text-sm">{format(new Date(instanceData.created_date), 'MMM d, yyyy HH:mm')}</p>
+                <p className="font-medium text-sm">{format(new Date(instanceData.created_date), 'd MMM yyyy HH:mm')}</p>
               </div>
               {instanceData.resubmit_count > 0 && (
                 <div>
@@ -557,7 +557,7 @@ export default function WorkflowApproval() {
               {instanceData.completed_date && (
                 <div>
                   <p className="text-xs text-slate-500 mb-0.5">Completed</p>
-                  <p className="font-medium text-sm">{format(new Date(instanceData.completed_date), 'MMM d, yyyy HH:mm')}</p>
+                  <p className="font-medium text-sm">{format(new Date(instanceData.completed_date), 'd MMM yyyy HH:mm')}</p>
                 </div>
               )}
             </CardContent>
@@ -583,7 +583,7 @@ export default function WorkflowApproval() {
                           </Badge>
                         </div>
                         <p className="text-xs text-slate-500">{entry.actor}</p>
-                        <p className="text-xs text-slate-400">{format(new Date(entry.timestamp), 'MMM d, yyyy HH:mm')}</p>
+                        <p className="text-xs text-slate-400">{format(new Date(entry.timestamp), 'd MMM yyyy HH:mm')}</p>
                         {entry.comments && (
                           <p className="text-xs text-slate-600 mt-1 italic bg-slate-50 p-2 rounded border-l-2 border-slate-200">
                             "{entry.comments}"

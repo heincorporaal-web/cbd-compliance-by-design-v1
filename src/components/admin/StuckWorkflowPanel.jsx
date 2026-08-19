@@ -221,7 +221,7 @@ export default function StuckWorkflowPanel() {
                     {inst.originator_email && (
                       <p className="text-xs text-slate-400 mt-0.5">Submitted by: {inst.originator_email}</p>
                     )}
-                    <p className="text-xs text-slate-400">Last updated: {format(updated, "MMM d, yyyy HH:mm")}</p>
+                    <p className="text-xs text-slate-400">Last updated: {format(updated, "d MMM yyyy HH:mm")}</p>
                   </div>
                   <div className="flex gap-2 flex-wrap shrink-0">
                     <Button

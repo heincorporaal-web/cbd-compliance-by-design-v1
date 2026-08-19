@@ -457,7 +457,7 @@ export default function ControlDetail() {
                 <div key={i} className="p-4 text-sm">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="font-medium text-slate-800">{a.amended_by}</span>
-                    <span className="text-xs text-slate-400">{a.amended_at ? new Date(a.amended_at).toLocaleDateString() : ""}</span>
+                    <span className="text-xs text-slate-400">{a.amended_at ? new Date(a.amended_at).toLocaleDateString("en-GB") : ""}</span>
                   </div>
                   <p className="text-slate-600 mb-1"><span className="font-medium">Changes:</span> {a.changes}</p>
                   <p className="text-slate-500 italic">Reason: {a.reason}</p>
@@ -868,7 +868,7 @@ export default function ControlDetail() {
                                 <p className="text-sm text-amber-700 mt-1">{ca.remediation_plan}</p>
                                 {ca.remediation_date && (
                                   <p className="text-xs text-amber-600 mt-1">
-                                    Target: {new Date(ca.remediation_date).toLocaleDateString()}
+                                    Target: {new Date(ca.remediation_date).toLocaleDateString("en-GB")}
                                   </p>
                                 )}
                               </div>

@@ -238,13 +238,13 @@ export default function ThirdPartyDetail() {
                     {provider.contract_start_date && (
                       <div>
                         <p className="text-xs text-slate-500">Contract Start</p>
-                        <p className="text-sm text-slate-900">{format(new Date(provider.contract_start_date), 'MMM d, yyyy')}</p>
+                        <p className="text-sm text-slate-900">{format(new Date(provider.contract_start_date), 'd MMM yyyy')}</p>
                       </div>
                     )}
                     {provider.contract_end_date && (
                       <div>
                         <p className="text-xs text-slate-500">Contract End</p>
-                        <p className="text-sm text-slate-900">{format(new Date(provider.contract_end_date), 'MMM d, yyyy')}</p>
+                        <p className="text-sm text-slate-900">{format(new Date(provider.contract_end_date), 'd MMM yyyy')}</p>
                       </div>
                     )}
                   </div>
@@ -256,13 +256,13 @@ export default function ThirdPartyDetail() {
                     {provider.last_audit_date && (
                       <div>
                         <p className="text-xs text-slate-500">Last Audit</p>
-                        <p className="text-sm text-slate-900">{format(new Date(provider.last_audit_date), 'MMM d, yyyy')}</p>
+                        <p className="text-sm text-slate-900">{format(new Date(provider.last_audit_date), 'd MMM yyyy')}</p>
                       </div>
                     )}
                     {provider.next_audit_date && (
                       <div>
                         <p className="text-xs text-slate-500">Next Audit</p>
-                        <p className="text-sm text-slate-900">{format(new Date(provider.next_audit_date), 'MMM d, yyyy')}</p>
+                        <p className="text-sm text-slate-900">{format(new Date(provider.next_audit_date), 'd MMM yyyy')}</p>
                       </div>
                     )}
                   </div>
@@ -522,7 +522,7 @@ export default function ThirdPartyDetail() {
                         <div className="flex items-center gap-4 text-sm text-slate-600">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            {format(new Date(assessment.assessment_date), 'MMM d, yyyy')}
+                            {format(new Date(assessment.assessment_date), 'd MMM yyyy')}
                           </div>
                           {assessment.assessor && (
                             <span>Assessor: {assessment.assessor}</span>
@@ -601,7 +601,7 @@ export default function ThirdPartyDetail() {
                         <div className="pt-4 border-t border-slate-200">
                           <p className="text-sm text-slate-600">
                             <span className="font-medium">Next Assessment Scheduled:</span>{' '}
-                            {format(new Date(assessment.next_assessment_date), 'MMM d, yyyy')}
+                            {format(new Date(assessment.next_assessment_date), 'd MMM yyyy')}
                           </p>
                         </div>
                       )}

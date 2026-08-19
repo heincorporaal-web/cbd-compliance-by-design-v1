@@ -332,7 +332,7 @@ export default function SurveyDetail() {
                         <p className="text-sm text-slate-600">{response.respondent_email}</p>
                       </div>
                       <p className="text-sm text-slate-500">
-                        {format(new Date(response.completed_date), 'MMM d, yyyy HH:mm')}
+                        {format(new Date(response.completed_date), 'd MMM yyyy HH:mm')}
                       </p>
                     </div>
                   </CardHeader>
