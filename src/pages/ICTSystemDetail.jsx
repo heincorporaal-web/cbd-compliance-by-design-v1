@@ -119,6 +119,15 @@ export default function ICTSystemDetail() {
     },
   });
 
+  const handleUpdateSystemCriticality = async (newCriticality) => {
+    setFormData(prev => ({ ...prev, criticality: newCriticality }));
+    if (systemId && !isNew) {
+      await base44.entities.ICTSystem.update(systemId, { criticality: newCriticality });
+      queryClient.invalidateQueries(["ictSystem", systemId]);
+      queryClient.invalidateQueries(["ictSystems"]);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     markClean();
@@ -365,7 +374,7 @@ export default function ICTSystemDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
-                <SystemModulesTab systemId={systemId} companyId={formData.company_id} />
+                <SystemModulesTab systemId={systemId} companyId={formData.company_id} systemCriticality={formData.criticality} onUpdateSystemCriticality={handleUpdateSystemCriticality} />
               </CardContent>
             </Card>
           </TabsContent>

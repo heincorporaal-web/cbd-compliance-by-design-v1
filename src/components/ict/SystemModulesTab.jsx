@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Plus, Pencil, Trash2, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Plus, Pencil, Trash2, CheckCircle, XCircle, AlertTriangle, ArrowUp } from "lucide-react";
 import { getICTModuleErrors } from "@/utils/validationErrors.jsx";
 
 const MANAGEMENT_CHAINS = [
@@ -27,10 +27,18 @@ const MANAGEMENT_CHAINS = [
   "Strategic Planning & Direction",
 ];
 
+const CRITICALITY_RANK = { critical: 3, important: 2, supporting: 1 };
+const CRITICALITY_COLORS = {
+  critical: "bg-red-100 text-red-700 border-red-200",
+  important: "bg-orange-100 text-orange-700 border-orange-200",
+  supporting: "bg-blue-100 text-blue-700 border-blue-200",
+};
+
 const EMPTY_MODULE = {
   module_name: "",
   description: "",
   is_active: true,
+  criticality: "supporting",
   module_owner_stakeholder_id: "",
   module_owner_name: "",
   active_from: "",
@@ -41,7 +49,7 @@ const EMPTY_MODULE = {
   workstream_name: "",
 };
 
-export default function SystemModulesTab({ systemId, companyId }) {
+export default function SystemModulesTab({ systemId, companyId, systemCriticality, onUpdateSystemCriticality }) {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editingModule, setEditingModule] = useState(null);
@@ -108,6 +116,7 @@ export default function SystemModulesTab({ systemId, companyId }) {
       ict_scope: mod.ict_scope || "",
       workstream_id: mod.workstream_id || "",
       workstream_name: mod.workstream_name || "",
+      criticality: mod.criticality || "supporting",
     });
     setShowForm(true);
   };
@@ -142,6 +151,33 @@ export default function SystemModulesTab({ systemId, companyId }) {
           <Plus className="w-4 h-4 mr-1.5" /> Add Module
         </Button>
       </div>
+
+      {systemCriticality && (() => {
+        const violators = modules.filter(m => CRITICALITY_RANK[m.criticality] > CRITICALITY_RANK[systemCriticality]);
+        if (violators.length === 0) return null;
+        const maxCriticality = violators.reduce((max, m) => CRITICALITY_RANK[m.criticality] > CRITICALITY_RANK[max] ? m.criticality : max, "supporting");
+        return (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-semibold text-red-700 text-sm">Module criticality exceeds system criticality</p>
+                <p className="text-xs text-red-600 mt-0.5">
+                  {violators.length} module{violators.length !== 1 ? "s" : ""} have a higher criticality than the system ({systemCriticality}):
+                </p>
+                <ul className="text-xs text-red-600 mt-1 space-y-0.5">
+                  {violators.map(m => <li key={m.id}>• <strong>{m.module_name}</strong> — {m.criticality}</li>)}
+                </ul>
+              </div>
+            </div>
+            {onUpdateSystemCriticality && (
+              <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100" onClick={() => onUpdateSystemCriticality(maxCriticality)}>
+                <ArrowUp className="w-3.5 h-3.5 mr-1.5" /> Update System Criticality to {maxCriticality.charAt(0).toUpperCase() + maxCriticality.slice(1)}
+              </Button>
+            )}
+          </div>
+        );
+      })()}
 
       {modules.length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl">
@@ -195,6 +231,9 @@ export default function SystemModulesTab({ systemId, companyId }) {
                           <XCircle className="w-3 h-3" /> Inactive
                         </Badge>
                       )}
+                      {mod.criticality && (
+                        <Badge variant="outline" className={`text-xs ${CRITICALITY_COLORS[mod.criticality] || ""}`}>{mod.criticality}</Badge>
+                      )}
                       {mod.domain && (
                         <Badge variant="outline" className="text-xs">{mod.domain.split(" ").slice(0, 2).join(" ")}</Badge>
                       )}
@@ -238,6 +277,21 @@ export default function SystemModulesTab({ systemId, companyId }) {
             <div className="space-y-1">
               <Label>Description</Label>
               <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} rows={2} />
+            </div>
+
+            <div className="space-y-1">
+              <Label>Module Criticality</Label>
+              <Select value={formData.criticality} onValueChange={v => setFormData(p => ({ ...p, criticality: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="critical">Critical</SelectItem>
+                  <SelectItem value="important">Important</SelectItem>
+                  <SelectItem value="supporting">Supporting</SelectItem>
+                </SelectContent>
+              </Select>
+              {systemCriticality && CRITICALITY_RANK[formData.criticality] > CRITICALITY_RANK[systemCriticality] && (
+                <p className="text-xs text-red-500">Exceeds system criticality ({systemCriticality})</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">

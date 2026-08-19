@@ -23,6 +23,16 @@
       "default": true,
       "description": "Whether this module is active"
     },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "important",
+        "supporting"
+      ],
+      "default": "supporting",
+      "description": "Module criticality level. A module should not have a higher criticality than its parent system."
+    },
     "module_owner_stakeholder_id": {
       "type": "string",
       "description": "Reference to Stakeholder entity (module owner)"
