@@ -6,11 +6,13 @@ import { Badge2 } from "../CmdbShared";
 import { Plus, Trash2, Link2, GitBranch, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import CIRelationshipDialog from "../CIRelationshipDialog";
+import ApplicationCIRelationshipDialog from "../ApplicationCIRelationshipDialog";
 import { toast } from "sonner";
 
 export default function RelationshipsTab({ ci }) {
   const queryClient = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
+  const [showAppLink, setShowAppLink] = useState(false);
 
   const { data: allCIs = [] } = useQuery({ queryKey: ["configurationItems", ci.company_id], queryFn: () => base44.entities.ConfigurationItem.filter({ company_id: ci.company_id }) });
   const { data: rels = [] } = useQuery({ queryKey: ["ciRelationships", ci.id], queryFn: () => base44.entities.CIRelationship.filter({ company_id: ci.company_id }) });
@@ -74,9 +76,12 @@ export default function RelationshipsTab({ ci }) {
       </div>
 
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5"><Link2 className="w-3.5 h-3.5" /> CBD Application Relationships</h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5"><Link2 className="w-3.5 h-3.5" /> CBD Application Relationships</h4>
+          <Button size="sm" variant="outline" onClick={() => setShowAppLink(true)} className="gap-1.5"><Plus className="w-3.5 h-3.5" /> Link Application</Button>
+        </div>
         {appRels.length === 0 ? (
-          <p className="text-sm text-slate-400 italic">No CBD application relationships. These are managed in the Application view (Phase 2).</p>
+          <p className="text-sm text-slate-400 italic">No CBD application relationships linked to this CI.</p>
         ) : (
           <div className="space-y-2">
             {appRels.map(r => {
@@ -98,6 +103,7 @@ export default function RelationshipsTab({ ci }) {
       </div>
 
       {showAdd && <CIRelationshipDialog open={showAdd} onOpenChange={setShowAdd} ci={ci} companyId={ci.company_id} />}
+      {showAppLink && <ApplicationCIRelationshipDialog open={showAppLink} onOpenChange={setShowAppLink} ci={ci} companyId={ci.company_id} />}
     </div>
   );
 }

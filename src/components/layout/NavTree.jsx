@@ -90,6 +90,7 @@ export const NAV_GROUPS = [
       { id: "advanced_process_modelling", title: "Operations by Design (OBD)", url: createPageUrl("OperationsByDesign"), icon: Workflow },
       { id: "assets_by_design", title: "Assets by Design (ABD)", url: createPageUrl("AssetsByDesign"), icon: Boxes },
       { id: "cmdb_inventory", title: "CMDB Inventory", url: createPageUrl("CMDBInventory"), icon: Boxes },
+      { id: "cmdb_applications", title: "CBD Applications", url: createPageUrl("CMDBApplications"), icon: Layers },
       { id: "process_assignment_gaps", title: "Assignment Gap Finder", url: createPageUrl("StakeholderAssignmentGaps"), icon: ShieldAlert },
     ],
   },
