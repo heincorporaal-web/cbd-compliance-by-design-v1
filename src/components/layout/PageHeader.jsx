@@ -19,12 +19,14 @@ import NavIcon from "@/hooks/useNavIcon.jsx";
 export default function PageHeader({ icon: Icon, navItemId, title, tagline, gradient = "from-primary to-secondary" }) {
   return (
     <div className="flex items-center gap-3">
-      <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center shadow-lg shrink-0`}>
-        {navItemId ? (
-          <NavIcon itemId={navItemId} defaultIcon={Icon} className="w-7 h-7 text-white" forceWhite />
-        ) : (
-          Icon ? <Icon className="w-7 h-7 text-white" /> : null
-        )}
+      <div className={`w-12 h-12 p-[2px] bg-gradient-to-br ${gradient} rounded-xl shrink-0`}>
+        <div className="w-full h-full bg-slate-100 rounded-[10px] flex items-center justify-center">
+          {navItemId ? (
+            <NavIcon itemId={navItemId} defaultIcon={Icon} className="w-7 h-7 text-primary" />
+          ) : (
+            Icon ? <Icon className="w-7 h-7 text-primary" /> : null
+          )}
+        </div>
       </div>
       <div>
         <h1 className="text-3xl font-bold text-slate-900 leading-tight">{title}</h1>

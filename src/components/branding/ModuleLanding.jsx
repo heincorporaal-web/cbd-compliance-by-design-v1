@@ -62,10 +62,10 @@ export default function ModuleLanding({ brand, Icon, features, logoUrl }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {features.map((f, i) => (
             <Card key={i} className="p-5 hover:shadow-md transition-shadow">
-              <div
-                className={`w-10 h-10 rounded-lg ${brand.softBg} ${brand.softText} flex items-center justify-center mb-3`}
-              >
-                <f.icon className="w-5 h-5" />
+              <div className={`w-10 h-10 p-[2px] bg-gradient-to-br ${brand.gradient} rounded-lg mb-3`}>
+                <div className="w-full h-full bg-slate-100 rounded-md flex items-center justify-center">
+                  <f.icon className={`w-5 h-5 ${brand.softText}`} />
+                </div>
               </div>
               <h3 className="font-semibold text-slate-800">{f.title}</h3>
               <p className="text-sm text-slate-500 mt-1">{f.desc}</p>
@@ -81,8 +81,10 @@ export default function ModuleLanding({ brand, Icon, features, logoUrl }) {
             <img src={logoUrl} alt={brand.name} className="w-7 h-7 object-contain" />
           </div>
         ) : (
-          <div className={`w-9 h-9 rounded-lg ${brand.solid} text-white flex items-center justify-center shrink-0`}>
-            <Icon className="w-5 h-5" />
+          <div className={`w-9 h-9 p-[2px] bg-gradient-to-br ${brand.gradient} rounded-lg shrink-0`}>
+            <div className="w-full h-full bg-slate-100 rounded-md flex items-center justify-center">
+              <Icon className={`w-5 h-5 ${brand.softText}`} />
+            </div>
           </div>
         )}
         <div>

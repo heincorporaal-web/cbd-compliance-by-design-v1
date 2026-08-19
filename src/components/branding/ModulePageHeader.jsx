@@ -13,8 +13,10 @@ export default function ModulePageHeader({ brand, Icon, title, subtitle, landing
           <img src={logoUrl} alt={title} className="w-9 h-9 object-contain" />
         </div>
       ) : (
-        <div className={`w-12 h-12 bg-gradient-to-br ${brand.gradient} rounded-xl flex items-center justify-center shadow-lg shrink-0`}>
-          <Icon className="w-7 h-7 text-white" />
+        <div className={`w-12 h-12 p-[2px] bg-gradient-to-br ${brand.gradient} rounded-xl shrink-0`}>
+          <div className="w-full h-full bg-slate-100 rounded-[10px] flex items-center justify-center">
+            <Icon className={`w-7 h-7 ${brand.softText}`} />
+          </div>
         </div>
       )}
       <div className="min-w-0">
