@@ -293,7 +293,7 @@ function exportToWord(flat, selectedCompany, filters, showColumns, systemsMap = 
 
   const titlePara = wPara(wRun(`Process Report — ${selectedCompany?.name || ""}`, true, "0F172A"), null, 0).replace("<w:sz w:val=\"18\"/>", "<w:sz w:val=\"28\"/>");
   const metaParts = [
-    `Generated: ${format(new Date(), "PPP")}`,
+    `Generated: ${format(new Date(), "d MMMM yyyy")}`,
     filters.date_from ? `From: ${filters.date_from}` : null,
     filters.date_to ? `To: ${filters.date_to}` : null,
     filters.status !== "all" ? `Status: ${filters.status}` : null,
@@ -329,7 +329,7 @@ function exportToPowerPoint(flat, selectedCompany, filters, showColumns, systems
 
   // Title slide
   const titleSlide = `<p:sp><p:nvSpPr><p:cNvPr id="2" name="Title"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="title"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" sz="3200" b="1"/><a:t>Process Report — ${escXml(selectedCompany?.name)}</a:t></a:r></a:p></p:txBody></p:sp>
-<p:sp><p:nvSpPr><p:cNvPr id="3" name="Subtitle"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="subTitle" idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" sz="1800"/><a:t>Generated: ${escXml(format(new Date(), "PPP"))}</a:t></a:r></a:p></p:txBody></p:sp>`;
+<p:sp><p:nvSpPr><p:cNvPr id="3" name="Subtitle"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="subTitle" idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" sz="1800"/><a:t>Generated: ${escXml(format(new Date(), "d MMMM yyyy"))}</a:t></a:r></a:p></p:txBody></p:sp>`;
 
   // Process slides — 8 per slide
   const chunkSize = 8;
@@ -391,7 +391,7 @@ function exportToPowerPoint(flat, selectedCompany, filters, showColumns, systems
   const pptHtml = `<html><head><meta charset="UTF-8"><title>Process Report</title>
 <style>body{font-family:Calibri,sans-serif;} .slide{page-break-after:always;padding:40px;border:1px solid #ccc;margin-bottom:20px;min-height:400px;} h1{color:#1d4ed8;} .row{padding:4px 0;font-size:12px;border-bottom:1px solid #f1f5f9;} .code{color:#1d4ed8;font-family:monospace;font-size:11px;} .indent-1{padding-left:20px;} .indent-2{padding-left:40px;} .indent-3{padding-left:60px;} .meta{font-size:10px;color:#64748b;margin-left:20px;}</style></head>
 <body>
-<div class="slide"><h1>Process Report — ${escXml(selectedCompany?.name)}</h1><p style="color:#64748b;">Generated: ${escXml(format(new Date(), "PPP"))}${filters.date_from ? " · From: " + filters.date_from : ""}${filters.date_to ? " · To: " + filters.date_to : ""}</p></div>
+<div class="slide"><h1>Process Report — ${escXml(selectedCompany?.name)}</h1><p style="color:#64748b;">Generated: ${escXml(format(new Date(), "d MMMM yyyy"))}${filters.date_from ? " · From: " + filters.date_from : ""}${filters.date_to ? " · To: " + filters.date_to : ""}</p></div>
 ${flat.map(p => `<div class="row indent-${Math.min(p._depth||0,3)}"><span class="code">${escXml(p.process_code)}</span> <b>${escXml(p.name)}</b>${showColumns.status ? ` <span style="color:#64748b;font-size:10px;">[${p.status||""}]</span>` : ""}${showColumns.ownership && p.process_owner ? `<div class="meta">Owner: ${escXml(p.process_owner)}</div>` : ""}${showColumns.description && p.description ? `<div class="meta">${escXml(p.description.slice(0,200))}</div>` : ""}${showColumns.systems && p.linked_system_ids?.length ? `<div class="meta">Systems: ${escXml(p.linked_system_ids.map(id=>systemsMap[id]?.name).filter(Boolean).join(", "))}</div>` : ""}${showColumns.capabilities && p.linked_it_capability_ids?.length ? `<div class="meta">Capabilities: ${escXml(p.linked_it_capability_ids.map(id=>capabilitiesMap[id]?.name).filter(Boolean).join(", "))}</div>` : ""}${showColumns.requirements && p.level===3 && p.minimum_requirements?.length ? `<div class="meta">${p.minimum_requirements.map((r,i)=>`${i+1}. ${escXml(r.requirement)}`).join(" | ")}</div>` : ""}</div>`).join("")}
 </body></html>`;
 
@@ -609,7 +609,7 @@ export default function ProcessCompanyReport() {
           <div className="hidden print:block mb-6">
             <h1 className="text-2xl font-bold text-slate-900">Process Report — {selectedCompany?.name}</h1>
             <p className="text-slate-600 text-sm mt-1">
-              Generated: {format(new Date(), "PPP")}
+              Generated: {format(new Date(), "d MMMM yyyy")}
               {filters.date_from && ` · From: ${filters.date_from}`}
               {filters.date_to && ` · To: ${filters.date_to}`}
               {filters.status !== "all" && ` · Status: ${filters.status}`}
