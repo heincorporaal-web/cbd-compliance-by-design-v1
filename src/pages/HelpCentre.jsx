@@ -347,7 +347,7 @@ export default function HelpCentre() {
       {/* Header */}
       <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-8 border border-primary/20 text-center">
         <div className="w-14 h-14 p-[2px] bg-gradient-to-br from-primary to-secondary rounded-2xl mx-auto mb-4">
-          <div className="w-full h-full bg-slate-100 rounded-[14px] flex items-center justify-center">
+          <div className="w-full h-full bg-slate-200 rounded-[14px] flex items-center justify-center">
             <NavIcon itemId="help_centre" defaultIcon={MessageCircle} className="w-7 h-7 text-primary" />
           </div>
         </div>

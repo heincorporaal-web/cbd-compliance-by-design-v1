@@ -14,7 +14,7 @@ export default function ModulePageHeader({ brand, Icon, title, subtitle, landing
         </div>
       ) : (
         <div className={`w-12 h-12 p-[2px] bg-gradient-to-br ${brand.gradient} rounded-xl shrink-0`}>
-          <div className="w-full h-full bg-slate-100 rounded-[10px] flex items-center justify-center">
+          <div className="w-full h-full bg-slate-200 rounded-[10px] flex items-center justify-center">
             <Icon className={`w-7 h-7 ${brand.softText}`} />
           </div>
         </div>
