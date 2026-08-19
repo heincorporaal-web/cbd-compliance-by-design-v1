@@ -44,6 +44,7 @@ import CIInventory from './pages/cmdb/CIInventory';
 import CIDetail from './pages/cmdb/CIDetail';
 import CBDApplications from './pages/cmdb/CBDApplications';
 import CBDApplicationDetail from './pages/cmdb/CBDApplicationDetail';
+import CMDBDashboard from './pages/cmdb/CMDBDashboard';
 import AdvancedAssetManagement from './pages/AdvancedAssetManagement';
 import OperationsByDesign from './pages/OperationsByDesign';
 import PartnerByDesign from './pages/PartnerByDesign';
@@ -124,6 +125,7 @@ const AuthenticatedApp = () => {
         <Route path="/CMDBInventory" element={<CIInventory />} />
         <Route path="/CIDetail" element={<CIDetail />} />
         <Route path="/CMDBApplications" element={<CBDApplications />} />
+        <Route path="/CMDBDashboard" element={<CMDBDashboard />} />
         <Route path="/CMDBApplicationDetail" element={<CBDApplicationDetail />} />
         <Route path="/AdvancedAssetManagement" element={<AdvancedAssetManagement />} />
         <Route path="/OperationsByDesign" element={<OperationsByDesign />} />
