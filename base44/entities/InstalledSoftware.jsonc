@@ -1,0 +1,63 @@
+{
+  "name": "InstalledSoftware",
+  "type": "object",
+  "properties": {
+    "software_name": {
+      "type": "string",
+      "description": "Software product name"
+    },
+    "publisher": {
+      "type": "string",
+      "description": "Software publisher / vendor"
+    },
+    "version": {
+      "type": "string"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Product identifier where available"
+    },
+    "architecture": {
+      "type": "string",
+      "description": "x86, x64, ARM64, etc."
+    },
+    "installation_location": {
+      "type": "string"
+    },
+    "installation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "discovery_source": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "manual"
+      ],
+      "description": "Microsoft discovery source that found this software installation"
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (multi-tenant scoping)"
+    }
+  },
+  "required": [
+    "software_name",
+    "company_id"
+  ]
+}

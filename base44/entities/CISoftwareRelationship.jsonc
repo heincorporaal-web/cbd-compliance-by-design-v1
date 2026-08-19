@@ -1,0 +1,44 @@
+{
+  "name": "CISoftwareRelationship",
+  "type": "object",
+  "properties": {
+    "configuration_item_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity"
+    },
+    "installed_software_id": {
+      "type": "string",
+      "description": "Reference to InstalledSoftware entity"
+    },
+    "discovery_source": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "manual"
+      ]
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized for RLS)"
+    }
+  },
+  "required": [
+    "configuration_item_id",
+    "installed_software_id"
+  ]
+}

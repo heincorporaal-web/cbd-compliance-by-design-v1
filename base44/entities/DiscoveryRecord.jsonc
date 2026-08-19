@@ -1,0 +1,87 @@
+{
+  "name": "DiscoveryRecord",
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "manual"
+      ],
+      "description": "Discovery source that produced this record"
+    },
+    "source_object_id": {
+      "type": "string",
+      "description": "External object identifier in the source system"
+    },
+    "raw_object_type": {
+      "type": "string",
+      "description": "Object type as reported by the source system (e.g. machine, managedDevice, resource)"
+    },
+    "raw_data": {
+      "type": "object",
+      "description": "Raw JSON payload from the source API. Preserved so discovery processing can be re-run without losing original data."
+    },
+    "discovery_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the source system reported this record"
+    },
+    "processing_status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "normalized",
+        "matched",
+        "new_ci_created",
+        "review_required",
+        "ignored",
+        "error"
+      ],
+      "default": "new",
+      "description": "Current stage in the staging \u2192 normalization \u2192 reconciliation pipeline"
+    },
+    "matched_ci_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity if this record was matched to an existing CI"
+    },
+    "match_confidence": {
+      "type": "number",
+      "description": "Confidence score 0-100 for the reconciliation match"
+    },
+    "match_identifiers_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of identifier types used for the match (azure_resource_id, defender_machine_id, entra_device_id, serial_number, mac_address, fqdn, hostname, ip_address)"
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if processing_status is 'error'"
+    },
+    "processed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "discovery_run_id": {
+      "type": "string",
+      "description": "Reference to DiscoveryRun entity that produced this record"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    }
+  },
+  "required": [
+    "source",
+    "company_id"
+  ]
+}

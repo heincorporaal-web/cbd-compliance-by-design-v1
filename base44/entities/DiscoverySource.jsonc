@@ -1,0 +1,84 @@
+{
+  "name": "DiscoverySource",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name (e.g. Microsoft Defender for Endpoint)"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "cbd_application"
+      ],
+      "description": "Discovery source type / connector slug"
+    },
+    "is_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this source is enabled for discovery runs"
+    },
+    "is_connected": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the connector credentials are currently valid/connected"
+    },
+    "last_successful_sync": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_failed_sync": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "records_received": {
+      "type": "number",
+      "default": 0
+    },
+    "records_created": {
+      "type": "number",
+      "default": 0
+    },
+    "records_updated": {
+      "type": "number",
+      "default": 0
+    },
+    "records_requiring_review": {
+      "type": "number",
+      "default": 0
+    },
+    "errors_count": {
+      "type": "number",
+      "default": 0
+    },
+    "next_scheduled_sync": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sync_interval_minutes": {
+      "type": "number",
+      "description": "Synchronization interval in minutes (0 = manual only)"
+    },
+    "config": {
+      "type": "object",
+      "description": "Connection configuration (tenant ID, API endpoint, auth method, etc.). Secrets are never stored here \u2014 referenced via secure secret storage."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    }
+  },
+  "required": [
+    "name",
+    "source_type",
+    "company_id"
+  ]
+}

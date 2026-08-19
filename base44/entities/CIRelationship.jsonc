@@ -1,0 +1,66 @@
+{
+  "name": "CIRelationship",
+  "type": "object",
+  "properties": {
+    "parent_ci_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity (parent / source side)"
+    },
+    "child_ci_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity (child / target side)"
+    },
+    "relationship_type": {
+      "type": "string",
+      "description": "Relationship type (sourced from RelationshipType catalogue: Hosted On, Connected To, Member Of, Protected By, Routes To, Attached To, etc.)"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "discovery_source": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "manual"
+      ]
+    },
+    "automatically_discovered": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this relationship was discovered automatically by a discovery source"
+    },
+    "manually_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if a human user confirmed this relationship"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Confidence score 0-100 for discovered relationships"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized for RLS)"
+    }
+  },
+  "required": [
+    "parent_ci_id",
+    "child_ci_id",
+    "relationship_type"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "name": "CIChangeHistory",
+  "type": "object",
+  "properties": {
+    "configuration_item_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity"
+    },
+    "change_type": {
+      "type": "string",
+      "enum": [
+        "hostname_changed",
+        "ip_address_changed",
+        "os_changed",
+        "os_version_changed",
+        "management_state_changed",
+        "became_unmanaged",
+        "device_disappeared",
+        "software_installed",
+        "software_removed",
+        "azure_resource_changed",
+        "environment_changed",
+        "application_relationship_changed",
+        "lifecycle_changed",
+        "owner_changed",
+        "other"
+      ],
+      "description": "Type of configuration change detected"
+    },
+    "field_name": {
+      "type": "string",
+      "description": "Specific field that changed"
+    },
+    "old_value": {
+      "type": "string"
+    },
+    "new_value": {
+      "type": "string"
+    },
+    "change_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "discovery_source": {
+      "type": "string",
+      "description": "Discovery source that detected the change, or 'manual' for user changes"
+    },
+    "changed_by": {
+      "type": "string",
+      "description": "User who made the change, or 'system' for automated discovery"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized for RLS)"
+    }
+  },
+  "required": [
+    "configuration_item_id",
+    "change_type"
+  ]
+}

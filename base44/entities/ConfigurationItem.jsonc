@@ -1,0 +1,272 @@
+{
+  "name": "ConfigurationItem",
+  "type": "object",
+  "properties": {
+    "ci_id": {
+      "type": "string",
+      "description": "Human-friendly CI identifier (e.g. CI-000001). Not the database key \u2014 UUID is used internally for relationships."
+    },
+    "ci_name": {
+      "type": "string",
+      "description": "Display name of the configuration item"
+    },
+    "asset_name": {
+      "type": "string",
+      "description": "Asset name (may differ from CI name)"
+    },
+    "hostname": {
+      "type": "string",
+      "description": "Device or resource hostname"
+    },
+    "fqdn": {
+      "type": "string",
+      "description": "Fully qualified domain name"
+    },
+    "description": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (multi-tenant scoping)"
+    },
+    "ci_class_id": {
+      "type": "string",
+      "description": "Reference to CIClass entity"
+    },
+    "ci_class_name": {
+      "type": "string",
+      "description": "CI class name (denormalized from CIClass for display/filtering)"
+    },
+    "ci_subclass_id": {
+      "type": "string",
+      "description": "Reference to CISubclass entity"
+    },
+    "ci_subclass_name": {
+      "type": "string",
+      "description": "CI subclass name (denormalized)"
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "serial_number": {
+      "type": "string"
+    },
+    "hardware_version": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "Primary IP address. NOT a permanent unique identifier \u2014 IPs can change."
+    },
+    "additional_ip_addresses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mac_address": {
+      "type": "string"
+    },
+    "dns_name": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "network_subnet": {
+      "type": "string"
+    },
+    "vlan": {
+      "type": "string"
+    },
+    "os_platform": {
+      "type": "string"
+    },
+    "os_version": {
+      "type": "string"
+    },
+    "os_build": {
+      "type": "string"
+    },
+    "architecture": {
+      "type": "string"
+    },
+    "cloud_provider": {
+      "type": "string"
+    },
+    "cloud_tenant": {
+      "type": "string"
+    },
+    "cloud_subscription": {
+      "type": "string"
+    },
+    "resource_group": {
+      "type": "string"
+    },
+    "cloud_region": {
+      "type": "string"
+    },
+    "resource_type": {
+      "type": "string"
+    },
+    "azure_resource_id": {
+      "type": "string",
+      "description": "Full Azure Resource ID \u2014 authoritative external identifier for Azure resources"
+    },
+    "managed_unmanaged": {
+      "type": "string",
+      "enum": [
+        "managed",
+        "unmanaged",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Whether the device is managed by expected Microsoft management/security tools"
+    },
+    "management_platform": {
+      "type": "string"
+    },
+    "defender_onboarding_status": {
+      "type": "string"
+    },
+    "intune_management_status": {
+      "type": "string"
+    },
+    "entra_registration_status": {
+      "type": "string"
+    },
+    "defender_risk_score": {
+      "type": "string"
+    },
+    "exposure_level": {
+      "type": "string"
+    },
+    "security_status": {
+      "type": "string"
+    },
+    "vulnerability_info": {
+      "type": "string"
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "description": "Lifecycle status value (sourced from LifecycleStatus catalogue: Discovered, Identified, In Service, Maintenance, Quarantined, Retiring, Retired, Stale, Unknown)"
+    },
+    "environment": {
+      "type": "string",
+      "description": "Environment value (sourced from Environment catalogue: Development, Test, Training, UAT, Pre-Production, Production, Disaster Recovery, Sandbox, Other)"
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_successful_discovery": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "discovery_source": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "manual"
+      ],
+      "description": "Primary discovery source that identified this CI"
+    },
+    "source_record_id": {
+      "type": "string",
+      "description": "External source record identifier from the primary discovery source"
+    },
+    "discovery_confidence": {
+      "type": "number",
+      "description": "Confidence score 0-100 from the last reconciliation match"
+    },
+    "last_reconciled_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "technical_owner": {
+      "type": "string"
+    },
+    "support_team": {
+      "type": "string"
+    },
+    "business_owner": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "intrinsic_criticality": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "na"
+      ],
+      "default": "medium",
+      "description": "Intrinsic CI criticality set within the CMDB (independent of CBD application criticality)"
+    },
+    "inherited_criticality": {
+      "type": "string",
+      "description": "Infrastructure criticality derived from linked CBD application criticality. Computed only \u2014 never written back to CBD."
+    },
+    "inherited_criticality_from": {
+      "type": "string",
+      "description": "Name of the CBD application the inherited criticality was derived from"
+    },
+    "new_asset_status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "under_review",
+        "identified",
+        "approved",
+        "rejected_expected",
+        "exception"
+      ],
+      "description": "New-asset review queue status (Section 18)"
+    },
+    "stale_status": {
+      "type": "string",
+      "enum": [
+        "current",
+        "warning",
+        "stale",
+        "retirement_candidate"
+      ],
+      "default": "current",
+      "description": "Staleness classification derived from last-seen thresholds (Section 19)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "archived"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "ci_name",
+    "company_id"
+  ]
+}

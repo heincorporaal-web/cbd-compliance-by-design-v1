@@ -1,0 +1,74 @@
+{
+  "name": "CIAuditHistory",
+  "type": "object",
+  "properties": {
+    "configuration_item_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity (if applicable to a CI)"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "ci_created",
+        "ci_updated",
+        "ci_deleted",
+        "reconciliation",
+        "duplicate_merged",
+        "classification_changed",
+        "lifecycle_changed",
+        "application_relationship_created",
+        "application_relationship_deleted",
+        "source_precedence_override",
+        "manual_data_override",
+        "administrative_config",
+        "other"
+      ],
+      "description": "Type of audited action"
+    },
+    "object_type": {
+      "type": "string",
+      "description": "Type of object affected (ConfigurationItem, ApplicationCIRelationship, etc.)"
+    },
+    "object_id": {
+      "type": "string",
+      "description": "ID of the affected object"
+    },
+    "previous_value": {
+      "type": "string",
+      "description": "Previous value (JSON or plain text)"
+    },
+    "new_value": {
+      "type": "string",
+      "description": "New value (JSON or plain text)"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "automated_discovery",
+        "administrative"
+      ],
+      "description": "Whether the action was performed by a human or a system process"
+    },
+    "user": {
+      "type": "string",
+      "description": "User who performed the action. 'system' for automated discovery updates."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Reason for the change where applicable"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized for RLS)"
+    }
+  },
+  "required": [
+    "action",
+    "timestamp"
+  ]
+}

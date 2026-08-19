@@ -1,0 +1,64 @@
+{
+  "name": "CINetworkInterface",
+  "type": "object",
+  "properties": {
+    "configuration_item_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity"
+    },
+    "interface_name": {
+      "type": "string",
+      "description": "Network interface name/label"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address on this interface"
+    },
+    "mac_address": {
+      "type": "string",
+      "description": "MAC address on this interface"
+    },
+    "subnet": {
+      "type": "string"
+    },
+    "vlan": {
+      "type": "string"
+    },
+    "dns_name": {
+      "type": "string"
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false
+    },
+    "discovery_source": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "manual"
+      ]
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized from CI for RLS)"
+    }
+  },
+  "required": [
+    "configuration_item_id"
+  ]
+}

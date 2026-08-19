@@ -1,0 +1,65 @@
+{
+  "name": "CIDataQualityIssue",
+  "type": "object",
+  "properties": {
+    "configuration_item_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity"
+    },
+    "issue_type": {
+      "type": "string",
+      "enum": [
+        "missing_owner",
+        "missing_ci_class",
+        "missing_environment",
+        "missing_serial_number",
+        "unknown_device",
+        "no_discovery_source",
+        "no_application_relationship",
+        "stale_asset",
+        "duplicate_candidate",
+        "missing_lifecycle_status",
+        "conflicting_source_info",
+        "other"
+      ],
+      "description": "Type of data quality issue detected"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "description": {
+      "type": "string"
+    },
+    "detected_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "resolved",
+        "ignored"
+      ],
+      "default": "open"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized for RLS)"
+    }
+  },
+  "required": [
+    "configuration_item_id",
+    "issue_type"
+  ]
+}

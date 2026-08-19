@@ -1,0 +1,59 @@
+{
+  "name": "ReconciliationCandidate",
+  "type": "object",
+  "properties": {
+    "discovery_record_id": {
+      "type": "string",
+      "description": "Reference to DiscoveryRecord entity being matched"
+    },
+    "candidate_ci_id": {
+      "type": "string",
+      "description": "Reference to existing ConfigurationItem that is a potential match"
+    },
+    "candidate_ci_name": {
+      "type": "string",
+      "description": "Candidate CI name (denormalized for display)"
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "Match confidence 0-100. 95-100 = auto-reconcile, 70-94 = review required, <70 = new CI."
+    },
+    "match_identifiers_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Identifier types that contributed to the match"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "merged",
+        "new_ci_created"
+      ],
+      "default": "pending",
+      "description": "Review queue status"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "User who reviewed the candidate"
+    },
+    "reviewed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    }
+  },
+  "required": [
+    "discovery_record_id"
+  ]
+}

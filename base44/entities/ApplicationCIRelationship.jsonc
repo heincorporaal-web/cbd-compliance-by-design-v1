@@ -1,0 +1,111 @@
+{
+  "name": "ApplicationCIRelationship",
+  "type": "object",
+  "properties": {
+    "cbd_application_reference_id": {
+      "type": "string",
+      "description": "Reference to CBDApplicationReference entity"
+    },
+    "cbd_application_id": {
+      "type": "string",
+      "description": "CBD application ID (denormalized for querying)"
+    },
+    "cbd_application_name": {
+      "type": "string",
+      "description": "CBD application name (denormalized for display)"
+    },
+    "configuration_item_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity"
+    },
+    "ci_name": {
+      "type": "string",
+      "description": "CI name (denormalized for display)"
+    },
+    "relationship_type": {
+      "type": "string",
+      "enum": [
+        "hosted_on",
+        "runs_on",
+        "depends_on",
+        "uses",
+        "connects_to",
+        "database_for",
+        "storage_for",
+        "network_dependency",
+        "security_dependency",
+        "authentication_dependency",
+        "integration_dependency",
+        "backup_dependency",
+        "disaster_recovery_dependency",
+        "supporting_infrastructure",
+        "other"
+      ],
+      "description": "Application-to-CI relationship type"
+    },
+    "environment": {
+      "type": "string",
+      "description": "Environment this relationship applies to (Production, Development, etc.)"
+    },
+    "critical_dependency": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this CI is a critical dependency for the application"
+    },
+    "primary_secondary": {
+      "type": "string",
+      "enum": [
+        "primary",
+        "secondary"
+      ],
+      "default": "primary"
+    },
+    "effective_from": {
+      "type": "string",
+      "format": "date"
+    },
+    "effective_to": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "proposed"
+      ],
+      "default": "active"
+    },
+    "relationship_source": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "discovered",
+        "suggested"
+      ],
+      "default": "manual",
+      "description": "How the relationship was created. 'suggested' requires human confirmation before becoming active."
+    },
+    "confirmed_by": {
+      "type": "string",
+      "description": "User who confirmed this relationship"
+    },
+    "confirmed_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized for RLS)"
+    }
+  },
+  "required": [
+    "cbd_application_reference_id",
+    "configuration_item_id",
+    "relationship_type"
+  ]
+}

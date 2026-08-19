@@ -1,0 +1,78 @@
+{
+  "name": "DiscoveryRun",
+  "type": "object",
+  "properties": {
+    "discovery_source_id": {
+      "type": "string",
+      "description": "Reference to DiscoverySource entity"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "cbd_application",
+        "manual"
+      ]
+    },
+    "run_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "completed",
+        "failed",
+        "partial"
+      ],
+      "default": "running"
+    },
+    "records_received": {
+      "type": "number",
+      "default": 0
+    },
+    "records_created": {
+      "type": "number",
+      "default": 0
+    },
+    "records_updated": {
+      "type": "number",
+      "default": 0
+    },
+    "records_requiring_review": {
+      "type": "number",
+      "default": 0
+    },
+    "errors_count": {
+      "type": "number",
+      "default": 0
+    },
+    "error_summary": {
+      "type": "string"
+    },
+    "triggered_by": {
+      "type": "string",
+      "description": "User who triggered the run, or 'system' for scheduled runs"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    }
+  },
+  "required": [
+    "discovery_source_id",
+    "company_id"
+  ]
+}

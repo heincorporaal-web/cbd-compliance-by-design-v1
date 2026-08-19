@@ -1,0 +1,59 @@
+{
+  "name": "CIExternalIdentifier",
+  "type": "object",
+  "properties": {
+    "configuration_item_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity"
+    },
+    "source_system": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "manual"
+      ],
+      "description": "Microsoft discovery source system that owns this external identifier"
+    },
+    "external_id": {
+      "type": "string",
+      "description": "External identifier in the source system (e.g. Defender Machine ID, Entra Device ID, Intune Device ID, Azure Resource ID)"
+    },
+    "external_object_type": {
+      "type": "string",
+      "description": "Object type in the source system (e.g. machine, device, managedDevice, resource)"
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Direct URL to the source record if available"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this external identifier is still present in the source system"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized from CI for RLS)"
+    }
+  },
+  "required": [
+    "configuration_item_id",
+    "source_system",
+    "external_id"
+  ]
+}

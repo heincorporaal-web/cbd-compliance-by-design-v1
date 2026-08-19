@@ -1,0 +1,52 @@
+{
+  "name": "SourcePrecedenceRule",
+  "type": "object",
+  "properties": {
+    "attribute_category": {
+      "type": "string",
+      "enum": [
+        "azure_specific",
+        "endpoint_security",
+        "device_management",
+        "identity",
+        "application",
+        "manual_cmdb"
+      ],
+      "description": "Attribute group this precedence rule applies to (e.g. azure-specific attributes \u2192 Azure Resource Graph wins)"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "cbd_application",
+        "manual_cmdb"
+      ],
+      "description": "Discovery source for this precedence entry"
+    },
+    "precedence_rank": {
+      "type": "number",
+      "description": "Priority rank \u2014 lower number = higher priority. A lower-priority source must not overwrite an authoritative value from a higher-priority source."
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "attribute_category",
+    "source",
+    "precedence_rank",
+    "company_id"
+  ]
+}

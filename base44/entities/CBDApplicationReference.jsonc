@@ -1,0 +1,63 @@
+{
+  "name": "CBDApplicationReference",
+  "type": "object",
+  "properties": {
+    "cbd_application_id": {
+      "type": "string",
+      "description": "Authoritative external reference \u2014 the CBD ICT Application record identifier"
+    },
+    "application_name": {
+      "type": "string"
+    },
+    "application_description": {
+      "type": "string"
+    },
+    "application_type": {
+      "type": "string"
+    },
+    "application_owner": {
+      "type": "string"
+    },
+    "technical_owner": {
+      "type": "string"
+    },
+    "business_owner": {
+      "type": "string"
+    },
+    "business_criticality": {
+      "type": "string",
+      "description": "Application criticality from CBD (authoritative \u2014 CMDB must not change this)"
+    },
+    "information_classification": {
+      "type": "string"
+    },
+    "lifecycle_status": {
+      "type": "string"
+    },
+    "hosting_type": {
+      "type": "string"
+    },
+    "production_status": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "last_refreshed": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the last successful refresh from CBD"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "False if the CBD application has disappeared or become inactive. Historical CMDB relationships are retained."
+    }
+  },
+  "required": [
+    "cbd_application_id",
+    "application_name",
+    "company_id"
+  ]
+}

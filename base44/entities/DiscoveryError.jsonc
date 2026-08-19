@@ -1,0 +1,66 @@
+{
+  "name": "DiscoveryError",
+  "type": "object",
+  "properties": {
+    "discovery_run_id": {
+      "type": "string",
+      "description": "Reference to DiscoveryRun entity"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "defender_for_endpoint",
+        "intune",
+        "entra_id",
+        "azure_resource_graph",
+        "defender_for_cloud",
+        "defender_for_iot",
+        "azure_arc",
+        "sentinel",
+        "manual"
+      ]
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "error_type": {
+      "type": "string",
+      "enum": [
+        "auth",
+        "rate_limit",
+        "network",
+        "schema",
+        "api_error",
+        "config",
+        "other"
+      ],
+      "description": "Classification of the error"
+    },
+    "raw_record_ref": {
+      "type": "string",
+      "description": "Reference to the DiscoveryRecord that caused the error, if applicable"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "error",
+        "critical"
+      ],
+      "default": "error"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    }
+  },
+  "required": [
+    "discovery_run_id",
+    "error_message"
+  ]
+}
