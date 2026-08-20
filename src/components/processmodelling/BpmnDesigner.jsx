@@ -396,7 +396,7 @@ export default function BpmnDesigner({
   };
 
   return (
-    <div className="flex h-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+    <div className="flex h-[calc(100vh-260px)] min-h-[500px] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
       {!readOnly && <BpmnElementPalette onDragStart={onDragStart} />}
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50 flex-wrap">
@@ -476,8 +476,8 @@ export default function BpmnDesigner({
         {/* Bounded canvas area: a white "page" on a grey workspace. Everything
             outside the page is clipped (overflow hidden), so the future image
             preview will only capture what is placed inside this canvas. */}
-        <div className="flex-1 min-h-[60vh] bg-slate-200 p-3 md:p-5 overflow-auto flex justify-center">
-          <div className="relative w-full max-w-[1200px] min-h-[560px] bg-white rounded-lg shadow-lg ring-1 ring-slate-300 overflow-hidden">
+        <div className="flex-1 min-h-0 bg-slate-200 p-3 md:p-5 overflow-auto flex justify-center">
+          <div className="relative w-full max-w-[1200px] h-full min-h-[560px] bg-white rounded-lg shadow-lg ring-1 ring-slate-300 overflow-hidden">
             <span className="pointer-events-none absolute top-2 left-3 z-10 text-[10px] font-semibold uppercase tracking-wide text-slate-300 select-none">
               Canvas
             </span>
