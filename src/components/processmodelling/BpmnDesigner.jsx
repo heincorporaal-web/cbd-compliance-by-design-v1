@@ -5,7 +5,7 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2 } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2, Plus, ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
 import BpmnDataPane from "@/components/processmodelling/BpmnDataPane";
@@ -248,6 +248,66 @@ export default function BpmnDesigner({
     return !!(el && el.businessObject && el.businessObject.$type === "bpmn:SubProcess");
   })();
 
+  const canAddLane = (() => {
+    const el = selectedElementRef.current;
+    return !!(el && el.businessObject && el.businessObject.$type === "bpmn:Participant");
+  })();
+
+  const selectedPoolHorizontal = (() => {
+    const el = selectedElementRef.current;
+    if (!el || !el.businessObject || el.businessObject.$type !== "bpmn:Participant") return true;
+    const di = el.di || {};
+    return di.horizontal !== false;
+  })();
+
+  // Add a lane (band) inside the selected pool. The lane orientation follows
+  // the pool's current orientation (horizontal pool → horizontal band, etc.).
+  const addLaneToPool = () => {
+    const modeler = modelerRef.current;
+    const el = selectedElementRef.current;
+    if (!modeler || !el) return;
+    const bo = el.businessObject || {};
+    if (bo.$type !== "bpmn:Participant") {
+      toast.info("Select a pool to add a lane");
+      return;
+    }
+    try {
+      const modeling = modeler.get("modeling");
+      const elementFactory = modeler.get("elementFactory");
+      const lane = elementFactory.createShape({ type: "bpmn:Lane" });
+      modeling.createShape(lane, { x: el.x + el.width / 2, y: el.y + el.height / 2 }, el);
+      setDirty(true);
+      toast.success("Lane added to pool");
+    } catch (e) {
+      toast.error("Could not add lane: " + (e?.message || e));
+    }
+  };
+
+  // Flip the selected pool between horizontal and vertical orientation, which
+  // makes its lanes render as horizontal or vertical bands respectively.
+  const togglePoolOrientation = () => {
+    const modeler = modelerRef.current;
+    const el = selectedElementRef.current;
+    if (!modeler || !el) return;
+    const bo = el.businessObject || {};
+    if (bo.$type !== "bpmn:Participant") {
+      toast.info("Select a pool to toggle orientation");
+      return;
+    }
+    try {
+      const di = el.di || {};
+      const isHorizontal = di.horizontal !== false;
+      modeler.get("replace").replaceElement(el, {
+        type: "bpmn:Participant",
+        isExpanded: di.isExpanded === true,
+        horizontal: !isHorizontal,
+      });
+      setDirty(true);
+    } catch (e) {
+      toast.error("Could not toggle pool orientation: " + (e?.message || e));
+    }
+  };
+
   // Start a native bpmn-js drag-create from the docked palette so elements
   // can be dragged onto the canvas with live preview and proper drop targets
   // (lanes, pools, attaching boundary events to activities, etc.).
@@ -427,6 +487,29 @@ export default function BpmnDesigner({
                 {selectedIsExpanded ? <Minimize2 className="w-4 h-4" /> : <Expand className="w-4 h-4" />}
                 {selectedIsExpanded ? "Collapse" : "Expand"}
               </Button>
+            )}
+            {!readOnly && canAddLane && (
+              <>
+                <div className="w-px h-6 bg-slate-200 mx-1" />
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={addLaneToPool}
+                  title="Add a lane (band) inside the selected pool"
+                  className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <Plus className="w-4 h-4" /> Add Lane
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={togglePoolOrientation}
+                  title={selectedPoolHorizontal ? "Switch pool to vertical (vertical bands)" : "Switch pool to horizontal (horizontal bands)"}
+                  className="gap-1.5"
+                >
+                  <ArrowLeftRight className="w-4 h-4" /> {selectedPoolHorizontal ? "Horizontal" : "Vertical"}
+                </Button>
+              </>
             )}
             {!readOnly && (
               <>
