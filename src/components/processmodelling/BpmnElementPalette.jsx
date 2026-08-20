@@ -22,6 +22,17 @@ const EVENT = {
   terminate: "bpmn:TerminateEventDefinition",
 };
 
+const COMMON_ELEMENTS = [
+  { label: "Task", type: "bpmn:Task" },
+  { label: "User Task", type: "bpmn:UserTask" },
+  { label: "Sub-process (collapsed)", type: "bpmn:SubProcess", isExpanded: false },
+  { label: "Start Event", type: "bpmn:StartEvent" },
+  { label: "End Event", type: "bpmn:EndEvent" },
+  { label: "Exclusive (XOR)", type: "bpmn:ExclusiveGateway" },
+  { label: "Parallel (AND)", type: "bpmn:ParallelGateway" },
+  { label: "Pool / Participant", type: "bpmn:Participant", isExpanded: true },
+];
+
 const CATEGORIES = [
   {
     key: "general",
@@ -368,9 +379,10 @@ function BpmnIcon({ item }) {
 /* ------------------------------- Component ------------------------------- */
 
 export default function BpmnElementPalette({ onDragStart }) {
-  const [open, setOpen] = useState(() =>
-    Object.fromEntries(CATEGORIES.map((c) => [c.key, true]))
-  );
+  const [open, setOpen] = useState(() => ({
+    common: true,
+    ...Object.fromEntries(CATEGORIES.map((c) => [c.key, true])),
+  }));
 
   const toggle = (key) => setOpen((s) => ({ ...s, [key]: !s[key] }));
 
@@ -380,6 +392,38 @@ export default function BpmnElementPalette({ onDragStart }) {
         <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">Elements</h3>
       </div>
       <div className="flex-1 overflow-y-auto">
+        <div className="border-b border-slate-100 bg-indigo-50/30">
+          <button
+            type="button"
+            onClick={() => toggle("common")}
+            className="w-full flex items-center gap-1.5 px-3 py-2 text-left hover:bg-indigo-50"
+          >
+            {open.common ? (
+              <ChevronDown className="w-3.5 h-3.5 text-indigo-400" />
+            ) : (
+              <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
+            )}
+            <span className="text-xs font-semibold text-indigo-700">Common Elements</span>
+          </button>
+          {open.common && (
+            <div className="grid grid-cols-2 gap-1 px-2 pb-3 pt-1">
+              {COMMON_ELEMENTS.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  title={`Drag ${item.label} onto the canvas`}
+                  onMouseDown={(e) => onDragStart(e, item.type, item)}
+                  className="flex flex-col items-center gap-1 p-2 rounded-md border border-transparent hover:border-indigo-200 hover:bg-indigo-50/60 transition-colors cursor-grab active:cursor-grabbing"
+                >
+                  <BpmnIcon item={item} />
+                  <span className="text-[10px] leading-tight text-slate-600 text-center">
+                    {item.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         {CATEGORIES.map((cat) => (
           <div key={cat.key} className="border-b border-slate-100">
             <button
