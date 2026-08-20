@@ -11,11 +11,11 @@ import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import {
   ShieldAlert, Globe, Search, Plus, ShieldCheck, Cpu, AlertCircle,
-  TriangleAlert, FileCheck, Network, Lock, Power, Handshake,
+  TriangleAlert, FileCheck, Network, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import ThirdPartyRiskDetailDialog from "@/components/tprm/ThirdPartyRiskDetailDialog";
-import ModulePageHeader from "@/components/branding/ModulePageHeader";
+import ModuleToggleStrip from "@/components/branding/ModuleToggleStrip";
 import { BRANDS } from "@/lib/moduleBrands";
 
 const RATING_COLOR = {
@@ -101,8 +101,7 @@ export default function AdvancedThirdPartyRiskManagement() {
   // No company selected (admin "all")
   if (!effectiveCompanyId) {
     return (
-      <div className="p-6 lg:p-8 space-y-6">
-        <PageHeader />
+      <div className="p-6 lg:p-8 space-y-4">
         <Card className="p-10 text-center text-slate-500">
           <Globe className="w-10 h-10 mx-auto mb-3 text-slate-300" />
           <p className="font-medium">Select a specific company to manage Advanced Third Party Risk Management.</p>
@@ -113,32 +112,17 @@ export default function AdvancedThirdPartyRiskManagement() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <PageHeader />
-
-      {/* Module toggle banner — product owner only */}
+    <div className="p-6 lg:p-8 space-y-4">
+      {/* Module toggle strip — product owner only, collapsed by default */}
       {isProductOwner && (
-        <Card className="p-5 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${tprmEnabled ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}>
-              <Power className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-800">Advanced Third Party Risk Management add-on</h3>
-              <p className="text-sm text-slate-500">
-                {tprmEnabled
-                  ? "Switched on — add and track third parties for risk, controls, frameworks, processes, assets, BCP and more."
-                  : "Switched off — enable the add-on to start adding and tracking third parties."}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-sm font-medium ${tprmEnabled ? "text-indigo-600" : "text-slate-400"}`}>
-              {tprmEnabled ? "Enabled" : "Disabled"}
-            </span>
-            <Switch checked={tprmEnabled} onCheckedChange={(v) => enableModuleMutation.mutate(v)} />
-          </div>
-        </Card>
+        <ModuleToggleStrip
+          brand={BRANDS.pbd}
+          moduleName="Advanced Third Party Risk Management"
+          moduleEnabled={tprmEnabled}
+          onToggle={(v) => enableModuleMutation.mutate(v)}
+          enabledLabel="Switched on — add and track third parties for risk, controls, frameworks, processes, assets, BCP and more."
+          disabledLabel="Switched off — enable the add-on to start adding and tracking third parties."
+        />
       )}
 
       {!tprmEnabled ? (
@@ -259,18 +243,7 @@ export default function AdvancedThirdPartyRiskManagement() {
   );
 }
 
-function PageHeader() {
-  return (
-    <ModulePageHeader
-      brand={BRANDS.pbd}
-      Icon={Handshake}
-      title="Partner by Design"
-      subtitle="Search third-party records and manage their advanced risk profiles — risks, controls, frameworks, processes, assets & BCP"
-      landingPath="/PartnerByDesign"
-      logoUrl={BRANDS.pbd.logoUrl}
-    />
-  );
-}
+
 
 function Stat({ icon: Icon, n, label }) {
   return (

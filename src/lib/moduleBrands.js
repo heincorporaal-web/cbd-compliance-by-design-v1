@@ -67,3 +67,15 @@ export const BRANDS = {
     text: "text-blue-700",
   },
 };
+
+// Maps add-on module routes to their brand. When the app is on one of these
+// routes, the top app bar shows the module identity instead of the CBD logo.
+export const ROUTE_BRANDS = {
+  "/AdvancedProcessModelling": BRANDS.obd,
+  "/AdvancedThirdPartyRiskManagement": BRANDS.pbd,
+  "/AdvancedAssetManagement": BRANDS.abd,
+};
+
+export function brandForRoute(pathname) {
+  return ROUTE_BRANDS[pathname] || null;
+}

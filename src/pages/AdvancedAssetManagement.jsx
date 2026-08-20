@@ -7,7 +7,6 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import {
   Select,
@@ -16,9 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Boxes, Globe, Lock, Power, Search, Radar, Server, Plus, Check } from "lucide-react";
+import { Boxes, Globe, Lock, Search, Radar, Server, Plus, Check } from "lucide-react";
 import { toast } from "sonner";
-import ModulePageHeader from "@/components/branding/ModulePageHeader";
+import ModuleToggleStrip from "@/components/branding/ModuleToggleStrip";
 import { BRANDS } from "@/lib/moduleBrands";
 import DiscoveryScanDialog from "@/components/assets/DiscoveryScanDialog";
 
@@ -151,8 +150,7 @@ export default function AdvancedAssetManagement() {
   // No company selected (admin "all")
   if (!effectiveCompanyId) {
     return (
-      <div className="p-6 lg:p-8 space-y-6">
-        <PageHeader />
+      <div className="p-6 lg:p-8 space-y-4">
         <Card className="p-10 text-center text-slate-500">
           <Globe className="w-10 h-10 mx-auto mb-3 text-slate-300" />
           <p className="font-medium">Select a specific company to manage Assets by Design.</p>
@@ -163,32 +161,17 @@ export default function AdvancedAssetManagement() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <PageHeader />
-
-      {/* Module toggle banner — product owner only */}
+    <div className="p-6 lg:p-8 space-y-4">
+      {/* Module toggle strip — product owner only, collapsed by default */}
       {isProductOwner && (
-        <Card className="p-5 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${moduleEnabled ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-400"}`}>
-              <Power className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-800">Assets by Design add-on</h3>
-              <p className="text-sm text-slate-500">
-                {moduleEnabled
-                  ? "Switched on — discover assets with native Microsoft tools and manage them in the CMDB."
-                  : "Switched off — enable the add-on to run network discovery and build your CMDB."}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-sm font-medium ${moduleEnabled ? "text-blue-600" : "text-slate-400"}`}>
-              {moduleEnabled ? "Enabled" : "Disabled"}
-            </span>
-            <Switch checked={moduleEnabled} onCheckedChange={(v) => enableModuleMutation.mutate(v)} />
-          </div>
-        </Card>
+        <ModuleToggleStrip
+          brand={BRANDS.abd}
+          moduleName="Assets by Design"
+          moduleEnabled={moduleEnabled}
+          onToggle={(v) => enableModuleMutation.mutate(v)}
+          enabledLabel="Switched on — discover assets with native Microsoft tools and manage them in the CMDB."
+          disabledLabel="Switched off — enable the add-on to run network discovery and build your CMDB."
+        />
       )}
 
       {!moduleEnabled ? (
@@ -321,18 +304,5 @@ export default function AdvancedAssetManagement() {
 
       <DiscoveryScanDialog open={scanOpen} onOpenChange={setScanOpen} companyId={effectiveCompanyId} />
     </div>
-  );
-}
-
-function PageHeader() {
-  return (
-    <ModulePageHeader
-      brand={BRANDS.abd}
-      Icon={Boxes}
-      title="Assets by Design"
-      subtitle="Run network discovery with native Microsoft tools and manage your CMDB — linked to the ICT system register"
-      landingPath="/AssetsByDesign"
-      logoUrl={BRANDS.abd.logoUrl}
-    />
   );
 }

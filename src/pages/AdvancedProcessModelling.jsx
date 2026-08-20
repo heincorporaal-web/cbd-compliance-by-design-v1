@@ -7,17 +7,16 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import {
-  Workflow, Globe, Lock, Power, GitBranch, ArrowLeft, FileText,
+  Workflow, Globe, Lock, GitBranch, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import BpmnDesigner from "@/components/processmodelling/BpmnDesigner";
 import ProcessDiagramList from "@/components/processmodelling/ProcessDiagramList";
 import ProcessDocumentTemplates from "@/components/processmodelling/ProcessDocumentTemplates";
 import GenerateDocumentDialog from "@/components/processmodelling/GenerateDocumentDialog";
-import ModulePageHeader from "@/components/branding/ModulePageHeader";
+import ModuleToggleStrip from "@/components/branding/ModuleToggleStrip";
 import { BRANDS } from "@/lib/moduleBrands";
 
 export default function AdvancedProcessModelling() {
@@ -121,8 +120,7 @@ export default function AdvancedProcessModelling() {
   // No company selected (admin "all")
   if (!effectiveCompanyId) {
     return (
-      <div className="p-6 lg:p-8 space-y-6">
-        <PageHeader />
+      <div className="p-6 lg:p-8 space-y-4">
         <Card className="p-10 text-center text-slate-500">
           <Globe className="w-10 h-10 mx-auto mb-3 text-slate-300" />
           <p className="font-medium">Select a specific company to manage Advanced Process Modelling.</p>
@@ -133,32 +131,17 @@ export default function AdvancedProcessModelling() {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <PageHeader />
-
-      {/* Module toggle banner — product owner only */}
+    <div className="p-4 lg:p-6 space-y-4">
+      {/* Module toggle strip — product owner only, collapsed by default */}
       {isProductOwner && (
-        <Card className="p-5 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${moduleEnabled ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}>
-              <Power className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-800">Advanced Process Modelling add-on</h3>
-              <p className="text-sm text-slate-500">
-                {moduleEnabled
-                  ? "Switched on — model processes using BPMN 2.0 diagrams, document them, and assess risk posture."
-                  : "Switched off — enable the add-on to access the BPMN 2.0 process diagram designer."}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-sm font-medium ${moduleEnabled ? "text-indigo-600" : "text-slate-400"}`}>
-              {moduleEnabled ? "Enabled" : "Disabled"}
-            </span>
-            <Switch checked={moduleEnabled} onCheckedChange={(v) => enableModuleMutation.mutate(v)} />
-          </div>
-        </Card>
+        <ModuleToggleStrip
+          brand={BRANDS.obd}
+          moduleName="Advanced Process Modelling"
+          moduleEnabled={moduleEnabled}
+          onToggle={(v) => enableModuleMutation.mutate(v)}
+          enabledLabel="Switched on — model processes using BPMN 2.0 diagrams, document them, and assess risk posture."
+          disabledLabel="Switched off — enable the add-on to access the BPMN 2.0 process diagram designer."
+        />
       )}
 
       {!moduleEnabled ? (
@@ -252,18 +235,5 @@ function TabButton({ active, onClick, children }) {
     >
       {children}
     </button>
-  );
-}
-
-function PageHeader() {
-  return (
-    <ModulePageHeader
-      brand={BRANDS.obd}
-      Icon={Workflow}
-      title="Operations by Design"
-      subtitle="Model processes with BPMN 2.0 diagrams, build documentation, and assess risk posture"
-      landingPath="/OperationsByDesign"
-      logoUrl={BRANDS.obd.logoUrl}
-    />
   );
 }

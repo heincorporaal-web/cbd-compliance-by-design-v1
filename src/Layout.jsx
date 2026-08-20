@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation, Link } from "react-router-dom";
 
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import NavTree from "@/components/layout/NavTree";
@@ -15,6 +16,8 @@ import {
 } from "@/components/ui/sidebar";
 import { base44 } from "@/api/base44Client";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { brandForRoute } from "@/lib/moduleBrands";
+import { ArrowLeft } from "lucide-react";
 
 function UserFooter() {
   const [user, setUser] = React.useState(null);
@@ -61,6 +64,40 @@ function CBDLogo() {
   );
 }
 
+function ModuleBrandMark() {
+  const { pathname } = useLocation();
+  const brand = brandForRoute(pathname);
+  if (!brand) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shadow flex items-center justify-center">
+          <CBDLogo />
+        </div>
+        <h1 className="text-xl font-bold text-slate-900">CBD</h1>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2 min-w-0">
+      <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shadow flex items-center justify-center shrink-0 ring-1 ring-slate-200">
+        <img src={brand.logoUrl} alt={brand.name} className="w-6 h-6 object-contain" />
+      </div>
+      <div className="flex items-center gap-1.5 min-w-0">
+        <h1 className="text-base font-bold text-slate-900 truncate">{brand.name}</h1>
+        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${brand.badgeBg} shrink-0`}>
+          {brand.short}
+        </span>
+      </div>
+      <Link
+        to={brand.landingPath}
+        className={`hidden md:inline-flex items-center gap-1 ml-1 text-xs ${brand.text} font-medium hover:underline shrink-0`}
+      >
+        <ArrowLeft className="w-3 h-3" /> overview
+      </Link>
+    </div>
+  );
+}
+
 export default function Layout({ children }) {
   const isMobile = useIsMobile();
 
@@ -104,12 +141,7 @@ export default function Layout({ children }) {
                 {!isMobile && (
                   <SidebarTrigger className="lg:hidden hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200" />
                 )}
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shadow flex items-center justify-center">
-                    <CBDLogo />
-                  </div>
-                  <h1 className="text-xl font-bold text-slate-900">CBD</h1>
-                </div>
+                <ModuleBrandMark />
               </div>
               <div className="ml-auto flex items-center gap-3">
                 <CompanyFilterBar />
