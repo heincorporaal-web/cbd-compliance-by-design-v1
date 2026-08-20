@@ -145,6 +145,7 @@ export default function BpmnDesigner({
         setSelection(null);
         selectedElementRef.current = null;
         setSelectedIsExpanded(false);
+        setPaneOpen(false);
       } else {
         setSelection(desc);
         selectedElementRef.current = el;
@@ -157,7 +158,6 @@ export default function BpmnDesigner({
             [desc.id]: { ...desc.seed, ...(prev[desc.id] || {}) },
           }));
         }
-        setPaneOpen(true);
       }
     };
     modeler.on("selection.changed", onSelectionChanged);
@@ -456,16 +456,20 @@ export default function BpmnDesigner({
                 e.target.value = "";
               }}
             />
-            <div className="w-px h-6 bg-slate-200 mx-1" />
-            <Button
-              size="sm"
-              variant={paneOpen ? "default" : "ghost"}
-              onClick={() => setPaneOpen((v) => !v)}
-              title="Toggle data pane"
-              className="gap-1.5"
-            >
-              <PanelRight className="w-4 h-4" /> Data
-            </Button>
+            {selection && (
+              <>
+                <div className="w-px h-6 bg-slate-200 mx-1" />
+                <Button
+                  size="sm"
+                  variant={paneOpen ? "default" : "ghost"}
+                  onClick={() => setPaneOpen((v) => !v)}
+                  title={paneOpen ? "Hide data pane" : "Show data pane for selected element"}
+                  className="gap-1.5"
+                >
+                  <PanelRight className="w-4 h-4" /> {paneOpen ? "Hide Data" : "Show Data"}
+                </Button>
+              </>
+            )}
             {!readOnly && (
               <Button size="sm" onClick={handleSave} disabled={saving} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
                 <Save className="w-4 h-4" /> {saving ? "Saving…" : "Save"}
