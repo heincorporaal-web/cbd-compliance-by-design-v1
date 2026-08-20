@@ -30,7 +30,10 @@ const COMMON_ELEMENTS = [
   { label: "End Event", type: "bpmn:EndEvent" },
   { label: "Exclusive (XOR)", type: "bpmn:ExclusiveGateway" },
   { label: "Parallel (AND)", type: "bpmn:ParallelGateway" },
+  { label: "Inclusive (OR)", type: "bpmn:InclusiveGateway" },
+  { label: "Event-based", type: "bpmn:EventBasedGateway" },
   { label: "Pool / Participant", type: "bpmn:Participant", isExpanded: true },
+  { label: "Lane", type: "bpmn:Lane", isExpanded: true },
 ];
 
 const CATEGORIES = [
