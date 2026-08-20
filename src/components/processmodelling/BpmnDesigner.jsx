@@ -396,7 +396,7 @@ export default function BpmnDesigner({
   };
 
   return (
-    <div className="flex h-[calc(100vh-260px)] min-h-[500px] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+    <div className="flex h-[calc(100vh-480px)] min-h-[400px] bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
       {!readOnly && <BpmnElementPalette onDragStart={onDragStart} />}
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50 flex-wrap">
