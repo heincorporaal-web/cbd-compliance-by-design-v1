@@ -32,7 +32,7 @@ export default function GovernanceByDesign() {
       brand={BRANDS.gbd}
       Icon={BookOpen}
       features={FEATURES}
-      logoUrl={null}
+      logoUrl={BRANDS.gbd.logoUrl}
     />
   );
 }

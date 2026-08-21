@@ -76,7 +76,8 @@ export const BRANDS = {
     enterLabel: "Enter Governance by Design",
     enterPath: "/GovernanceByDesignModule",
     landingPath: "/GovernanceByDesign",
-    logoUrl: null,
+    logoUrl:
+      "https://media.base44.com/images/public/6975dcbcbc9efd8b47128ae3/d479d7336_ChatGPTImageAug21202609_26_26AM.png",
     // Burgundy — governance / authority
     gradient: "from-[#800020] to-[#58181F]",
     solid: "bg-[#800020]",
