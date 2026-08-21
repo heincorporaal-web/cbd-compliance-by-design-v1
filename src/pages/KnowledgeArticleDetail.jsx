@@ -128,13 +128,14 @@ export default function KnowledgeArticleDetail() {
       return;
     }
     let dataToSave = { ...formData, shortcode: formData.shortcode.toUpperCase() };
-    markClean();
     if (isNew || !articleId) {
       const seq = getNextSeqNumber(formData.shortcode, formData.category);
       dataToSave.reference_number = buildReferenceNumber(formData.shortcode, formData.category, seq);
-      await createMutation.mutateAsync(dataToSave);
+      const created = await createMutation.mutateAsync(dataToSave);
+      initSnapshot(created || dataToSave);
     } else {
-      await updateMutation.mutateAsync(dataToSave);
+      const updated = await updateMutation.mutateAsync(dataToSave);
+      initSnapshot(updated || dataToSave);
     }
   };
 
@@ -263,7 +264,7 @@ export default function KnowledgeArticleDetail() {
 
               <div className="space-y-2">
                 <Label htmlFor="framework_id">Framework (Optional)</Label>
-                <Select value={formData.framework_id} onValueChange={(value) => setFormData({ ...formData, framework_id: value })}>
+                <Select value={formData.framework_id || ""} onValueChange={(value) => setFormData({ ...formData, framework_id: value || "" })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select framework" />
                   </SelectTrigger>
