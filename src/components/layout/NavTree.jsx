@@ -385,6 +385,7 @@ export default function NavTree() {
                 onToggleFav={toggleFav}
                 showFavBtn
                 customIcons={navIcons}
+                customIconMap={customIconMap}
               />
             ))}
           </div>
