@@ -20,6 +20,13 @@
         }
       },
       "description": "List of custom options"
+    },
+    "disabled_seeded": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Values of seeded (built-in) options that have been end-dated by the user. These remain in the catalogue but are hidden from active selection."
     }
   },
   "required": [

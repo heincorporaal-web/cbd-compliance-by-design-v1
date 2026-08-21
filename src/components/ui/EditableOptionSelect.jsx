@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Trash2, Settings2, Pencil, Search } from "lucide-react";
-import { loadFromDB, writeToDB, subscribe } from "@/lib/customOptionsStore";
+import { Plus, Trash2, Settings2, Pencil, Search, CalendarOff, RotateCcw } from "lucide-react";
+import { loadFromDB, writeToDB, subscribe, setDisabledSeeded } from "@/lib/customOptionsStore";
 
 export function CustomOptionIcon({ className = "" }) {
   return (
@@ -23,6 +23,7 @@ export default function EditableOptionSelect({
   placeholder = "Select...",
 }) {
   const [options, setOptions] = useState([]);
+  const [disabledSeeded, setDisabledSeededState] = useState([]);
   const [newLabel, setNewLabel] = useState("");
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -31,10 +32,13 @@ export default function EditableOptionSelect({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const loaded = await loadFromDB(storageKey);
-      if (!cancelled) setOptions(loaded);
+      await loadFromDB(storageKey);
     })();
-    const unsub = subscribe(storageKey, setOptions);
+    const unsub = subscribe(storageKey, (opts, disabled) => {
+      if (cancelled) return;
+      setOptions(opts || []);
+      setDisabledSeededState(disabled || []);
+    });
     return () => { cancelled = true; unsub(); };
   }, [storageKey]);
 
@@ -44,9 +48,21 @@ export default function EditableOptionSelect({
     setSaving(false);
   };
 
-  const isCustom = (val) => options.some(o => o.value === val);
+  const toggleSeeded = async (val) => {
+    setSaving(true);
+    const next = disabledSeeded.includes(val)
+      ? disabledSeeded.filter(v => v !== val)
+      : [...disabledSeeded, val];
+    await setDisabledSeeded(storageKey, next);
+    // If the currently selected value was just disabled, clear it
+    if (!disabledSeeded.includes(val) && value === val) onValueChange("");
+    setSaving(false);
+  };
 
-  const allOptions = [...seededOptions, ...options];
+  const isCustom = (val) => options.some(o => o.value === val);
+  const isDisabledSeeded = (val) => disabledSeeded.includes(val);
+
+  const allOptions = [...seededOptions, ...options].filter(o => !isDisabledSeeded(o.value));
   const filteredOptions = allOptions.filter(o =>
     (o.label || "").toLowerCase().includes(search.toLowerCase())
   );
@@ -104,17 +120,38 @@ export default function EditableOptionSelect({
             <Settings2 className="w-4 h-4 text-slate-500" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-4 space-y-4" align="end">
+        <PopoverContent className="w-80 p-4 space-y-4 max-h-[60vh] overflow-y-auto" align="end">
           <p className="text-sm font-semibold text-slate-800">Manage Options</p>
 
           <div className="space-y-1">
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Built-in (locked)</p>
-            {seededOptions.map(opt => (
-              <div key={opt.value} className="flex items-center justify-between px-2 py-1 rounded bg-slate-50 text-sm text-slate-600">
-                <span>{opt.label}</span>
-                <span className="text-xs text-slate-400 italic">locked</span>
-              </div>
-            ))}
+            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Built-in</p>
+            {seededOptions.map(opt => {
+              const disabled = isDisabledSeeded(opt.value);
+              return (
+                <div
+                  key={opt.value}
+                  className={`flex items-center justify-between px-2 py-1 rounded text-sm ${disabled ? "bg-red-50 text-slate-400" : "bg-slate-50 text-slate-600"}`}
+                >
+                  <span className={`flex items-center gap-1.5 ${disabled ? "line-through" : ""}`}>
+                    {opt.label}
+                    {disabled && <CalendarOff className="w-3 h-3 text-red-400" />}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    title={disabled ? "Re-activate" : "End-date (hide from selection)"}
+                    onClick={() => toggleSeeded(opt.value)}
+                    disabled={saving}
+                  >
+                    {disabled
+                      ? <RotateCcw className="w-3 h-3 text-green-500" />
+                      : <CalendarOff className="w-3 h-3 text-orange-500" />}
+                  </Button>
+                </div>
+              );
+            })}
           </div>
 
           {options.length > 0 && (

@@ -63,7 +63,7 @@ export default function ValueChains() {
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [showExpired, setShowExpired] = useState(false);
   const { canImport } = useIsImplementerRole();
-  const { getLabel: getChainLabel } = useCustomOptions("value_chain_management_chains");
+  const { getLabel: getChainLabel, disabledSeeded: disabledChains, isDisabledSeeded: isChainDisabled } = useCustomOptions("value_chain_management_chains");
 
   // Resolve a stored management_chain value to its human-readable label.
   // Seeded options store value === label; legacy custom records stored a
@@ -159,6 +159,8 @@ export default function ValueChains() {
   const filtered = valueChains.filter(vc => {
     // Hide end-dated / inactive / archived items unless the user toggles "show expired"
     if (!showExpired && isEndDated(vc)) return false;
+    // Hide items whose management chain has been end-dated, unless showing expired
+    if (!showExpired && isChainDisabled(vc.management_chain)) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     const chainLabel = resolveChainLabel(vc.management_chain);
@@ -317,8 +319,13 @@ export default function ValueChains() {
                   className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
                 >
                   {isOpen ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-                  <span className={`text-sm font-semibold px-2.5 py-0.5 rounded-full ${badgeCls}`}>{chain}</span>
-                  {chainDescriptions[chain] && (
+                  <span className={`text-sm font-semibold px-2.5 py-0.5 rounded-full ${badgeCls} ${isChainDisabled(items[0]?.management_chain) ? "line-through opacity-60" : ""}`}>{chain}</span>
+                   {isChainDisabled(items[0]?.management_chain) && (
+                     <Badge variant="outline" className="text-xs text-red-500 border-red-300 bg-red-50 gap-1">
+                       <CalendarOff className="w-3 h-3" /> End-dated
+                     </Badge>
+                   )}
+                   {chainDescriptions[chain] && (
                     <TooltipProvider delayDuration={200}>
                       <Tooltip>
                         <TooltipTrigger asChild>
