@@ -64,7 +64,7 @@ function ArticleNode({ article, onView, onDelete }) {
 }
 
 function ChapterNode({ chapter, articles, onView, onDelete }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   return (
     <div className="ml-6">
       <button
@@ -96,7 +96,7 @@ function ChapterNode({ chapter, articles, onView, onDelete }) {
 }
 
 function FrameworkNode({ frameworkName, chapters, onView, onDelete }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const totalArticles = Object.values(chapters).reduce((acc, arr) => acc + arr.length, 0);
 
   return (
