@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Upload, X, FileText, Loader2 } from "lucide-react";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 export default function FileUpload({ onFileUploaded, existingFiles = [], onFileRemoved }) {
   const [uploading, setUploading] = useState(false);
+  const inputRef = useRef(null);
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
@@ -21,6 +22,8 @@ export default function FileUpload({ onFileUploaded, existingFiles = [], onFileR
       console.error(error);
     } finally {
       setUploading(false);
+      // Reset the input so the same file can be selected again
+      if (inputRef.current) inputRef.current.value = "";
     }
   };
 
@@ -31,7 +34,7 @@ export default function FileUpload({ onFileUploaded, existingFiles = [], onFileR
           type="button"
           variant="outline"
           disabled={uploading}
-          onClick={() => document.getElementById('file-input')?.click()}
+          onClick={() => inputRef.current?.click()}
         >
           {uploading ? (
             <>
@@ -46,7 +49,7 @@ export default function FileUpload({ onFileUploaded, existingFiles = [], onFileR
           )}
         </Button>
         <input
-          id="file-input"
+          ref={inputRef}
           type="file"
           className="hidden"
           onChange={handleFileSelect}
