@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronDown, BookOpen, FolderOpen, Folder, FileText, Eye, Edit2, Trash2, Download } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ChevronRight, ChevronDown, BookOpen, FolderOpen, Folder, FileText, Eye, Edit2, Trash2, Download, Check, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -22,48 +23,103 @@ const getStatusColor = (status) => ({
   archived: 'bg-slate-100 text-slate-500',
 }[status] || 'bg-slate-100 text-slate-600');
 
-function ArticleNode({ article, onView, onDelete }) {
+function ArticleNode({ article, onView, onDelete, onRename }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(article.title);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const startEdit = () => {
+    setEditTitle(article.title);
+    setIsEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setEditTitle(article.title);
+  };
+
+  const saveEdit = () => {
+    const trimmed = editTitle.trim();
+    if (trimmed && trimmed !== article.title) {
+      onRename(article.id, trimmed);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); saveEdit(); }
+    else if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+  };
+
   return (
     <div className="flex items-center justify-between group p-2.5 ml-10 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         <FileText className="w-4 h-4 text-indigo-400 flex-shrink-0" />
-        <div className="min-w-0">
-          <span className="text-sm font-medium text-slate-800 truncate block">{article.title}</span>
-          <div className="flex gap-1.5 mt-0.5 flex-wrap">
-            {article.category && (
-              <Badge className={`text-xs py-0 ${getCategoryColor(article.category)}`}>
-                {article.category.replace(/_/g, ' ')}
+        <div className="min-w-0 flex-1">
+          {isEditing ? (
+            <Input
+              ref={inputRef}
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="h-7 text-sm font-medium"
+            />
+          ) : (
+            <span className="text-sm font-medium text-slate-800 truncate block">{article.title}</span>
+          )}
+          {!isEditing && (
+            <div className="flex gap-1.5 mt-0.5 flex-wrap">
+              {article.category && (
+                <Badge className={`text-xs py-0 ${getCategoryColor(article.category)}`}>
+                  {article.category.replace(/_/g, ' ')}
+                </Badge>
+              )}
+              <Badge className={`text-xs py-0 ${getStatusColor(article.status)}`}>
+                {article.status || 'draft'}
               </Badge>
-            )}
-            <Badge className={`text-xs py-0 ${getStatusColor(article.status)}`}>
-              {article.status || 'draft'}
-            </Badge>
-          </div>
+            </div>
+          )}
         </div>
       </div>
-      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onView(article)}>
-          <Eye className="w-3.5 h-3.5 text-slate-500" />
-        </Button>
-        {article.pdf_url && (
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => window.open(article.pdf_url, '_blank')}>
-            <Download className="w-3.5 h-3.5 text-slate-500" />
+      {isEditing ? (
+        <div className="flex gap-1 flex-shrink-0">
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={saveEdit}>
+            <Check className="w-3.5 h-3.5 text-green-600" />
           </Button>
-        )}
-        <Link to={createPageUrl(`KnowledgeArticleDetail?id=${article.id}`)}>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-            <Edit2 className="w-3.5 h-3.5 text-slate-500" />
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={cancelEdit}>
+            <X className="w-3.5 h-3.5 text-slate-500" />
           </Button>
-        </Link>
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onDelete(article.id)}>
-          <Trash2 className="w-3.5 h-3.5 text-red-400" />
-        </Button>
-      </div>
+        </div>
+      ) : (
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={startEdit} title="Rename">
+            <Edit2 className="w-3.5 h-3.5 text-indigo-500" />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onView(article)}>
+            <Eye className="w-3.5 h-3.5 text-slate-500" />
+          </Button>
+          {article.pdf_url && (
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => window.open(article.pdf_url, '_blank')}>
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onDelete(article.id)}>
+            <Trash2 className="w-3.5 h-3.5 text-red-400" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
 
-function ChapterNode({ chapter, articles, onView, onDelete }) {
+function ChapterNode({ chapter, articles, onView, onDelete, onRename }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="ml-6">
@@ -87,7 +143,7 @@ function ChapterNode({ chapter, articles, onView, onDelete }) {
       {expanded && (
         <div className="space-y-0.5 mt-0.5">
           {articles.map(article => (
-            <ArticleNode key={article.id} article={article} onView={onView} onDelete={onDelete} />
+            <ArticleNode key={article.id} article={article} onView={onView} onDelete={onDelete} onRename={onRename} />
           ))}
         </div>
       )}
@@ -95,7 +151,7 @@ function ChapterNode({ chapter, articles, onView, onDelete }) {
   );
 }
 
-function FrameworkNode({ frameworkName, chapters, onView, onDelete }) {
+function FrameworkNode({ frameworkName, chapters, onView, onDelete, onRename }) {
   const [expanded, setExpanded] = useState(false);
   const totalArticles = Object.values(chapters).reduce((acc, arr) => acc + arr.length, 0);
 
@@ -127,6 +183,7 @@ function FrameworkNode({ frameworkName, chapters, onView, onDelete }) {
               articles={articles}
               onView={onView}
               onDelete={onDelete}
+              onRename={onRename}
             />
           ))}
         </div>
@@ -135,7 +192,7 @@ function FrameworkNode({ frameworkName, chapters, onView, onDelete }) {
   );
 }
 
-export default function KnowledgeTreeView({ articles, frameworks, onView, onDelete }) {
+export default function KnowledgeTreeView({ articles, frameworks, onView, onDelete, onRename }) {
   // Build tree: frameworkId -> chapter -> articles[]
   const tree = {};
 
@@ -161,6 +218,7 @@ export default function KnowledgeTreeView({ articles, frameworks, onView, onDele
           chapters={chapters}
           onView={onView}
           onDelete={onDelete}
+          onRename={onRename}
         />
       ))}
     </div>

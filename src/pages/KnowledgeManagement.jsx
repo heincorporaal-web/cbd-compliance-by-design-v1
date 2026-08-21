@@ -45,6 +45,14 @@ export default function KnowledgeManagement() {
     },
   });
 
+  const renameMutation = useMutation({
+    mutationFn: ({ id, title }) => base44.entities.KnowledgeArticle.update(id, { title }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['knowledgeArticles']);
+      toast.success('Article renamed');
+    },
+  });
+
   const filteredArticles = articles.filter(article => {
     const term = searchTerm.toLowerCase();
     if (!term) return true;
@@ -142,6 +150,7 @@ export default function KnowledgeManagement() {
           frameworks={frameworks}
           onView={handleView}
           onDelete={(id) => deleteMutation.mutate(id)}
+          onRename={(id, title) => renameMutation.mutate({ id, title })}
         />
       )}
 
