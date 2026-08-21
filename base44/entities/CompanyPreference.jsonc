@@ -121,6 +121,11 @@
       "type": "boolean",
       "default": false,
       "description": "Switch on the Assets by Design add-on module for this company (CMDB with native Microsoft network discovery, linked to the ICT system register)"
+    },
+    "enable_governance_by_design": {
+      "type": "boolean",
+      "default": false,
+      "description": "Switch on the Governance by Design add-on module for this company (Policy lifecycle management, governance artefact library, relationships to risks, controls and frameworks)"
     }
   },
   "required": [

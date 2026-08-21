@@ -1,0 +1,295 @@
+{
+  "name": "GovernanceDocument",
+  "type": "object",
+  "properties": {
+    "document_code": {
+      "type": "string",
+      "description": "Human-readable document ID (e.g. POL-SEC-001)"
+    },
+    "document_name": {
+      "type": "string",
+      "description": "Full document name"
+    },
+    "short_name": {
+      "type": "string",
+      "description": "Short / abbreviated name"
+    },
+    "description": {
+      "type": "string"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "framework",
+        "policy",
+        "standard",
+        "procedure",
+        "guideline"
+      ],
+      "default": "policy",
+      "description": "Level in the governance artefact hierarchy"
+    },
+    "policy_category": {
+      "type": "string",
+      "description": "Category label (e.g. Information Security, Operational Resilience)"
+    },
+    "governance_domain": {
+      "type": "string",
+      "enum": [
+        "Information Security",
+        "Operational Resilience",
+        "Third Party Management",
+        "Data Governance",
+        "Technology Governance",
+        "Risk Management",
+        "Compliance",
+        "Human Capital",
+        "Finance",
+        "Legal",
+        "Other"
+      ],
+      "description": "Governance domain this document belongs to"
+    },
+    "parent_document_id": {
+      "type": "string",
+      "description": "Reference to parent GovernanceDocument (e.g. the Policy that a Standard sits under)"
+    },
+    "owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (document owner)"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Owner name (denormalized)"
+    },
+    "approver_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (approval authority)"
+    },
+    "approver_name": {
+      "type": "string",
+      "description": "Approver name (denormalized)"
+    },
+    "author_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (author)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "internal_review",
+        "awaiting_approval",
+        "approved",
+        "published",
+        "under_review",
+        "superseded",
+        "retired",
+        "expired"
+      ],
+      "default": "draft",
+      "description": "Current lifecycle status"
+    },
+    "current_version": {
+      "type": "string",
+      "description": "Current version number (e.g. 4.2)"
+    },
+    "draft_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "approval_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "publication_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "review_frequency": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "bi-annual",
+        "annual",
+        "bi-annual",
+        "two_yearly",
+        "as_required"
+      ],
+      "default": "annual",
+      "description": "How often the document must be reviewed"
+    },
+    "last_review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "review_lead_days": {
+      "type": "number",
+      "default": 60,
+      "description": "Days before next_review_date to trigger the review workflow"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "retirement_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "document_url": {
+      "type": "string",
+      "description": "URL or location of the actual document (uploaded file, SharePoint link, etc.)"
+    },
+    "document_file_name": {
+      "type": "string",
+      "description": "Original file name of the uploaded document"
+    },
+    "information_classification": {
+      "type": "string",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "highly_confidential"
+      ],
+      "default": "internal"
+    },
+    "business_criticality": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "regulatory_significance": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "none"
+      ],
+      "default": "medium"
+    },
+    "mandatory_advisory": {
+      "type": "string",
+      "enum": [
+        "mandatory",
+        "advisory"
+      ],
+      "default": "mandatory"
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to Risk entities"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to Control entities"
+    },
+    "linked_framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to Framework entities"
+    },
+    "linked_process_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to OrgProcess entities"
+    },
+    "linked_ict_system_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to ICTSystem entities"
+    },
+    "linked_third_party_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to ThirdPartyProvider entities"
+    },
+    "version_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "document_url": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Version history log"
+    },
+    "review_notes": {
+      "type": "string",
+      "description": "Notes from the most recent review"
+    },
+    "review_outcome": {
+      "type": "string",
+      "enum": [
+        "no_change",
+        "minor_amendment",
+        "major_revision",
+        "replacement",
+        "retirement"
+      ],
+      "description": "Outcome of the most recent review"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Free-form tags for filtering"
+    }
+  },
+  "required": [
+    "document_name",
+    "document_type",
+    "company_id"
+  ]
+}

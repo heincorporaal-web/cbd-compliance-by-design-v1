@@ -66,6 +66,26 @@ export const BRANDS = {
     badgeBg: "bg-blue-100 text-blue-700",
     text: "text-blue-700",
   },
+  gbd: {
+    key: "gbd",
+    name: "Governance by Design",
+    short: "GbD",
+    suite: "CBD — Compliance by Design",
+    tagline:
+      "Translate governance intent into accountable, measurable and traceable implementation — policy lifecycle management, artefact library, version control and relationship tracing to risks, controls and frameworks.",
+    enterLabel: "Enter Governance by Design",
+    enterPath: "/GovernanceByDesignModule",
+    landingPath: "/GovernanceByDesign",
+    logoUrl: null,
+    // Burgundy — governance / authority
+    gradient: "from-[#800020] to-[#58181F]",
+    solid: "bg-[#800020]",
+    softBg: "bg-rose-50",
+    softText: "text-[#800020]",
+    border: "border-rose-200",
+    badgeBg: "bg-rose-100 text-[#800020]",
+    text: "text-[#800020]",
+  },
 };
 
 // Maps add-on module routes to their brand. When the app is on one of these
@@ -74,6 +94,7 @@ export const ROUTE_BRANDS = {
   "/AdvancedProcessModelling": BRANDS.obd,
   "/AdvancedThirdPartyRiskManagement": BRANDS.pbd,
   "/AdvancedAssetManagement": BRANDS.abd,
+  "/GovernanceByDesignModule": BRANDS.gbd,
 };
 
 export function brandForRoute(pathname) {

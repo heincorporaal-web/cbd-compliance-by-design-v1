@@ -8,11 +8,12 @@ const MODULE_ROUTES = {
   obd: ["/OperationsByDesign", "/AdvancedProcessModelling"],
   pbd: ["/PartnerByDesign", "/AdvancedThirdPartyRiskManagement"],
   abd: ["/AssetsByDesign", "/AdvancedAssetManagement"],
+  gbd: ["/GovernanceByDesign", "/GovernanceByDesignModule"],
 };
 
 export default function ModuleNavigator() {
   const location = useLocation();
-  const modules = [BRANDS.obd, BRANDS.pbd, BRANDS.abd];
+  const modules = [BRANDS.obd, BRANDS.pbd, BRANDS.abd, BRANDS.gbd];
 
   return (
     <div className="px-2 pb-2">

@@ -46,6 +46,8 @@ import CBDApplications from './pages/cmdb/CBDApplications';
 import CBDApplicationDetail from './pages/cmdb/CBDApplicationDetail';
 import CMDBDashboard from './pages/cmdb/CMDBDashboard';
 import AdvancedAssetManagement from './pages/AdvancedAssetManagement';
+import GovernanceByDesign from './pages/GovernanceByDesign';
+import GovernanceByDesignModule from './pages/GovernanceByDesignModule';
 import OperationsByDesign from './pages/OperationsByDesign';
 import PartnerByDesign from './pages/PartnerByDesign';
 import StakeholderAssignmentGaps from './pages/StakeholderAssignmentGaps';
@@ -131,6 +133,8 @@ const AuthenticatedApp = () => {
         <Route path="/OperationsByDesign" element={<OperationsByDesign />} />
         <Route path="/PartnerByDesign" element={<PartnerByDesign />} />
         <Route path="/StakeholderAssignmentGaps" element={<StakeholderAssignmentGaps />} />
+        <Route path="/GovernanceByDesign" element={<GovernanceByDesign />} />
+        <Route path="/GovernanceByDesignModule" element={<GovernanceByDesignModule />} />
         <Route path="/about" element={<About />} />
         <Route path="/MobileSettings" element={<MobileSettings />} />
         <Route path="*" element={<PageNotFound />} />
