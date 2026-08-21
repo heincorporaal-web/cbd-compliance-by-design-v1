@@ -260,6 +260,37 @@
       },
       "description": "Version history log"
     },
+    "signed_off_by": {
+      "type": "string",
+      "description": "Name of the person who signed off the document when it was approved"
+    },
+    "signed_off_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the document was signed off"
+    },
+    "approval_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Audit trail of approval status changes"
+    },
     "review_notes": {
       "type": "string",
       "description": "Notes from the most recent review"

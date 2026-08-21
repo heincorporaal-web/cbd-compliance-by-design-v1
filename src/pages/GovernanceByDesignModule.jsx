@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { format, differenceInDays, parseISO } from "date-fns";
 import ModuleToggleStrip from "@/components/branding/ModuleToggleStrip";
 import GovernanceLinksPanel from "@/components/governance/GovernanceLinksPanel";
+import ApprovalTracker from "@/components/governance/ApprovalTracker";
 import { BRANDS } from "@/lib/moduleBrands";
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -248,24 +249,10 @@ function DocumentFormDialog({ open, onOpenChange, doc, companyId, onSave }) {
 
 // ── Document detail dialog ──────────────────────────────────────────────────
 
-function DocumentDetailDialog({ open, onOpenChange, doc, onEdit, onDelete, onStatusChange, companyId }) {
+function DocumentDetailDialog({ open, onOpenChange, doc, onEdit, onDelete, onStatusChange, companyId, user }) {
   if (!doc) return null;
   const sc = STATUS_CONFIG[doc.status] || STATUS_CONFIG.draft;
   const reviewStatus = getReviewStatus(doc);
-
-  const TRANSITIONS = {
-    draft:             ["internal_review", "awaiting_approval"],
-    internal_review:   ["awaiting_approval", "draft"],
-    awaiting_approval: ["approved", "draft"],
-    approved:          ["published"],
-    published:         ["under_review", "superseded", "retired"],
-    under_review:      ["published", "awaiting_approval", "draft"],
-    superseded:        ["retired"],
-    retired:           [],
-    expired:           ["under_review", "retired"],
-  };
-
-  const nextStates = TRANSITIONS[doc.status] || [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -331,22 +318,8 @@ function DocumentDetailDialog({ open, onOpenChange, doc, onEdit, onDelete, onSta
             ))}
           </div>
 
-          {/* Lifecycle transitions */}
-          {nextStates.length > 0 && (
-            <div>
-              <p className="text-xs text-slate-400 mb-2">Advance status</p>
-              <div className="flex flex-wrap gap-2">
-                {nextStates.map((s) => {
-                  const cfg = STATUS_CONFIG[s];
-                  return (
-                    <Button key={s} size="sm" variant="outline" onClick={() => onStatusChange(doc.id, s)} className="text-xs gap-1.5">
-                      <ChevronRight className="w-3 h-3" /> {cfg?.label || s}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* Approval status tracker */}
+          <ApprovalTracker doc={doc} user={user} onStatusChange={(status, opts) => onStatusChange(doc.id, status, opts)} />
 
           {/* Traceability links to OBD processes and ABD assets */}
           <GovernanceLinksPanel doc={doc} companyId={companyId} />
@@ -466,10 +439,20 @@ export default function GovernanceByDesignModule() {
   });
 
   const statusMutation = useMutation({
-    mutationFn: ({ id, status }) => base44.entities.GovernanceDocument.update(id, { status }),
+    mutationFn: ({ id, status, opts }) => {
+      const now = new Date().toISOString();
+      const actor = user?.full_name || user?.email || "Unknown";
+      const history = [...(opts?.currentHistory || []), { status, actor, timestamp: now, notes: opts?.notes || "" }];
+      const payload = { status, approval_history: history };
+      if (opts?.signOff) {
+        payload.signed_off_by = actor;
+        payload.signed_off_date = now;
+        payload.approval_date = now.slice(0, 10);
+      }
+      return base44.entities.GovernanceDocument.update(id, payload);
+    },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries(["governanceDocs"]);
-      setDetailOpen(false);
       toast.success(`Status updated to ${STATUS_CONFIG[vars.status]?.label || vars.status}`);
     },
   });
@@ -773,9 +756,10 @@ export default function GovernanceByDesignModule() {
         onOpenChange={setDetailOpen}
         doc={detailDoc}
         companyId={effectiveCompanyId}
+        user={user}
         onEdit={(doc) => { setEditDoc(doc); setFormOpen(true); }}
         onDelete={(id) => deleteMutation.mutate(id)}
-        onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
+        onStatusChange={(id, status, opts) => statusMutation.mutate({ id, status, opts: { ...opts, currentHistory: detailDoc?.approval_history } })}
       />
     </div>
   );
