@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Trash2, Settings, Pencil, Search, CalendarOff, RotateCcw } from "lucide-react";
+import { Plus, Trash2, Settings, Pencil, Search, CalendarOff, RotateCcw, CheckSquare, Square, X } from "lucide-react";
 import { loadFromDB, writeToDB, subscribe, setDisabledSeeded } from "@/lib/customOptionsStore";
+import { toast } from "sonner";
 
 export function CustomOptionIcon({ className = "" }) {
   return (
@@ -28,6 +29,7 @@ export default function EditableOptionSelect({
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -61,6 +63,53 @@ export default function EditableOptionSelect({
 
   const isCustom = (val) => options.some(o => o.value === val);
   const isDisabledSeeded = (val) => disabledSeeded.includes(val);
+
+  const toggleSelect = (val) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(val)) next.delete(val); else next.add(val);
+      return next;
+    });
+  };
+
+  const allSeededSelected = seededOptions.length > 0 && seededOptions.every(o => selected.has(o.value));
+  const selectAllSeeded = () => setSelected(new Set(seededOptions.map(o => o.value)));
+  const clearSelection = () => setSelected(new Set());
+
+  const bulkEndDate = async () => {
+    if (selected.size === 0) return;
+    setSaving(true);
+    const toAdd = Array.from(selected).filter(v => !disabledSeeded.includes(v));
+    if (toAdd.length === 0) {
+      toast.info("All selected items are already end-dated.");
+      setSelected(new Set());
+      setSaving(false);
+      return;
+    }
+    const next = [...new Set([...disabledSeeded, ...toAdd])];
+    await setDisabledSeeded(storageKey, next);
+    if (toAdd.some(v => value === v)) onValueChange("");
+    toast.success(`End-dated ${toAdd.length} management chain${toAdd.length !== 1 ? "s" : ""}.`);
+    setSelected(new Set());
+    setSaving(false);
+  };
+
+  const bulkReactivate = async () => {
+    if (selected.size === 0) return;
+    setSaving(true);
+    const toRemove = Array.from(selected).filter(v => disabledSeeded.includes(v));
+    if (toRemove.length === 0) {
+      toast.info("None of the selected items are end-dated.");
+      setSelected(new Set());
+      setSaving(false);
+      return;
+    }
+    const next = disabledSeeded.filter(v => !toRemove.includes(v));
+    await setDisabledSeeded(storageKey, next);
+    toast.success(`Re-activated ${toRemove.length} management chain${toRemove.length !== 1 ? "s" : ""}.`);
+    setSelected(new Set());
+    setSaving(false);
+  };
 
   const allOptions = [...seededOptions, ...options].filter(o => !isDisabledSeeded(o.value));
   const filteredOptions = allOptions.filter(o =>
@@ -124,17 +173,58 @@ export default function EditableOptionSelect({
           <p className="text-sm font-semibold text-slate-800">Manage Options</p>
 
           <div className="space-y-1">
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Built-in</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Built-in</p>
+              <button
+                type="button"
+                onClick={() => allSeededSelected ? clearSelection() : selectAllSeeded()}
+                className="text-[11px] text-slate-500 hover:text-slate-700 flex items-center gap-1"
+                disabled={saving}
+              >
+                {allSeededSelected
+                  ? <><Square className="w-3 h-3" /> Clear</>
+                  : <><CheckSquare className="w-3 h-3" /> Select all</>}
+              </button>
+            </div>
+
+            {selected.size > 0 && (
+              <div className="flex items-center gap-1.5 py-1.5 px-2 bg-slate-100 rounded text-xs">
+                <span className="text-slate-600 font-medium">{selected.size} selected</span>
+                <Button type="button" size="sm" onClick={bulkEndDate} disabled={saving} className="h-6 px-2 text-[11px] bg-orange-500 hover:bg-orange-600 text-white">
+                  <CalendarOff className="w-3 h-3" /> End-date
+                </Button>
+                <Button type="button" size="sm" onClick={bulkReactivate} disabled={saving} className="h-6 px-2 text-[11px] bg-green-500 hover:bg-green-600 text-white">
+                  <RotateCcw className="w-3 h-3" /> Re-activate
+                </Button>
+                <Button type="button" size="icon" onClick={clearSelection} disabled={saving} className="h-6 w-6 text-slate-400 hover:text-slate-600">
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
+
             {seededOptions.map(opt => {
               const disabled = isDisabledSeeded(opt.value);
+              const isChecked = selected.has(opt.value);
               return (
                 <div
                   key={opt.value}
-                  className={`flex items-center justify-between px-2 py-1 rounded text-sm ${disabled ? "bg-red-50 text-slate-400" : "bg-slate-50 text-slate-600"}`}
+                  className={`flex items-center justify-between px-2 py-1 rounded text-sm ${disabled ? "bg-red-50 text-slate-400" : "bg-slate-50 text-slate-600"} ${isChecked ? "ring-1 ring-blue-300" : ""}`}
                 >
-                  <span className={`flex items-center gap-1.5 ${disabled ? "line-through" : ""}`}>
-                    {opt.label}
-                    {disabled && <CalendarOff className="w-3 h-3 text-red-400" />}
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => toggleSelect(opt.value)}
+                      className="shrink-0 text-slate-400 hover:text-blue-500"
+                      title={isChecked ? "Deselect" : "Select for bulk action"}
+                    >
+                      {isChecked
+                        ? <CheckSquare className="w-3.5 h-3.5 text-blue-500" />
+                        : <Square className="w-3.5 h-3.5" />}
+                    </button>
+                    <span className={`flex items-center gap-1.5 ${disabled ? "line-through" : ""}`}>
+                      {opt.label}
+                      {disabled && <CalendarOff className="w-3 h-3 text-red-400" />}
+                    </span>
                   </span>
                   <Button
                     type="button"
