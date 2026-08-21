@@ -69,7 +69,7 @@ export const BRANDS = {
   gbd: {
     key: "gbd",
     name: "Governance by Design",
-    short: "GbD",
+    short: "GBD",
     suite: "CBD — Compliance by Design",
     tagline:
       "Translate governance intent into accountable, measurable and traceable implementation — policy lifecycle management, artefact library, version control and relationship tracing to risks, controls and frameworks.",
@@ -81,10 +81,10 @@ export const BRANDS = {
     // Burgundy — governance / authority
     gradient: "from-[#800020] to-[#58181F]",
     solid: "bg-[#800020]",
-    softBg: "bg-rose-50",
+    softBg: "bg-slate-100",
     softText: "text-[#800020]",
-    border: "border-rose-200",
-    badgeBg: "bg-rose-100 text-[#800020]",
+    border: "border-slate-200",
+    badgeBg: "bg-slate-200 text-[#800020]",
     text: "text-[#800020]",
   },
 };
