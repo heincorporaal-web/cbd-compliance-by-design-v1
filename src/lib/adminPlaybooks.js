@@ -3,6 +3,9 @@
 // (matched by `playbook_key`), or add brand-new standalone playbooks.
 // Keep entries concise, practical, and step-driven.
 
+import { ADDON_MODULE_PLAYBOOKS } from "./adminPlaybooksAddons";
+import { CONFIG_WORKBOOK_PLAYBOOKS } from "./adminPlaybooksWorkbooks";
+
 export const ADMIN_PLAYBOOK_CATEGORIES = [
   "Custom Icons",
   "Workflows",
@@ -11,6 +14,8 @@ export const ADMIN_PLAYBOOK_CATEGORIES = [
   "Framework Library",
   "Process Modelling",
   "Stakeholders",
+  "Add-on Modules",
+  "Config Workbooks",
   "General",
 ];
 
@@ -179,4 +184,6 @@ Module is a per-company add-on (CompanyPreference flag). Enable it only for comp
 - Use **group assignments** to apply one stakeholder across many records at once.
 - The **Gap Finder** surfaces records missing required owners (risk owner, process owner, control owner) and can auto-create Issues to track remediation (createIssuesFromGaps).`,
   },
+  ...ADDON_MODULE_PLAYBOOKS,
+  ...CONFIG_WORKBOOK_PLAYBOOKS,
 ];

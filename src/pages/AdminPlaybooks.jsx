@@ -11,6 +11,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import {
   BookOpen, Search, PlusCircle, Pencil, RotateCcw, Lock, X,
   Palette, GitBranch, Upload, Hash, Library, Workflow, Users, HelpCircle,
+  Boxes, FileCode, Shield, Network, Scale, FileSpreadsheet,
 } from "lucide-react";
 
 const CATEGORY_ICONS = {
@@ -21,6 +22,8 @@ const CATEGORY_ICONS = {
   "Framework Library": Library,
   "Process Modelling": Workflow,
   "Stakeholders": Users,
+  "Add-on Modules": Boxes,
+  "Config Workbooks": FileCode,
   "General": HelpCircle,
 };
 
