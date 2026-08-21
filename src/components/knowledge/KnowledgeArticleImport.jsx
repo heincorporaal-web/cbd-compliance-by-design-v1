@@ -53,9 +53,11 @@ const CHECKLIST_EXAMPLE = [
   ...Array(CHECKLIST_STEP_COUNT * 2 - 6).fill(""),
 ];
 
-// Implementation guide template: base columns + step columns with reference numbers and expected artefacts (up to 10 steps)
+// Implementation guide template: shortcode + reference_number + base columns + step columns with reference numbers and expected artefacts (up to 10 steps)
 const GUIDE_STEP_COUNT = 10;
 const GUIDE_HEADERS = [
+  "shortcode",
+  "reference_number",
   ...TEMPLATE_HEADERS,
   ...Array.from({ length: GUIDE_STEP_COUNT }, (_, i) => [
     `step_${i + 1}_title`,
@@ -65,6 +67,8 @@ const GUIDE_HEADERS = [
   ]).flat(),
 ];
 const GUIDE_EXAMPLE = [
+  "AC",
+  "AC-IG-001",
   "ISO 27001 Access Control Implementation Guide",
   "Access Control",
   "Implementation guide for ISO 27001 A.9 Access Control",
@@ -180,6 +184,8 @@ function rowToArticle(row) {
   }
 
   return {
+    shortcode: (row.shortcode || "").trim(),
+    reference_number: (row.reference_number || "").trim(),
     title: row.title || "",
     chapter: row.chapter || "",
     description: row.description || "",
@@ -223,6 +229,10 @@ export default function KnowledgeArticleImport() {
       const article = rowToArticle(row);
       if (!article.title) {
         errors.push(`Skipped row: missing title`);
+        continue;
+      }
+      if (!article.shortcode) {
+        errors.push(`Skipped row "${article.title}": missing shortcode (required, max 4 chars)`);
         continue;
       }
       try {
