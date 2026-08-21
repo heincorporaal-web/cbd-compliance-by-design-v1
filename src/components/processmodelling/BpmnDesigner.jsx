@@ -5,10 +5,12 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2, Plus, ArrowLeftRight } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2, Plus, ArrowLeftRight, ShieldAlert, Bot } from "lucide-react";
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
 import BpmnDataPane from "@/components/processmodelling/BpmnDataPane";
+import SodScanner from "@/components/processmodelling/SodScanner";
+import SodAgentChat from "@/components/agents/SodAgentChat";
 import UnlinkedElementsDialog from "@/components/processmodelling/UnlinkedElementsDialog";
 import { getElementCategory } from "@/components/processmodelling/bpmnDataConfig";
 import { base44 } from "@/api/base44Client";
@@ -70,6 +72,8 @@ export default function BpmnDesigner({
   const [selectedIsExpanded, setSelectedIsExpanded] = useState(false);
   const [unlinked, setUnlinked] = useState(null);
   const [adding, setAdding] = useState(false);
+  const [sodOpen, setSodOpen] = useState(false);
+  const [agentOpen, setAgentOpen] = useState(false);
 
   // Exit connect mode on Escape
   useEffect(() => {
@@ -526,6 +530,25 @@ export default function BpmnDesigner({
                 <Button size="sm" variant="ghost" onClick={() => fileInputRef.current?.click()} title="Import BPMN/XML"><Upload className="w-4 h-4" /></Button>
               </>
             )}
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+            <Button
+              size="sm"
+              variant={sodOpen ? "default" : "ghost"}
+              onClick={() => setSodOpen((v) => !v)}
+              title="Scan process steps for Segregation of Duties violations"
+              className={`gap-1.5 ${sodOpen ? "bg-orange-600 hover:bg-orange-700 text-white" : "text-orange-600"}`}
+            >
+              <ShieldAlert className="w-4 h-4" /> SOD Scan
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setAgentOpen(true)}
+              title="Ask the SOD Violation Finder agent"
+              className="gap-1.5 text-indigo-600"
+            >
+              <Bot className="w-4 h-4" /> SOD Agent
+            </Button>
             <Button size="sm" variant="ghost" onClick={handleDownloadSvg} title="Export SVG"><FileImage className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={handleDownloadXml} title="Download .bpmn"><Download className="w-4 h-4" /></Button>
             <input
@@ -593,6 +616,25 @@ export default function BpmnDesigner({
           onClose={() => setPaneOpen(false)}
         />
       )}
+      {sodOpen && (
+        <SodScanner
+          modelerRef={modelerRef}
+          elementMeta={elementMeta}
+          canvasMeta={canvasMeta}
+          companyId={companyId}
+          onClose={() => setSodOpen(false)}
+        />
+      )}
+      <SodAgentChat
+        open={agentOpen}
+        onClose={() => setAgentOpen(false)}
+        processContext={currentProcess ? {
+          processId: currentProcess.id,
+          processName: currentProcess.name,
+          processCode: currentProcess.process_code,
+          companyId,
+        } : { companyId }}
+      />
       <UnlinkedElementsDialog
         elements={unlinked}
         adding={adding}
