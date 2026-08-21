@@ -233,6 +233,14 @@
       },
       "description": "References to ThirdPartyProvider entities"
     },
+    "value_chain_id": {
+      "type": "string",
+      "description": "Reference to ValueChain entity"
+    },
+    "workstream_id": {
+      "type": "string",
+      "description": "Reference to Workstream entity"
+    },
     "version_history": {
       "type": "array",
       "items": {

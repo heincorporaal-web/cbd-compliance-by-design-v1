@@ -35,7 +35,12 @@
       "type": "string"
     },
     "value_chain": {
-      "type": "string"
+      "type": "string",
+      "description": "Value chain name (legacy text field \u2014 prefer value_chain_id)"
+    },
+    "value_chain_id": {
+      "type": "string",
+      "description": "Reference to ValueChain entity"
     },
     "process_owner": {
       "type": "string"
@@ -55,7 +60,12 @@
       "type": "string"
     },
     "workstream": {
-      "type": "string"
+      "type": "string",
+      "description": "Workstream name (legacy text field \u2014 prefer workstream_id)"
+    },
+    "workstream_id": {
+      "type": "string",
+      "description": "Reference to Workstream entity"
     },
     "status": {
       "type": "string",

@@ -16,6 +16,7 @@ import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import CompanyField from "@/components/CompanyField";
 import { getICTSystemErrors, ErrorIcon } from "@/utils/validationErrors.jsx";
 import PageHeader from "@/components/layout/PageHeader";
+import ValueChainWorkstreamPicker from "@/components/valuechains/ValueChainWorkstreamPicker";
 
 export default function ICTSystems() {
   const [globalCompany, , { locked }] = useCompanyFilter();
@@ -37,7 +38,9 @@ export default function ICTSystems() {
     recovery_time_objective: "",
     recovery_point_objective: "",
     data_classification: "internal",
-    status: "active"
+    status: "active",
+    value_chain_id: "",
+    workstream_id: ""
   });
 
   const { data: systems = [], isLoading } = useQuery({
@@ -89,7 +92,9 @@ export default function ICTSystems() {
       recovery_time_objective: "",
       recovery_point_objective: "",
       data_classification: "internal",
-      status: "active"
+      status: "active",
+      value_chain_id: "",
+      workstream_id: ""
     });
     setEditingSystem(null);
   };
@@ -295,6 +300,13 @@ export default function ICTSystems() {
                   </Select>
                 </div>
               </div>
+              <ValueChainWorkstreamPicker
+                companyId={formData.company_id}
+                valueChainId={formData.value_chain_id}
+                workstreamId={formData.workstream_id}
+                onValueChainChange={(id) => setFormData({...formData, value_chain_id: id})}
+                onWorkstreamChange={(id) => setFormData({...formData, workstream_id: id})}
+              />
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea

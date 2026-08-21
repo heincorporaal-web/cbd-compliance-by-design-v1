@@ -16,6 +16,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import CompanyField from "@/components/CompanyField";
+import ValueChainWorkstreamPicker from "@/components/valuechains/ValueChainWorkstreamPicker";
 
 export default function ProcessDetail() {
   const navigate = useNavigate();
@@ -33,9 +34,11 @@ export default function ProcessDetail() {
     level: 0,
     parent_id: "",
     value_chain: "",
+    value_chain_id: "",
     process_owner: "",
     global_control_owner: "",
     workstream: "",
+    workstream_id: "",
     status: "active",
     linked_risk_ids: [],
     linked_control_ids: [],
@@ -336,13 +339,14 @@ export default function ProcessDetail() {
                     </div>
                   )}
                   {formData.level === 0 && (
-                    <div className="space-y-2">
-                      <Label htmlFor="value_chain">Value Chain</Label>
-                      <Input
-                        id="value_chain"
-                        value={formData.value_chain}
-                        onChange={(e) => setFormData({...formData, value_chain: e.target.value})}
-                        placeholder="e.g., Customer Service, Operations"
+                    <div className="col-span-1 md:col-span-2">
+                      <ValueChainWorkstreamPicker
+                        companyId={formData.company_id}
+                        valueChainId={formData.value_chain_id}
+                        workstreamId={formData.workstream_id}
+                        onValueChainChange={(id, vc) => setFormData({...formData, value_chain_id: id, value_chain: vc?.name || ""})}
+                        onWorkstreamChange={(id, ws) => setFormData({...formData, workstream_id: id, workstream: ws?.name || ""})}
+                        compact
                       />
                     </div>
                   )}
