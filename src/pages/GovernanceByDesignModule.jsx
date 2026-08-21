@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 import { format, differenceInDays, parseISO } from "date-fns";
 import ModuleToggleStrip from "@/components/branding/ModuleToggleStrip";
+import GovernanceLinksPanel from "@/components/governance/GovernanceLinksPanel";
 import { BRANDS } from "@/lib/moduleBrands";
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -247,7 +248,7 @@ function DocumentFormDialog({ open, onOpenChange, doc, companyId, onSave }) {
 
 // ── Document detail dialog ──────────────────────────────────────────────────
 
-function DocumentDetailDialog({ open, onOpenChange, doc, onEdit, onDelete, onStatusChange }) {
+function DocumentDetailDialog({ open, onOpenChange, doc, onEdit, onDelete, onStatusChange, companyId }) {
   if (!doc) return null;
   const sc = STATUS_CONFIG[doc.status] || STATUS_CONFIG.draft;
   const reviewStatus = getReviewStatus(doc);
@@ -268,7 +269,7 @@ function DocumentDetailDialog({ open, onOpenChange, doc, onEdit, onDelete, onSta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
@@ -346,6 +347,9 @@ function DocumentDetailDialog({ open, onOpenChange, doc, onEdit, onDelete, onSta
               </div>
             </div>
           )}
+
+          {/* Traceability links to OBD processes and ABD assets */}
+          <GovernanceLinksPanel doc={doc} companyId={companyId} />
         </div>
 
         <DialogFooter className="gap-2 flex-wrap">
@@ -768,6 +772,7 @@ export default function GovernanceByDesignModule() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
         doc={detailDoc}
+        companyId={effectiveCompanyId}
         onEdit={(doc) => { setEditDoc(doc); setFormOpen(true); }}
         onDelete={(id) => deleteMutation.mutate(id)}
         onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
