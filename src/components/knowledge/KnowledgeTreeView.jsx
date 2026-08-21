@@ -152,7 +152,9 @@ export default function KnowledgeTreeView({ articles, frameworks, onView, onDele
 
   return (
     <div className="space-y-4">
-      {Object.entries(tree).map(([fwId, { name, chapters }]) => (
+      {Object.entries(tree)
+        .sort(([, a], [, b]) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+        .map(([fwId, { name, chapters }]) => (
         <FrameworkNode
           key={fwId}
           frameworkName={name}

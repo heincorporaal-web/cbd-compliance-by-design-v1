@@ -45,11 +45,17 @@ export default function KnowledgeManagement() {
     },
   });
 
-  const filteredArticles = articles.filter(article => 
-    article.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.chapter?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredArticles = articles.filter(article => {
+    const term = searchTerm.toLowerCase();
+    if (!term) return true;
+    const fw = frameworks.find(f => f.id === article.framework_id);
+    return (
+      article.title?.toLowerCase().includes(term) ||
+      article.chapter?.toLowerCase().includes(term) ||
+      article.tags?.some(tag => tag.toLowerCase().includes(term)) ||
+      fw?.name?.toLowerCase().includes(term)
+    );
+  });
 
   const getCategoryColor = (category) => {
     const colors = {
