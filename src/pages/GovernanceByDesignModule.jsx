@@ -27,6 +27,7 @@ import { format, differenceInDays, parseISO } from "date-fns";
 import ModuleToggleStrip from "@/components/branding/ModuleToggleStrip";
 import GovernanceLinksPanel from "@/components/governance/GovernanceLinksPanel";
 import ApprovalTracker from "@/components/governance/ApprovalTracker";
+import ApprovalStageChart from "@/components/governance/ApprovalStageChart";
 import { BRANDS } from "@/lib/moduleBrands";
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -658,6 +659,14 @@ export default function GovernanceByDesignModule() {
                 <StatCard label="In Progress" value={stats.draftOrReview} icon={Clock} color="text-amber-700" />
                 <StatCard label="Overdue Reviews" value={stats.overdue} icon={AlertTriangle} color="text-red-700" />
               </div>
+
+              {/* Approval stage breakdown chart */}
+              <Card className="p-5">
+                <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-[#800020]" /> Approval Stage Distribution
+                </h3>
+                <ApprovalStageChart docs={docs} />
+              </Card>
 
               {/* By domain */}
               {presentDomains.length > 0 && (
