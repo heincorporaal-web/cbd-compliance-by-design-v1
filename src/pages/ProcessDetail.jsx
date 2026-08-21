@@ -366,7 +366,7 @@ export default function ProcessDetail() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="process_owner">Process Owner</Label>
                     <Input
@@ -381,14 +381,6 @@ export default function ProcessDetail() {
                       id="global_control_owner"
                       value={formData.global_control_owner}
                       onChange={(e) => setFormData({...formData, global_control_owner: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="workstream">Workstream</Label>
-                    <Input
-                      id="workstream"
-                      value={formData.workstream}
-                      onChange={(e) => setFormData({...formData, workstream: e.target.value})}
                     />
                   </div>
                 </div>

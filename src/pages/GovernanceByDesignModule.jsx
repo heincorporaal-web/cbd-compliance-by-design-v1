@@ -29,6 +29,7 @@ import GovernanceLinksPanel from "@/components/governance/GovernanceLinksPanel";
 import ApprovalTracker from "@/components/governance/ApprovalTracker";
 import ApprovalStageChart from "@/components/governance/ApprovalStageChart";
 import { BRANDS } from "@/lib/moduleBrands";
+import ValueChainWorkstreamPicker from "@/components/valuechains/ValueChainWorkstreamPicker";
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -166,6 +167,19 @@ function DocumentFormDialog({ open, onOpenChange, doc, companyId, onSave }) {
             <div className="col-span-2">
               <Label>Description</Label>
               <Textarea value={form.description || ""} onChange={(e) => set("description", e.target.value)} rows={2} />
+            </div>
+            <div className="col-span-2">
+              <Label>Value Chain & Workstream</Label>
+              <div className="rounded-lg border border-slate-200 p-3 bg-slate-50/50">
+                <ValueChainWorkstreamPicker
+                  companyId={companyId}
+                  valueChainId={form.value_chain_id || ""}
+                  workstreamId={form.workstream_id || ""}
+                  onValueChainChange={(id) => set("value_chain_id", id)}
+                  onWorkstreamChange={(id) => set("workstream_id", id)}
+                  compact
+                />
+              </div>
             </div>
             <div>
               <Label>Owner</Label>
