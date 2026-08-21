@@ -53,6 +53,32 @@ const CHECKLIST_EXAMPLE = [
   ...Array(CHECKLIST_STEP_COUNT * 2 - 6).fill(""),
 ];
 
+// Implementation guide template: base columns + step columns with reference numbers and expected artefacts (up to 10 steps)
+const GUIDE_STEP_COUNT = 10;
+const GUIDE_HEADERS = [
+  ...TEMPLATE_HEADERS,
+  ...Array.from({ length: GUIDE_STEP_COUNT }, (_, i) => [
+    `step_${i + 1}_title`,
+    `step_${i + 1}_description`,
+    `step_${i + 1}_reference_number`,
+    `step_${i + 1}_expected_artefacts`,
+  ]).flat(),
+];
+const GUIDE_EXAMPLE = [
+  "ISO 27001 Access Control Implementation Guide",
+  "Access Control",
+  "Implementation guide for ISO 27001 A.9 Access Control",
+  "Full content of the implementation guide goes here",
+  "implementation_guide",
+  "draft",
+  "iso27001;access control;iam",
+  "",
+  "Define access control policy", "Document the organisation's access control policy and review annually", "AC-001", "Access Control Policy document;Board approval",
+  "Establish user registration", "Implement a formal user registration and de-registration process", "AC-002", "User provisioning procedure;HR onboarding checklist",
+  "Manage privileged access", "Restrict and monitor privileged access to systems and data", "AC-003", "Privileged access matrix;PAM tool configuration",
+  ...Array(GUIDE_STEP_COUNT * 4 - 12).fill(""),
+];
+
 const CATEGORY_OPTIONS = [
   "implementation_guide",
   "best_practice",
@@ -81,6 +107,12 @@ function downloadChecklistTemplate() {
   const rows = [CHECKLIST_HEADERS, CHECKLIST_EXAMPLE];
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
   triggerDownload(csv, "knowledge_checklist_template.csv");
+}
+
+function downloadImplementationGuideTemplate() {
+  const rows = [GUIDE_HEADERS, GUIDE_EXAMPLE];
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+  triggerDownload(csv, "knowledge_implementation_guide_template.csv");
 }
 
 function parseCSV(text) {
@@ -118,7 +150,7 @@ function parseCSV(text) {
 function rowToArticle(row) {
   const category = CATEGORY_OPTIONS.includes(row.category) ? row.category : "implementation_guide";
 
-  // Parse step columns for checklist articles
+  // Parse step columns for checklist and implementation guide articles
   const key_steps = [];
   if (category === "checklist") {
     for (let i = 1; i <= CHECKLIST_STEP_COUNT; i++) {
@@ -128,6 +160,20 @@ function rowToArticle(row) {
           step: stepTitle,
           description: (row[`step_${i}_description`] || "").trim(),
           order: i,
+        });
+      }
+    }
+  } else if (category === "implementation_guide") {
+    for (let i = 1; i <= GUIDE_STEP_COUNT; i++) {
+      const stepTitle = (row[`step_${i}_title`] || "").trim();
+      if (stepTitle) {
+        key_steps.push({
+          step: stepTitle,
+          description: (row[`step_${i}_description`] || "").trim(),
+          order: i,
+          reference_number: (row[`step_${i}_reference_number`] || "").trim(),
+          expected_artefacts: (row[`step_${i}_expected_artefacts`] || "")
+            .split(";").map(a => a.trim()).filter(Boolean),
         });
       }
     }
@@ -226,6 +272,9 @@ export default function KnowledgeArticleImport() {
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" onClick={downloadTemplate} className="gap-2">
                   <Download className="w-4 h-4" /> General Template
+                </Button>
+                <Button variant="outline" size="sm" onClick={downloadImplementationGuideTemplate} className="gap-2">
+                  <Download className="w-4 h-4" /> Implementation Guide Template (with steps & artefacts)
                 </Button>
                 <Button variant="outline" size="sm" onClick={downloadChecklistTemplate} className="gap-2">
                   <Download className="w-4 h-4" /> Checklist Template (with steps)
