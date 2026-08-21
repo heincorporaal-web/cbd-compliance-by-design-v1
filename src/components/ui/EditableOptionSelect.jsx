@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Trash2, Settings2, Pencil, Search, CalendarOff, RotateCcw } from "lucide-react";
+import { Plus, Trash2, Settings, Pencil, Search, CalendarOff, RotateCcw } from "lucide-react";
 import { loadFromDB, writeToDB, subscribe, setDisabledSeeded } from "@/lib/customOptionsStore";
 
 export function CustomOptionIcon({ className = "" }) {
@@ -117,7 +117,7 @@ export default function EditableOptionSelect({
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button type="button" variant="outline" size="icon" title="Manage options">
-            <Settings2 className="w-4 h-4 text-slate-500" />
+            <Settings className="w-4 h-4 text-slate-500" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 p-4 space-y-4 max-h-[60vh] overflow-y-auto" align="end">
