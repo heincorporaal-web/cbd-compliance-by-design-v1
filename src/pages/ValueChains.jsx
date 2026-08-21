@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Search, Network, ChevronDown, ChevronRight, Info, CalendarOff, Upload, Download } from "lucide-react";
-import EndDateBadge from "@/components/ui/EndDateBadge";
+import EndDateBadge, { isExpired } from "@/components/ui/EndDateBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import WorkstreamPanel from "@/components/valuechains/WorkstreamPanel";
@@ -61,6 +61,7 @@ export default function ValueChains() {
   const [expandedWS, setExpandedWS] = useState({});
   const [importOpen, setImportOpen] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const [showExpired, setShowExpired] = useState(false);
   const { canImport } = useIsImplementerRole();
   const { getLabel: getChainLabel } = useCustomOptions("value_chain_management_chains");
 
@@ -143,11 +144,21 @@ export default function ValueChains() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (editingItem) updateMutation.mutate({ id: editingItem.id, data: formData });
-    else createMutation.mutate(formData);
+    // If an end_date is set and is in the past, auto-mark as inactive
+    const data = { ...formData };
+    if (data.end_date && isExpired(data.end_date) && data.status === "active") {
+      data.status = "inactive";
+      data.is_active = false;
+    }
+    if (editingItem) updateMutation.mutate({ id: editingItem.id, data });
+    else createMutation.mutate(data);
   };
 
+  const isEndDated = (vc) => isExpired(vc.end_date) || vc.status === "inactive" || vc.status === "archived";
+
   const filtered = valueChains.filter(vc => {
+    // Hide end-dated / inactive / archived items unless the user toggles "show expired"
+    if (!showExpired && isEndDated(vc)) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     const chainLabel = resolveChainLabel(vc.management_chain);
@@ -252,8 +263,12 @@ export default function ValueChains() {
           <span className="text-sm text-slate-500">Total</span>
         </div>
         <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-4 py-2">
-          <span className="text-2xl font-bold text-green-600">{valueChains.filter(v => v.status === 'active').length}</span>
+          <span className="text-2xl font-bold text-green-600">{valueChains.filter(v => !isEndDated(v)).length}</span>
           <span className="text-sm text-slate-500">Active</span>
+        </div>
+        <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-4 py-2">
+          <span className="text-2xl font-bold text-red-500">{valueChains.filter(v => isEndDated(v)).length}</span>
+          <span className="text-sm text-slate-500">End-dated</span>
         </div>
         <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-4 py-2">
           <span className="text-2xl font-bold text-slate-600">{Object.keys(grouped).length}</span>
@@ -268,6 +283,14 @@ export default function ValueChains() {
             className="pl-9"
           />
         </div>
+        <Button
+          variant={showExpired ? "default" : "outline"}
+          onClick={() => setShowExpired(s => !s)}
+          className="gap-2 shrink-0"
+        >
+          <CalendarOff className="w-4 h-4" />
+          {showExpired ? "Showing all" : "Show end-dated"}
+        </Button>
       </div>
 
       {/* Content */}
@@ -276,7 +299,11 @@ export default function ValueChains() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed rounded-xl">
           <Network className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-          <p className="text-slate-500">No value chains found.</p>
+          <p className="text-slate-500">
+            {valueChains.length > 0 && !showExpired
+              ? "All value chains are end-dated. Click \"Show end-dated\" to view them."
+              : "No value chains found."}
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -364,6 +391,28 @@ export default function ValueChains() {
                       )}
                       </div>
                             <div className="flex items-center gap-1 shrink-0">
+                              {!isEndDated(vc) && (
+                                <TooltipProvider delayDuration={200}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7"
+                                        onClick={() => {
+                                          const today = new Date().toISOString().split("T")[0];
+                                          updateMutation.mutate({ id: vc.id, data: { end_date: today, status: "inactive", is_active: false } });
+                                        }}
+                                      >
+                                        <CalendarOff className="w-3.5 h-3.5 text-orange-500" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="bg-white border-2 text-xs" style={{ borderColor: '#5C7F99' }}>
+                                      End-date this value chain (set to today)
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
                               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(vc)}>
                                 <Pencil className="w-3.5 h-3.5" />
                               </Button>
@@ -450,13 +499,22 @@ export default function ValueChains() {
               </div>
             </div>
             <div className="space-y-1">
-              <Label>Sort Order</Label>
-              <Input type="number" value={formData.sort_order} onChange={e => setFormData(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))} />
+              <Label className="flex items-center gap-1.5"><CalendarOff className="w-3.5 h-3.5 text-primary" /> End Date</Label>
+              <Input
+                type="date"
+                value={formData.end_date || ""}
+                onChange={e => setFormData(p => ({ ...p, end_date: e.target.value }))}
+                className={formData.end_date && isExpired(formData.end_date) ? "border-red-300 bg-red-50" : ""}
+              />
+              <p className="text-xs text-slate-400">
+                {formData.end_date && isExpired(formData.end_date)
+                  ? "This end date is in the past — the value chain will be marked inactive and hidden from the active list."
+                  : "Set a date to end-date this value chain. Past dates hide it from the active list."}
+              </p>
             </div>
             <div className="space-y-1">
-              <Label className="flex items-center gap-1.5"><CalendarOff className="w-3.5 h-3.5 text-slate-400" /> End Date</Label>
-              <Input type="date" value={formData.end_date || ""} onChange={e => setFormData(p => ({ ...p, end_date: e.target.value }))} />
-              <p className="text-xs text-slate-400">Set to mark this value chain as expired on that date</p>
+              <Label>Sort Order</Label>
+              <Input type="number" value={formData.sort_order} onChange={e => setFormData(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))} />
             </div>
             <div className="space-y-1">
               <Label>Description</Label>
