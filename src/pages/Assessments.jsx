@@ -15,6 +15,7 @@ import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import PageHeader from "@/components/layout/PageHeader";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 export default function Assessments() {
   const [globalCompany, , { locked }] = useCompanyFilter();
@@ -59,10 +60,7 @@ export default function Assessments() {
     queryFn: () => base44.entities.Company.list(),
   });
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ['frameworks'],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   const { data: assessmentModels = [] } = useQuery({
     queryKey: ['assessment-models-active'],

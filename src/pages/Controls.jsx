@@ -16,6 +16,7 @@ import FileUpload from "@/components/FileUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import PageHeader from "@/components/layout/PageHeader";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 export default function Controls() {
   const queryClient = useQueryClient();
@@ -34,10 +35,7 @@ export default function Controls() {
   const libraryControls = allControls.filter(c => c.is_library_control === true);
   const companyControls = allControls.filter(c => c.is_library_control !== true);
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ['frameworks'],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   const importControlLibrary = useMutation({
     mutationFn: async (file) => {

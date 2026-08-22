@@ -81,7 +81,17 @@ function useEntityOptions(companyId) {
     }),
     framework: useQuery({
       queryKey: ["dpFrameworks", companyId],
-      queryFn: () => base44.entities.Framework.list("-created_date", 500),
+      queryFn: async () => {
+        const all = await base44.entities.Framework.list("-created_date", 500);
+        // Deduplicate by name, preferring master frameworks
+        const sorted = [...all].sort((a, b) => (b.is_master ? 1 : 0) - (a.is_master ? 1 : 0));
+        const seen = new Map();
+        for (const f of sorted) {
+          const key = (f.name || "").toLowerCase().trim();
+          if (key && !seen.has(key)) seen.set(key, f);
+        }
+        return Array.from(seen.values()).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      },
       enabled,
       staleTime: 60000,
     }),

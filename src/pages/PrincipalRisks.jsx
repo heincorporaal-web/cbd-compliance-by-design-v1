@@ -16,6 +16,7 @@ import SearchableStakeholderSelect from "@/components/risks/SearchableStakeholde
 import CalendarPromptDialog from "@/components/risks/CalendarPromptDialog";
 import SearchableMultiPicker from "@/components/objectives/SearchableMultiPicker";
 import PinRecordButton from "@/components/layout/PinRecordButton";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 const CATEGORIES = ["Strategic", "Compliance", "IT", "Operational", "Cyber", "Data", "Third Party", "Financial Crime", "Reputational Risk", "Financial Risk", "Compliance / Conduct Risk", "Third-Party / Supplier Risk", "Technology / Information Security Risk"];
 const STATUSES = ["Draft", "Active", "Under Review", "Retired"];
@@ -92,10 +93,7 @@ export default function PrincipalRisks() {
     queryFn: () => base44.entities.StakeholderGroup.list(),
   });
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ["frameworks"],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.PrincipalRisk.create(data),

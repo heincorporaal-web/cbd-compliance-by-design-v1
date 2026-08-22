@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import PageHeader from "@/components/layout/PageHeader";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 export default function RiskControlEngine() {
   const [selectedCompany, setSelectedCompany] = useState("all");
@@ -35,10 +36,7 @@ export default function RiskControlEngine() {
     queryFn: () => base44.entities.Assessment.list(),
   });
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ['frameworks'],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   const { data: controls = [] } = useQuery({
     queryKey: ['controls'],

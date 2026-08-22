@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ReactMarkdown from "react-markdown";
 import PageHeader from "@/components/layout/PageHeader";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 export default function FrameworkControlMapper() {
   const [conversation, setConversation] = useState(null);
@@ -25,10 +26,7 @@ export default function FrameworkControlMapper() {
     queryFn: () => base44.entities.Company.list(),
   });
 
-  const { data: allFrameworks = [] } = useQuery({
-    queryKey: ["frameworks"],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   const { data: allControls = [] } = useQuery({
     queryKey: ["controls"],
@@ -44,7 +42,6 @@ export default function FrameworkControlMapper() {
   const selectedCompany = companies.find(c => c.id === selectedCompanyId);
 
   // Frameworks available: all (they are global, not per-company), but we note which company we're working for
-  const frameworks = allFrameworks;
 
   // Reset framework selection when company changes
   useEffect(() => {

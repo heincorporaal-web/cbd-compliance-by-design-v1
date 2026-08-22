@@ -24,6 +24,7 @@ import WorkflowPanel from "@/components/workflows/WorkflowPanel";
 import StakeholderOwnerPicker from "@/components/stakeholders/StakeholderOwnerPicker";
 import RiskSignOffPanel from "@/components/risks/RiskSignOffPanel";
 import { applyAutoNumber } from "@/lib/autoNumbering";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 const RISK_TYPES = ["Financial", "Operational", "Strategic", "Governance & Compliance", "Governance", "Unspecified"];
 
@@ -110,10 +111,7 @@ export default function RiskDetail() {
     queryFn: () => base44.entities.Workstream.list(),
   });
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ['frameworks'],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   const [formData, setFormData] = useState({
     title: "",

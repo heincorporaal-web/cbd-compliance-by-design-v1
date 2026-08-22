@@ -25,6 +25,7 @@ import CompensatingControlPicker from "@/components/controls/CompensatingControl
 import TestPlanPanel from "@/components/controls/TestPlanPanel";
 import ArchivedFrameworkBanner from "@/components/frameworks/ArchivedFrameworkBanner";
 import { applyAutoNumber } from "@/lib/autoNumbering";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 export default function ControlDetail() {
   const navigate = useNavigate();
@@ -79,10 +80,7 @@ export default function ControlDetail() {
     enabled: !!controlId && !isNew,
   });
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ['frameworks'],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   const { data: controlAssessments = [] } = useQuery({
     queryKey: ['controlAssessments', controlId],

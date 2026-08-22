@@ -11,6 +11,7 @@ import { AlertTriangle, CheckCircle, Search, Filter, Download } from "lucide-rea
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import PageHeader from "@/components/layout/PageHeader";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 // RACI role definitions — which stakeholder group → which RACI role
 const GROUP_RACI_MAP = {
@@ -75,10 +76,7 @@ export default function RACIMatrix() {
     queryFn: () => base44.entities.StakeholderGroup.list(),
   });
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ["frameworks"],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   // All active group names for this company (columns)
   const companyGroups = useMemo(() => {

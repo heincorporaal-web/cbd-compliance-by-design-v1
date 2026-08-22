@@ -12,6 +12,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import SearchableMultiPicker from "./SearchableMultiPicker";
 import CompanyField from "@/components/CompanyField";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 const EMPTY_FORM = {
   reference_number: "", title: "", description: "", company_id: "", category: "Operational",
@@ -40,7 +41,7 @@ export default function ObjectiveFormDialog({ open, onClose, onSaveSuccess, edit
   const queryClient = useQueryClient();
   const [form, setForm] = useState(EMPTY_FORM);
 
-  const { data: frameworks = [] } = useQuery({ queryKey: ["frameworks"], queryFn: () => base44.entities.Framework.list() });
+  const { frameworks } = useFrameworks();
   const { data: risks = [] } = useQuery({ queryKey: ["risks"], queryFn: () => base44.entities.Risk.list() });
   const { data: controls = [] } = useQuery({ queryKey: ["controls"], queryFn: () => base44.entities.Control.list() });
   const { data: valueChains = [] } = useQuery({ queryKey: ["valueChains"], queryFn: () => base44.entities.ValueChain.list() });

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, CheckSquare } from "lucide-react";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 const PRIORITY_COLORS = {
   critical: "bg-red-500 text-white",
@@ -54,10 +55,7 @@ export default function ControlSelectionPanel({ companyId, selectedIds, onSelect
     queryFn: () => base44.entities.Control.list(),
   });
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ["frameworks"],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   // Company controls: those whose framework belongs to this company, or no framework
   const companyFrameworkIds = frameworks

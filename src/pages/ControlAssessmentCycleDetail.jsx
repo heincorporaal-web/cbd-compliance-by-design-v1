@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import ControlSelectionPanel from "@/components/controls/ControlSelectionPanel";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
 const urlParams = new URLSearchParams(window.location.search);
 const cycleId = urlParams.get("id");
@@ -65,10 +66,7 @@ export default function ControlAssessmentCycleDetail() {
     queryFn: () => base44.entities.Control.list(),
   });
 
-  const { data: frameworks = [] } = useQuery({
-    queryKey: ["frameworks"],
-    queryFn: () => base44.entities.Framework.list(),
-  });
+  const { frameworks } = useFrameworks();
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
