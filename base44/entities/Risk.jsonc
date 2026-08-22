@@ -204,6 +204,21 @@
     "library_risk_id": {
       "type": "string",
       "description": "Source library risk ID if this risk was assigned from the master library"
+    },
+    "library_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "retired",
+        "draft"
+      ],
+      "default": "active",
+      "description": "Lifecycle status of this master library risk entry (active, retired, or draft)"
+    },
+    "library_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date when this master library risk was retired"
     }
   },
   "required": [

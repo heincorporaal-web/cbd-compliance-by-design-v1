@@ -155,6 +155,21 @@
       "type": "string",
       "description": "Source library control ID if assigned from master library"
     },
+    "library_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "retired",
+        "draft"
+      ],
+      "default": "active",
+      "description": "Lifecycle status of this master library control entry (active, retired, or draft)"
+    },
+    "library_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date when this master library control was retired"
+    },
     "reviewer": {
       "type": "string",
       "description": "Reviewer name (denormalized)"
