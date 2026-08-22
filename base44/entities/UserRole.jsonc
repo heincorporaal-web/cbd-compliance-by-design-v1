@@ -653,6 +653,29 @@
               "type": "boolean"
             }
           }
+        },
+        "knowledge_articles": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean"
+            },
+            "create": {
+              "type": "boolean"
+            },
+            "edit": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "approve": {
+              "type": "boolean"
+            },
+            "export": {
+              "type": "boolean"
+            }
+          }
         }
       }
     },

@@ -22,7 +22,7 @@ const getStatusColor = (status) => ({
   archived: 'bg-slate-100 text-slate-500',
 }[status] || 'bg-slate-100 text-slate-600');
 
-function ArticleNode({ article, onView, onDelete }) {
+function ArticleNode({ article, onView, onDelete, canEdit }) {
   return (
     <div className="flex items-center justify-between group p-2.5 ml-10 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -42,11 +42,13 @@ function ArticleNode({ article, onView, onDelete }) {
         </div>
       </div>
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-        <Link to={createPageUrl(`KnowledgeArticleDetail?id=${article.id}`)} title="Edit article">
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-            <Edit2 className="w-3.5 h-3.5 text-indigo-500" />
-          </Button>
-        </Link>
+        {canEdit && (
+          <Link to={createPageUrl(`KnowledgeArticleDetail?id=${article.id}`)} title="Edit article">
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+              <Edit2 className="w-3.5 h-3.5 text-indigo-500" />
+            </Button>
+          </Link>
+        )}
         <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onView(article)} title="View article">
           <Eye className="w-3.5 h-3.5 text-slate-500" />
         </Button>
@@ -55,15 +57,17 @@ function ArticleNode({ article, onView, onDelete }) {
             <Download className="w-3.5 h-3.5 text-slate-500" />
           </Button>
         )}
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onDelete(article.id)}>
-          <Trash2 className="w-3.5 h-3.5 text-red-400" />
-        </Button>
+        {canEdit && onDelete && (
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => onDelete(article.id)}>
+            <Trash2 className="w-3.5 h-3.5 text-red-400" />
+          </Button>
+        )}
       </div>
     </div>
   );
 }
 
-function ChapterNode({ chapter, articles, onView, onDelete }) {
+function ChapterNode({ chapter, articles, onView, onDelete, canEdit }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="ml-6">
@@ -87,7 +91,7 @@ function ChapterNode({ chapter, articles, onView, onDelete }) {
       {expanded && (
         <div className="space-y-0.5 mt-0.5">
           {articles.map(article => (
-            <ArticleNode key={article.id} article={article} onView={onView} onDelete={onDelete} />
+            <ArticleNode key={article.id} article={article} onView={onView} onDelete={onDelete} canEdit={canEdit} />
           ))}
         </div>
       )}
@@ -95,7 +99,7 @@ function ChapterNode({ chapter, articles, onView, onDelete }) {
   );
 }
 
-function FrameworkNode({ frameworkName, chapters, onView, onDelete }) {
+function FrameworkNode({ frameworkName, chapters, onView, onDelete, canEdit }) {
   const [expanded, setExpanded] = useState(false);
   const totalArticles = Object.values(chapters).reduce((acc, arr) => acc + arr.length, 0);
 
@@ -127,6 +131,7 @@ function FrameworkNode({ frameworkName, chapters, onView, onDelete }) {
               articles={articles}
               onView={onView}
               onDelete={onDelete}
+              canEdit={canEdit}
             />
           ))}
         </div>
@@ -135,7 +140,7 @@ function FrameworkNode({ frameworkName, chapters, onView, onDelete }) {
   );
 }
 
-export default function KnowledgeTreeView({ articles, frameworks, onView, onDelete }) {
+export default function KnowledgeTreeView({ articles, frameworks, onView, onDelete, canEdit }) {
   // Build tree: frameworkId -> chapter -> articles[]
   const tree = {};
 
@@ -161,6 +166,7 @@ export default function KnowledgeTreeView({ articles, frameworks, onView, onDele
           chapters={chapters}
           onView={onView}
           onDelete={onDelete}
+          canEdit={canEdit}
         />
       ))}
     </div>

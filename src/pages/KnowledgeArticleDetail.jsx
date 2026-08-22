@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save, Plus, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Upload, Eye } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import FileUpload from "@/components/FileUpload";
 import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
 import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import { useIsKnowledgeManager } from "@/hooks/useIsKnowledgeManager";
 import ArchivedFrameworkBanner from "@/components/frameworks/ArchivedFrameworkBanner";
 
 export default function KnowledgeArticleDetail() {
@@ -74,6 +75,7 @@ export default function KnowledgeArticleDetail() {
   const [newTag, setNewTag] = useState("");
   const [newStep, setNewStep] = useState({ step: "", description: "", expected_artefacts: [], order: 1 });
   const [newArtefact, setNewArtefact] = useState("");
+  const { canEdit } = useIsKnowledgeManager();
   const { isDirty, checkDirty, initSnapshot, markClean, guardedNavigate, showDialog, confirmDiscard, confirmSave, cancelDialog } = useUnsavedChangesGuard(navigate);
 
   const { data: existingArticle } = useQuery({
@@ -214,17 +216,28 @@ export default function KnowledgeArticleDetail() {
           </h1>
         </div>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("KnowledgeManagement"))}>Cancel</Button>
-          <Button onClick={handleSubmit} className="bg-indigo-600 hover:bg-indigo-700">
-            <Save className="w-4 h-4 mr-2" />
-            {isNew || !articleId ? 'Create Article' : 'Save Changes'}
+          <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("KnowledgeManagement"))}>
+            {canEdit ? "Cancel" : "Back"}
           </Button>
+          {canEdit && (
+            <Button onClick={handleSubmit} className="bg-indigo-600 hover:bg-indigo-700">
+              <Save className="w-4 h-4 mr-2" />
+              {isNew || !articleId ? 'Create Article' : 'Save Changes'}
+            </Button>
+          )}
+          {!canEdit && (
+            <Button type="button" variant="outline" onClick={() => guardedNavigate(createPageUrl("KnowledgeManagement"))}>
+              <Eye className="w-4 h-4 mr-2" />
+              Read-only
+            </Button>
+          )}
         </div>
       </div>
 
       <ArchivedFrameworkBanner frameworkId={formData.framework_id} />
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <fieldset disabled={!canEdit} className="space-y-6">
         <Card className="border-none shadow-lg">
           <CardHeader className="border-b border-slate-100">
             <CardTitle>Basic Information</CardTitle>
@@ -493,6 +506,7 @@ export default function KnowledgeArticleDetail() {
             />
           </CardContent>
         </Card>
+      </fieldset>
       </form>
 
       <UnsavedChangesDialog

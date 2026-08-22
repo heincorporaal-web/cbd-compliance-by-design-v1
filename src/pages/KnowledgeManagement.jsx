@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { BookOpen, Plus, Search, FileText, Download, Eye, Trash2 } from "lucide-react";
+import { BookOpen, Plus, Search, FileText, Download, Eye, Trash2, LayoutGrid, ListTree } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
 import KnowledgeTreeView from "@/components/knowledge/KnowledgeTreeView";
+import KnowledgeGalleryView from "@/components/knowledge/KnowledgeGalleryView";
 import KnowledgeArticleImport from "@/components/knowledge/KnowledgeArticleImport";
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
+import { useIsKnowledgeManager } from "@/hooks/useIsKnowledgeManager";
 import PageHeader from "@/components/layout/PageHeader";
 
 export default function KnowledgeManagement() {
@@ -20,12 +22,11 @@ export default function KnowledgeManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [viewMode, setViewMode] = useState("tree");
+  const { canEdit: canEditArticles } = useIsKnowledgeManager();
   const { canImport } = useIsImplementerRole();
 
-  useEffect(() => {
-    base44.auth.me().then(u => setIsAdmin(u?.role === "admin")).catch(() => {});
-  }, []);
+  const isAdmin = canEditArticles; // Knowledge Managers and admins can create/edit
 
   const { data: articles = [] } = useQuery({
     queryKey: ['knowledgeArticles'],
@@ -91,19 +92,37 @@ export default function KnowledgeManagement() {
           tagline="Framework guides, best practices, and documentation"
           gradient="from-indigo-600 to-purple-700"
         />
-        {(isAdmin || canImport) && (
-          <div className="flex items-center gap-2">
-            {canImport && <KnowledgeArticleImport />}
-            {isAdmin && (
-              <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Article
-                </Button>
-              </Link>
-            )}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-slate-100 rounded-lg p-0.5">
+            <Button
+              variant={viewMode === "tree" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("tree")}
+              className={`h-8 ${viewMode === "tree" ? "bg-white shadow-sm" : "hover:bg-slate-200"}`}
+              title="Tree view"
+            >
+              <ListTree className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={viewMode === "gallery" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("gallery")}
+              className={`h-8 ${viewMode === "gallery" ? "bg-white shadow-sm" : "hover:bg-slate-200"}`}
+              title="Gallery view"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
           </div>
-        )}
+          {canImport && <KnowledgeArticleImport />}
+          {canEditArticles && (
+            <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
+              <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <Plus className="w-4 h-4 mr-2" />
+                New Article
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       <Card className="border-none shadow-lg">
@@ -126,7 +145,7 @@ export default function KnowledgeManagement() {
             <BookOpen className="w-16 h-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 mb-2">No Knowledge Articles</h3>
             <p className="text-slate-600 mb-6">Create your first article to capture framework knowledge</p>
-            {isAdmin && (
+            {canEditArticles && (
               <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
@@ -136,12 +155,20 @@ export default function KnowledgeManagement() {
             )}
           </CardContent>
         </Card>
+      ) : viewMode === "gallery" ? (
+        <KnowledgeGalleryView
+          articles={filteredArticles}
+          frameworks={frameworks}
+          onView={handleView}
+          canEdit={canEditArticles}
+        />
       ) : (
         <KnowledgeTreeView
           articles={filteredArticles}
           frameworks={frameworks}
           onView={handleView}
-          onDelete={(id) => deleteMutation.mutate(id)}
+          onDelete={canEditArticles ? (id) => deleteMutation.mutate(id) : undefined}
+          canEdit={canEditArticles}
         />
       )}
 
