@@ -89,6 +89,21 @@ export default function KnowledgeArticleDetail() {
     queryFn: () => base44.entities.Framework.list(),
   });
 
+  // Deduplicate frameworks by name, preferring master records, then sort alphabetically
+  const uniqueFrameworks = React.useMemo(() => {
+    const sorted = [...frameworks].sort((a, b) =>
+      (b.is_master ? 1 : 0) - (a.is_master ? 1 : 0)
+    );
+    const seen = new Map();
+    for (const f of sorted) {
+      const key = (f.name || "").toLowerCase().trim();
+      if (key && !seen.has(key)) seen.set(key, f);
+    }
+    return Array.from(seen.values()).sort((a, b) =>
+      (a.name || "").localeCompare(b.name || "")
+    );
+  }, [frameworks]);
+
   useEffect(() => {
     if (existingArticle) {
       setFormData(existingArticle);
@@ -283,7 +298,7 @@ export default function KnowledgeArticleDetail() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={null}>None</SelectItem>
-                    {frameworks.map(f => (
+                    {uniqueFrameworks.map(f => (
                       <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
                     ))}
                   </SelectContent>
