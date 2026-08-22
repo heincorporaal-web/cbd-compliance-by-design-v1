@@ -51,6 +51,7 @@ import GovernanceByDesignModule from './pages/GovernanceByDesignModule';
 import OperationsByDesign from './pages/OperationsByDesign';
 import PartnerByDesign from './pages/PartnerByDesign';
 import StakeholderAssignmentGaps from './pages/StakeholderAssignmentGaps';
+import SeedLibraries from './pages/SeedLibraries';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -135,6 +136,7 @@ const AuthenticatedApp = () => {
         <Route path="/StakeholderAssignmentGaps" element={<StakeholderAssignmentGaps />} />
         <Route path="/GovernanceByDesign" element={<GovernanceByDesign />} />
         <Route path="/GovernanceByDesignModule" element={<GovernanceByDesignModule />} />
+        <Route path="/SeedLibraries" element={<SeedLibraries />} />
         <Route path="/about" element={<About />} />
         <Route path="/MobileSettings" element={<MobileSettings />} />
         <Route path="*" element={<PageNotFound />} />

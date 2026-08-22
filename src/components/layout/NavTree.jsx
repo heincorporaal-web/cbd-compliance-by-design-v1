@@ -7,7 +7,7 @@ import {
   Target, FileCheck, Network, GitBranch, Cog, FileText, Star,
   ChevronDown, ChevronRight, BookOpen, Settings, Layers, Globe,
   Activity, X, PlusCircle, Sparkles, Cpu, Search, ShieldCheck, HelpCircle, MessageCircle, SlidersHorizontal, Folder, ShieldAlert, CalendarClock, Gauge, Info,
-  Presentation, FileSpreadsheet, Workflow, Palette, Boxes
+  Presentation, FileSpreadsheet, Workflow, Palette, Boxes, Database
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useIsAuditRole } from "@/hooks/useIsAuditRole";
@@ -126,6 +126,7 @@ export const NAV_GROUPS = [
     items: [
       { id: "users", title: "Users", url: createPageUrl("Users"), icon: Users },
       { id: "roles", title: "Roles", url: createPageUrl("Roles"), icon: Layers },
+      { id: "seeded_libraries", title: "Seeded Libraries", url: createPageUrl("SeedLibraries"), icon: Database },
       { id: "audit_logs", title: "Audit Logs", url: createPageUrl("AuditLogs"), icon: Activity },
     ],
   },
