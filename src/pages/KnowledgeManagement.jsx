@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { BookOpen, Plus, Search, FileText, Download, Eye, Edit2, Trash2 } from "lucide-react";
+import { BookOpen, Plus, Search, FileText, Download, Eye, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
@@ -42,14 +42,6 @@ export default function KnowledgeManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries(['knowledgeArticles']);
       toast.success('Article deleted');
-    },
-  });
-
-  const renameMutation = useMutation({
-    mutationFn: ({ id, title }) => base44.entities.KnowledgeArticle.update(id, { title }),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['knowledgeArticles']);
-      toast.success('Article renamed');
     },
   });
 
@@ -150,7 +142,6 @@ export default function KnowledgeManagement() {
           frameworks={frameworks}
           onView={handleView}
           onDelete={(id) => deleteMutation.mutate(id)}
-          onRename={(id, title) => renameMutation.mutate({ id, title })}
         />
       )}
 
