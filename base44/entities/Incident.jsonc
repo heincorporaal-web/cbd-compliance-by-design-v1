@@ -2,6 +2,10 @@
   "name": "Incident",
   "type": "object",
   "properties": {
+    "incident_reference": {
+      "type": "string",
+      "description": "Unique incident reference number (e.g. INC-2026-0001)"
+    },
     "title": {
       "type": "string",
       "description": "Incident title"
@@ -12,7 +16,7 @@
     },
     "ict_system_id": {
       "type": "string",
-      "description": "Reference to ICTSystem entity"
+      "description": "Reference to ICTSystem entity (affected system)"
     },
     "incident_type": {
       "type": "string",
@@ -24,9 +28,18 @@
         "third_party_failure",
         "natural_disaster",
         "human_error",
+        "security_incident",
         "other"
       ],
       "description": "Type of incident"
+    },
+    "category": {
+      "type": "string",
+      "description": "Incident category (e.g. Network, Database, Application, Access)"
+    },
+    "subcategory": {
+      "type": "string",
+      "description": "Incident subcategory for finer classification"
     },
     "severity": {
       "type": "string",
@@ -39,25 +52,102 @@
       "default": "moderate",
       "description": "Incident severity"
     },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "default": "P3",
+      "description": "Incident priority (P1=Critical, P2=High, P3=Medium, P4=Low)"
+    },
     "status": {
       "type": "string",
       "enum": [
-        "open",
+        "detected",
+        "logged",
+        "classified",
+        "assessed",
+        "assigned",
         "investigating",
+        "mitigating",
+        "service_restored",
         "resolved",
+        "pir_rca",
         "closed"
       ],
-      "default": "open"
+      "default": "detected",
+      "description": "Incident lifecycle status"
+    },
+    "major_incident": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a declared Major Incident (P1 governance model)"
+    },
+    "recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flagged as a recurring incident (same service + category multiple times)"
+    },
+    "security_incident": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a security-related incident"
+    },
+    "data_breach": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the incident involves a data/privacy breach"
     },
     "detected_date": {
       "type": "string",
       "format": "date-time",
       "description": "When incident was detected"
     },
+    "reported_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When incident was formally reported/logged"
+    },
     "resolved_date": {
       "type": "string",
       "format": "date-time",
-      "description": "When incident was resolved"
+      "description": "When incident was permanently resolved"
+    },
+    "service_restored_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Distinct milestone: when normal service was restored (may precede permanent resolution)"
+    },
+    "closure_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When incident was formally closed"
+    },
+    "detection_source": {
+      "type": "string",
+      "enum": [
+        "monitoring_alert",
+        "service_desk",
+        "user_report",
+        "email",
+        "api_ingestion",
+        "third_party_notification",
+        "manual",
+        "other"
+      ],
+      "default": "manual",
+      "description": "How the incident was detected"
+    },
+    "reporter": {
+      "type": "string",
+      "description": "Person or system that reported the incident"
+    },
+    "affected_service": {
+      "type": "string",
+      "description": "Affected IT service name"
     },
     "description": {
       "type": "string",
@@ -67,9 +157,92 @@
       "type": "string",
       "description": "Business impact description"
     },
+    "users_affected": {
+      "type": "string",
+      "description": "Number or description of users/customers affected"
+    },
+    "estimated_financial_impact": {
+      "type": "string",
+      "description": "Estimated financial impact (currency amount or range)"
+    },
+    "regulatory_impact": {
+      "type": "string",
+      "description": "Regulatory impact assessment"
+    },
+    "incident_owner": {
+      "type": "string",
+      "description": "Incident owner name (denormalized)"
+    },
+    "incident_owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (incident owner)"
+    },
+    "assignment_group": {
+      "type": "string",
+      "description": "Resolver / assignment group"
+    },
+    "technical_lead": {
+      "type": "string",
+      "description": "Technical lead name"
+    },
+    "business_owner": {
+      "type": "string",
+      "description": "Business owner name"
+    },
+    "incident_commander": {
+      "type": "string",
+      "description": "Incident Commander (major incidents only)"
+    },
+    "response_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the incident was first responded to"
+    },
+    "investigation_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When investigation began"
+    },
+    "symptoms": {
+      "type": "string",
+      "description": "Observed symptoms"
+    },
+    "investigation_notes": {
+      "type": "string",
+      "description": "Investigation and diagnosis notes"
+    },
+    "suspected_cause": {
+      "type": "string",
+      "description": "Suspected cause during investigation"
+    },
+    "workaround": {
+      "type": "string",
+      "description": "Workaround or temporary fix applied"
+    },
+    "resolution": {
+      "type": "string",
+      "description": "Resolution description or code"
+    },
     "root_cause": {
       "type": "string",
-      "description": "Root cause analysis"
+      "description": "Root cause analysis outcome"
+    },
+    "root_cause_category": {
+      "type": "string",
+      "description": "Root cause category (e.g. Software Defect, Config Error, Hardware Failure)"
+    },
+    "rca_methodology": {
+      "type": "string",
+      "description": "RCA methodology used (5 Whys, Fishbone, Kepner-Tregoe, etc.)"
+    },
+    "known_error": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is recorded as a known error"
+    },
+    "problem_record_id": {
+      "type": "string",
+      "description": "Reference to linked Problem record (if problem management is active)"
     },
     "remediation_actions": {
       "type": "string",
@@ -79,6 +252,34 @@
       "type": "string",
       "description": "Lessons learned and improvements"
     },
+    "pir_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a Post-Incident Review is required"
+    },
+    "pir_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the Post-Incident Review has been completed"
+    },
+    "pir_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the PIR was conducted"
+    },
+    "pir_findings": {
+      "type": "string",
+      "description": "PIR findings, control failures, improvement recommendations"
+    },
+    "closure_approved_by": {
+      "type": "string",
+      "description": "Person who approved closure"
+    },
+    "closure_approval_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When closure was approved"
+    },
     "reported_to_regulator": {
       "type": "boolean",
       "default": false,
@@ -87,6 +288,132 @@
     "regulator_reference": {
       "type": "string",
       "description": "Regulator case reference number"
+    },
+    "sla_response_target": {
+      "type": "string",
+      "description": "SLA response target (e.g. '15m', '1h')"
+    },
+    "sla_restoration_target": {
+      "type": "string",
+      "description": "SLA service restoration target (e.g. '4h', '8h')"
+    },
+    "sla_resolution_target": {
+      "type": "string",
+      "description": "SLA resolution target (e.g. '24h', '5d')"
+    },
+    "sla_breached": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether any SLA target was breached"
+    },
+    "escalation_level": {
+      "type": "number",
+      "default": 0,
+      "description": "Current escalation level (0=none, 1=L1, 2=L2, 3=L3/management)"
+    },
+    "configuration_item_id": {
+      "type": "string",
+      "description": "Reference to ConfigurationItem entity (Assets by Design integration \u2014 only when ABD module is enabled)"
+    },
+    "third_party_id": {
+      "type": "string",
+      "description": "Reference to ThirdPartyProvider entity (TPRM integration \u2014 only when Third Party Risk Management module is enabled)"
+    },
+    "third_party_ticket_ref": {
+      "type": "string",
+      "description": "Supplier's own ticket reference for this incident"
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to Risk entities linked to this incident"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to Control entities that failed or are relevant"
+    },
+    "linked_process_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to OrgProcess entities affected"
+    },
+    "linked_issue_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to Issue entities (remediation actions, findings)"
+    },
+    "evidence_urls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "uploaded_date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Evidence and attachment files (logs, screenshots, diagnostic output)"
+    },
+    "communications_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "audience": {
+            "type": "string",
+            "description": "Communication audience (users, management, stakeholders, regulator)"
+          },
+          "message": {
+            "type": "string"
+          },
+          "sent_by": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Stakeholder communication history"
+    },
+    "status_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Audit trail of status changes"
     }
   },
   "required": [

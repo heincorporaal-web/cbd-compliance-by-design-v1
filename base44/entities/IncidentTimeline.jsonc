@@ -1,0 +1,59 @@
+{
+  "name": "IncidentTimeline",
+  "type": "object",
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "Reference to Incident entity"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized for RLS)"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "created",
+        "status_changed",
+        "assigned",
+        "escalated",
+        "communication",
+        "decision",
+        "restoration",
+        "milestone",
+        "comment",
+        "priority_changed",
+        "severity_changed"
+      ],
+      "description": "Type of timeline event"
+    },
+    "event_text": {
+      "type": "string",
+      "description": "Human-readable event description"
+    },
+    "event_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event occurred"
+    },
+    "actor": {
+      "type": "string",
+      "description": "Person or system that triggered the event"
+    },
+    "old_value": {
+      "type": "string",
+      "description": "Previous value (for change events)"
+    },
+    "new_value": {
+      "type": "string",
+      "description": "New value (for change events)"
+    }
+  },
+  "required": [
+    "incident_id",
+    "company_id",
+    "event_type",
+    "event_text",
+    "event_timestamp"
+  ]
+}

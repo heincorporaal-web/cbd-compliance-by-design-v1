@@ -20,6 +20,7 @@ import ControlsReport from './pages/ControlsReport';
 import PrincipalRisksReport from './pages/PrincipalRisksReport';
 import IssuesReport from './pages/IssuesReport';
 import IncidentsReport from './pages/IncidentsReport';
+import IncidentDetail from './pages/IncidentDetail';
 import AssessmentsReport from './pages/AssessmentsReport';
 import ThirdPartiesReport from './pages/ThirdPartiesReport';
 import ITCapabilitiesReport from './pages/ITCapabilitiesReport';
@@ -114,6 +115,7 @@ const AuthenticatedApp = () => {
         <Route path="/PrincipalRisksReport" element={<PrincipalRisksReport />} />
         <Route path="/IssuesReport" element={<IssuesReport />} />
         <Route path="/IncidentsReport" element={<IncidentsReport />} />
+        <Route path="/IncidentDetail" element={<IncidentDetail />} />
         <Route path="/AssessmentsReport" element={<AssessmentsReport />} />
         <Route path="/ThirdPartiesReport" element={<ThirdPartiesReport />} />
         <Route path="/ITCapabilitiesReport" element={<ITCapabilitiesReport />} />

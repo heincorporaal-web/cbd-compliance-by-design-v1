@@ -1,0 +1,98 @@
+{
+  "name": "IncidentAction",
+  "type": "object",
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "Reference to Incident entity"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "Reference to Company entity (denormalized for RLS)"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "remediation",
+        "corrective",
+        "preventive",
+        "improvement",
+        "workaround"
+      ],
+      "default": "remediation",
+      "description": "Type of action"
+    },
+    "title": {
+      "type": "string",
+      "description": "Action title / description"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed action description"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Person responsible for the action (denormalized name)"
+    },
+    "owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (action owner)"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Action due date"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Action priority"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "overdue"
+      ],
+      "default": "open",
+      "description": "Action status"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the action was completed"
+    },
+    "evidence_url": {
+      "type": "string",
+      "description": "URL to evidence of action completion"
+    },
+    "effectiveness_validated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the action's effectiveness has been validated"
+    },
+    "effectiveness_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date effectiveness was validated"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "incident_id",
+    "company_id",
+    "title"
+  ]
+}
