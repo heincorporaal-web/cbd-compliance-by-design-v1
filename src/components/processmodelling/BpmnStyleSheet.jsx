@@ -15,21 +15,42 @@ function deriveTheme(name, colors) {
   const s = colors.secondary || "#2b8cac";
   const a = colors.accent || "#0ea5e9";
   const bg = colors.background || "#f0f9ff";
-  // Slightly lighter tints for fills (mix with white)
-  const lighten = (hex, amt = 0.82) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    const mix = (c) => Math.round(c + (255 - c) * amt);
-    return `#${mix(r).toString(16).padStart(2, "0")}${mix(g).toString(16).padStart(2, "0")}${mix(b).toString(16).padStart(2, "0")}`;
+  // Wash out a colour for fills: convert to HSL, clamp saturation low and lightness high
+  // so text on top stays readable regardless of how vivid the brand colour is.
+  const washOut = (hex, { maxSat = 30, lightness = 93 } = {}) => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        default: h = (r - g) / d + 4;
+      }
+      h /= 6;
+    }
+    s = Math.min(s * 100, maxSat);
+    const L = Math.max(l * 100, lightness);
+    const c = (v) => {
+      const k = (n) => (n + h * 12) % 12;
+      const a = s * Math.min(L, 100 - L) / 100;
+      return Math.round(255 * (L / 100 - a * Math.max(-1, Math.min(k(0) - 3, Math.min(9 - k(0), 1)))));
+    };
+    const toHex = (n) => c(n).toString(16).padStart(2, "0");
+    return `#${toHex(0)}${toHex(8)}${toHex(4)}`;
   };
   return {
     name,
-    task:       { fill: lighten(p, 0.78), stroke: p },
-    gateway:    { fill: lighten(s, 0.78), stroke: s },
-    event:      { fill: lighten(a, 0.85), stroke: a },
-    pool:       { fill: lighten(p, 0.90), stroke: p },
-    lane:       { fill: lighten(p, 0.93), stroke: p },
+    task:       { fill: washOut(p, { maxSat: 30, lightness: 92 }), stroke: p },
+    gateway:    { fill: washOut(s, { maxSat: 30, lightness: 92 }), stroke: s },
+    event:      { fill: washOut(a, { maxSat: 25, lightness: 94 }), stroke: a },
+    pool:       { fill: washOut(p, { maxSat: 20, lightness: 95 }), stroke: p },
+    lane:       { fill: washOut(p, { maxSat: 15, lightness: 96 }), stroke: p },
     annotation: { fill: bg, stroke: "#94a3b8" },
     data:       { fill: "#ffffff", stroke: "#64748b" },
     default:    { fill: "#ffffff", stroke: "#6b7280" },
