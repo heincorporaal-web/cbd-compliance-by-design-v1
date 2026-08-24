@@ -5,11 +5,12 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2, Plus, ArrowLeftRight, ShieldAlert, Bot, Settings2 } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2, Plus, ArrowLeftRight, ShieldAlert, Bot, Settings2, Paintbrush } from "lucide-react";
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
 import BpmnDataPane from "@/components/processmodelling/BpmnDataPane";
 import CanvasFormatBar, { getCanvasDimensions, getPageSizeLabel } from "@/components/processmodelling/CanvasFormatBar";
+import BpmnStyleSheet from "@/components/processmodelling/BpmnStyleSheet";
 import SodScanner from "@/components/processmodelling/SodScanner";
 import SodAgentChat from "@/components/agents/SodAgentChat";
 import UnlinkedElementsDialog from "@/components/processmodelling/UnlinkedElementsDialog";
@@ -76,6 +77,7 @@ export default function BpmnDesigner({
   const [sodOpen, setSodOpen] = useState(false);
   const [agentOpen, setAgentOpen] = useState(false);
   const [formatOpen, setFormatOpen] = useState(false);
+  const [styleOpen, setStyleOpen] = useState(false);
   const [modelerReady, setModelerReady] = useState(false);
 
   // Exit connect mode on Escape
@@ -515,6 +517,17 @@ export default function BpmnDesigner({
             >
               <Settings2 className="w-4 h-4" /> Format
             </Button>
+            {!readOnly && (
+              <Button
+                size="sm"
+                variant={styleOpen ? "default" : "ghost"}
+                onClick={() => setStyleOpen((v) => !v)}
+                title="Apply a CBD style sheet to all diagram elements"
+                className={`gap-1.5 ${styleOpen ? "bg-violet-600 hover:bg-violet-700 text-white" : "text-violet-600"}`}
+              >
+                <Paintbrush className="w-4 h-4" /> Style
+              </Button>
+            )}
             <div className="w-px h-6 bg-slate-200 mx-1" />
             {!readOnly && (
               <Button
@@ -625,6 +638,13 @@ export default function BpmnDesigner({
             canvasMeta={canvasMeta}
             onChange={onCanvasChange}
             onClose={() => setFormatOpen(false)}
+          />
+        )}
+        {styleOpen && (
+          <BpmnStyleSheet
+            modelerRef={modelerRef}
+            companyId={companyId}
+            onClose={() => setStyleOpen(false)}
           />
         )}
         {/* Bounded canvas area: a white "page" on a grey workspace. Everything
