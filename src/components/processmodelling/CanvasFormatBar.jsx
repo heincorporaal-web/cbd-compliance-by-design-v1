@@ -53,6 +53,7 @@ export default function CanvasFormatBar({ canvasMeta, onChange, onClose }) {
   const orientation = canvasMeta.pageOrientation || "landscape";
   const pageSize = canvasMeta.pageSize || "Auto";
   const showPageSize = canvasMeta.showPageSize ?? false;
+  const showPageBoundary = canvasMeta.showPageBoundary ?? true;
   const snapToGrid = canvasMeta.snapToGrid ?? false;
   const gridSize = canvasMeta.gridSize ?? 20;
 
@@ -83,7 +84,7 @@ export default function CanvasFormatBar({ canvasMeta, onChange, onClose }) {
         </Select>
       </div>
 
-      {/* Show Page Size toggle */}
+      {/* Show Page Size label toggle */}
       <Button
         size="sm"
         variant={showPageSize ? "default" : "outline"}
@@ -92,7 +93,19 @@ export default function CanvasFormatBar({ canvasMeta, onChange, onClose }) {
         title={showPageSize ? "Hide page size label on canvas" : "Show page size label on canvas"}
       >
         {showPageSize ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-        {showPageSize ? "Size Shown" : "Show Size"}
+        {showPageSize ? "Label On" : "Show Label"}
+      </Button>
+
+      {/* Page boundary (dotted lines) toggle */}
+      <Button
+        size="sm"
+        variant={showPageBoundary ? "default" : "outline"}
+        onClick={() => onChange("showPageBoundary", !showPageBoundary)}
+        className="h-8 gap-1.5 text-xs"
+        title={showPageBoundary ? "Hide dotted page boundary on canvas" : "Show dotted page boundary to keep designs within page limits"}
+      >
+        {showPageBoundary ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+        {showPageBoundary ? "Boundary On" : "Show Boundary"}
       </Button>
 
       <div className="w-px h-6 bg-slate-200" />
