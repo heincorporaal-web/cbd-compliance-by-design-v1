@@ -5,10 +5,11 @@ import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2, Plus, ArrowLeftRight, ShieldAlert, Bot } from "lucide-react";
+import { Save, ZoomIn, ZoomOut, Maximize2, Download, FileImage, ArrowLeft, PanelRight, Upload, Spline, Expand, Minimize2, Plus, ArrowLeftRight, ShieldAlert, Bot, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import BpmnElementPalette from "@/components/processmodelling/BpmnElementPalette";
 import BpmnDataPane from "@/components/processmodelling/BpmnDataPane";
+import CanvasFormatBar, { getCanvasDimensions, getPageSizeLabel } from "@/components/processmodelling/CanvasFormatBar";
 import SodScanner from "@/components/processmodelling/SodScanner";
 import SodAgentChat from "@/components/agents/SodAgentChat";
 import UnlinkedElementsDialog from "@/components/processmodelling/UnlinkedElementsDialog";
@@ -74,6 +75,8 @@ export default function BpmnDesigner({
   const [adding, setAdding] = useState(false);
   const [sodOpen, setSodOpen] = useState(false);
   const [agentOpen, setAgentOpen] = useState(false);
+  const [formatOpen, setFormatOpen] = useState(false);
+  const [modelerReady, setModelerReady] = useState(false);
 
   // Exit connect mode on Escape
   useEffect(() => {
@@ -131,6 +134,7 @@ export default function BpmnDesigner({
       .then(() => {
         modeler.get("canvas").zoom("fit-viewport");
         if (!readOnly) ensureGuids();
+        setModelerReady(true);
       })
       .catch((err) => toast.error("Failed to load diagram: " + (err?.message || err)));
 
@@ -194,6 +198,30 @@ export default function BpmnDesigner({
       modelerRef.current = null;
     };
   }, []);
+
+  // Apply grid snapping and grid size to the bpmn-js modeler whenever the
+  // canvas formatting settings change or the modeler becomes ready.
+  useEffect(() => {
+    if (!modelerReady) return;
+    const modeler = modelerRef.current;
+    if (!modeler) return;
+    try {
+      const snapToGrid = canvasMeta.snapToGrid ?? false;
+      const gridSize = canvasMeta.gridSize ?? 20;
+
+      const grid = modeler.get("grid");
+      const gridSnapping = modeler.get("gridSnapping");
+
+      if (snapToGrid) {
+        if (grid) grid.setGridSize(gridSize);
+        if (grid) grid.setVisible(true);
+        if (gridSnapping && !gridSnapping.isActive()) gridSnapping.setActive(true);
+      } else {
+        if (grid) grid.setVisible(false);
+        if (gridSnapping && gridSnapping.isActive()) gridSnapping.setActive(false);
+      }
+    } catch {}
+  }, [modelerReady, canvasMeta.snapToGrid, canvasMeta.gridSize]);
 
   const onCanvasChange = (key, value) => {
     setCanvasMeta((prev) => ({ ...prev, [key]: value }));
@@ -478,6 +506,15 @@ export default function BpmnDesigner({
             <Button size="sm" variant="ghost" onClick={zoomOut} title="Zoom out"><ZoomOut className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={zoomIn} title="Zoom in"><ZoomIn className="w-4 h-4" /></Button>
             <Button size="sm" variant="ghost" onClick={fit} title="Fit to screen"><Maximize2 className="w-4 h-4" /></Button>
+            <Button
+              size="sm"
+              variant={formatOpen ? "default" : "ghost"}
+              onClick={() => setFormatOpen((v) => !v)}
+              title="Canvas formatting options (page size, orientation, grid)"
+              className={`gap-1.5 ${formatOpen ? "bg-indigo-600 hover:bg-indigo-700 text-white" : ""}`}
+            >
+              <Settings2 className="w-4 h-4" /> Format
+            </Button>
             <div className="w-px h-6 bg-slate-200 mx-1" />
             {!readOnly && (
               <Button
@@ -583,17 +620,31 @@ export default function BpmnDesigner({
             )}
           </div>
         </div>
+        {formatOpen && (
+          <CanvasFormatBar
+            canvasMeta={canvasMeta}
+            onChange={onCanvasChange}
+            onClose={() => setFormatOpen(false)}
+          />
+        )}
         {/* Bounded canvas area: a white "page" on a grey workspace. Everything
             outside the page is clipped (overflow hidden), so the future image
             preview will only capture what is placed inside this canvas. */}
         <div className="flex-1 min-h-0 bg-slate-200 p-3 md:p-5 overflow-auto flex justify-center">
-          <div className="relative w-full max-w-[1200px] h-full min-h-[560px] bg-white rounded-lg shadow-lg ring-1 ring-slate-300 overflow-hidden">
-            <span className="pointer-events-none absolute top-2 left-3 z-10 text-[10px] font-semibold uppercase tracking-wide text-slate-300 select-none">
-              Canvas
+          <div
+            className="relative bg-white rounded-lg shadow-lg ring-1 ring-slate-300 overflow-hidden shrink-0"
+            style={(() => {
+              const dims = getCanvasDimensions(canvasMeta);
+              if (dims) return { width: `${dims.width}px`, height: `${dims.height}px`, minWidth: `${dims.width}px` };
+              return { width: "100%", maxWidth: "1200px", height: "100%", minHeight: "560px" };
+            })()}
+          >
+            <span className="pointer-events-none absolute top-2 left-3 z-10 text-[10px] font-semibold uppercase tracking-wide text-slate-400 select-none">
+              {(canvasMeta.showPageSize && getPageSizeLabel(canvasMeta)) || "Canvas"}
             </span>
             <div
               ref={containerRef}
-              className="w-full h-full min-h-[560px]"
+              className="w-full h-full"
               style={connectMode ? { cursor: "crosshair" } : undefined}
             >
               {/* Hide the native floating bpmn-js palette — elements are now in the docked pane */}
