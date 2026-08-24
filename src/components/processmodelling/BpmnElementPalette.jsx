@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown, ChevronDown as CaretDown } from "lucide-react";
 
 /* ---------------------------------------------------------------------------
    BPMN 2.0 element definitions, grouped by category.
@@ -22,41 +22,10 @@ const EVENT = {
   terminate: "bpmn:TerminateEventDefinition",
 };
 
-const COMMON_ELEMENTS = [
-  { label: "Task", type: "bpmn:Task" },
-  { label: "User Task", type: "bpmn:UserTask" },
-  { label: "Sub-process (collapsed)", type: "bpmn:SubProcess", isExpanded: false },
-  { label: "Start Event", type: "bpmn:StartEvent" },
-  { label: "End Event", type: "bpmn:EndEvent" },
-  { label: "Exclusive (XOR)", type: "bpmn:ExclusiveGateway" },
-  { label: "Parallel (AND)", type: "bpmn:ParallelGateway" },
-  { label: "Inclusive (OR)", type: "bpmn:InclusiveGateway" },
-  { label: "Event-based", type: "bpmn:EventBasedGateway" },
-  { label: "Pool / Participant", type: "bpmn:Participant", isExpanded: true },
-  { label: "Lane", type: "bpmn:Lane", isExpanded: true },
-];
-
 const CATEGORIES = [
   {
-    key: "general",
-    label: "BPMN 2.0 General",
-    items: [
-      { label: "Pool / Participant", type: "bpmn:Participant", isExpanded: true },
-      { label: "Lane", type: "bpmn:Lane", isExpanded: true },
-      { label: "Sub-process (collapsed)", type: "bpmn:SubProcess", isExpanded: false },
-      { label: "Sub-process (expanded)", type: "bpmn:SubProcess", isExpanded: true },
-      { label: "Ad-hoc Sub-process", type: "bpmn:AdHocSubProcess", isExpanded: false },
-      { label: "Transaction", type: "bpmn:Transaction" },
-      { label: "Call Activity", type: "bpmn:CallActivity" },
-      { label: "Data Object", type: "bpmn:DataObjectReference" },
-      { label: "Data Store", type: "bpmn:DataStoreReference" },
-      { label: "Group", type: "bpmn:Group" },
-      { label: "Text Annotation", type: "bpmn:TextAnnotation" },
-    ],
-  },
-  {
-    key: "tasks",
-    label: "BPMN 2.0 Tasks",
+    key: "activities",
+    label: "Activities",
     items: [
       { label: "Task", type: "bpmn:Task" },
       { label: "Service Task", type: "bpmn:ServiceTask" },
@@ -66,42 +35,89 @@ const CATEGORIES = [
       { label: "Manual Task", type: "bpmn:ManualTask" },
       { label: "Script Task", type: "bpmn:ScriptTask" },
       { label: "Business Rule Task", type: "bpmn:BusinessRuleTask" },
+      { label: "Collapsed Subprocess", type: "bpmn:SubProcess", isExpanded: false },
+      { label: "Expanded Subprocess", type: "bpmn:SubProcess", isExpanded: true },
+      { label: "Collapsed Event-Subprocess", type: "bpmn:SubProcess", isExpanded: false, triggeredByEvent: true },
+      { label: "Event Subprocess", type: "bpmn:SubProcess", isExpanded: true, triggeredByEvent: true },
+      { label: "Ad-hoc Sub-process", type: "bpmn:AdHocSubProcess", isExpanded: false },
+      { label: "Transaction", type: "bpmn:Transaction" },
+      { label: "Call Activity", type: "bpmn:CallActivity" },
     ],
   },
   {
-    key: "choreographies",
-    label: "BPMN 2.0 Choreographies",
+    key: "gateways",
+    label: "Gateways",
     items: [
-      { label: "Choreography Task", type: "bpmn:ChoreographyTask" },
-      { label: "Sub-Choreography", type: "bpmn:SubChoreography", isExpanded: false },
-      { label: "Call Choreography", type: "bpmn:CallChoreography" },
+      { label: "Exclusive (XOR)", type: "bpmn:ExclusiveGateway" },
+      { label: "Parallel (AND)", type: "bpmn:ParallelGateway" },
+      { label: "Inclusive (OR)", type: "bpmn:InclusiveGateway" },
+      { label: "Complex", type: "bpmn:ComplexGateway" },
+      { label: "Event-based", type: "bpmn:EventBasedGateway" },
+      { label: "Exclusive Event-based", type: "bpmn:ExclusiveEventBasedGateway" },
+      { label: "Parallel Event-based", type: "bpmn:ParallelEventBasedGateway" },
     ],
   },
   {
-    key: "events",
-    label: "BPMN 2.0 Events",
+    key: "swimlanes",
+    label: "Swimlanes",
+    items: [
+      { label: "Pool / Participant", type: "bpmn:Participant", isExpanded: true },
+      { label: "Lane", type: "bpmn:Lane", isExpanded: true },
+    ],
+  },
+  {
+    key: "artifacts",
+    label: "Artifacts",
+    items: [
+      { label: "Group", type: "bpmn:Group" },
+      { label: "Text Annotation", type: "bpmn:TextAnnotation" },
+    ],
+  },
+  {
+    key: "data_objects",
+    label: "Data Objects",
+    items: [
+      { label: "Data Object", type: "bpmn:DataObjectReference" },
+      { label: "Data Store", type: "bpmn:DataStoreReference" },
+    ],
+  },
+  {
+    key: "start_events",
+    label: "Start Events",
     items: [
       { label: "Start Event", type: "bpmn:StartEvent" },
       { label: "Message Start", type: "bpmn:StartEvent", eventDefinitionType: EVENT.message },
       { label: "Timer Start", type: "bpmn:StartEvent", eventDefinitionType: EVENT.timer },
       { label: "Conditional Start", type: "bpmn:StartEvent", eventDefinitionType: EVENT.conditional },
       { label: "Signal Start", type: "bpmn:StartEvent", eventDefinitionType: EVENT.signal },
+    ],
+  },
+  {
+    key: "catching_intermediate",
+    label: "Catching Intermediate Events",
+    items: [
       { label: "Intermediate Event", type: "bpmn:IntermediateCatchEvent" },
       { label: "Message Catch", type: "bpmn:IntermediateCatchEvent", eventDefinitionType: EVENT.message },
       { label: "Timer Catch", type: "bpmn:IntermediateCatchEvent", eventDefinitionType: EVENT.timer },
       { label: "Conditional Catch", type: "bpmn:IntermediateCatchEvent", eventDefinitionType: EVENT.conditional },
       { label: "Signal Catch", type: "bpmn:IntermediateCatchEvent", eventDefinitionType: EVENT.signal },
       { label: "Link Catch", type: "bpmn:IntermediateCatchEvent", eventDefinitionType: EVENT.link },
+    ],
+  },
+  {
+    key: "throwing_intermediate",
+    label: "Throwing Intermediate Events",
+    items: [
       { label: "Message Throw", type: "bpmn:IntermediateThrowEvent", eventDefinitionType: EVENT.message },
       { label: "Escalation Throw", type: "bpmn:IntermediateThrowEvent", eventDefinitionType: EVENT.escalation },
       { label: "Compensation Throw", type: "bpmn:IntermediateThrowEvent", eventDefinitionType: EVENT.compensate },
       { label: "Link Throw", type: "bpmn:IntermediateThrowEvent", eventDefinitionType: EVENT.link },
-      { label: "Boundary Message", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.message, attach: true },
-      { label: "Boundary Timer", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.timer, attach: true },
-      { label: "Boundary Error", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.error, attach: true },
-      { label: "Boundary Signal", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.signal, attach: true },
-      { label: "Boundary Cancel", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.cancel, attach: true },
-      { label: "Boundary Compensation", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.compensate, attach: true },
+    ],
+  },
+  {
+    key: "end_events",
+    label: "End Events",
+    items: [
       { label: "End Event", type: "bpmn:EndEvent" },
       { label: "Message End", type: "bpmn:EndEvent", eventDefinitionType: EVENT.message },
       { label: "Error End", type: "bpmn:EndEvent", eventDefinitionType: EVENT.error },
@@ -112,16 +128,33 @@ const CATEGORIES = [
     ],
   },
   {
-    key: "gateways",
-    label: "BPMN 2.0 Gateways",
+    key: "boundary_events",
+    label: "Boundary Events",
     items: [
-      { label: "Exclusive (XOR)", type: "bpmn:ExclusiveGateway" },
-      { label: "Parallel (AND)", type: "bpmn:ParallelGateway" },
-      { label: "Inclusive (OR)", type: "bpmn:InclusiveGateway" },
-      { label: "Complex", type: "bpmn:ComplexGateway" },
-      { label: "Event-based", type: "bpmn:EventBasedGateway" },
-      { label: "Exclusive Event-based", type: "bpmn:ExclusiveEventBasedGateway" },
-      { label: "Parallel Event-based", type: "bpmn:ParallelEventBasedGateway" },
+      { label: "Boundary Message", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.message, attach: true },
+      { label: "Boundary Timer", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.timer, attach: true },
+      { label: "Boundary Error", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.error, attach: true },
+      { label: "Boundary Signal", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.signal, attach: true },
+      { label: "Boundary Cancel", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.cancel, attach: true },
+      { label: "Boundary Compensation", type: "bpmn:BoundaryEvent", eventDefinitionType: EVENT.compensate, attach: true },
+    ],
+  },
+  {
+    key: "choreographies",
+    label: "Choreographies",
+    items: [
+      { label: "Choreography Task", type: "bpmn:ChoreographyTask" },
+      { label: "Sub-Choreography", type: "bpmn:SubChoreography", isExpanded: false },
+      { label: "Call Choreography", type: "bpmn:CallChoreography" },
+    ],
+  },
+  {
+    key: "connecting_objects",
+    label: "Connecting Objects",
+    items: [
+      { label: "Sequence Flow", type: "bpmn:SequenceFlow", isConnector: true },
+      { label: "Message Flow", type: "bpmn:MessageFlow", isConnector: true },
+      { label: "Association", type: "bpmn:Association", isConnector: true },
     ],
   },
 ];
@@ -241,10 +274,18 @@ function resolveIcon(item) {
   if (t === "bpmn:CallActivity") return { shape: "rect", thick: true };
   if (t === "bpmn:Transaction") return { shape: "transaction" };
   if (t === "bpmn:AdHocSubProcess") return { shape: "rect", marker: "adhoc" };
-  if (t === "bpmn:SubProcess" || t === "bpmn:SubChoreography")
+  if (t === "bpmn:SubProcess" || t === "bpmn:SubChoreography") {
+    if (item.triggeredByEvent) {
+      return { shape: "rect", marker: item.isExpanded === false ? "event-collapsed" : "event-expanded" };
+    }
     return { shape: "rect", marker: item.isExpanded === false ? "collapsed" : "expanded" };
+  }
   if (t === "bpmn:ChoreographyTask") return { shape: "choreo" };
   if (t === "bpmn:CallChoreography") return { shape: "choreo", thick: true };
+
+  if (t === "bpmn:SequenceFlow") return { shape: "sequence" };
+  if (t === "bpmn:MessageFlow") return { shape: "message-flow" };
+  if (t === "bpmn:Association") return { shape: "association" };
 
   if (t.endsWith("Task"))
     return { shape: "task", taskType: taskTypeOf(t) };
@@ -300,7 +341,7 @@ function BpmnIcon({ item }) {
   const d = resolveIcon(item);
   const stroke = { stroke: "currentColor", strokeWidth: 1.5, fill: "none", strokeLinejoin: "round", strokeLinecap: "round" };
   return (
-    <svg viewBox="0 0 24 24" width="22" height="22" className="text-slate-700 shrink-0">
+    <svg viewBox="0 0 24 24" width="20" height="20" className="text-slate-700 shrink-0">
       {d.shape === "event" && (
         <>
           <circle cx="12" cy="12" r="9" {...stroke} strokeWidth={d.kind === "end" ? 3 : 1.6} />
@@ -330,6 +371,15 @@ function BpmnIcon({ item }) {
           )}
           {d.marker === "expanded" && (
             <rect x="9.5" y="14" width="5" height="5" rx="0.6" {...stroke} strokeDasharray="1.5,1.2" />
+          )}
+          {d.marker === "event-collapsed" && (
+            <>
+              <rect x="3" y="6" width="18" height="12" rx="3" {...stroke} strokeDasharray="3,2" />
+              <rect x="9.5" y="14" width="5" height="5" rx="0.6" {...stroke} />
+            </>
+          )}
+          {d.marker === "event-expanded" && (
+            <rect x="3" y="6" width="18" height="12" rx="3" {...stroke} strokeDasharray="3,2" />
           )}
           {d.marker === "adhoc" && (
             <path d="M10 14.5 L14 17 M10 17 L14 14.5" {...stroke} />
@@ -375,6 +425,15 @@ function BpmnIcon({ item }) {
           <rect x="3" y="5" width="6" height="14" rx="1" {...stroke} strokeWidth={1} />
         </>
       )}
+      {d.shape === "sequence" && (
+        <path d="M3 12 L18 12 M14 8 L18 12 L14 16" {...stroke} />
+      )}
+      {d.shape === "message-flow" && (
+        <path d="M3 12 L18 12 M14 8 L18 12 L14 16 M3 10 L3 14" {...stroke} strokeDasharray="2,2" />
+      )}
+      {d.shape === "association" && (
+        <path d="M3 12 L18 12" {...stroke} strokeDasharray="1.5,2" />
+      )}
     </svg>
   );
 }
@@ -383,80 +442,60 @@ function BpmnIcon({ item }) {
 
 export default function BpmnElementPalette({ onDragStart }) {
   const [open, setOpen] = useState(() => ({
-    common: true,
-    ...Object.fromEntries(CATEGORIES.map((c) => [c.key, true])),
+    activities: true,
   }));
 
   const toggle = (key) => setOpen((s) => ({ ...s, [key]: !s[key] }));
 
   return (
-    <div className="w-56 shrink-0 border-r border-slate-200 bg-white flex flex-col">
-      <div className="px-3 py-2 border-b border-slate-200 bg-slate-50">
-        <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">Elements</h3>
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        <div className="border-b border-slate-100 bg-indigo-50/30">
-          <button
-            type="button"
-            onClick={() => toggle("common")}
-            className="w-full flex items-center gap-1.5 px-3 py-2 text-left hover:bg-indigo-50"
-          >
-            {open.common ? (
-              <ChevronDown className="w-3.5 h-3.5 text-indigo-400" />
-            ) : (
-              <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
-            )}
-            <span className="text-xs font-semibold text-indigo-700">Common Elements</span>
-          </button>
-          {open.common && (
-            <div className="grid grid-cols-2 gap-1 px-2 pb-3 pt-1">
-              {COMMON_ELEMENTS.map((item) => (
-                <button
-                  key={item.label}
-                  type="button"
-                  title={`Drag ${item.label} onto the canvas`}
-                  onMouseDown={(e) => onDragStart(e, item.type, item)}
-                  className="flex flex-col items-center gap-1 p-2 rounded-md border border-transparent hover:border-indigo-200 hover:bg-indigo-50/60 transition-colors cursor-grab active:cursor-grabbing"
-                >
-                  <BpmnIcon item={item} />
-                  <span className="text-[10px] leading-tight text-slate-600 text-center">
-                    {item.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
+    <div className="w-56 shrink-0 border-r border-slate-200 bg-[#f7f7f7] flex flex-col">
+      {/* BPMN (Complete) selector */}
+      <div className="px-3 py-2 border-b border-slate-200 bg-white">
+        <div className="flex items-center justify-between px-2 py-1.5 rounded border border-slate-200 text-sm text-slate-700">
+          <span className="font-medium">BPMN (Complete)</span>
+          <CaretDown className="w-4 h-4 text-slate-400" />
         </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
         {CATEGORIES.map((cat) => (
-          <div key={cat.key} className="border-b border-slate-100">
+          <div key={cat.key} className="border-b border-slate-200/80">
             <button
               type="button"
               onClick={() => toggle(cat.key)}
-              className="w-full flex items-center gap-1.5 px-3 py-2 text-left hover:bg-slate-50"
+              className="w-full flex items-center gap-1.5 px-3 py-2.5 text-left hover:bg-slate-100/60"
             >
               {open[cat.key] ? (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-slate-500" />
               ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronRight className="w-4 h-4 text-slate-500" />
               )}
-              <span className="text-xs font-semibold text-slate-700">{cat.label}</span>
+              <span className="text-sm font-medium text-slate-800">{cat.label}</span>
             </button>
             {open[cat.key] && (
-              <div className="grid grid-cols-2 gap-1 px-2 pb-3 pt-1">
+              <div className="pb-1">
                 {cat.items.map((item) => (
                   <button
                     key={item.label}
                     type="button"
-                    title={`Drag ${item.label} onto the canvas`}
-                    onMouseDown={(e) => onDragStart(e, item.type, item)}
-                    className="flex flex-col items-center gap-1 p-2 rounded-md border border-transparent hover:border-indigo-200 hover:bg-indigo-50/60 transition-colors cursor-grab active:cursor-grabbing"
+                    title={item.isConnector ? "Use the Connect button in the toolbar to create flows" : `Drag ${item.label} onto the canvas`}
+                    onMouseDown={item.isConnector ? undefined : (e) => onDragStart(e, item.type, item)}
+                    disabled={item.isConnector}
+                    className={`w-full flex items-center gap-2.5 pl-9 pr-3 py-2 text-left transition-colors ${
+                      item.isConnector
+                        ? "cursor-default opacity-60"
+                        : "hover:bg-indigo-50 cursor-grab active:cursor-grabbing"
+                    }`}
                   >
                     <BpmnIcon item={item} />
-                    <span className="text-[10px] leading-tight text-slate-600 text-center">
-                      {item.label}
-                    </span>
+                    <span className="text-xs text-slate-700">{item.label}</span>
                   </button>
                 ))}
+                {cat.key === "connecting_objects" && (
+                  <p className="pl-9 pr-3 pb-2 text-[10px] text-slate-400 leading-snug">
+                    Use the <span className="font-medium">Connect</span> button in the toolbar to draw flows between elements.
+                  </p>
+                )}
               </div>
             )}
           </div>
