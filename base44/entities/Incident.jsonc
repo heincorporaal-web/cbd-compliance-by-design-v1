@@ -179,19 +179,35 @@
     },
     "assignment_group": {
       "type": "string",
-      "description": "Resolver / assignment group"
+      "description": "Resolver / assignment group name (denormalized)"
+    },
+    "assignment_group_id": {
+      "type": "string",
+      "description": "Reference to StakeholderGroup entity (assignment group)"
     },
     "technical_lead": {
       "type": "string",
-      "description": "Technical lead name"
+      "description": "Technical lead name (denormalized)"
+    },
+    "technical_lead_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (technical lead)"
     },
     "business_owner": {
       "type": "string",
-      "description": "Business owner name"
+      "description": "Business owner name (denormalized)"
+    },
+    "business_owner_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (business owner)"
     },
     "incident_commander": {
       "type": "string",
-      "description": "Incident Commander (major incidents only)"
+      "description": "Incident Commander name (denormalized, major incidents only)"
+    },
+    "incident_commander_stakeholder_id": {
+      "type": "string",
+      "description": "Reference to Stakeholder entity (incident commander)"
     },
     "response_timestamp": {
       "type": "string",
@@ -229,7 +245,11 @@
     },
     "root_cause_category": {
       "type": "string",
-      "description": "Root cause category (e.g. Software Defect, Config Error, Hardware Failure)"
+      "description": "Root cause category (denormalized, e.g. Software Defect, Config Error, Hardware Failure)"
+    },
+    "root_cause_category_id": {
+      "type": "string",
+      "description": "Reference to RootCauseCategory entity"
     },
     "rca_methodology": {
       "type": "string",
