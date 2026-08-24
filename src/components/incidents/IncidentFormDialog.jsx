@@ -82,14 +82,11 @@ export default function IncidentFormDialog({
               <Label>Incident Title *</Label>
               <Input value={formData.title || ""} onChange={(e) => set("title", e.target.value)} required />
             </div>
-            <div className="space-y-1.5">
-              <Label>Company *</Label>
-              <CompanyField
-                value={formData.company_id}
-                onChange={(v) => set("company_id", v)}
-                companies={companies}
-              />
-            </div>
+            <CompanyField
+              value={formData.company_id}
+              onChange={(v) => set("company_id", v)}
+              companies={companies}
+            />
             <div className="space-y-1.5">
               <Label>Detection Source</Label>
               <Select value={formData.detection_source || "manual"} onValueChange={(v) => set("detection_source", v)}>
