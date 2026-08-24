@@ -632,7 +632,11 @@ export default function BpmnDesigner({
             preview will only capture what is placed inside this canvas. */}
         <div className="flex-1 min-h-0 bg-slate-200 p-3 md:p-5 overflow-auto flex justify-center">
           <div
-            className="relative bg-white rounded-lg shadow-lg ring-1 ring-slate-300 overflow-hidden shrink-0"
+            className={`relative bg-white rounded-lg shadow-lg overflow-hidden shrink-0 ${
+              getCanvasDimensions(canvasMeta)
+                ? "border-2 border-dashed border-indigo-400"
+                : "ring-1 ring-slate-300"
+            }`}
             style={(() => {
               const dims = getCanvasDimensions(canvasMeta);
               if (dims) return { width: `${dims.width}px`, height: `${dims.height}px`, minWidth: `${dims.width}px` };
