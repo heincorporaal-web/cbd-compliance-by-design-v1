@@ -21,6 +21,7 @@ import PrincipalRisksReport from './pages/PrincipalRisksReport';
 import IssuesReport from './pages/IssuesReport';
 import IncidentsReport from './pages/IncidentsReport';
 import IncidentDetail from './pages/IncidentDetail';
+import IncidentDashboard from './pages/IncidentDashboard';
 import AssessmentsReport from './pages/AssessmentsReport';
 import ThirdPartiesReport from './pages/ThirdPartiesReport';
 import ITCapabilitiesReport from './pages/ITCapabilitiesReport';
