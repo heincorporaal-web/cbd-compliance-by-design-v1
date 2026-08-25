@@ -47,6 +47,12 @@ const parseLevel = (v) => {
   return m ? Number(m[1]) : null;
 };
 
+const SUBPROCESS_TYPES = new Set([
+  "bpmn:SubProcess",
+  "bpmn:AdHocSubProcess",
+  "bpmn:Transaction",
+]);
+
 export default function BpmnDesigner({
   initialXml,
   initialCanvasMeta,
@@ -111,6 +117,24 @@ export default function BpmnDesigner({
     setCanvasMeta((prev) => (prev.guid ? prev : { ...prev, guid: newGuid() }));
   };
 
+  // Thicken borders on sub-process elements so they're visually distinct from
+  // regular tasks — makes it easy to spot where a process has nested sub-processes.
+  const thickenSubProcessBorders = () => {
+    const modeler = modelerRef.current;
+    if (!modeler) return;
+    try {
+      const elementRegistry = modeler.get("elementRegistry");
+      const graphicsFactory = modeler.get("graphicsFactory");
+      for (const el of elementRegistry.getAll()) {
+        if (SUBPROCESS_TYPES.has(el.type) && el.di && typeof el.di.set === "function") {
+          el.di.set("strokeWidth", 3);
+          const gfx = elementRegistry.getGraphics(el);
+          if (gfx) graphicsFactory.update("shape", el, gfx);
+        }
+      }
+    } catch {}
+  };
+
   // Seed source/target labels for sequence flows into element meta on selection.
   const describeSelection = (el) => {
     if (!el || el.type === "label") return null;
@@ -131,17 +155,33 @@ export default function BpmnDesigner({
     const modeler = new (readOnly ? BpmnViewer : BpmnModeler)({ container: containerRef.current });
     modelerRef.current = modeler;
 
+    let isImporting = true;
     modeler
       .importXML(initialXml || EMPTY_BPMN_XML)
       .then(() => {
+        isImporting = false;
         modeler.get("canvas").zoom("fit-viewport");
         if (!readOnly) ensureGuids();
+        thickenSubProcessBorders();
         setModelerReady(true);
       })
       .catch((err) => toast.error("Failed to load diagram: " + (err?.message || err)));
 
     // Assign a GUID to newly created elements (tasks, events, flows, …).
-    const onShapeAdded = () => ensureGuids();
+    // Also thicken borders on sub-process elements for visual identification.
+    const onShapeAdded = (event) => {
+      ensureGuids();
+      if (isImporting) return;
+      const el = event?.element || event?.shape;
+      if (!el || !SUBPROCESS_TYPES.has(el.type)) return;
+      if (el.di && typeof el.di.set === "function") {
+        el.di.set("strokeWidth", 3);
+        try {
+          const gfx = modeler.get("elementRegistry").getGraphics(el);
+          if (gfx) modeler.get("graphicsFactory").update("shape", el, gfx);
+        } catch {}
+      }
+    };
     if (!readOnly) {
       modeler.on("commandStack.changed", () => setDirty(true));
       modeler.on("shape.added", onShapeAdded);
