@@ -31,6 +31,7 @@ export default function KnowledgeArticleDetail() {
     policy_template: "POL",
     procedure: "PROC",
     checklist: "CHL",
+    wiki_article: "WKI",
   };
 
   const [formData, setFormData] = useState({
@@ -46,7 +47,8 @@ export default function KnowledgeArticleDetail() {
     key_steps: [],
     pdf_url: "",
     attachments: [],
-    status: "draft"
+    status: "draft",
+    source_url: ""
   });
 
   const { data: allArticles = [] } = useQuery({
@@ -310,6 +312,7 @@ export default function KnowledgeArticleDetail() {
                     <SelectItem value="policy_template">Policy Template</SelectItem>
                     <SelectItem value="procedure">Procedure</SelectItem>
                     <SelectItem value="checklist">Checklist</SelectItem>
+                    <SelectItem value="wiki_article">Wiki Article</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -345,6 +348,22 @@ export default function KnowledgeArticleDetail() {
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   rows={6}
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="source_url">
+                  Source URL
+                  <span className="text-slate-400 font-normal text-xs ml-1">
+                    (link to the original article — e.g. SharePoint, Confluence, vendor docs)
+                  </span>
+                </Label>
+                <Input
+                  id="source_url"
+                  type="url"
+                  value={formData.source_url || ""}
+                  onChange={(e) => setFormData({ ...formData, source_url: e.target.value })}
+                  placeholder="https://..."
                 />
               </div>
             </div>

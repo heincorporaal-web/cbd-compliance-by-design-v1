@@ -6,13 +6,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BookOpen, FileText, Eye, Edit2, Download, Filter, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { KNOWLEDGE_CATEGORY_TILE, KNOWLEDGE_CATEGORY_ICONS, isWikiArticle } from "@/lib/knowledgeCategories";
+import { Copy, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 
 const CATEGORY_COLORS = {
-  implementation_guide: "bg-blue-100 text-blue-700",
-  best_practice: "bg-green-100 text-green-700",
-  policy_template: "bg-purple-100 text-purple-700",
+  implementation_guide: "bg-indigo-100 text-indigo-700",
+  best_practice: "bg-emerald-100 text-emerald-700",
+  policy_template: "bg-violet-100 text-violet-700",
   procedure: "bg-amber-100 text-amber-700",
-  checklist: "bg-pink-100 text-pink-700",
+  checklist: "bg-red-100 text-red-700",
+  wiki_article: "bg-cyan-100 text-cyan-700",
 };
 
 const STATUS_COLORS = {
@@ -27,6 +31,7 @@ const CATEGORY_LABELS = {
   policy_template: "Policy Template",
   procedure: "Procedure",
   checklist: "Checklist",
+  wiki_article: "Wiki Article",
 };
 
 export default function KnowledgeGalleryView({ articles, frameworks, onView, canEdit }) {
@@ -174,12 +179,13 @@ export default function KnowledgeGalleryView({ articles, frameworks, onView, can
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((article) => {
             const fw = frameworks.find((f) => f.id === article.framework_id);
+            const CategoryIcon = KNOWLEDGE_CATEGORY_ICONS[article.category] || FileText;
             return (
               <Card key={article.id} className="group hover:shadow-lg transition-shadow border-slate-200 flex flex-col">
                 <CardContent className="p-4 flex flex-col flex-1">
                   <div className="flex items-start gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-5 h-5 text-white" />
+                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${KNOWLEDGE_CATEGORY_TILE[article.category] || "from-slate-400 to-slate-500"} flex items-center justify-center flex-shrink-0`}>
+                      <CategoryIcon className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-slate-900 text-sm leading-snug line-clamp-2">{article.title}</h3>
@@ -191,6 +197,19 @@ export default function KnowledgeGalleryView({ articles, frameworks, onView, can
 
                   {article.description && (
                     <p className="text-xs text-slate-600 line-clamp-2 mb-3">{article.description}</p>
+                  )}
+
+                  {article.source_url && (
+                    <a
+                      href={article.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-cyan-600 hover:underline flex items-center gap-1 mb-3 truncate"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">Source article</span>
+                    </a>
                   )}
 
                   <div className="flex flex-wrap gap-1.5 mb-3">
@@ -225,6 +244,19 @@ export default function KnowledgeGalleryView({ articles, frameworks, onView, can
                     <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => onView(article)}>
                       <Eye className="w-3.5 h-3.5 mr-1" /> View
                     </Button>
+                    {isWikiArticle(article) && article.source_url && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => {
+                          navigator.clipboard.writeText(article.source_url).then(() => toast.success("Link copied"));
+                        }}
+                        title="Copy link to share"
+                      >
+                        <Copy className="w-3.5 h-3.5 mr-1" /> Copy Link
+                      </Button>
+                    )}
                     {canEdit && (
                       <Link to={createPageUrl(`KnowledgeArticleDetail?id=${article.id}`)} className="ml-auto">
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0">

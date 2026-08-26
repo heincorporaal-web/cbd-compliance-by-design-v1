@@ -17,6 +17,8 @@ import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { useIsKnowledgeManager } from "@/hooks/useIsKnowledgeManager";
 import PageHeader from "@/components/layout/PageHeader";
 import { printKnowledgeArticle, printFrameworkImplementation } from "@/lib/knowledgePrint";
+import { isWikiArticle } from "@/lib/knowledgeCategories";
+import { Copy, ExternalLink } from "lucide-react";
 
 export default function KnowledgeManagement() {
   const queryClient = useQueryClient();
@@ -61,11 +63,12 @@ export default function KnowledgeManagement() {
 
   const getCategoryColor = (category) => {
     const colors = {
-      implementation_guide: 'bg-blue-100 text-blue-700',
-      best_practice: 'bg-green-100 text-green-700',
-      policy_template: 'bg-purple-100 text-purple-700',
+      implementation_guide: 'bg-indigo-100 text-indigo-700',
+      best_practice: 'bg-emerald-100 text-emerald-700',
+      policy_template: 'bg-violet-100 text-violet-700',
       procedure: 'bg-amber-100 text-amber-700',
-      checklist: 'bg-pink-100 text-pink-700'
+      checklist: 'bg-red-100 text-red-700',
+      wiki_article: 'bg-cyan-100 text-cyan-700'
     };
     return colors[category] || 'bg-slate-100 text-slate-700';
   };
@@ -92,6 +95,18 @@ export default function KnowledgeManagement() {
 
   const handlePrintFramework = (framework) => {
     printFrameworkImplementation(framework, articles);
+  };
+
+  const handleCopyLink = () => {
+    if (!selectedArticle?.source_url) {
+      toast.error("No source URL set for this article");
+      return;
+    }
+    navigator.clipboard.writeText(selectedArticle.source_url).then(() => {
+      toast.success("Link copied to clipboard — paste into SharePoint, Teams, etc.");
+    }).catch(() => {
+      toast.error("Could not copy link");
+    });
   };
 
   return (
@@ -189,10 +204,19 @@ export default function KnowledgeManagement() {
           <DialogHeader>
             <div className="flex items-center justify-between gap-4 pr-8">
               <DialogTitle>{selectedArticle?.title}</DialogTitle>
-              <Button variant="outline" size="sm" onClick={handlePrintArticle}>
-                <Printer className="w-4 h-4 mr-2" />
-                Print
-              </Button>
+              <div className="flex gap-2">
+                {selectedArticle && isWikiArticle(selectedArticle) ? (
+                  <Button variant="outline" size="sm" onClick={handleCopyLink} disabled={!selectedArticle.source_url}>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Link
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" onClick={handlePrintArticle}>
+                    <Printer className="w-4 h-4 mr-2" />
+                    Print
+                  </Button>
+                )}
+              </div>
             </div>
           </DialogHeader>
           {selectedArticle && (
@@ -245,6 +269,21 @@ export default function KnowledgeManagement() {
                   <div className="prose prose-sm max-w-none">
                     <p className="text-slate-600 whitespace-pre-wrap">{selectedArticle.content}</p>
                   </div>
+                </div>
+              )}
+
+              {selectedArticle.source_url && (
+                <div>
+                  <h3 className="font-semibold text-slate-900 mb-2">Source Article</h3>
+                  <a
+                    href={selectedArticle.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-indigo-600 hover:underline break-all"
+                  >
+                    <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                    {selectedArticle.source_url}
+                  </a>
                 </div>
               )}
 

@@ -21,6 +21,7 @@ const TEMPLATE_HEADERS = [
   "status",
   "tags",
   "framework_id",
+  "source_url",
 ];
 
 const TEMPLATE_EXAMPLE = [
@@ -33,6 +34,7 @@ const TEMPLATE_EXAMPLE = [
   "implementation_guide",
   "draft",
   "iso27001;access control;iam",
+  "",
   "",
 ];
 
@@ -52,6 +54,7 @@ const CHECKLIST_EXAMPLE = [
   "checklist",
   "draft",
   "gdpr;privacy;compliance",
+  "",
   "",
   "Appoint a DPO", "Designate a Data Protection Officer if required",
   "Map data flows", "Document all personal data processing activities",
@@ -81,6 +84,7 @@ const GUIDE_EXAMPLE = [
   "draft",
   "iso27001;access control;iam",
   "",
+  "",
   "Define access control policy", "Document the organisation's access control policy and review annually", "AC-001", "Access Control Policy document;Board approval",
   "Establish user registration", "Implement a formal user registration and de-registration process", "AC-002", "User provisioning procedure;HR onboarding checklist",
   "Manage privileged access", "Restrict and monitor privileged access to systems and data", "AC-003", "Privileged access matrix;PAM tool configuration",
@@ -93,6 +97,7 @@ const CATEGORY_OPTIONS = [
   "policy_template",
   "procedure",
   "checklist",
+  "wiki_article",
 ];
 
 function triggerDownload(csv, filename) {
@@ -198,6 +203,7 @@ function rowToArticle(row) {
     status: ["draft", "published", "archived"].includes(row.status) ? row.status : "draft",
     tags: row.tags ? row.tags.split(";").map(t => t.trim()).filter(Boolean) : [],
     framework_id: row.framework_id || "",
+    source_url: row.source_url || "",
     key_steps,
     attachments: [],
     pdf_url: "",

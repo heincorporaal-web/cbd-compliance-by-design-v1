@@ -6,6 +6,7 @@ const CATEGORY_LABELS = {
   policy_template: "Policy Template",
   procedure: "Procedure",
   checklist: "Checklist",
+  wiki_article: "Wiki Article",
 };
 
 function escapeHtml(str) {
@@ -363,6 +364,7 @@ async function getUserEmail() {
 }
 
 export async function printKnowledgeArticle(article, frameworkName) {
+  if (article?.category === "wiki_article") return;
   const userEmail = await getUserEmail();
   const title = article.title || "Knowledge Article";
   const html = buildPrintDocument({
@@ -379,6 +381,7 @@ export async function printFrameworkImplementation(framework, articles) {
   const isNoFramework = framework.id === "__none__";
   const fwArticles = articles
     .filter((a) => (isNoFramework ? !a.framework_id : a.framework_id === framework.id))
+    .filter((a) => a.category !== "wiki_article")
     .sort((a, b) => (a.chapter || "").localeCompare(b.chapter || "") || (a.reference_number || "").localeCompare(b.reference_number || ""));
   const title = framework.name || "Framework Implementation";
   const html = buildPrintDocument({

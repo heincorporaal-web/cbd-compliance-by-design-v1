@@ -4,17 +4,9 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronDown, BookOpen, FolderOpen, Folder, FileText, Eye, Edit2, Trash2, Download, Printer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { KNOWLEDGE_CATEGORY_BADGE, KNOWLEDGE_CATEGORY_ICONS, KNOWLEDGE_CATEGORY_ICON_COLOR } from "@/lib/knowledgeCategories";
 
-const getCategoryColor = (category) => {
-  const colors = {
-    implementation_guide: 'bg-blue-100 text-blue-700',
-    best_practice: 'bg-green-100 text-green-700',
-    policy_template: 'bg-purple-100 text-purple-700',
-    procedure: 'bg-amber-100 text-amber-700',
-    checklist: 'bg-pink-100 text-pink-700',
-  };
-  return colors[category] || 'bg-slate-100 text-slate-700';
-};
+const getCategoryColor = (category) => KNOWLEDGE_CATEGORY_BADGE[category] || 'bg-slate-100 text-slate-700';
 
 const getStatusColor = (status) => ({
   draft: 'bg-slate-100 text-slate-600',
@@ -23,10 +15,12 @@ const getStatusColor = (status) => ({
 }[status] || 'bg-slate-100 text-slate-600');
 
 function ArticleNode({ article, onView, onDelete, canEdit }) {
+  const CategoryIcon = KNOWLEDGE_CATEGORY_ICONS[article.category] || FileText;
+  const iconColor = KNOWLEDGE_CATEGORY_ICON_COLOR[article.category] || 'text-slate-400';
   return (
     <div className="flex items-center justify-between group p-2.5 ml-10 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <FileText className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+        <CategoryIcon className={`w-4 h-4 flex-shrink-0 ${iconColor}`} />
         <div className="min-w-0 flex-1">
           <span className="text-sm font-medium text-slate-800 truncate block">{article.title}</span>
           <div className="flex gap-1.5 mt-0.5 flex-wrap">

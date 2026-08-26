@@ -59,6 +59,10 @@
       "type": "string",
       "description": "Full article content"
     },
+    "source_url": {
+      "type": "string",
+      "description": "Link to the original external article (e.g. SharePoint, Confluence, vendor docs). Primarily used for Wiki Article category."
+    },
     "tags": {
       "type": "array",
       "items": {
@@ -73,7 +77,8 @@
         "best_practice",
         "policy_template",
         "procedure",
-        "checklist"
+        "checklist",
+        "wiki_article"
       ],
       "description": "Article category"
     },
