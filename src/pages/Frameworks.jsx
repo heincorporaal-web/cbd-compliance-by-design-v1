@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Download, CheckCircle2, ChevronRight, Search, Edit2, Tag, Clock } from "lucide-react";
+import { Shield, Download, CheckCircle2, ChevronRight, Search, Edit2, Tag, Clock, Plus } from "lucide-react";
 import EndDateBadge from "@/components/ui/EndDateBadge";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -216,11 +216,17 @@ export default function Frameworks() {
               {showExpired ? "Hide Expired" : `Show Expired (${frameworks.filter(isExpired).length})`}
             </button>
           )}
+          <Link to={createPageUrl("FrameworkDetail?new=true")}>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Framework
+            </Button>
+          </Link>
           {frameworks.length === 0 && (
-            <Button 
-              onClick={loadSampleFrameworks} 
+            <Button
+              onClick={loadSampleFrameworks}
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700"
+              variant="outline"
             >
               <Download className="w-4 h-4 mr-2" />
               {loading ? "Loading..." : "Load Sample Frameworks"}
