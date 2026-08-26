@@ -207,7 +207,7 @@ export default function Frameworks() {
         <PageHeader
           navItemId="frameworks"
           icon={Shield}
-          title="Risk & Control Frameworks"
+          title="Frameworks & Other Leading Practices"
           tagline="Manage compliance frameworks and controls"
           gradient="from-blue-700 to-indigo-800"
         />
