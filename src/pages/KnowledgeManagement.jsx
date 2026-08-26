@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { BookOpen, Plus, Search, FileText, Download, Eye, Trash2, LayoutGrid, ListTree } from "lucide-react";
+import { BookOpen, Plus, Search, FileText, Download, Eye, Trash2, LayoutGrid, ListTree, Printer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import KnowledgeArticleImport from "@/components/knowledge/KnowledgeArticleImpor
 import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
 import { useIsKnowledgeManager } from "@/hooks/useIsKnowledgeManager";
 import PageHeader from "@/components/layout/PageHeader";
+import { printKnowledgeArticle, printFrameworkImplementation } from "@/lib/knowledgePrint";
 
 export default function KnowledgeManagement() {
   const queryClient = useQueryClient();
@@ -81,6 +82,16 @@ export default function KnowledgeManagement() {
   const handleView = (article) => {
     setSelectedArticle(article);
     setIsViewDialogOpen(true);
+  };
+
+  const handlePrintArticle = () => {
+    if (!selectedArticle) return;
+    const fw = frameworks.find(f => f.id === selectedArticle.framework_id);
+    printKnowledgeArticle(selectedArticle, fw?.name);
+  };
+
+  const handlePrintFramework = (framework) => {
+    printFrameworkImplementation(framework, articles);
   };
 
   return (
@@ -169,13 +180,20 @@ export default function KnowledgeManagement() {
           onView={handleView}
           onDelete={canEditArticles ? (id) => deleteMutation.mutate(id) : undefined}
           canEdit={canEditArticles}
+          onPrintFramework={handlePrintFramework}
         />
       )}
 
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{selectedArticle?.title}</DialogTitle>
+            <div className="flex items-center justify-between gap-4 pr-8">
+              <DialogTitle>{selectedArticle?.title}</DialogTitle>
+              <Button variant="outline" size="sm" onClick={handlePrintArticle}>
+                <Printer className="w-4 h-4 mr-2" />
+                Print
+              </Button>
+            </div>
           </DialogHeader>
           {selectedArticle && (
             <div className="space-y-6">

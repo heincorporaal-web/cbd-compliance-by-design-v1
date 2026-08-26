@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronDown, BookOpen, FolderOpen, Folder, FileText, Eye, Edit2, Trash2, Download } from "lucide-react";
+import { ChevronRight, ChevronDown, BookOpen, FolderOpen, Folder, FileText, Eye, Edit2, Trash2, Download, Printer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -99,29 +99,43 @@ function ChapterNode({ chapter, articles, onView, onDelete, canEdit }) {
   );
 }
 
-function FrameworkNode({ frameworkName, chapters, onView, onDelete, canEdit }) {
+function FrameworkNode({ frameworkId, frameworkName, chapters, onView, onDelete, canEdit, onPrintFramework }) {
   const [expanded, setExpanded] = useState(false);
   const totalArticles = Object.values(chapters).reduce((acc, arr) => acc + arr.length, 0);
 
   return (
     <div className="border border-slate-200 rounded-xl bg-white shadow-sm overflow-hidden">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-3 w-full text-left p-4 hover:bg-slate-50 transition-colors"
-      >
-        {expanded ? (
-          <ChevronDown className="w-5 h-5 text-slate-400 flex-shrink-0" />
-        ) : (
-          <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
+      <div className="flex items-center">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center gap-3 flex-1 min-w-0 text-left p-4 hover:bg-slate-50 transition-colors"
+        >
+          {expanded ? (
+            <ChevronDown className="w-5 h-5 text-slate-400 flex-shrink-0" />
+          ) : (
+            <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
+          )}
+          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-4 h-4 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="font-semibold text-slate-900">{frameworkName}</span>
+            <span className="text-xs text-slate-500 ml-2">{Object.keys(chapters).length} chapters · {totalArticles} articles</span>
+          </div>
+        </button>
+        {onPrintFramework && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mr-2 h-8"
+            title="Print full framework implementation"
+            onClick={() => onPrintFramework({ id: frameworkId, name: frameworkName })}
+          >
+            <Printer className="w-4 h-4 text-indigo-500" />
+            <span className="hidden sm:inline ml-1 text-xs">Print</span>
+          </Button>
         )}
-        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-          <BookOpen className="w-4 h-4 text-white" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <span className="font-semibold text-slate-900">{frameworkName}</span>
-          <span className="text-xs text-slate-500 ml-2">{Object.keys(chapters).length} chapters · {totalArticles} articles</span>
-        </div>
-      </button>
+      </div>
       {expanded && (
         <div className="pb-3 space-y-1 border-t border-slate-100 pt-2">
           {Object.entries(chapters).map(([chapter, articles]) => (
@@ -140,7 +154,7 @@ function FrameworkNode({ frameworkName, chapters, onView, onDelete, canEdit }) {
   );
 }
 
-export default function KnowledgeTreeView({ articles, frameworks, onView, onDelete, canEdit }) {
+export default function KnowledgeTreeView({ articles, frameworks, onView, onDelete, canEdit, onPrintFramework }) {
   // Build tree: frameworkId -> chapter -> articles[]
   const tree = {};
 
@@ -162,11 +176,13 @@ export default function KnowledgeTreeView({ articles, frameworks, onView, onDele
         .map(([fwId, { name, chapters }]) => (
         <FrameworkNode
           key={fwId}
+          frameworkId={fwId}
           frameworkName={name}
           chapters={chapters}
           onView={onView}
           onDelete={onDelete}
           canEdit={canEdit}
+          onPrintFramework={onPrintFramework}
         />
       ))}
     </div>
