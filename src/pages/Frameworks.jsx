@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Download, CheckCircle2, ChevronRight, Search, Edit2, Tag, Clock, Plus } from "lucide-react";
+import { Shield, Download, CheckCircle2, ChevronRight, Search, Edit2, Tag, Clock, Plus, SlidersHorizontal, X } from "lucide-react";
+import FrameworkAdvancedFilters from "@/components/frameworks/FrameworkAdvancedFilters";
 import EndDateBadge from "@/components/ui/EndDateBadge";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,14 @@ export default function Frameworks() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [showExpired, setShowExpired] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    statuses: [],
+    tags: [],
+    framework_family: "",
+    issuing_body: "",
+    is_master: null,
+  });
 
   const isExpired = (f) => f.end_date && new Date(f.end_date) < new Date();
   const FRAMEWORK_CATEGORY_SEEDED = [
@@ -238,15 +247,42 @@ export default function Frameworks() {
       {frameworks.length > 0 && (
         <Card className="border-none shadow-lg">
           <CardContent className="p-4 space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <Input
-                placeholder="Search frameworks and controls..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <Input
+                  placeholder="Search frameworks and controls..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                variant={showAdvanced ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowAdvanced((v) => !v)}
+              >
+                <SlidersHorizontal className="w-4 h-4 mr-2" />
+                Filters
+                {showAdvanced && <X className="w-3 h-3 ml-1" />}
+              </Button>
             </div>
+            {showAdvanced && (
+              <FrameworkAdvancedFilters
+                frameworks={frameworks}
+                filters={advancedFilters}
+                onChange={setAdvancedFilters}
+                onClear={() =>
+                  setAdvancedFilters({
+                    statuses: [],
+                    tags: [],
+                    framework_family: "",
+                    issuing_body: "",
+                    is_master: null,
+                  })
+                }
+              />
+            )}
             {/* Category filter buttons — only show categories that exist in loaded frameworks */}
             <div className="flex flex-wrap gap-2">
               <button
@@ -306,7 +342,18 @@ export default function Frameworks() {
                  c.control_id?.toLowerCase().includes(searchTerm.toLowerCase()))
               );
             const matchesCategory = categoryFilter === "all" || f.category === categoryFilter;
-            return matchesSearch && matchesCategory;
+            const matchesStatus = (advancedFilters.statuses || []).length === 0 ||
+              (advancedFilters.statuses || []).includes(f.status);
+            const matchesFamily = !advancedFilters.framework_family ||
+              f.framework_family === advancedFilters.framework_family;
+            const matchesIssuingBody = !advancedFilters.issuing_body ||
+              f.issuing_body === advancedFilters.issuing_body;
+            const matchesTags = (advancedFilters.tags || []).length === 0 ||
+              (advancedFilters.tags || []).every(t => (f.tags || []).includes(t));
+            const matchesMaster = advancedFilters.is_master === null ||
+              !!f.is_master === advancedFilters.is_master;
+            return matchesSearch && matchesCategory && matchesStatus && matchesFamily &&
+              matchesIssuingBody && matchesTags && matchesMaster;
           }).map((framework) => {
             const frameworkControls = controls.filter(c => c.framework_id === framework.id);
             const isExpanded = expandedFramework === framework.id;
