@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
 const TEMPLATE_HEADERS = [
+  "shortcode",
+  "reference_number",
   "title",
   "chapter",
   "description",
@@ -22,6 +24,8 @@ const TEMPLATE_HEADERS = [
 ];
 
 const TEMPLATE_EXAMPLE = [
+  "ISO",
+  "ISO-IG-001",
   "ISO 27001 Access Control Guide",
   "Access Control",
   "Implementation guide for ISO 27001 A.9 Access Control",
@@ -39,6 +43,8 @@ const CHECKLIST_HEADERS = [
   ...Array.from({ length: CHECKLIST_STEP_COUNT }, (_, i) => [`step_${i + 1}_title`, `step_${i + 1}_description`]).flat(),
 ];
 const CHECKLIST_EXAMPLE = [
+  "GDPR",
+  "GDPR-CHL-001",
   "GDPR Compliance Checklist",
   "Data Privacy",
   "Step-by-step GDPR compliance checklist",
@@ -56,8 +62,6 @@ const CHECKLIST_EXAMPLE = [
 // Implementation guide template: shortcode + reference_number + base columns + step columns with reference numbers and expected artefacts (up to 10 steps)
 const GUIDE_STEP_COUNT = 10;
 const GUIDE_HEADERS = [
-  "shortcode",
-  "reference_number",
   ...TEMPLATE_HEADERS,
   ...Array.from({ length: GUIDE_STEP_COUNT }, (_, i) => [
     `step_${i + 1}_title`,
@@ -276,7 +280,8 @@ export default function KnowledgeArticleImport() {
             <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
               <p className="text-sm font-semibold text-slate-700 mb-1">Step 1 — Download the template</p>
               <p className="text-xs text-slate-500 mb-3">
-                Fill in the CSV with your articles. Tags should be separated by semicolons (;).
+                Fill in the CSV with your articles. <strong>shortcode</strong> is required (max 4 characters, e.g. ISO).
+                Tags should be separated by semicolons (;).
                 Category must be one of: <span className="font-mono">{CATEGORY_OPTIONS.join(", ")}</span>.
               </p>
               <div className="flex flex-wrap gap-2">
@@ -295,7 +300,7 @@ export default function KnowledgeArticleImport() {
             {/* Step 2: Upload */}
             <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
               <p className="text-sm font-semibold text-slate-700 mb-1">Step 2 — Upload your completed CSV</p>
-              <p className="text-xs text-slate-500 mb-3">Only rows with a valid title will be imported.</p>
+              <p className="text-xs text-slate-500 mb-3">Only rows with a valid title and shortcode will be imported.</p>
               <Button
                 variant="outline"
                 size="sm"
