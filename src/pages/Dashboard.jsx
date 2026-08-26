@@ -14,6 +14,7 @@ import CompanyFilterBar from "@/components/CompanyFilterBar";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import UnassignedRecordsChart from "@/components/dashboard/UnassignedRecordsChart";
 import RiskHeatmap from "@/components/dashboard/RiskHeatmap";
+import RecentIncidentsChart from "@/components/dashboard/RecentIncidentsChart";
 import NavIcon from "@/hooks/useNavIcon.jsx";
 import PageHeader from "@/components/layout/PageHeader";
 import MetricSection from "@/components/dashboard/DashboardMetrics";
@@ -474,54 +475,10 @@ export default function Dashboard() {
 
       <UnassignedRecordsChart />
 
-      <div className="grid grid-cols-1 gap-6">
-        {visibleWidgets.recentIncidents && (
-          <Card className="border-none shadow-lg">
-          <CardHeader className="border-b border-slate-100">
-            <div className="flex items-center justify-between">
-              <CardTitle>Recent Incidents</CardTitle>
-              <Link to={createPageUrl("Incidents")}>
-                <Button variant="ghost" size="sm">View All</Button>
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            {recentIncidents.length > 0 ? (
-              <div className="divide-y divide-slate-100">
-                {recentIncidents.map((incident) => (
-                  <div key={incident.id} className="p-4 hover:bg-slate-50 transition-colors">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-slate-900">{incident.title}</h3>
-                        <p className="text-sm text-slate-600 mt-1">{incident.incident_type.replace(/_/g, ' ')}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge variant="outline" className={`${getSeverityColor(incident.severity)} border`}>
-                          {incident.severity}
-                        </Badge>
-                        <Badge className={getStatusColor(incident.status)}>
-                          {incident.status}
-                        </Badge>
-                      </div>
-                    </div>
-                    {incident.description && (
-                      <p className="text-sm text-slate-600 line-clamp-2">{incident.description}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-12 text-center">
-                <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                <p className="text-slate-500">No recent incidents</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        )}
+      {visibleWidgets.recentIncidents && (
+        <RecentIncidentsChart incidents={filteredIncidents} />
+      )}
 
-
-      </div>
     </div>
   );
 }
