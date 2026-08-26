@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,10 +50,11 @@ const EMPTY_FORM = {
 
 export default function Incidents() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [globalCompany] = useCompanyFilter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [severityFilter, setSeverityFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all");
+  const [severityFilter, setSeverityFilter] = useState(searchParams.get("severity") || "all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingIncident, setEditingIncident] = useState(null);
