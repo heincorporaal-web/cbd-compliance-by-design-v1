@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Download, CheckCircle2, ChevronRight, Search, Edit2, Tag, Clock, Plus, SlidersHorizontal, X } from "lucide-react";
+import { Shield, Download, CheckCircle2, ChevronRight, Search, Edit2, Tag, Clock, Plus, SlidersHorizontal, X, RotateCcw } from "lucide-react";
 import FrameworkAdvancedFilters from "@/components/frameworks/FrameworkAdvancedFilters";
 import EndDateBadge from "@/components/ui/EndDateBadge";
 import { Badge } from "@/components/ui/badge";
@@ -201,6 +201,47 @@ export default function Frameworks() {
     return colors[priority] || 'bg-slate-100 text-slate-700 border-slate-200';
   };
 
+  const filteredFrameworks = frameworks.filter(f => {
+    if (!showExpired && isExpired(f)) return false;
+    if (showExpired && !isExpired(f)) return false;
+    const matchesSearch = !searchTerm ||
+      f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      f.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      f.tags?.some(t => t.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      f.framework_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      f.issuing_body?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      f.framework_family?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      controls.some(c =>
+        c.framework_id === f.id &&
+        (c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         c.control_id?.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    const matchesCategory = categoryFilter === "all" || f.category === categoryFilter;
+    const matchesStatus = (advancedFilters.statuses || []).length === 0 ||
+      (advancedFilters.statuses || []).includes(f.status);
+    const matchesFamily = !advancedFilters.framework_family ||
+      f.framework_family === advancedFilters.framework_family;
+    const matchesIssuingBody = !advancedFilters.issuing_body ||
+      f.issuing_body === advancedFilters.issuing_body;
+    const matchesTags = (advancedFilters.tags || []).length === 0 ||
+      (advancedFilters.tags || []).every(t => (f.tags || []).includes(t));
+    const matchesMaster = advancedFilters.is_master === null ||
+      !!f.is_master === advancedFilters.is_master;
+    return matchesSearch && matchesCategory && matchesStatus && matchesFamily &&
+      matchesIssuingBody && matchesTags && matchesMaster;
+  });
+
+  const hasActiveFilters = !!searchTerm || categoryFilter !== "all" ||
+    (advancedFilters.statuses || []).length > 0 || (advancedFilters.tags || []).length > 0 ||
+    !!advancedFilters.framework_family || !!advancedFilters.issuing_body ||
+    advancedFilters.is_master !== null;
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setCategoryFilter("all");
+    setAdvancedFilters({ statuses: [], tags: [], framework_family: "", issuing_body: "", is_master: null });
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -309,6 +350,23 @@ export default function Frameworks() {
                 </button>
               ))}
             </div>
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+              <p className="text-sm text-slate-600">
+                <span className="font-semibold text-slate-900">{filteredFrameworks.length}</span>
+                {" of "}
+                <span className="font-semibold text-slate-900">{frameworks.length}</span>
+                {" framework" + (filteredFrameworks.length === 1 ? "" : "s") + " found"}
+              </p>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearAllFilters}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Clear all
+                </button>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
@@ -329,32 +387,19 @@ export default function Frameworks() {
         </Card>
       ) : (
         <div className="space-y-6">
-          {frameworks.filter(f => {
-            if (!showExpired && isExpired(f)) return false;
-            if (showExpired && !isExpired(f)) return false;
-            const matchesSearch = !searchTerm ||
-              f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              f.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              f.tags?.some(t => t.toLowerCase().includes(searchTerm.toLowerCase())) ||
-              controls.some(c =>
-                c.framework_id === f.id &&
-                (c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                 c.control_id?.toLowerCase().includes(searchTerm.toLowerCase()))
-              );
-            const matchesCategory = categoryFilter === "all" || f.category === categoryFilter;
-            const matchesStatus = (advancedFilters.statuses || []).length === 0 ||
-              (advancedFilters.statuses || []).includes(f.status);
-            const matchesFamily = !advancedFilters.framework_family ||
-              f.framework_family === advancedFilters.framework_family;
-            const matchesIssuingBody = !advancedFilters.issuing_body ||
-              f.issuing_body === advancedFilters.issuing_body;
-            const matchesTags = (advancedFilters.tags || []).length === 0 ||
-              (advancedFilters.tags || []).every(t => (f.tags || []).includes(t));
-            const matchesMaster = advancedFilters.is_master === null ||
-              !!f.is_master === advancedFilters.is_master;
-            return matchesSearch && matchesCategory && matchesStatus && matchesFamily &&
-              matchesIssuingBody && matchesTags && matchesMaster;
-          }).map((framework) => {
+          {filteredFrameworks.length === 0 ? (
+            <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
+              <CardContent className="p-12 text-center">
+                <Search className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-1">No frameworks match your filters</h3>
+                <p className="text-slate-600 mb-4 max-w-md mx-auto">Try adjusting or clearing your search and filter criteria.</p>
+                <Button onClick={clearAllFilters} variant="outline">
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Clear all filters
+                </Button>
+              </CardContent>
+            </Card>
+          ) : filteredFrameworks.map((framework) => {
             const frameworkControls = controls.filter(c => c.framework_id === framework.id);
             const isExpanded = expandedFramework === framework.id;
             
