@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Settings, LayoutDashboard, ShieldAlert, LayoutGrid, List } from "lucide-react";
+import { Building2, Shield, ClipboardCheck, TrendingUp, AlertTriangle, CheckCircle2, Server, Users, AlertCircle, Network, Target, Settings, LayoutDashboard, ShieldAlert, LayoutGrid, List, Boxes, FileText, Handshake, Workflow } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -25,17 +25,21 @@ const WIDGET_LABELS = {
   processHealth: "Process Health",
   goals: "Goal Achievement",
   recentIncidents: "Recent Incidents",
+  tprm: "Third Party Risk Management",
+  assetsByDesign: "Assets by Design (CMDB)",
+  governanceByDesign: "Governance & Policies",
+  advancedProcessModelling: "Process Modelling",
 };
 
 const CATEGORY_VIEWS = [
-  { id: "all", label: "All", widgets: ["compliance", "riskPosture", "resilience", "processHealth", "goals", "recentIncidents"] },
-  { id: "compliance", label: "Compliance", widgets: ["compliance", "recentIncidents"] },
-  { id: "risk", label: "Risk", widgets: ["riskPosture", "recentIncidents"] },
-  { id: "resilience", label: "Resilience", widgets: ["resilience", "recentIncidents"] },
-  { id: "process", label: "Process", widgets: ["processHealth", "goals"] },
+  { id: "all", label: "All", widgets: ["compliance", "riskPosture", "resilience", "processHealth", "goals", "recentIncidents", "tprm", "assetsByDesign", "governanceByDesign", "advancedProcessModelling"] },
+  { id: "compliance", label: "Compliance", widgets: ["compliance", "governanceByDesign", "recentIncidents"] },
+  { id: "risk", label: "Risk", widgets: ["riskPosture", "tprm", "recentIncidents"] },
+  { id: "resilience", label: "Resilience", widgets: ["resilience", "assetsByDesign", "recentIncidents"] },
+  { id: "process", label: "Process", widgets: ["processHealth", "advancedProcessModelling", "goals"] },
 ];
 
-const DEFAULT_WIDGETS = { compliance: true, resilience: true, processHealth: true, goals: true, riskPosture: true, recentIncidents: true };
+const DEFAULT_WIDGETS = { compliance: true, resilience: true, processHealth: true, goals: true, riskPosture: true, recentIncidents: true, tprm: true, assetsByDesign: true, governanceByDesign: true, advancedProcessModelling: true };
 
 export default function Dashboard() {
   const [globalCompany, setSelectedCompany] = useCompanyFilter();
@@ -131,6 +135,26 @@ export default function Dashboard() {
     queryFn: () => base44.entities.PrincipalRisk.list(),
   });
 
+  const { data: allPrefs = [] } = useQuery({
+    queryKey: ['companyPreferences'],
+    queryFn: () => base44.entities.CompanyPreference.list(),
+  });
+
+  const { data: configurationItems = [] } = useQuery({
+    queryKey: ['configurationItems', globalCompany],
+    queryFn: () => base44.entities.ConfigurationItem.list(),
+  });
+
+  const { data: governanceDocs = [] } = useQuery({
+    queryKey: ['governanceDocs', globalCompany],
+    queryFn: () => base44.entities.GovernanceDocument.list(),
+  });
+
+  const { data: processDiagrams = [] } = useQuery({
+    queryKey: ['processDiagrams', globalCompany],
+    queryFn: () => base44.entities.ProcessDiagram.list(),
+  });
+
   // Apply company filter
   const gc = globalCompany;
   const filteredAssessments = gc === "all" ? assessments : assessments.filter(a => a.company_id === gc);
@@ -198,6 +222,24 @@ export default function Dashboard() {
   const highPrincipalRisks = filteredPrincipalRisks.filter(r => r.priority === 'High').length;
   const criticalPrincipalRisks = filteredPrincipalRisks.filter(r => r.criticality === 'Critical').length;
 
+  // Add-on module data
+  const filteredCIs = gc === "all" ? configurationItems : configurationItems.filter(ci => ci.company_id === gc);
+  const filteredGovDocs = gc === "all" ? governanceDocs : governanceDocs.filter(d => d.company_id === gc);
+  const filteredDiagrams = gc === "all" ? processDiagrams : processDiagrams.filter(d => d.company_id === gc);
+
+  const companyPrefs = gc === "all" ? allPrefs : allPrefs.filter(p => p.company_id === gc);
+  const enableTPRM = companyPrefs.some(p => p.enable_third_party_risk_management);
+  const enableABD = companyPrefs.some(p => p.enable_assets_by_design);
+  const enableGBD = companyPrefs.some(p => p.enable_governance_by_design);
+  const enableAPM = companyPrefs.some(p => p.enable_advanced_process_modelling);
+
+  const criticalCIs = filteredCIs.filter(ci => ci.intrinsic_criticality === 'critical').length;
+  const unmanagedCIs = filteredCIs.filter(ci => ci.managed_unmanaged === 'unmanaged' || ci.managed_unmanaged === 'unknown').length;
+  const staleCIs = filteredCIs.filter(ci => ci.stale_status === 'stale' || ci.stale_status === 'retirement_candidate').length;
+
+  const publishedGovDocs = filteredGovDocs.filter(d => d.status === 'published' || d.status === 'approved').length;
+  const underReviewGovDocs = filteredGovDocs.filter(d => d.status === 'internal_review' || d.status === 'awaiting_approval' || d.status === 'under_review').length;
+
   const recentIncidents = filteredIncidents.slice(0, 5);
 
   const toggleWidget = (widget) => {
@@ -259,7 +301,7 @@ export default function Dashboard() {
           <DialogTrigger asChild>
             <Button variant="outline">
               <Settings className="w-4 h-4 mr-2" />
-              Customize Widgets
+              Customise Widgets
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -374,6 +416,54 @@ export default function Dashboard() {
             { icon: AlertTriangle, label: "Open Incidents", value: openIncidents, sub: `${criticalIncidents} critical`, iconColor: "text-orange-600", to: "/Incidents" },
             { icon: AlertCircle, label: "Open Issues", value: openIssues, sub: "Action items", iconColor: "text-red-600", tint: "from-red-50 to-orange-50", to: "/Issues" },
             { icon: CheckCircle2, label: "Closed Issues", value: closedIssues, sub: "Resolved", iconColor: "text-green-600", tint: "from-green-50 to-emerald-50", to: "/Issues" },
+          ]}
+        />
+      )}
+
+      {visibleWidgets.tprm && enableTPRM && (
+        <MetricSection
+          title={<span className="flex items-center gap-2"><Handshake className="w-4 h-4 text-indigo-600" /> Third Party Risk Management</span>}
+          view={viewMode}
+          items={[
+            { icon: Handshake, label: "Total Third Parties", value: filteredThirdParties.length, sub: "Active providers", iconColor: "text-indigo-600", to: "/ThirdParties" },
+            { icon: AlertTriangle, label: "High Risk", value: highRiskProviders, sub: "Critical suppliers", iconColor: "text-red-600", tint: "from-red-50 to-orange-50", to: "/ThirdParties" },
+            { icon: Shield, label: "Assessed", value: filteredThirdParties.filter(tp => tp.risk_rating).length, sub: "With rating", iconColor: "text-green-600", to: "/AdvancedThirdPartyRiskManagement" },
+          ]}
+        />
+      )}
+
+      {visibleWidgets.assetsByDesign && enableABD && (
+        <MetricSection
+          title={<span className="flex items-center gap-2"><Boxes className="w-4 h-4 text-cyan-600" /> Assets by Design (CMDB)</span>}
+          view={viewMode}
+          items={[
+            { icon: Boxes, label: "Config Items", value: filteredCIs.length, sub: `${criticalCIs} critical`, iconColor: "text-cyan-600", to: "/CMDBInventory" },
+            { icon: AlertCircle, label: "Unmanaged", value: unmanagedCIs, sub: "Need review", iconColor: "text-orange-600", tint: "from-amber-50 to-orange-50", to: "/CMDBInventory" },
+            { icon: AlertTriangle, label: "Stale", value: staleCIs, sub: "Retirement candidates", iconColor: "text-red-500", tint: "from-red-50 to-orange-50", to: "/CMDBInventory" },
+          ]}
+        />
+      )}
+
+      {visibleWidgets.governanceByDesign && enableGBD && (
+        <MetricSection
+          title={<span className="flex items-center gap-2"><FileText className="w-4 h-4 text-violet-600" /> Governance & Policies</span>}
+          view={viewMode}
+          items={[
+            { icon: FileText, label: "Total Documents", value: filteredGovDocs.length, sub: "Policies & standards", iconColor: "text-violet-600", to: "/GovernanceByDesignModule" },
+            { icon: CheckCircle2, label: "Published", value: publishedGovDocs, sub: "In effect", iconColor: "text-green-600", tint: "from-green-50 to-emerald-50", to: "/GovernanceByDesignModule" },
+            { icon: AlertCircle, label: "Under Review", value: underReviewGovDocs, sub: "Awaiting approval", iconColor: "text-amber-600", tint: "from-amber-50 to-orange-50", to: "/GovernanceByDesignModule" },
+          ]}
+        />
+      )}
+
+      {visibleWidgets.advancedProcessModelling && enableAPM && (
+        <MetricSection
+          title={<span className="flex items-center gap-2"><Workflow className="w-4 h-4 text-blue-600" /> Process Modelling</span>}
+          view={viewMode}
+          items={[
+            { icon: Workflow, label: "Process Diagrams", value: filteredDiagrams.length, sub: "BPMN models", iconColor: "text-blue-600", to: "/AdvancedProcessModelling" },
+            { icon: Network, label: "Active Processes", value: activeProcesses, sub: `${criticalProcesses} critical`, iconColor: "text-purple-600", to: "/ProcessManagement" },
+            { icon: ClipboardCheck, label: "Assessed", value: filteredProcessAssessments.length, sub: "Risk-rated", iconColor: "text-green-600", to: "/ProcessAssessments" },
           ]}
         />
       )}
