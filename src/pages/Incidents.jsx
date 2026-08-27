@@ -1,17 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+// Incident Management — list + dashboard views
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, Plus, Search, ChevronRight, Zap, Clock, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, Plus, Search, ChevronRight, Zap, Clock, ShieldAlert, CheckCircle2, LayoutDashboard, List } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useCompanyFilter } from "@/hooks/useCompanyFilter";
 import PageHeader from "@/components/layout/PageHeader";
 import IncidentFormDialog from "@/components/incidents/IncidentFormDialog";
+import IncidentKpiCards from "@/components/incidents/IncidentKpiCards";
+import IncidentGauges from "@/components/incidents/IncidentGauges";
+import IncidentCharts from "@/components/incidents/IncidentCharts";
 
 const SEVERITY_STYLES = {
   critical: "bg-red-500 text-white",
@@ -59,6 +63,7 @@ export default function Incidents() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingIncident, setEditingIncident] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [viewMode, setViewMode] = useState("list");
   const queryClient = useQueryClient();
 
   const { data: incidents = [], isLoading } = useQuery({
@@ -132,13 +137,97 @@ export default function Incidents() {
           tagline="End-to-end incident lifecycle from detection to closure and improvement"
           gradient="from-red-600 to-rose-700"
         />
-        <Button onClick={openCreate} className="bg-red-600 hover:bg-red-700 shrink-0">
-          <Plus className="w-4 h-4 mr-2" /> Report Incident
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5">
+            <button
+              onClick={() => setViewMode("list")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === "list" ? "bg-red-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+            >
+              <List className="w-4 h-4" /> List
+            </button>
+            <button
+              onClick={() => setViewMode("dashboard")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === "dashboard" ? "bg-red-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+            >
+              <LayoutDashboard className="w-4 h-4" /> Dashboard
+            </button>
+          </div>
+          <Button onClick={openCreate} className="bg-red-600 hover:bg-red-700 shrink-0">
+            <Plus className="w-4 h-4 mr-2" /> Report Incident
+          </Button>
+        </div>
       </div>
 
+      {/* Dashboard View */}
+      {viewMode === "dashboard" && (
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-8 h-8 border-4 border-slate-200 border-t-red-600 rounded-full animate-spin"></div>
+            </div>
+          ) : filteredIncidents.length === 0 ? (
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-12 text-center">
+                <AlertTriangle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-500 mb-4">No incidents found for the current filters.</p>
+                <Button className="bg-red-600 hover:bg-red-700" onClick={openCreate}>
+                  <Plus className="w-4 h-4 mr-2" /> Report Incident
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              <IncidentKpiCards incidents={filteredIncidents} />
+              <IncidentGauges incidents={filteredIncidents} />
+              <IncidentCharts incidents={filteredIncidents} />
+              <Card className="border-none shadow-sm">
+                <CardHeader className="border-b border-slate-100 pb-3">
+                  <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-slate-500" /> Recent Incidents
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-slate-100">
+                    {filteredIncidents.slice(0, 8).map((incident) => {
+                      const company = companies.find((c) => c.id === incident.company_id);
+                      return (
+                        <div
+                          key={incident.id}
+                          onClick={() => navigate(`/IncidentDetail?id=${incident.id}`)}
+                          className="p-4 hover:bg-slate-50 transition-colors cursor-pointer group flex items-center justify-between gap-3"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              {incident.incident_reference && (
+                                <span className="text-[11px] font-mono text-slate-400">{incident.incident_reference}</span>
+                              )}
+                              <h3 className="font-semibold text-slate-900 truncate text-sm">{incident.title}</h3>
+                              {incident.priority && (
+                                <Badge className={`text-[10px] ${PRIORITY_STYLES[incident.priority]}`}>{incident.priority}</Badge>
+                              )}
+                              <Badge className={`text-[10px] ${SEVERITY_STYLES[incident.severity]}`}>{incident.severity}</Badge>
+                              <Badge variant="outline" className={`text-[10px] ${STATUS_STYLES[incident.status] || STATUS_STYLES.detected}`}>
+                                {incident.status.replace(/_/g, " ")}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-slate-500">
+                              {company?.name || "—"} • {format(new Date(incident.detected_date), "d MMM yyyy")}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 shrink-0" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 ${viewMode === "list" ? "" : "hidden"}`}>
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -158,7 +247,7 @@ export default function Incidents() {
       </div>
 
       {/* Filters */}
-      <Card className="border-none shadow-lg">
+      <Card className={`border-none shadow-lg ${viewMode === "list" ? "" : "hidden"}`}>
         <CardHeader className="border-b border-slate-100 pb-4">
           <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
             <div className="relative flex-1">
