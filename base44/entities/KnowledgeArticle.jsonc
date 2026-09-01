@@ -59,6 +59,10 @@
       "type": "string",
       "description": "Full article content"
     },
+    "disclaimer": {
+      "type": "string",
+      "description": "Disclaimer displayed with the knowledge article and included in printed or generated documentation"
+    },
     "source_url": {
       "type": "string",
       "description": "Link to the original external article (e.g. SharePoint, Confluence, vendor docs). Primarily used for Wiki Article category."
