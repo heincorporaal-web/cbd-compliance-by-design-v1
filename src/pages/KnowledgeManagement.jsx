@@ -4,323 +4,1285 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { BookOpen, Plus, Search, FileText, Download, Eye, Trash2, LayoutGrid, ListTree, Printer } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { ArrowLeft, Save, Plus, Trash2, Upload, Eye } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { toast } from "sonner";
-import KnowledgeTreeView from "@/components/knowledge/KnowledgeTreeView";
-import KnowledgeGalleryView from "@/components/knowledge/KnowledgeGalleryView";
-import KnowledgeArticleImport from "@/components/knowledge/KnowledgeArticleImport";
-import { useIsImplementerRole } from "@/hooks/useIsImplementerRole";
+import FileUpload from "@/components/FileUpload";
+import UnsavedChangesDialog from "@/components/UnsavedChangesDialog";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
 import { useIsKnowledgeManager } from "@/hooks/useIsKnowledgeManager";
-import PageHeader from "@/components/layout/PageHeader";
-import { printKnowledgeArticle, printFrameworkImplementation } from "@/lib/knowledgePrint";
-import { isWikiArticle } from "@/lib/knowledgeCategories";
-import { Copy, ExternalLink } from "lucide-react";
+import ArchivedFrameworkBanner from "@/components/frameworks/ArchivedFrameworkBanner";
+import { useFrameworks } from "@/hooks/useFrameworks";
 
-export default function KnowledgeManagement() {
-const queryClient = useQueryClient();
-const [searchTerm, setSearchTerm] = useState("");
-const [selectedArticle, setSelectedArticle] = useState(null);
-const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-const [viewMode, setViewMode] = useState("tree");
-const { canEdit: canEditArticles } = useIsKnowledgeManager();
-const { canImport } = useIsImplementerRole();
+/*
+ * Default disclaimer applied to NEW Knowledge Articles.
+ *
+ * Knowledge Managers can amend this text for an individual article.
+ * Existing articles without a disclaimer remain unaffected.
+ */
+const DEFAULT_DISCLAIMER = `This information is provided for general guidance and reference purposes only. It does not constitute legal, regulatory, compliance, audit, or professional advice.
 
-const isAdmin = canEditArticles; // Knowledge Managers and admins can create/edit
+Users remain responsible for determining the applicability of any framework, standard, control, recommendation, or implementation guidance to their organisation and circumstances.
 
-const { data: articles = [] } = useQuery({
-queryKey: ['knowledgeArticles'],
-queryFn: () => base44.entities.KnowledgeArticle.list('-created_date'),
-});
+Where reference is made to external standards, regulations, frameworks, guidance or other third-party material, users should consult the official source and ensure that they are using the current and applicable version.`;
 
-const { data: frameworks = [] } = useQuery({
-queryKey: ['frameworks'],
-queryFn: () => base44.entities.Framework.list(),
-});
+export default function KnowledgeArticleDetail() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-const deleteMutation = useMutation({
-mutationFn: (id) => base44.entities.KnowledgeArticle.delete(id),
-onSuccess: () => {
-queryClient.invalidateQueries(['knowledgeArticles']);
-toast.success('Article deleted');
-},
-});
+  const urlParams = new URLSearchParams(window.location.search);
+  const articleId = urlParams.get("id");
+  const isNew = urlParams.get("new") === "true";
 
-const filteredArticles = articles.filter(article => {
-const term = searchTerm.toLowerCase();
-if (!term) return true;
-const fw = frameworks.find(f => f.id === article.framework_id);
-return (
-article.title?.toLowerCase().includes(term) ||
-article.chapter?.toLowerCase().includes(term) ||
-article.tags?.some(tag => tag.toLowerCase().includes(term)) ||
-fw?.name?.toLowerCase().includes(term)
-);
-});
+  const CATEGORY_CODES = {
+    implementation_guide: "IG",
+    best_practice: "BP",
+    policy_template: "POL",
+    procedure: "PROC",
+    checklist: "CHL",
+    wiki_article: "WKI"
+  };
 
-const getCategoryColor = (category) => {
-const colors = {
-implementation_guide: 'bg-indigo-100 text-indigo-700',
-best_practice: 'bg-emerald-100 text-emerald-700',
-policy_template: 'bg-violet-100 text-violet-700',
-procedure: 'bg-amber-100 text-amber-700',
-checklist: 'bg-red-100 text-red-700',
-wiki_article: 'bg-cyan-100 text-cyan-700'
-};
-return colors[category] || 'bg-slate-100 text-slate-700';
-};
+  const [formData, setFormData] = useState({
+    shortcode: "",
+    reference_number: "",
+    title: "",
+    framework_id: "",
+    chapter: "",
+    description: "",
+    content: "",
+    category: "implementation_guide",
+    tags: [],
+    key_steps: [],
+    pdf_url: "",
+    attachments: [],
+    status: "draft",
+    source_url: "",
 
-const getStatusColor = (status) => {
-const colors = {
-draft: 'bg-slate-100 text-slate-700',
-published: 'bg-green-100 text-green-700',
-archived: 'bg-slate-100 text-slate-700'
-};
-return colors[status] || 'bg-slate-100 text-slate-700';
-};
+    // Default disclaimer for new articles
+    disclaimer: DEFAULT_DISCLAIMER
+  });
 
-const handleView = (article) => {
-setSelectedArticle(article);
-setIsViewDialogOpen(true);
-};
+  const { data: allArticles = [] } = useQuery({
+    queryKey: ["knowledgeArticles"],
+    queryFn: () => base44.entities.KnowledgeArticle.list()
+  });
 
-const handlePrintArticle = () => {
-if (!selectedArticle) return;
-const fw = frameworks.find(f => f.id === selectedArticle.framework_id);
-printKnowledgeArticle(selectedArticle, fw?.name);
-};
+  // Compute next sequence number for a given shortcode+category combo
+  const getNextSeqNumber = (shortcode, category) => {
+    if (!shortcode || !category) return 1;
 
-const handlePrintFramework = (framework) => {
-printFrameworkImplementation(framework, articles);
-};
+    const catCode = CATEGORY_CODES[category];
+    const prefix = `${shortcode.toUpperCase()}-${catCode}-`;
 
-const handleCopyLink = () => {
-if (!selectedArticle?.source_url) {
-toast.error("No source URL set for this article");
-return;
-}
-navigator.clipboard.writeText(selectedArticle.source_url).then(() => {
-toast.success("Link copied to clipboard — paste into SharePoint, Teams, etc.");
-}).catch(() => {
-toast.error("Could not copy link");
-});
-};
+    const existing = allArticles
+      .filter((a) => a.reference_number?.startsWith(prefix))
+      .map((a) =>
+        parseInt(a.reference_number.replace(prefix, ""), 10)
+      )
+      .filter((n) => !isNaN(n));
 
-return (
-<div className="p-6 lg:p-8 space-y-6">
-<div className="flex items-center justify-between">
-<PageHeader
-       icon={BookOpen}
-       title="Knowledge Management"
-       tagline="Framework guides, best practices, and documentation"
-       gradient="from-indigo-600 to-purple-700"
-     />
-<div className="flex items-center gap-2">
-<div className="flex items-center bg-slate-100 rounded-lg p-0.5">
-<Button
-variant={viewMode === "tree" ? "default" : "ghost"}
-size="sm"
-onClick={() => setViewMode("tree")}
-className={h-8 ${viewMode === "tree" ? "bg-white shadow-sm" : "hover:bg-slate-200"}}
-title="Tree view"
->
-<ListTree className="w-4 h-4" />
-</Button>
-<Button
-variant={viewMode === "gallery" ? "default" : "ghost"}
-size="sm"
-onClick={() => setViewMode("gallery")}
-className={h-8 ${viewMode === "gallery" ? "bg-white shadow-sm" : "hover:bg-slate-200"}}
-title="Gallery view"
->
-<LayoutGrid className="w-4 h-4" />
-</Button>
-</div>
-{canImport && <KnowledgeArticleImport />}
-{canEditArticles && (
-<Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
-<Button className="bg-indigo-600 hover:bg-indigo-700">
-<Plus className="w-4 h-4 mr-2" />
-New Article
-</Button>
-</Link>
-)}
-</div>
-</div>
+    const max = existing.length > 0 ? Math.max(...existing) : 0;
 
-  <Card className="border-none shadow-lg">
-    <CardContent className="p-4">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-        <Input
-          placeholder="Search articles, chapters, tags..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-    </CardContent>
-  </Card>
+    return max + 1;
+  };
 
-  {filteredArticles.length === 0 ? (
-    <Card className="border-2 border-dashed border-slate-300 bg-slate-50">
-      <CardContent className="p-12 text-center">
-        <BookOpen className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No Knowledge Articles</h3>
-        <p className="text-slate-600 mb-6">Create your first article to capture framework knowledge</p>
-        {canEditArticles && (
-          <Link to={createPageUrl("KnowledgeArticleDetail?new=true")}>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Article
-            </Button>
-          </Link>
-        )}
-      </CardContent>
-    </Card>
-  ) : viewMode === "gallery" ? (
-    <KnowledgeGalleryView
-      articles={filteredArticles}
-      frameworks={frameworks}
-      onView={handleView}
-      canEdit={canEditArticles}
-    />
-  ) : (
-    <KnowledgeTreeView
-      articles={filteredArticles}
-      frameworks={frameworks}
-      onView={handleView}
-      onDelete={canEditArticles ? (id) => deleteMutation.mutate(id) : undefined}
-      canEdit={canEditArticles}
-      onPrintFramework={handlePrintFramework}
-    />
-  )}
+  const buildReferenceNumber = (shortcode, category, seq) => {
+    if (!shortcode || !category) return "";
 
-  <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-      <DialogHeader>
-        <div className="flex items-center justify-between gap-4 pr-8">
-          <DialogTitle>{selectedArticle?.title}</DialogTitle>
-          <div className="flex gap-2">
-            {selectedArticle && isWikiArticle(selectedArticle) ? (
-              <Button variant="outline" size="sm" onClick={handleCopyLink} disabled={!selectedArticle.source_url}>
-                <Copy className="w-4 h-4 mr-2" />
-                Copy Link
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" onClick={handlePrintArticle}>
-                <Printer className="w-4 h-4 mr-2" />
-                Print
-              </Button>
-            )}
-          </div>
+    const catCode = CATEGORY_CODES[category];
+
+    return `${shortcode.toUpperCase()}-${catCode}-${String(seq).padStart(
+      3,
+      "0"
+    )}`;
+  };
+
+  const [newTag, setNewTag] = useState("");
+
+  const [newStep, setNewStep] = useState({
+    step: "",
+    description: "",
+    expected_artefacts: [],
+    order: 1
+  });
+
+  const [newArtefact, setNewArtefact] = useState("");
+
+  const { canEdit } = useIsKnowledgeManager();
+
+  const {
+    isDirty,
+    checkDirty,
+    initSnapshot,
+    markClean,
+    guardedNavigate,
+    showDialog,
+    confirmDiscard,
+    confirmSave,
+    cancelDialog
+  } = useUnsavedChangesGuard(navigate);
+
+  const { data: existingArticle } = useQuery({
+    queryKey: ["knowledgeArticle", articleId],
+    queryFn: () =>
+      base44.entities.KnowledgeArticle
+        .filter({ id: articleId })
+        .then((res) => res[0]),
+    enabled: !!articleId && !isNew
+  });
+
+  const { frameworks } = useFrameworks();
+
+  /*
+   * Load an existing article.
+   *
+   * If the article predates the disclaimer field, preserve a blank
+   * disclaimer rather than automatically changing the stored article.
+   */
+  useEffect(() => {
+    if (existingArticle) {
+      const articleWithDefaults = {
+        ...existingArticle,
+        disclaimer: existingArticle.disclaimer || ""
+      };
+
+      setFormData(articleWithDefaults);
+      initSnapshot(articleWithDefaults);
+    } else if (isNew) {
+      initSnapshot(formData);
+    }
+  }, [existingArticle]);
+
+  // Track dirty state
+  useEffect(() => {
+    checkDirty(formData);
+  }, [formData]);
+
+  const createMutation = useMutation({
+    mutationFn: (data) =>
+      base44.entities.KnowledgeArticle.create(data),
+
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["knowledgeArticles"]);
+
+      navigate(
+        createPageUrl(`KnowledgeArticleDetail?id=${data.id}`)
+      );
+
+      toast.success("Article created");
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data) =>
+      base44.entities.KnowledgeArticle.update(articleId, data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries(["knowledgeArticles"]);
+      queryClient.invalidateQueries([
+        "knowledgeArticle",
+        articleId
+      ]);
+
+      toast.success("Article updated");
+    }
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.shortcode ||
+      formData.shortcode.trim().length === 0
+    ) {
+      toast.error("Shortcode is required");
+      return;
+    }
+
+    if (formData.shortcode.trim().length > 4) {
+      toast.error("Shortcode must be 4 characters or fewer");
+      return;
+    }
+
+    let dataToSave = {
+      ...formData,
+      shortcode: formData.shortcode.toUpperCase()
+    };
+
+    if (isNew || !articleId) {
+      const seq = getNextSeqNumber(
+        formData.shortcode,
+        formData.category
+      );
+
+      dataToSave.reference_number = buildReferenceNumber(
+        formData.shortcode,
+        formData.category,
+        seq
+      );
+
+      const created =
+        await createMutation.mutateAsync(dataToSave);
+
+      initSnapshot(created || dataToSave);
+    } else {
+      const updated =
+        await updateMutation.mutateAsync(dataToSave);
+
+      initSnapshot(updated || dataToSave);
+    }
+  };
+
+  const addTag = () => {
+    if (newTag) {
+      const newTags = newTag
+        .split(";")
+        .map((t) => t.trim())
+        .filter(
+          (t) =>
+            t &&
+            !formData.tags.includes(t)
+        );
+
+      if (newTags.length > 0) {
+        setFormData({
+          ...formData,
+          tags: [...formData.tags, ...newTags]
+        });
+      }
+
+      setNewTag("");
+    }
+  };
+
+  const removeTag = (tag) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter((t) => t !== tag)
+    });
+  };
+
+  const addArtefact = () => {
+    const trimmed = newArtefact.trim();
+
+    if (
+      trimmed &&
+      !newStep.expected_artefacts.includes(trimmed)
+    ) {
+      setNewStep({
+        ...newStep,
+        expected_artefacts: [
+          ...newStep.expected_artefacts,
+          trimmed
+        ]
+      });
+    }
+
+    setNewArtefact("");
+  };
+
+  const removeArtefact = (val) => {
+    setNewStep({
+      ...newStep,
+      expected_artefacts:
+        newStep.expected_artefacts.filter(
+          (a) => a !== val
+        )
+    });
+  };
+
+  const addStep = () => {
+    if (newStep.step) {
+      const stepOrder =
+        formData.key_steps.length + 1;
+
+      const stepRef =
+        formData.shortcode &&
+        formData.category
+          ? `${formData.shortcode.toUpperCase()}-${
+              CATEGORY_CODES[formData.category]
+            }-${String(stepOrder).padStart(3, "0")}`
+          : "";
+
+      const steps = [
+        ...formData.key_steps,
+        {
+          ...newStep,
+          order: stepOrder,
+          reference_number: stepRef
+        }
+      ];
+
+      setFormData({
+        ...formData,
+        key_steps: steps
+      });
+
+      setNewStep({
+        step: "",
+        description: "",
+        expected_artefacts: [],
+        order: formData.key_steps.length + 2
+      });
+
+      setNewArtefact("");
+    }
+  };
+
+  const removeStep = (index) => {
+    setFormData({
+      ...formData,
+      key_steps: formData.key_steps.filter(
+        (_, idx) => idx !== index
+      )
+    });
+  };
+
+  const handlePdfUploaded = (url, name) => {
+    setFormData({
+      ...formData,
+      pdf_url: url
+    });
+
+    toast.success("PDF uploaded");
+  };
+
+  const handleAttachmentUploaded = (url, name) => {
+    const newAttachments = [
+      ...(formData.attachments || []),
+      {
+        url,
+        name,
+        type: "document"
+      }
+    ];
+
+    setFormData({
+      ...formData,
+      attachments: newAttachments
+    });
+  };
+
+  const removeAttachment = (index) => {
+    setFormData({
+      ...formData,
+      attachments:
+        formData.attachments.filter(
+          (_, idx) => idx !== index
+        )
+    });
+  };
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6">
+
+      {/* PAGE HEADER */}
+      <div className="flex items-center justify-between">
+
+        <div className="flex items-center gap-4">
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() =>
+              guardedNavigate(
+                createPageUrl("KnowledgeManagement")
+              )
+            }
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+
+          <h1 className="text-3xl font-bold text-slate-900">
+            {isNew
+              ? "New Knowledge Article"
+              : formData.title ||
+                "Edit Article"}
+          </h1>
+
         </div>
-      </DialogHeader>
-      {selectedArticle && (
-        <div className="space-y-6">
-          {selectedArticle.chapter && (
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-1">Chapter/Domain</h3>
-              <p className="text-slate-600">{selectedArticle.chapter}</p>
-            </div>
-          )}
-          
-          {selectedArticle.description && (
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-1">Description</h3>
-              <p className="text-slate-600">{selectedArticle.description}</p>
-            </div>
+
+        <div className="flex gap-2">
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              guardedNavigate(
+                createPageUrl("KnowledgeManagement")
+              )
+            }
+          >
+            {canEdit ? "Cancel" : "Back"}
+          </Button>
+
+          {canEdit && (
+            <Button
+              onClick={handleSubmit}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              <Save className="w-4 h-4 mr-2" />
+
+              {isNew || !articleId
+                ? "Create Article"
+                : "Save Changes"}
+            </Button>
           )}
 
-          {selectedArticle.key_steps && selectedArticle.key_steps.length > 0 && (
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-3">Key Steps</h3>
-              <div className="space-y-3">
-                {selectedArticle.key_steps
-                  .sort((a, b) => (a.order || 0) - (b.order || 0))
-                  .map((step, idx) => (
-                    <div key={idx} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
-                      <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                        <div className="w-4 h-4 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold text-[10px]">
-                          {step.order || idx + 1}
-                        </div>
-                        {step.reference_number && (
-                          <span className="text-xs font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">{step.reference_number}</span>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-slate-900">{step.step}</p>
-                        {step.description && (
-                          <p className="text-sm text-slate-600 mt-1">{step.description}</p>
-                        )}
-                      </div>
+          {!canEdit && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                guardedNavigate(
+                  createPageUrl(
+                    "KnowledgeManagement"
+                  )
+                )
+              }
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Read-only
+            </Button>
+          )}
+
+        </div>
+
+      </div>
+
+      <ArchivedFrameworkBanner
+        frameworkId={formData.framework_id}
+      />
+
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6"
+      >
+
+        <fieldset
+          disabled={!canEdit}
+          className="space-y-6"
+        >
+
+          {/* BASIC INFORMATION */}
+
+          <Card className="border-none shadow-lg">
+
+            <CardHeader className="border-b border-slate-100">
+              <CardTitle>
+                Basic Information
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="pt-6 space-y-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* SHORTCODE */}
+
+                <div className="space-y-2">
+
+                  <Label htmlFor="shortcode">
+                    Shortcode *
+                    <span className="text-slate-400 font-normal text-xs ml-1">
+                      (max 4 chars, e.g. EDM)
+                    </span>
+                  </Label>
+
+                  <Input
+                    id="shortcode"
+                    value={formData.shortcode}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        shortcode:
+                          e.target.value
+                            .toUpperCase()
+                            .slice(0, 4)
+                      })
+                    }
+                    placeholder="e.g. EDM"
+                    maxLength={4}
+                    required
+                  />
+
+                </div>
+
+                {/* REFERENCE NUMBER */}
+
+                {formData.reference_number && (
+                  <div className="space-y-2">
+
+                    <Label>
+                      Reference Number
+                    </Label>
+
+                    <div className="h-9 px-3 flex items-center rounded-md border border-slate-200 bg-slate-50 text-sm font-mono text-slate-700">
+                      {
+                        formData.reference_number
+                      }
                     </div>
-                  ))}
-              </div>
-            </div>
-          )}
 
-          {selectedArticle.content && (
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-2">Content</h3>
-              <div className="prose prose-sm max-w-none">
-                <p className="text-slate-600 whitespace-pre-wrap">{selectedArticle.content}</p>
-              </div>
-            </div>
-          )}
+                  </div>
+                )}
 
-          {selectedArticle.source_url && (
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-2">Source Article</h3>
-              <a
-                href={selectedArticle.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-indigo-600 hover:underline break-all"
-              >
-                <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                {selectedArticle.source_url}
-              </a>
-            </div>
-          )}
+                {/* TITLE */}
 
-          {selectedArticle.pdf_url && (
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-2">Documentation</h3>
-              <Button onClick={() => window.open(selectedArticle.pdf_url, '_blank')}>
-                <FileText className="w-4 h-4 mr-2" />
-                View PDF Documentation
-              </Button>
-            </div>
-          )}
+                <div
+                  className={`space-y-2 ${
+                    formData.reference_number
+                      ? "md:col-span-2"
+                      : ""
+                  }`}
+                >
 
-          {selectedArticle.attachments && selectedArticle.attachments.length > 0 && (
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-2">Attachments</h3>
-              <div className="space-y-2">
-                {selectedArticle.attachments.map((attachment, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded">
-                    <span className="text-sm text-slate-700">{attachment.name}</span>
+                  <Label htmlFor="title">
+                    Title *
+                  </Label>
+
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        title:
+                          e.target.value
+                      })
+                    }
+                    required
+                  />
+
+                </div>
+
+                {/* FRAMEWORK */}
+
+                <div className="space-y-2">
+
+                  <Label htmlFor="framework_id">
+                    Framework (Optional)
+                  </Label>
+
+                  <Select
+                    value={
+                      formData.framework_id ||
+                      ""
+                    }
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        framework_id:
+                          value || ""
+                      })
+                    }
+                  >
+
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select framework" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+
+                      <SelectItem value={null}>
+                        None
+                      </SelectItem>
+
+                      {frameworks.map((f) => (
+                        <SelectItem
+                          key={f.id}
+                          value={f.id}
+                        >
+                          {f.name}
+                        </SelectItem>
+                      ))}
+
+                    </SelectContent>
+
+                  </Select>
+
+                </div>
+
+                {/* CHAPTER */}
+
+                <div className="space-y-2">
+
+                  <Label htmlFor="chapter">
+                    Chapter/Domain
+                  </Label>
+
+                  <Input
+                    id="chapter"
+                    value={formData.chapter}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        chapter:
+                          e.target.value
+                      })
+                    }
+                    placeholder="e.g., Access Control, Cryptography"
+                  />
+
+                </div>
+
+                {/* CATEGORY */}
+
+                <div className="space-y-2">
+
+                  <Label htmlFor="category">
+                    Category
+                  </Label>
+
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        category: value
+                      })
+                    }
+                  >
+
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+
+                    <SelectContent>
+
+                      <SelectItem value="implementation_guide">
+                        Implementation Guide
+                      </SelectItem>
+
+                      <SelectItem value="best_practice">
+                        Best Practice
+                      </SelectItem>
+
+                      <SelectItem value="policy_template">
+                        Policy Template
+                      </SelectItem>
+
+                      <SelectItem value="procedure">
+                        Procedure
+                      </SelectItem>
+
+                      <SelectItem value="checklist">
+                        Checklist
+                      </SelectItem>
+
+                      <SelectItem value="wiki_article">
+                        Wiki Article
+                      </SelectItem>
+
+                    </SelectContent>
+
+                  </Select>
+
+                </div>
+
+                {/* STATUS */}
+
+                <div className="space-y-2">
+
+                  <Label htmlFor="status">
+                    Status
+                  </Label>
+
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        status: value
+                      })
+                    }
+                  >
+
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+
+                    <SelectContent>
+
+                      <SelectItem value="draft">
+                        Draft
+                      </SelectItem>
+
+                      <SelectItem value="published">
+                        Published
+                      </SelectItem>
+
+                      <SelectItem value="archived">
+                        Archived
+                      </SelectItem>
+
+                    </SelectContent>
+
+                  </Select>
+
+                </div>
+
+                {/* DESCRIPTION */}
+
+                <div className="space-y-2 md:col-span-2">
+
+                  <Label htmlFor="description">
+                    Description
+                  </Label>
+
+                  <Textarea
+                    id="description"
+                    value={
+                      formData.description
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        description:
+                          e.target.value
+                      })
+                    }
+                    rows={2}
+                  />
+
+                </div>
+
+                {/* FULL CONTENT */}
+
+                <div className="space-y-2 md:col-span-2">
+
+                  <Label htmlFor="content">
+                    Full Content
+                  </Label>
+
+                  <Textarea
+                    id="content"
+                    value={formData.content}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        content:
+                          e.target.value
+                      })
+                    }
+                    rows={6}
+                  />
+
+                </div>
+
+                {/* DISCLAIMER */}
+
+                <div className="space-y-2 md:col-span-2">
+
+                  <Label htmlFor="disclaimer">
+                    Disclaimer
+                  </Label>
+
+                  <Textarea
+                    id="disclaimer"
+                    value={
+                      formData.disclaimer ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        disclaimer:
+                          e.target.value
+                      })
+                    }
+                    rows={6}
+                    placeholder="Enter the disclaimer applicable to this knowledge article..."
+                  />
+
+                  <div className="flex items-start justify-between gap-4">
+
+                    <p className="text-xs text-slate-400">
+                      The disclaimer will
+                      be displayed with the
+                      knowledge article.
+                    </p>
+
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => window.open(attachment.url, '_blank')}
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          disclaimer:
+                            DEFAULT_DISCLAIMER
+                        })
+                      }
+                      className="text-xs"
                     >
-                      <Download className="w-4 h-4" />
+                      Restore Default
                     </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </DialogContent>
-  </Dialog>
-</div>
 
-);
+                  </div>
+
+                </div>
+
+                {/* SOURCE URL */}
+
+                <div className="space-y-2 md:col-span-2">
+
+                  <Label htmlFor="source_url">
+
+                    Source URL
+
+                    <span className="text-slate-400 font-normal text-xs ml-1">
+                      (link to the original
+                      article — e.g.
+                      SharePoint, Confluence,
+                      vendor docs)
+                    </span>
+
+                  </Label>
+
+                  <Input
+                    id="source_url"
+                    type="url"
+                    value={
+                      formData.source_url ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        source_url:
+                          e.target.value
+                      })
+                    }
+                    placeholder="https://..."
+                  />
+
+                </div>
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          {/* KEY STEPS */}
+
+          <Card className="border-none shadow-lg">
+
+            <CardHeader className="border-b border-slate-100">
+
+              <CardTitle>
+                Key Steps
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="pt-6 space-y-4">
+
+              <div className="space-y-3">
+
+                {formData.key_steps.map(
+                  (step, idx) => (
+                    <div
+                      key={idx}
+                      className="flex gap-3 p-3 bg-slate-50 rounded-lg"
+                    >
+
+                      <div className="flex flex-col items-center gap-1 flex-shrink-0">
+
+                        <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold text-sm">
+                          {step.order ||
+                            idx + 1}
+                        </div>
+
+                        {step.reference_number && (
+                          <span className="text-xs font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded whitespace-nowrap">
+                            {
+                              step.reference_number
+                            }
+                          </span>
+                        )}
+
+                      </div>
+
+                      <div className="flex-1">
+
+                        <p className="font-medium text-slate-900">
+                          {step.step}
+                        </p>
+
+                        {step.description && (
+                          <p className="text-sm text-slate-600 mt-1">
+                            {
+                              step.description
+                            }
+                          </p>
+                        )}
+
+                        {step.expected_artefacts
+                          ?.length > 0 && (
+                          <div className="mt-2">
+
+                            <p className="text-xs font-medium text-slate-500 mb-1">
+                              Expected
+                              Artefacts/Evidence:
+                            </p>
+
+                            <div className="flex flex-wrap gap-1">
+
+                              {step.expected_artefacts.map(
+                                (a, i) => (
+                                  <span
+                                    key={i}
+                                    className="text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full"
+                                  >
+                                    {a}
+                                  </span>
+                                )
+                              )}
+
+                            </div>
+
+                          </div>
+                        )}
+
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          removeStep(idx)
+                        }
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+
+                    </div>
+                  )
+                )}
+
+              </div>
+
+              {/* ADD NEW STEP */}
+
+              <div className="space-y-3 p-4 border border-slate-200 rounded-lg">
+
+                <div className="space-y-2">
+
+                  <Label>
+                    Step
+                  </Label>
+
+                  <Input
+                    value={newStep.step}
+                    onChange={(e) =>
+                      setNewStep({
+                        ...newStep,
+                        step:
+                          e.target.value
+                      })
+                    }
+                    placeholder="Step title"
+                  />
+
+                </div>
+
+                <div className="space-y-2">
+
+                  <Label>
+                    Description
+                  </Label>
+
+                  <Textarea
+                    value={
+                      newStep.description
+                    }
+                    onChange={(e) =>
+                      setNewStep({
+                        ...newStep,
+                        description:
+                          e.target.value
+                      })
+                    }
+                    rows={2}
+                    placeholder="Step description"
+                  />
+
+                </div>
+
+                <div className="space-y-2">
+
+                  <Label>
+                    Expected Artefacts/Evidence
+                    <span className="text-slate-400 font-normal text-xs ml-1">
+                      (optional, press Enter
+                      or + to add)
+                    </span>
+                  </Label>
+
+                  {newStep.expected_artefacts
+                    .length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+
+                      {newStep.expected_artefacts.map(
+                        (a, i) => (
+                          <span
+                            key={i}
+                            className="flex items-center gap-1 text-xs px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full"
+                          >
+
+                            {a}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeArtefact(
+                                  a
+                                )
+                              }
+                              className="hover:text-red-500"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+
+                          </span>
+                        )
+                      )}
+
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+
+                    <Input
+                      value={
+                        newArtefact
+                      }
+                      onChange={(e) =>
+                        setNewArtefact(
+                          e.target.value
+                        )
+                      }
+                      placeholder="e.g. Policy document, Screenshot, Report"
+                      onKeyDown={(e) => {
+                        if (
+                          e.key ===
+                          "Enter"
+                        ) {
+                          e.preventDefault();
+                          addArtefact();
+                        }
+                      }}
+                    />
+
+                    <Button
+                      type="button"
+                      onClick={
+                        addArtefact
+                      }
+                      variant="outline"
+                      size="icon"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+
+                  </div>
+
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={addStep}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Step
+                </Button>
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          {/* TAGS */}
+
+          <Card className="border-none shadow-lg">
+
+            <CardHeader className="border-b border-slate-100">
+
+              <CardTitle>
+                Tags
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="pt-6 space-y-4">
+
+              <div className="flex flex-wrap gap-2 mb-3">
+
+                {formData.tags.map(
+                  (tag, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full"
+                    >
+
+                      <span className="text-sm">
+                        {tag}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeTag(tag)
+                        }
+                        className="hover:bg-indigo-200 rounded-full p-0.5"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+
+                    </div>
+                  )
+                )}
+
+              </div>
+
+              <div className="flex gap-2">
+
+                <Input
+                  value={newTag}
+                  onChange={(e) =>
+                    setNewTag(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Add tag or multiple tags separated by ;"
+                  onKeyPress={(e) =>
+                    e.key === "Enter" &&
+                    (e.preventDefault(),
+                    addTag())
+                  }
+                />
+
+                <Button
+                  type="button"
+                  onClick={addTag}
+                  variant="outline"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          {/* PDF DOCUMENTATION */}
+
+          <Card className="border-none shadow-lg">
+
+            <CardHeader className="border-b border-slate-100">
+
+              <CardTitle>
+                PDF Documentation
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="pt-6">
+
+              <FileUpload
+                onFileUploaded={
+                  handlePdfUploaded
+                }
+                existingFiles={
+                  formData.pdf_url
+                    ? [
+                        {
+                          url:
+                            formData.pdf_url,
+                          name:
+                            "Framework PDF"
+                        }
+                      ]
+                    : []
+                }
+                onFileRemoved={() =>
+                  setFormData({
+                    ...formData,
+                    pdf_url: ""
+                  })
+                }
+                acceptedTypes=".pdf"
+              />
+
+            </CardContent>
+
+          </Card>
+
+          {/* ADDITIONAL ATTACHMENTS */}
+
+          <Card className="border-none shadow-lg">
+
+            <CardHeader className="border-b border-slate-100">
+
+              <CardTitle>
+                Additional Attachments
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="pt-6">
+
+              <FileUpload
+                onFileUploaded={
+                  handleAttachmentUploaded
+                }
+                existingFiles={
+                  formData.attachments ||
+                  []
+                }
+                onFileRemoved={
+                  removeAttachment
+                }
+              />
+
+            </CardContent>
+
+          </Card>
+
+        </fieldset>
+
+      </form>
+
+      <UnsavedChangesDialog
+        open={showDialog}
+        onDiscard={confirmDiscard}
+        onSave={() =>
+          confirmSave(
+            handleSubmit.bind(null, {
+              preventDefault: () => {}
+            })
+          )
+        }
+        onClose={cancelDialog}
+      />
+
+    </div>
+  );
 }
